@@ -78,7 +78,7 @@ enum {
  *
  *  	Extractor(const QString&) 	- Simply extract a single archive , any format
  *  			      	  , Most likely will be used for 7zip.
- *  	Extractor(cont QStringList&)	- Extract all archives from the QStringList in
+ *  	Extractor(const QStringList&)	- Extract all archives from the QStringList in
  *  				  order.
  *
  *  Methods:
