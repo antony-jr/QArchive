@@ -22,7 +22,6 @@ QT += core
 LIBS += -larchive
 
 # Input
-SOURCES += main.cpp \
-	   ../../QArchive.cpp
+SOURCES += main.cpp
 
 HEADERS += ../../QArchive.hpp

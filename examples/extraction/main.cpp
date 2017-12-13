@@ -8,8 +8,7 @@ int main(int argc , char** argv)
 
 	QString file("test.7z");
 
-	QArchive::Extractor *e = new QArchive::Extractor();
-	e->addArchive(file);
+	QArchive::Extractor *e = new QArchive::Extractor(file);
 
 	QObject::connect(e , &QArchive::Extractor::finished , [&](){
 		qDebug() << "finished extraction!";

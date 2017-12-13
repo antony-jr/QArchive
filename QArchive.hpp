@@ -94,10 +94,38 @@ namespace QArchive { // QArchive Namespace Start
 		Q_OBJECT
 		
 	   public:
-		void addArchive(QString&);
-		void addArchive(QStringList&);
-		
-		void removeArchive(QString&);
+		Extractor(QObject *parent = NULL){ }
+
+		Extractor(QString& filename)
+		{
+			addArchive(filename);
+		}
+
+		Extractor(QStringList& filenames)
+		{
+			addArchive(filenames);
+		}
+
+		void addArchive(QString& filename)
+		{       
+        		queue << filename;
+        		queue.removeDuplicates();
+		}
+
+		void addArchive(QStringList& filenames)
+		{
+        
+        	/*
+         	 * No need to extract the same archive twice!
+        	*/
+        	queue << filenames;
+        	queue.removeDuplicates();
+		}
+
+		void removeArchive(QString& filename)
+		{       
+        	queue.removeAll(filename);
+		}
 
 		void run() override {
         	for(auto i = 0; i < queue.size(); ++i)
@@ -106,12 +134,14 @@ namespace QArchive { // QArchive Namespace Start
                         	queue.removeAll(queue.at(i));
                         	return;
                 	}
+			emit extracted(QString(queue.at(i)));
         	}
         	queue.clear();
         	emit finished();
 		return;
 		}
 
+		~Extractor() { }
 	   signals:
 	   	void finished();
 		void extracted(const QString);
@@ -122,9 +152,66 @@ namespace QArchive { // QArchive Namespace Start
 		struct archive *arch,
 			       *ext;
 		struct archive_entry *entry;
-		int ret,
-		    extract(const char*),
-		    copy_data(void);
+		int ret;
+
+		int extract(const char* filename){
+			arch = archive_read_new();
+        		ext = archive_write_disk_new();
+        		archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
+        		archive_read_support_format_all(arch);
+
+			if((ret = archive_read_open_filename(arch, filename, 10240))){
+				emit error(ARCHIVE_READ_ERROR);
+				return ret;
+			}
+			for (;;) {
+                		ret = archive_read_next_header(arch, &entry);
+                		if (ret == ARCHIVE_EOF){ break; }
+                		if (ret != ARCHIVE_OK){
+					emit error(ARCHIVE_QUALITY_ERROR);
+                        		return 1;
+				}
+                		ret = archive_write_header(ext, entry);
+                		if (ret == ARCHIVE_OK){
+                         		 copy_data();
+                          		ret = archive_write_finish_entry(ext);
+                          		if (ret != ARCHIVE_OK){
+                              			emit error(ARCHIVE_UNCAUGHT_ERROR);
+			      			return -1;
+			  		}
+                		}
+
+        		}
+			archive_read_close(arch);
+       			archive_read_free(arch);
+			archive_write_close(ext);
+        		archive_write_free(ext);
+			return 0;
+		}
+
+		int copy_data()
+		{
+        		const void *buff;
+        		size_t size;
+		#if ARCHIVE_VERSION_NUMBER >= 3000000
+        		int64_t offset;
+		#else
+        		off_t offset;
+		#endif
+
+        	for (;;) {
+                	ret = archive_read_data_block(arch, &buff, &size, &offset);
+                	if (ret == ARCHIVE_EOF)
+                        	return (ARCHIVE_OK);
+                	if (ret != ARCHIVE_OK)
+                        	return (ret);
+                	ret = archive_write_data_block(ext, buff, size, offset);
+                	if (ret != ARCHIVE_OK) {
+                        	return (ret);
+                	}
+        	}
+	      }	
+
 	};
 	
 	/*
