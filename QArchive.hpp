@@ -49,205 +49,184 @@
  * runtime operating system
 */
 extern "C" {
-#include <sys/types.h>
 #include <archive.h>
 #include <archive_entry.h>
 }
 
-#define NO_ARCHIVE_ERROR 0
-#define ARCHIVE_QUALITY_ERROR 1
-#define ARCHIVE_READ_ERROR 2
-#define ARCHIVE_UNCAUGHT_ERROR 3
-
 namespace QArchive { // QArchive Namespace Start
-	/*
-	 * Class Extractor <- Inherits QObject
-	 * ---------------
-	 *
-	 *  Takes care of extraction of archives with the help
-	 *  of libarchive.
-	 *
-	 *  Constructors:
-	 *  	Extractor(QString&) 	- Simply extract a single archive , any format
-	 *  			      	  , Most likely will be used for 7zip.
-	 *  	Extractor(QStringList&)	- Extract all archives from the QStringList in
-	 *  				  order.
-	 *  	Extractor(void)		- Do nothing just construct!
-	 *  Methods:
-	 *	void addArchive(QString&)     - Add a archive to the queue.
-	 *	void addArchive(QStringList&) - Add a set of archives to the queue
-	 *	void removeArchive(QString&)  - Removes a archive from the queue matching
-	 *					the QString.
-	 *  
-	 *  Slots:
-	 *	int run(void)		      - starts the extractor.
-	 *	int stop(void)		      - stops the extractor.
-	 *  
-	 *  Signals:
-	 *	void finished(bool , QString) - emitted when a extraction job is done or
-	 *					 shows a error when the bool is false!
-	 *					 on true , gives the archive name.
-	 *
-	*/
-	class Extractor  : public QThread 
-	{
-		Q_OBJECT
-		
-	   public:
-		Extractor(QObject *parent = NULL){ }
+/*
+ * QArchive error codes
+ * --------------------
+*/
+enum {
+    NO_ARCHIVE_ERROR,
+    ARCHIVE_QUALITY_ERROR,
+    ARCHIVE_READ_ERROR,
+    ARCHIVE_UNCAUGHT_ERROR
+};
 
-		Extractor(QString& filename)
-		{
-			addArchive(filename);
-		}
 
-		Extractor(QStringList& filenames)
-		{
-			addArchive(filenames);
-		}
+/*
+ * Class Extractor <- Inherits QThread
+ * ---------------
+ *
+ *  Takes care of extraction of archives with the help
+ *  of libarchive.
+ *
+ *  Constructors:
+ *  	Extractor(QObject *parent = NULL)
+ *
+ *  	Extractor(const QString&) 	- Simply extract a single archive , any format
+ *  			      	  , Most likely will be used for 7zip.
+ *  	Extractor(cont QStringList&)	- Extract all archives from the QStringList in
+ *  				  order.
+ *
+ *  Methods:
+ *	void addArchive(const QString&)     - Add a archive to the queue.
+ *	void addArchive(const QStringList&) - Add a set of archives to the queue
+ *	void removeArchive(const QString&)  - Removes a archive from the queue matching
+ *					the QString.
+ *
+ *  Slots:
+ *	void start(void)	      - starts the extractor. (Inherited from QThread)
+ *	void stop(void)		      - stops the extractor.  (Inherited from QThread)
+ *
+ *  Signals:
+ *	void finished()		        - emitted when all extraction job is done.
+ *	void extracting(const QString&) - emitted with the filename beign extracted.
+ *	void extracted(const QString&)  - emitted with the filename that has been extracted.
+ *	void error(short , const QString&) - emitted when something goes wrong!
+ *
+*/
+class Extractor  : public QThread
+{
+    Q_OBJECT
 
-		void addArchive(QString& filename)
-		{       
-        		queue << filename;
-        		queue.removeDuplicates();
-		}
+public:
+    Extractor(QObject *parent = NULL)
+    {
+    }
 
-		void addArchive(QStringList& filenames)
-		{
-        
-        	/*
-         	 * No need to extract the same archive twice!
-        	*/
-        	queue << filenames;
-        	queue.removeDuplicates();
-		}
+    Extractor(const QString& filename)
+    {
+        addArchive(filename);
+    }
 
-		void removeArchive(QString& filename)
-		{       
-        	queue.removeAll(filename);
-		}
+    Extractor(const QStringList& filenames)
+    {
+        addArchive(filenames);
+    }
 
-		void run() override {
-        	for(auto i = 0; i < queue.size(); ++i)
-        	{
-                	if(extract(queue.at(i).toStdString().c_str())){
-                        	queue.removeAll(queue.at(i));
-                        	return;
-                	}
-			emit extracted(QString(queue.at(i)));
-        	}
-        	queue.clear();
-        	emit finished();
-		return;
-		}
+    void addArchive(const QString& filename)
+    {
+        queue << filename;
+        queue.removeDuplicates();
+    }
 
-		~Extractor() { }
-	   signals:
-	   	void finished();
-		void extracted(const QString);
-		void error(short);
-	   private:
-		QStringList queue;
+    void addArchive(const QStringList& filenames)
+    {
 
-		struct archive *arch,
-			       *ext;
-		struct archive_entry *entry;
-		int ret;
+        /*
+         * No need to extract the same archive twice!
+        */
+        queue << filenames;
+        queue.removeDuplicates();
+    }
 
-		int extract(const char* filename){
-			arch = archive_read_new();
-        		ext = archive_write_disk_new();
-        		archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
-        		archive_read_support_format_all(arch);
+    void removeArchive(const QString& filename)
+    {
+        queue.removeAll(filename);
+    }
 
-			if((ret = archive_read_open_filename(arch, filename, 10240))){
-				emit error(ARCHIVE_READ_ERROR);
-				return ret;
-			}
-			for (;;) {
-                		ret = archive_read_next_header(arch, &entry);
-                		if (ret == ARCHIVE_EOF){ break; }
-                		if (ret != ARCHIVE_OK){
-					emit error(ARCHIVE_QUALITY_ERROR);
-                        		return 1;
-				}
-                		ret = archive_write_header(ext, entry);
-                		if (ret == ARCHIVE_OK){
-                         		 copy_data();
-                          		ret = archive_write_finish_entry(ext);
-                          		if (ret != ARCHIVE_OK){
-                              			emit error(ARCHIVE_UNCAUGHT_ERROR);
-			      			return -1;
-			  		}
-                		}
+    void run() override {
+        for(auto i = 0; i < queue.size(); ++i)
+        {
+            emit extracting(queue.at(i));
+            if(extract(queue.at(i).toStdString().c_str())) {
+                queue.removeAll(queue.at(i));
+                return;
+            }
+            emit extracted(queue.at(i));
+        }
+        queue.clear();
+        emit finished();
+        return;
+    }
 
-        		}
-			archive_read_close(arch);
-       			archive_read_free(arch);
-			archive_write_close(ext);
-        		archive_write_free(ext);
-			return 0;
-		}
+signals:
+    void finished();
+    void extracted(const QString&);
+    void extracting(const QString&);
+    void error(short, const QString&);
+private:
+    QStringList queue;
 
-		int copy_data()
-		{
-        		const void *buff;
-        		size_t size;
-		#if ARCHIVE_VERSION_NUMBER >= 3000000
-        		int64_t offset;
-		#else
-        		off_t offset;
-		#endif
+    struct archive *arch,
+               *ext;
+    struct archive_entry *entry;
+    int ret;
 
-        	for (;;) {
-                	ret = archive_read_data_block(arch, &buff, &size, &offset);
-                	if (ret == ARCHIVE_EOF)
-                        	return (ARCHIVE_OK);
-                	if (ret != ARCHIVE_OK)
-                        	return (ret);
-                	ret = archive_write_data_block(ext, buff, size, offset);
-                	if (ret != ARCHIVE_OK) {
-                        	return (ret);
-                	}
-        	}
-	      }	
+    int extract(const char* filename) {
+        arch = archive_read_new();
+        ext = archive_write_disk_new();
+        archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
+        archive_read_support_format_all(arch);
 
-	};
-	
-	/*
-         * Class Reader <- Inherits QObject
-         * ------------
-         *
-         *  Reads archives using libarchive. Simply returns a QStringList
-	 *  of files and folders , does not support showing subfolders.
-	 *  Just to verify files maybe ?
-	 *
-         *  Constructors:
-         *
-         *  Methods:
-         *
-        
-	class Reader	 : public QObject
-	{
-		Q_OBJECT
-	};	
-	
-	 *
-         * Class Compressor <- Inherits QObject
-         * ----------------
-         *
-         *  Compresses files and folders using libarchive.
-         *
-         *  Constructors:
-         *
-         *  Methods:
-         *
-        
-	class Compressor : public QObject
-	{
-		Q_OBJECT
-	};
-	*/
+        if((ret = archive_read_open_filename(arch, filename, 10240))) {
+            emit error(ARCHIVE_READ_ERROR, QString(filename));
+            return ret;
+        }
+        for (;;) {
+            ret = archive_read_next_header(arch, &entry);
+            if (ret == ARCHIVE_EOF) {
+                break;
+            }
+            if (ret != ARCHIVE_OK) {
+                emit error(ARCHIVE_QUALITY_ERROR, QString(filename));
+                return 1;
+            }
+            ret = archive_write_header(ext, entry);
+            if (ret == ARCHIVE_OK) {
+                copy_data();
+                ret = archive_write_finish_entry(ext);
+                if (ret != ARCHIVE_OK) {
+                    emit error(ARCHIVE_UNCAUGHT_ERROR, QString(filename));
+                    return -1;
+                }
+            }
+
+        }
+        archive_read_close(arch);
+        archive_read_free(arch);
+        archive_write_close(ext);
+        archive_write_free(ext);
+        return 0;
+    }
+
+    int copy_data()
+    {
+        const void *buff;
+        size_t size;
+#if ARCHIVE_VERSION_NUMBER >= 3000000
+        int64_t offset;
+#else
+        off_t offset;
+#endif
+
+        for (;;) {
+            ret = archive_read_data_block(arch, &buff, &size, &offset);
+            if (ret == ARCHIVE_EOF)
+                return (ARCHIVE_OK);
+            if (ret != ARCHIVE_OK)
+                return (ret);
+            ret = archive_write_data_block(ext, buff, size, offset);
+            if (ret != ARCHIVE_OK) {
+                return (ret);
+            }
+        }
+    }
+
+};
 
 } // QArchive Namespace Ends.
 
