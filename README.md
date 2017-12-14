@@ -6,9 +6,9 @@
 
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) 
 
-For a **long time** I've been searching for a easy to use archive library for **C++** with **Qt** support , I came   
-accross **libarchive** , it was super cool :heart: but it did'nt have a official **C++** binding. Some C++ Wrappers for   
-libarchive exists like **moor** but I needed something so simple as **1,2,3 and also support Qt's event loop.**    
+For a **long time** I've been searching for a easy to use archive library for **C++** with **Qt** support , I came accross    
+**libarchive** , it was super cool :heart: but it did'nt have a official **C++** binding. Some C++ Wrappers for libarchive exists    
+like **moor** but I needed something so simple as **1,2,3 and also support Qt's event loop.**    
 
 So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform helper library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
 
