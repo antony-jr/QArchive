@@ -65,7 +65,7 @@ Before jumping the guns make sure you have installed **libarchive** , refer liba
 I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
 
 * [LibArchive](https://github.com/libarchive/libarchive)
-* [AppImages](https://github.com/https://github.com/appImage/appimagekit)
+* [AppImages](https://github.com/appImage/appimagekit)
 * [Qt](https://github.com/qt)
 
 
