@@ -60,6 +60,15 @@ Before jumping the guns make sure you have installed **libarchive** , refer liba
 
 **Refer the wiki for more information on Compiling ,** [Compiling with QArchive](https://github.com/antony-jr/QArchive/wiki/Compiling)
 
+# Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
+
+I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
+
+* [LibArchive](https://github.com/libarchive/libarchive)
+* [AppImages](https://github.com/https://github.com/appImage/appimagekit)
+* [Qt](https://github.com/qt)
+
+
 # Support [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/antonyjr/donate) [![Twitter](https://img.shields.io/twitter/url/https/github.com/antony-jr/QArchive.svg?style=social)](https://twitter.com/intent/tweet?text=Checkout%20%23QArchive%20by%20%40antonyjr0%20%20%2C%20its%20cool.%20Try%20it%20at%20https%3A%2F%2Fgithub.com%2Fantony-jr%2FQArchive)
 
 If you think that this project is **cool** then you can give it a :star: or :fork_and_knife: it if you want to improve it with me. I really :heart: stars though!   
