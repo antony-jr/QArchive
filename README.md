@@ -1,6 +1,6 @@
 
 <p align="center">
-  <img src=".img/poster.png" height="250px" alt="QArchive Poster">
+  <img src=".img/poster.png" height="220px" alt="QArchive Poster">
 </p>
 
 
