@@ -60,6 +60,16 @@ Before jumping the guns make sure you have installed **libarchive** , refer liba
 
 **Refer the wiki for more information on Compiling ,** [Compiling with QArchive](https://github.com/antony-jr/QArchive/wiki/Compiling)
 
+# Deploying your apps
+
+I really recommend you all to use dynamic linking on all platforms and then pack it with simple containers this way you can   
+avoid the overhead of static compiling and also make it just work! :dog:
+
+In windows you can simply throw in the dll files and compress it into a setup file and distribute it to the users but its   
+different in linux , refer this [Qt Doc](http://doc.qt.io/qt-5/linux-deployment.html) for information on deploying qt apps.   
+
+In addition you can use [AppImages](https://github.com/appImage/appimagekit) and [linuxdeployqt](https://github.com/probonopd/linuxdeployqt).
+
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
 I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
