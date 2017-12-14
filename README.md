@@ -13,5 +13,5 @@
 
 The BSD 3-clause "New" or "Revised" License.
 
-Copyright (C) 2017 , antony jr.
+Copyright (C) 2017 , antony jr.   
 All Rights Reserved.
