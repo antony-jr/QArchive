@@ -1,9 +1,10 @@
 
 <p align="center">
-  <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">
-
-:dog: C++ Cross-Platform helper library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:
+  <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster" / >  <br>
+  
+  <a href="https://liberapay.com/antonyjr/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" / > </a>
 </p>
 
 
 # QArchive
+
