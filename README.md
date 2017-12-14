@@ -12,7 +12,51 @@ like **moor** but I needed something so simple as **1,2,3 and also support Qt's 
 
 So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform helper library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
 
-**QArchive can be easily integrated into your project because its just a header file**
+**QArchive can be easily integrated into your project because its just a header file!**
+
+**Depends on:** Qt5 Core Libraries and LibArchive.
+
+
+# Usage
+
+**Its simple as 1,2,3!**   
+
+```
+ #include "QArchive.hpp"
+	...
+	...
+	...
+
+
+ // Step 1
+ QArchive::Extractor Archiver("somefile.7z");
+
+ // Step 2 , Optional
+ QObject::connect(&Archiver , &QArchiver::Extractor::finished , [&]()
+ {
+	qDebug() << "finished extraction!";
+	QCoreApplication::quit();
+ });
+
+ // Step 3 
+
+ Archiver.start();
+
+ qDebug() << "Its Non-Blocking!";
+```
+
+**Refer the wiki for more information ,** [QArchive Wiki](https://github.com/antony-jr/QArchive/wiki)
+
+
+# Installation
+
+```
+ $ git clone https://github.com/antony-jr/QArchive
+ $ # Thats it
+ $ # Refer the wiki for more information on compiling!
+```
+
+**Refer the wiki for more information ,** [QArchive Wiki](https://github.com/antony-jr/QArchive/wiki)
 
 # Support [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/antonyjr/donate) [![Twitter](https://img.shields.io/twitter/url/https/github.com/antony-jr/QArchive.svg?style=social)](https://twitter.com/intent/tweet?text=Checkout%20%23QArchive%20by%20%40antonyjr0%20%20%2C%20its%20cool.%20Try%20it%20at%20https%3A%2F%2Fgithub.com%2Fantony-jr%2FQArchive)
 
