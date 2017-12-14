@@ -12,7 +12,8 @@ like **moor** but I needed something so simple as **1,2,3 and also support Qt's 
 
 So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform helper library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
 
-**QArchive can be easily integrated into your project because its just a header file!**
+**QArchive can be easily integrated into your project because its just a header file! it is also non-blocking so its best   
+suited for your Qt Projects!**
 
 **Depends on:** Qt5 Core Libraries and LibArchive.
 
