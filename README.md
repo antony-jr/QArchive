@@ -51,6 +51,8 @@ suited for your Qt Projects!**
 
 # Installation
 
+Before jumping the guns make sure you have installed **libarchive** , refer libarchive repo at [LibArchive](https://github.com/libarchive/libarchive)
+
 ```
  $ git clone https://github.com/antony-jr/QArchive
  $ # Thats it
