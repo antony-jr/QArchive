@@ -153,6 +153,8 @@ public:
         return;
     }
 
+    ~Extractor() { }
+
 signals:
     void finished();
     void extracted(const QString&);
