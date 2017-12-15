@@ -40,9 +40,6 @@
 #define QARCHIVE_HPP_INCLUDED
 
 #include <QtCore>
-#include <QString>
-#include <QThread>
-#include <QStringList>
 
 /*
  * Getting the libarchive headers for the
@@ -62,7 +59,8 @@ enum {
     NO_ARCHIVE_ERROR,
     ARCHIVE_QUALITY_ERROR,
     ARCHIVE_READ_ERROR,
-    ARCHIVE_UNCAUGHT_ERROR
+    ARCHIVE_UNCAUGHT_ERROR,
+    INVALID_DEST_PATH
 };
 
 
@@ -95,6 +93,7 @@ enum {
  *	void finished()		        - emitted when all extraction job is done.
  *	void extracting(const QString&) - emitted with the filename beign extracted.
  *	void extracted(const QString&)  - emitted with the filename that has been extracted.
+ *	void status(const QString& , const QString&) - emitted with the entry and the filename on extraction.
  *	void error(short , const QString&) - emitted when something goes wrong!
  *
 */
@@ -113,6 +112,18 @@ public:
     }
 
     explicit Extractor(const QStringList& filenames)
+    {
+        addArchive(filenames);
+    }
+
+    explicit Extractor(const QString& filename, const QString& destination)
+        : dest(cleanDestPath(destination))
+    {
+        addArchive(filename);
+    }
+
+    explicit Extractor(const QStringList& filenames, const QString& destination)
+        : dest(cleanDestPath(destination))
     {
         addArchive(filenames);
     }
@@ -138,12 +149,31 @@ public:
         queue.removeAll(filename);
     }
 
+    void setDestination(const QString& destination)
+    {
+        dest = cleanDestPath(destination);
+    }
+
     void run() override {
         short error_code = NO_ARCHIVE_ERROR;
+        const char *destination = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
+
+        if(destination != NULL)
+        {
+            /*
+             * Check if the directory exist!
+             */
+            if(!QDir(dest).exists())
+            {
+                emit error(INVALID_DEST_PATH, queue.takeFirst());
+                return;
+            }
+        }
+
         for(auto i = 0; i < queue.size(); ++i)
         {
             emit extracting(queue.at(i));
-            if( (error_code = extract(queue.at(i).toStdString().c_str())) ) {
+            if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
                 emit error(error_code, queue.at(i));
                 queue.removeAll(queue.at(i));
                 return;
@@ -161,11 +191,22 @@ signals:
     void finished();
     void extracted(const QString&);
     void extracting(const QString&);
+    void status(const QString&, const QString&);
     void error(short, const QString&);
 private:
     QStringList queue;
+    QString	dest;
 
-    int extract(const char* filename) {
+    QString cleanDestPath(const QString& input)
+    {
+        QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
+        if(ret.at(ret.count()) != QDir::separator()) {
+            ret += QDir::separator();
+        }
+        return ret;
+    }
+
+    int extract(const char* filename, const char* dest) {
 
         struct archive *arch,*ext;
         struct archive_entry *entry;
@@ -175,6 +216,7 @@ private:
         ext = archive_write_disk_new();
         archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
         archive_read_support_format_all(arch);
+        archive_read_support_filter_all(arch);
 
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
             return ARCHIVE_READ_ERROR;
@@ -187,6 +229,16 @@ private:
             if (ret != ARCHIVE_OK) {
                 return ARCHIVE_QUALITY_ERROR;
             }
+
+            if(dest != NULL) {
+                char* new_entry = concat( dest, archive_entry_pathname(entry));
+                archive_entry_set_pathname(entry, new_entry);
+                emit status(QString(filename), QString(new_entry));
+                free(new_entry);
+            } else {
+                emit status(QString(filename), QString(archive_entry_pathname(entry)));
+            }
+
             ret = archive_write_header(ext, entry);
             if (ret == ARCHIVE_OK) {
                 copy_data(arch, ext);
@@ -225,6 +277,16 @@ private:
             }
         }
         return NO_ARCHIVE_ERROR;
+    }
+
+    char *concat(const char *dest, const char *src)
+    {
+        char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
+
+        strcpy(ret, dest);
+        strcat(ret, src);
+
+        return ret;
     }
 
 };
