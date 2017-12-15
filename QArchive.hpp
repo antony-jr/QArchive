@@ -103,16 +103,16 @@ class Extractor  : public QThread
     Q_OBJECT
 
 public:
-    Extractor(QObject *parent = NULL)
+    explicit Extractor(QObject *parent = NULL)
     {
     }
 
-    Extractor(const QString& filename)
+    explicit Extractor(const QString& filename)
     {
         addArchive(filename);
     }
 
-    Extractor(const QStringList& filenames)
+    explicit Extractor(const QStringList& filenames)
     {
         addArchive(filenames);
     }
@@ -139,10 +139,12 @@ public:
     }
 
     void run() override {
+        short error_code = NO_ARCHIVE_ERROR;
         for(auto i = 0; i < queue.size(); ++i)
         {
             emit extracting(queue.at(i));
-            if(extract(queue.at(i).toStdString().c_str())) {
+            if( (error_code = extract(queue.at(i).toStdString().c_str())) ) {
+                emit error(error_code, queue.at(i));
                 queue.removeAll(queue.at(i));
                 return;
             }
@@ -163,20 +165,19 @@ signals:
 private:
     QStringList queue;
 
-    struct archive *arch,
-               *ext;
-    struct archive_entry *entry;
-    int ret;
-
     int extract(const char* filename) {
+
+        struct archive *arch,*ext;
+        struct archive_entry *entry;
+        int ret = 0;
+
         arch = archive_read_new();
         ext = archive_write_disk_new();
         archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
         archive_read_support_format_all(arch);
 
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
-            emit error(ARCHIVE_READ_ERROR, QString(filename));
-            return ret;
+            return ARCHIVE_READ_ERROR;
         }
         for (;;) {
             ret = archive_read_next_header(arch, &entry);
@@ -184,16 +185,14 @@ private:
                 break;
             }
             if (ret != ARCHIVE_OK) {
-                emit error(ARCHIVE_QUALITY_ERROR, QString(filename));
-                return 1;
+                return ARCHIVE_QUALITY_ERROR;
             }
             ret = archive_write_header(ext, entry);
             if (ret == ARCHIVE_OK) {
-                copy_data();
+                copy_data(arch, ext);
                 ret = archive_write_finish_entry(ext);
                 if (ret != ARCHIVE_OK) {
-                    emit error(ARCHIVE_UNCAUGHT_ERROR, QString(filename));
-                    return -1;
+                    return ARCHIVE_UNCAUGHT_ERROR;
                 }
             }
 
@@ -202,10 +201,10 @@ private:
         archive_read_free(arch);
         archive_write_close(ext);
         archive_write_free(ext);
-        return 0;
+        return NO_ARCHIVE_ERROR;
     }
 
-    int copy_data()
+    int copy_data(struct archive *arch, struct archive *ext)
     {
         const void *buff;
         size_t size;
@@ -214,6 +213,7 @@ private:
 #else
         off_t offset;
 #endif
+        int ret = 0;
 
         for (;;) {
             ret = archive_read_data_block(arch, &buff, &size, &offset);
@@ -226,6 +226,7 @@ private:
                 return (ret);
             }
         }
+        return NO_ARCHIVE_ERROR;
     }
 
 };
