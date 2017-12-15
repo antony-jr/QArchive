@@ -213,9 +213,7 @@ private:
 #else
         off_t offset;
 #endif
-        int ret = 0;
-
-        for (;;) {
+        for (int ret = 0;;) {
             ret = archive_read_data_block(arch, &buff, &size, &offset);
             if (ret == ARCHIVE_EOF)
                 return (ARCHIVE_OK);
