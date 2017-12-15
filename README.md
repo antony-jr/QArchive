@@ -17,7 +17,7 @@ suited for your Qt Projects!**
 
 **Depends on:** Qt5 Core Libraries and LibArchive.
 
-**Only supports extraction but does it well!**
+**Only supports extraction for now!**
 
 # Usage
 
