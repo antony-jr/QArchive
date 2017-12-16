@@ -19,6 +19,7 @@ int main(int argc , char** argv)
 	// emitted when all extraction is finished 
 	QObject::connect(&e , &QArchive::Extractor::finished , [&](){
 		qDebug() << "Finished all extraction!";
+		e.quit();
 		app.quit();		
 	});
 
@@ -33,6 +34,7 @@ int main(int argc , char** argv)
 
 	// emitted when something goes wrong
 	QObject::connect(&e , &QArchive::Extractor::error , [&](short code , QString file){
+		e.terminate();
 		switch(code){
 		case QArchive::ARCHIVE_READ_ERROR:
 				qDebug() << "unable to find archive :: " << file;
