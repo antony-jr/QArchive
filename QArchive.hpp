@@ -291,8 +291,65 @@ private:
 
 };
 
+/*
+ * Class Compressor <- Inherits QThread.
+ * ----------------
+ *
+ *  Compresses files and folder into a archive.
+ *
+ *  Constructors:
+ *
+ *	Compressor(QObject *parent = NULL)
+ *
+ *	Compressor(const QString& , const QStringList&) - sets an archive with the files from QStringList.
+ *	Compressor(const QString& , const QString&) - sets an archive with a single file or folder.
+ *      Compressor(const QString&) - only set the archive path to be created.
+ *
+ *  Methods:
+ *	
+ *	void setArchive(const QString&)  - sets the archive path to be created.
+ *	void addFiles(const QString&)    - add a single file or folder to the archive.
+ *	void addFiles(const QStringList&)- add a list of files and folders to the archive.
+ *	void removeFiles(const QString&) - removes a file from the archive.
+ *	void removeFiles(const QStringList&) - removes a list of files from the archive.
+ *
+ *  Slots:
+ *	void start() - starts or resumes the compression. (Inherited from QThread)
+ *	void stop()  - stops or pauses the compression. (Inherited from QThread)
+ *
+ *  Signals:
+ * 	void finished() - Emitted when all jobs are done.
+ * 	void compressing(const QString&) - Emitted with the file beign compressed.
+ * 	void compressed(const QString&)  - Emitted with file had been compressed.
+ * 	void error(short , const QString&) - Emitted with error code refering a file.
+ *
+*/
+
+class Compressor : public QThread 
+{
+	Q_OBJECT
+public:
+	explicit Compressor(QObject *parent = NULL)
+	{
+	}
+
+	explicit Compressor(const QString& , const QStringList&)
+	{
+	}
+
+	~Compressor() { }
+
+signals:
+	void finished();
+	void compressing(const QString&);
+	void compressed(const QString&);
+	void error(short , const QString&);
+
+private:
+	QString archivePath;
+	QStringList nodes;
+
+};
+
 } // QArchive Namespace Ends.
-
-
-
 #endif // QARCHIVE_HPP_INCLUDED
