@@ -19,30 +19,26 @@ suited for your Qt Projects!**
 
 # Usage
 
-**Its simple as 1,2,3!**   
+**Witness it with your own eye's**   
 
 ```
- #include "QArchive.hpp"
-	...
-	...
-	...
+#include <QCoreApplication>
+#include <QDebug>
+#include "QArchive.hpp"
 
+int main(int argc, char** argv)
+{
+    QCoreApplication app(argc, argv);
+    QArchive::Extractor e("test.7z");
+    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
+        qDebug() << "Finished all extraction!";
+        e.quit();
+        app.quit();
+    });
+    e.start();
+    return app.exec();
+}
 
- // Step 1
- QArchive::Extractor Archiver("somefile.7z");
-
- // Step 2 , Optional
- QObject::connect(&Archiver , &QArchiver::Extractor::finished , [&]()
- {
-	qDebug() << "finished extraction!";
-	QCoreApplication::quit();
- });
-
- // Step 3 
-
- Archiver.start();
-
- qDebug() << "Its Non-Blocking!";
 ```
 
 **Refer the wiki for more information ,** [QArchive Wiki](https://github.com/antony-jr/QArchive/wiki)
