@@ -16,7 +16,6 @@ int main(int argc, char** argv)
      * 2.Connect Callbacks
     */
 
-    // emitted when all extraction is finished
     QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
         qDebug() << archive << " :: ";
         qDebug() << files;
