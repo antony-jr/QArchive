@@ -596,10 +596,85 @@ private:
  * 	start() - Starts the operation. (Inherited from QThread)
  *
  * Signals:
- *
- * 	void archiveFiles(const QStringList&) - Emitted when we got all the files from the archive.
+ *	void error(short , const QString&) - Emitted when something goes wrong.
+ * 	void archiveFiles(const QString& , const QStringList&) - Emitted when we got all the files from the archive.
 */
 
+class Reader : public QThread
+{
+    Q_OBJECT
+public:
+    explicit Reader(QObject *parent = NULL) { }
+    explicit Reader(const QString& archive)
+    {
+        setArchive(archive);
+    }
+
+    void setArchive(const QString& archive)
+    {
+        Archive = QDir::cleanPath(archive);
+    }
+
+    const QStringList& listFiles()
+    {
+        return Files;
+    }
+
+    void run() override
+    {
+        if(Archive.isEmpty()) {
+            return;
+        }
+
+        QFileInfo fInfo(Archive);
+        if(!fInfo.exists()) {
+            emit error(ARCHIVE_READ_ERROR, Archive);
+            return;
+        }
+
+        struct archive *arch;
+        struct archive_entry *entry;
+        int ret = 0;
+
+        arch = archive_read_new();
+        archive_read_support_format_all(arch);
+        archive_read_support_filter_all(arch);
+
+        if((ret = archive_read_open_filename(arch, Archive.toStdString().c_str(), 10240))) {
+            emit error(ARCHIVE_READ_ERROR, Archive);
+            return;
+        }
+        for (;;) {
+            ret = archive_read_next_header(arch, &entry);
+            if (ret == ARCHIVE_EOF) {
+                break;
+            }
+            if (ret != ARCHIVE_OK) {
+                emit error(ARCHIVE_QUALITY_ERROR, Archive);
+                return;
+            }
+            Files << archive_entry_pathname(entry);
+        }
+        archive_read_close(arch);
+        archive_read_free(arch);
+        emit archiveFiles(Archive, Files);
+    }
+
+    void clear()
+    {
+        Archive.clear();
+        Files.clear();
+    }
+
+    ~Reader() { }
+signals:
+    void archiveFiles(const QString&, const QStringList&);
+    void error(short, const QString&);
+
+private:
+    QString Archive;
+    QStringList Files;
+}; // Class Reader Ends
 
 } // QArchive Namespace Ends.
 #endif // QARCHIVE_HPP_INCLUDED

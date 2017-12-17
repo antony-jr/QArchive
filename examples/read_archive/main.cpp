@@ -9,8 +9,7 @@ int main(int argc, char** argv)
     /*
      * 1.Construct
     */
-    QArchive::Extractor e("test.7z", "Output");
-    //		Archive  -^	    ^- Extract to Directory
+    QArchive::Reader e("test.7z");
 
 
     /*
@@ -18,26 +17,15 @@ int main(int argc, char** argv)
     */
 
     // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
-        qDebug() << "Finished all extraction!";
+    QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
+        qDebug() << archive << " :: ";
+        qDebug() << files;
+        e.quit();
         app.quit();
     });
 
-    QObject::connect(&e, &QArchive::Extractor::extracting, [&](QString file) {
-        qDebug() << "Extracting:: " << file;
-    });
-
-    QObject::connect(&e, &QArchive::Extractor::status, [&](QString archive, QString stat) {
-        qDebug() << archive << "::" << stat;
-    });
-
-    // emitted when a file is extracted
-    QObject::connect(&e, &QArchive::Extractor::extracted, [&](QString file) {
-        qDebug() << "Extracted:: " << file;
-    });
-
     // emitted when something goes wrong
-    QObject::connect(&e, &QArchive::Extractor::error, [&](short code, QString file) {
+    QObject::connect(&e, &QArchive::Reader::error, [&](short code, QString file) {
         switch(code) {
         case QArchive::ARCHIVE_READ_ERROR:
             qDebug() << "unable to find archive :: " << file;
@@ -51,10 +39,6 @@ int main(int argc, char** argv)
             qDebug() << "fatal error. :: " << file;
             app.quit();
             break;
-        case QArchive::INVALID_DEST_PATH:
-            qDebug() << "cannot find the destination path!";
-            app.quit();
-            break;
         default:
             qDebug() << "unknown error. :: " << file;
             app.quit();
@@ -66,8 +50,5 @@ int main(int argc, char** argv)
      * 3.Start extraction!
     */
     e.start();
-
-    qDebug() << "Will be extracted in the place you think!";
-
     return app.exec();
 }
