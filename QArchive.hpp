@@ -515,6 +515,7 @@ public:
         }
         archive_write_close(a);
         archive_write_free(a);
+        nodes.clear();
         emit finished();
     }
 
@@ -574,6 +575,31 @@ private:
         }
     }
 }; // Compressor Class Ends
+
+/*
+ * Class Reader <- Inherits QThread.
+ * ------------
+ *
+ * Gets the list of files inside a archive.
+ *
+ * Constructors:
+ * 	Reader(QObject *parent = NULL) - Only Constructs the reader.
+ * 	Reader(const QString&) - Sets a single archive and Constructs the reader.
+ *
+ * Methods:
+ *
+ * 	void setArchive(const QString&) - Sets a single archive
+ *	void clear()			- Clears everything stored in this class.
+ *	const QStringList& listFiles() - get the files stored in this class.
+ *
+ * Slots:
+ * 	start() - Starts the operation. (Inherited from QThread)
+ *
+ * Signals:
+ *
+ * 	void archiveFiles(const QStringList&) - Emitted when we got all the files from the archive.
+*/
+
 
 } // QArchive Namespace Ends.
 #endif // QARCHIVE_HPP_INCLUDED

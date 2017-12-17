@@ -9,7 +9,4 @@
 - [ ] Build-related changes
 - [ ] Other, please describe:
 
-**The Pull Request fulfills these requirements:**
-
-
 **Describe your Pull Request:**
