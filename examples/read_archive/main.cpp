@@ -17,9 +17,9 @@ int main(int argc, char** argv)
     */
 
     // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive , QStringList files) {
+    QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
         qDebug() << archive << " :: ";
-	qDebug() << files;
+        qDebug() << files;
         e.quit();
         app.quit();
     });
