@@ -632,7 +632,7 @@ public:
             return;
         }
 
-        struct archive *arch,*ext;
+        struct archive *arch;
         struct archive_entry *entry;
         int ret = 0;
 
