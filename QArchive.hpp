@@ -179,7 +179,7 @@ public:
             }
         }
 
-        for(auto i = 0; i < queue.size(); ++i) {
+        for(auto i = 0; i < queue.size() && !this->isInterruptionRequested(); ++i) {
             emit extracting(queue.at(i));
             if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
                 emit error(error_code, queue.at(i));
@@ -230,7 +230,7 @@ private:
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
             return ARCHIVE_READ_ERROR;
         }
-        for (;;) {
+        for (; !this->isInterruptionRequested();) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
@@ -466,7 +466,7 @@ public:
         archive_write_open_filename(a, archivePath.toStdString().c_str());
 
         QStringListIterator nodeIt(nodes);
-        while (nodeIt.hasNext()) {
+        while (nodeIt.hasNext() && !this->isInterruptionRequested()) {
             struct archive *disk = archive_read_disk_new();
             archive_read_disk_set_standard_lookup(disk);
             QString currentNode = nodeIt.next();
@@ -480,7 +480,7 @@ public:
                 return;
             }
 
-            for (;;) {
+            for (; !this->isInterruptionRequested();) {
                 entry = archive_entry_new();
                 r = archive_read_next_header2(disk, entry);
                 if (r == ARCHIVE_EOF)
@@ -644,7 +644,7 @@ public:
             emit error(ARCHIVE_READ_ERROR, Archive);
             return;
         }
-        for (;;) {
+        for (; !this->isInterruptionRequested();) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
