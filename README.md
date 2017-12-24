@@ -24,7 +24,7 @@ suited for your Qt Projects!**
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include "QArchive.hpp"
+#include "QArchive/QArchive.hpp"
 
 int main(int argc, char** argv)
 {
@@ -48,8 +48,11 @@ int main(int argc, char** argv)
 
 Before jumping the guns make sure you have installed **libarchive** , refer libarchive repo at [LibArchive](https://github.com/libarchive/libarchive)
 
+**Please check the releases!**
+
 ```
- $ wget "https://github.com/antony-jr/QArchive/releases/download/v0.0.2/QArchive.hpp"
+ $ wget "https://git.io/vbQ5z" # Check the releases
+ $ tar -xvf QArchive-vx.y.z.tar.gz # There is a zip too
  $ # Thats it , You just need to download the header
 ```
 
