@@ -50,8 +50,11 @@ Before jumping the guns make sure you have installed **libarchive** , refer liba
 
 **Please check the releases!**
 
+**Replace** , **x,y, and z** with the version number that you want.
+
 ```
- $ wget "https://git.io/vbQ5z" # Check the releases
+ $ wget \
+  "https://github.com/antony-jr/QArchive/releases/download/vx.y.z/QArchive-vx.y.z.tar.gz"
  $ tar -xvf QArchive-vx.y.z.tar.gz # There is a zip too
  $ # Thats it , You just need to download the header
 ```
