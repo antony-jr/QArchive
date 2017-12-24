@@ -65,7 +65,7 @@ different in linux , refer this [Qt Doc](http://doc.qt.io/qt-5/linux-deployment.
 
 In addition you can use [AppImages](https://github.com/appImage/appimagekit) and [linuxdeployqt](https://github.com/probonopd/linuxdeployqt).
 
-Take a look at [Qtar.AppImage](#) , its a extractor that is built with Qt5 and libarchive which runs just like that.   
+Take a look at [Example-x86_64.AppImage](https://github.com/antony-jr/QArchive/releases/download/v0.0.2/Example-x86_64.AppImage) , its a extractor that is built with Qt5 and libarchive which runs just like that.   
 Go through **AppImage repo for more information on extracting AppImages**   
 Now you must know the awesomeness of **AppImages**.
 
