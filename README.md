@@ -49,8 +49,8 @@ int main(int argc, char** argv)
 Before jumping the guns make sure you have installed **libarchive** , refer libarchive repo at [LibArchive](https://github.com/libarchive/libarchive)
 
 ```
- $ git clone https://github.com/antony-jr/QArchive
- $ # Thats it
+ $ wget "https://github.com/antony-jr/QArchive/releases/download/v0.0.2/QArchive.hpp"
+ $ # Thats it , You just need to download the header
 ```
 
 **Refer the wiki for more information on Compiling ,** [Compiling with QArchive](https://github.com/antony-jr/QArchive/wiki/Compiling)
