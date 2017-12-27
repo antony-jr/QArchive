@@ -1,0 +1,15 @@
+{
+  "docs": {
+    "Getting Started": [ 
+	   "Installation",
+	   "AddingQArchive"
+    ],
+    "API" : [
+	   "QArchiveFormats",
+	   "QArchiveErrorCodes",
+	   "QArchiveExtractor",
+	   "QArchiveCompressor",
+	   "QArchiveReader"
+    ]
+  }
+}
