@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>QArchive Blog</title>
+        <link>https://antony-jr.github.io/blog</link>
+        <description>The best place to stay up-to-date with the latest QArchive news and events.</description>
+        <lastBuildDate>Wed, 27 Dec 2017 06:00:00 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>Feed for Node.js</generator>
+        <image>
+            <title>QArchive Blog</title>
+            <url>https://antony-jr.github.ioimg/QArchive.png</url>
+            <link>https://antony-jr.github.io/blog</link>
+        </image>
+        <copyright>Copyright © 2017 Antony Jr.</copyright>
+        <item>
+            <title><![CDATA[Writing Documentation for software is the hardest part!]]></title>
+            <link>https://antony-jr.github.io/blog/2017/12/27/writing-documentation-is-hard.html</link>
+            <guid>https://antony-jr.github.io/blog/2017/12/27/writing-documentation-is-hard.html</guid>
+            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
+            <description><![CDATA[Hey everyone , I don't know if you know this but developing a software is easier compared   
+to writing a documentation for the users. I've started writing documentations for my   
+libraries and its kinda of boring. Will get back to you when I finish]]></description>
+        </item>
+        <item>
+            <title><![CDATA[I will be writing the documentation in Qt Style!]]></title>
+            <link>https://antony-jr.github.io/blog/2017/12/27/writing-docs-like-qt.html</link>
+            <guid>https://antony-jr.github.io/blog/2017/12/27/writing-docs-like-qt.html</guid>
+            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
+            <description><![CDATA[Hey folks , I learned a lot just by looking at Qt Docs. Its really a good style they follow   
+and I decided to follow the exact style with some of my imaginations , afterall this is a 
+simple header for Qt Projects , right ?... 
+
+**See ya!**.]]></description>
+        </item>
+        <item>
+            <title><![CDATA[Publishing the official documentation!]]></title>
+            <link>https://antony-jr.github.io/blog/2017/12/27/publishing-the-official-documentation.html</link>
+            <guid>https://antony-jr.github.io/blog/2017/12/27/publishing-the-official-documentation.html</guid>
+            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
+            <description><![CDATA[Hello everyone , I know that I already published a Wiki for QArchive at github but I thought it   
+would be good if the documentation and other guides are published with some awesome styles   
+and illustrations. So I am recreating the Wiki in **Docus]]></description>
+        </item>
+    </channel>
+</rss>
