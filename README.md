@@ -48,15 +48,11 @@ int main(int argc, char** argv)
 
 Before jumping the guns make sure you have installed **libarchive** , refer libarchive repo at [LibArchive](https://github.com/libarchive/libarchive)
 
-**Please check the releases!**
-
-**Replace** , **x,y, and z** with the version number that you want.
+**Please download from the releases for windows and mac!**   
+**You just need the header file and nothing else**
 
 ```
- $ wget \
-  "https://github.com/antony-jr/QArchive/releases/download/vx.y.z/QArchive-vx.y.z.tar.gz"
- $ tar -xvf QArchive-vx.y.z.tar.gz # There is a zip too
- $ # Thats it , You just need to download the header
+ $ curl -L "https://git.io/vbdTI" | bash
 ```
 
 **Refer the wiki for more information on Compiling ,** [Compiling with QArchive](https://github.com/antony-jr/QArchive/wiki/Compiling)
