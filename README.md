@@ -2,7 +2,9 @@
 <p align="center">
   <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">  <br>
 </p>
-
+<p align="center">
+  <a href="https://antony-jr.github.io/QArchive">GET STARTED WITH QARCHIVE!</a>
+</p>
 
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1ebae88c4a4e4e9d9a494568799a9ec8)](https://www.codacy.com/app/antony-jr/QArchive?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=antony-jr/QArchive&amp;utm_campaign=Badge_Grade) 
 
@@ -16,6 +18,8 @@ So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform he
 suited for your Qt Projects!**
 
 **Depends on:** Qt5 Core Libraries and LibArchive.
+
+**Head to [this site](https://antony-jr.github.io/QArchive) to get started with QArchive**
 
 # Usage
 
