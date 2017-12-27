@@ -105,7 +105,7 @@ class Index extends React.Component {
 			   ' thus you will have no problem integrating QArchive with your Qt Project.',
                   image: siteConfig.baseUrl + 'img/qt.png',
                   imageAlign: 'top',
-                  title: 'Supports Qt\'s Event Thread.',
+                  title: 'Supports Qt\'s Event Loop.',
                 },
                 {
                   content: 'Whatever archive you throw at QArchive , it will never fail you Because its' +
