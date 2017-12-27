@@ -41,39 +41,8 @@ int main(int argc, char** argv)
 
 ```
 
-**Refer the wiki for more information ,** [QArchive Wiki](https://github.com/antony-jr/QArchive/wiki)
+**For more information head to QArchive Docs,** [QArchive Documentation](https://antony-jr.github.io/QArchive)
 
-
-# Installation
-
-Before jumping the guns make sure you have installed **libarchive** , refer libarchive repo at [LibArchive](https://github.com/libarchive/libarchive)
-
-**Please download from the releases for windows and mac!**   
-**You just need the header file and nothing else**
-
-```
- $ curl -L "https://git.io/vbdTI" | bash
-```
-
-**Refer the wiki for more information on Compiling ,** [Compiling with QArchive](https://github.com/antony-jr/QArchive/wiki/Compiling)
-
-# Deploying your apps
-
-I really recommend you all to use dynamic linking on all platforms and then pack it with simple containers this way you can   
-avoid the overhead of static compiling and also make it just work! :dog:
-
-In windows you can simply throw in the dll files and compress it into a setup file and distribute it to the users but its   
-different in linux , refer this [Qt Doc](http://doc.qt.io/qt-5/linux-deployment.html) for information on deploying qt apps.   
-
-In addition you can use [AppImages](https://github.com/appImage/appimagekit) and [linuxdeployqt](https://github.com/probonopd/linuxdeployqt).
-
-Take a look at [Example-x86_64.AppImage](https://github.com/antony-jr/QArchive/releases/download/v0.0.2/Example-x86_64.AppImage) , its a extractor that is built with Qt5 and libarchive which runs just like that.   
-
-```
- $ chmod +x Example-x86_64.AppImage # to make it exec
- # ./Example-x86_64.AppImage -h
-```
-Now you must know the awesomeness of **AppImages**.
 
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
