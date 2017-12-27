@@ -1,4 +1,4 @@
-# 
+#!/bin/bash
 # BSD-3 Clause.
 # Copyright (C) 2017 Antony Jr.
 # 
