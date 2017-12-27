@@ -7,7 +7,7 @@
 isCurl=$(command -v curl);
 packageName="QArchive"
 license="LICENSE"
-repoRawUrl="https://github.com/antony-jr/QArchive/blob/master/"
+repoRawUrl="https://raw.githubusercontent.com/antony-jr/QArchive/master/"
 
 if [ $isCurl ]
 	then
