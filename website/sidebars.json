@@ -4,6 +4,9 @@
 	   "Installation",
 	   "AddingQArchive"
     ],
+    "Guides" : [
+	   "UsingExtractor"
+    ],
     "API" : [
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",

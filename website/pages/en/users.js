@@ -28,14 +28,13 @@ class Users extends React.Component {
           <div className="showcaseSection">
             <div className="prose">
               <h1>Who's Using This?</h1>
-              <p>This project is used by many folks</p>
+              <p>This project is used by many projects.</p>
             </div>
             <div className="logos">{showcase}</div>
-            <p>Are you using this project?</p>
             <a
-              href="https://github.com/facebook/docusaurus/edit/master/website/siteConfig.js"
+              href="https://github.com/antony-jr/QArchive/edit/master/website/siteConfig.js"
               className="button">
-              Add your company
+              List Yours Too!
             </a>
           </div>
         </Container>

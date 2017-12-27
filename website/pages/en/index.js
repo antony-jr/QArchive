@@ -17,7 +17,7 @@ const siteConfig = require(process.cwd() + '/siteConfig.js');
 class Button extends React.Component {
   render() {
     return (
-      <div className="pluginWrapper buttonWrapper">
+      <div className="pluginWrapper buttonWrapper" id={this.props.key}>
         <a className="button" href={this.props.href} target={this.props.target}>
           {this.props.children}
         </a>
@@ -37,7 +37,7 @@ class HomeSplash extends React.Component {
         <div className="homeSplashFade">
           <div className="wrapper homeWrapper">
             <div className="projectLogo">
-              <img src={siteConfig.baseUrl + 'img/docusaurus.svg'} />
+              <img src={siteConfig.baseUrl + 'img/QArchive.png'} />
             </div>
             <div className="inner">
               <h2 className="projectTitle">
@@ -47,25 +47,25 @@ class HomeSplash extends React.Component {
               <div className="section promoSection">
                 <div className="promoRow">
                   <div className="pluginRowBlock">
-                    <Button href="#try">Try It Out</Button>
                     <Button
                       href={
                         siteConfig.baseUrl +
                         'docs/' +
-                        this.props.language +
-                        '/doc1.html'
+                        'Installation.html'
                       }>
-                      Example Link
+                      Get Started
                     </Button>
                     <Button
                       href={
                         siteConfig.baseUrl +
                         'docs/' +
-                        this.props.language +
-                        '/doc2.html'
+                        'QArchiveFormats.html'
                       }>
-                      Example Link 2
+                      API Reference
                     </Button>
+	            <Button href={'https://github.com/antony-jr/QArchive'}>
+	    	      View on Github
+	    	    </Button>
                   </div>
                 </div>
               </div>
@@ -101,52 +101,22 @@ class Index extends React.Component {
               align="center"
               contents={[
                 {
-                  content: 'This is the content of my feature',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  content: 'QArchive fully supports Qt Projects by flowing with its event loop and'+
+			   ' thus you will have no problem integrating QArchive with your Qt Project.',
+                  image: siteConfig.baseUrl + 'img/qt.png',
                   imageAlign: 'top',
-                  title: 'Feature One',
+                  title: 'Supports Qt\'s Event Thread.',
                 },
                 {
-                  content: 'The content of my second feature',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                  content: 'Whatever archive you throw at QArchive , it will never fail you Because its' +
+			   ' backed by a very stable project ( libarchive ) and so giving you a lot of options '+
+			   'with a clean C++ API.',
+                  image: siteConfig.baseUrl + 'img/extract.png',
                   imageAlign: 'top',
-                  title: 'Feature Two',
+                  title: 'Works with a Wide Range of Archive Formats.',
                 },
               ]}
               layout="fourColumn"
-            />
-          </Container>
-
-          <div
-            className="productShowcaseSection paddingBottom"
-            style={{textAlign: 'center'}}>
-            <h2>Feature Callout</h2>
-            <MarkdownBlock>These are features of this project</MarkdownBlock>
-          </div>
-
-          <Container padding={['bottom', 'top']} background="light">
-            <GridBlock
-              contents={[
-                {
-                  content: 'Talk about learning how to use this',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
-                  imageAlign: 'right',
-                  title: 'Learn How',
-                },
-              ]}
-            />
-          </Container>
-
-          <Container padding={['bottom', 'top']} id="try">
-            <GridBlock
-              contents={[
-                {
-                  content: 'Talk about trying this out',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
-                  imageAlign: 'left',
-                  title: 'Try it Out',
-                },
-              ]}
             />
           </Container>
 
@@ -155,10 +125,14 @@ class Index extends React.Component {
               contents={[
                 {
                   content:
-                    'This is another description of how this project is useful',
-                  image: siteConfig.baseUrl + 'img/docusaurus.svg',
-                  imageAlign: 'right',
-                  title: 'Description',
+                    'For a long time I\'ve been searching for a easy to use archive library for C++ with Qt support' +
+		    ', I came accross libarchive , it was super cool ? but it did\'nt have a official C++ binding. ' +
+		    'Some C++ Wrappers for libarchive exists like moor but I needed something so simple as 1,2,3 and'+
+		    ' also support Qt\'s event loop.'+
+		    ''+
+		    'So QArchive is the result of the above , it is a C++ Cross-Platform header that Modernizes libarchive'+
+		    'using Qt5. Simply extracts 7z , Tarballs , RAR and other supported formats by libarchive.',
+                  title: 'Why Create QArchive ?',
                 },
               ]}
             />

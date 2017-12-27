@@ -7,17 +7,20 @@
 
 /* List of projects/orgs using your project for the users page */
 
-const users = [];
-/*
 const users = [
   {
-    caption: 'User1',
-    image: '/test-site/img/docusaurus.svg',
-    infoLink: 'https://www.facebook.com',
+    caption: 'QInstallerBridge',
+    image: '/QArchive/img/QInstallerBridge.png',
+    infoLink: 'https://antony-jr.github.io/QInstallerBridge',
+    pinned: true,
+  },
+  {	
+    caption: 'GHReleaseBridge',
+    image: '/QArchive/img/GHReleaseBridge.png',
+    infoLink: 'https://antony-jr.github.io/GHReleaseBridge',
     pinned: true,
   },
 ];
-*/
 
 const siteConfig = {
   title: 'QArchive' /* title for your website */,
@@ -32,8 +35,8 @@ const siteConfig = {
   ],
   users,
   /* path to images for header/footer */
-  headerIcon: 'img/docusaurus.svg',
-  footerIcon: 'img/docusaurus.svg',
+  headerIcon: 'img/QArchive.png',
+  footerIcon: 'img/QArchive.png',
   favicon: 'img/favicon.png',
   /* colors for website */
   colors: {
@@ -46,7 +49,7 @@ const siteConfig = {
     new Date().getFullYear() +
     ' Antony Jr.',
   // organizationName: 'deltice', // or set an env variable ORGANIZATION_NAME
-  // projectName: 'test-site', // or set an env variable PROJECT_NAME
+  projectName: 'QArchive', // or set an env variable PROJECT_NAME
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks
     theme: 'default',

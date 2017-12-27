@@ -18,16 +18,18 @@ class Help extends React.Component {
     const supportLinks = [
       {
         content:
-          'Learn more using the [documentation on this site.](/test-site/docs/en/doc1.html)',
+          'Learn more using the [documentation on this site.](/QArchive/docs/Installation.html)',
         title: 'Browse Docs',
       },
       {
-        content: 'Ask questions about the documentation and project',
-        title: 'Join the community',
+        content: 'If you have any questions about the author or the project just ask me , get in touch with me on '+
+	      	 '<a href="https://github.com/antony-jr/ama">Ask Me Anything!</a>',
+        title: 'Ask the Author',
       },
       {
-        content: "Find out what's new with this project",
-        title: 'Stay up to date',
+        content: "If you ever face any problem , please raise a <a href='https://github.com/antony-jr/QArchive/issues/new'>"+
+	      	 "Issue</a> to get it fixed asap!",
+        title: 'Open an Issue on GitHub',
       },
     ];
 
@@ -38,7 +40,9 @@ class Help extends React.Component {
             <header className="postHeader">
               <h2>Need help?</h2>
             </header>
-            <p>This project is maintained by a dedicated group of people.</p>
+            <p>
+	    This project is maintained by <a href="https://github.com/antony-jr">Antony Jr</a>.
+	    </p>
             <GridBlock contents={supportLinks} layout="threeColumn" />
           </div>
         </Container>

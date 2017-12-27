@@ -17,10 +17,13 @@
     "QArchive Compression Formats": "QArchive Compression Formats",
     "QArchiveReader": "Class QArchive::Reader",
     "QArchive::Reader": "QArchive::Reader",
+    "UsingExtractor": "Using QArchive to Extract Archives",
+    "Extracting Archives with QArchive": "Extracting Archives with QArchive",
     "Docs": "Docs",
     "Help": "Help",
     "Blog": "Blog",
     "Getting Started": "Getting Started",
+    "Guides": "Guides",
     "API": "API"
   },
   "pages-strings": {

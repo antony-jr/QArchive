@@ -24,31 +24,19 @@ class Footer extends React.Component {
           <div>
             <h5>Docs</h5>
             <a
-              href={
-                this.props.config.baseUrl +
-                'docs/' +
-                this.props.language +
-                '/doc1.html'
-              }>
-              Getting Started (or other categories)
+            href={`${this.props.config.baseUrl}docs/Installation.html`} 
+	    >
+              Getting Started
             </a>
             <a
-              href={
-                this.props.config.baseUrl +
-                'docs/' +
-                this.props.language +
-                '/doc2.html'
-              }>
-              Guides (or other categories)
+              href={`${this.props.config.baseUrl}docs/UsingExtractor.html`}
+	    >
+              Guides
             </a>
             <a
-              href={
-                this.props.config.baseUrl +
-                'docs/' +
-                this.props.language +
-                '/doc3.html'
-              }>
-              API Reference (or other categories)
+              href={`${this.props.config.baseUrl}docs/QArchiveFormats.html`}
+	    >
+              API Reference
             </a>
           </div>
           <div>
@@ -60,12 +48,12 @@ class Footer extends React.Component {
               User Showcase
             </a>
             <a
-              href="http://stackoverflow.com/questions/tagged/"
+              href="http://stackoverflow.com/questions/tagged/Qt/"
               target="_blank">
               Stack Overflow
             </a>
             <a href="https://discordapp.com/">Project Chat</a>
-            <a href="https://twitter.com/" target="_blank">
+            <a href="https://twitter.com/antony-jr" target="_blank">
               Twitter
             </a>
           </div>
@@ -77,7 +65,7 @@ class Footer extends React.Component {
               className="github-button"
               href={this.props.config.repoUrl}
               data-icon="octicon-star"
-              data-count-href="/facebook/docusaurus/stargazers"
+              data-count-href="/antony-jr/QArchive/stargazers"
               data-show-count={true}
               data-count-aria-label="# stargazers on GitHub"
               aria-label="Star this project on GitHub">
