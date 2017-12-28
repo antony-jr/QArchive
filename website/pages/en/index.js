@@ -116,6 +116,14 @@ class Index extends React.Component {
                   title: 'Works with a Wide Range of Archive Formats.',
                 },
 		{
+                  content: 'QArchive does not like leaving heavy traces for the users and thus '+
+                           'it is packed with all its amazing features in a single C++ header file , this ' +
+                           'makes QArchive easier to integrate with your project.',
+                  image: siteConfig.baseUrl + 'img/header.png',
+                  imageAlign: 'top',
+                  title: 'Header only library!',
+                },
+		{
                   content: 'This project is rated by <b>Codacy</b> with a <b>A Project Certification</b>' +
                            ' and thus integrating this header will not affect your source , So this project is also'+
                            ' best suited for those who care about code taste.',

@@ -327,7 +327,7 @@ enum {
  *
  *	Compressor(const QString& , const QStringList&) - sets an archive with the files from QStringList.
  *	Compressor(const QString& , const QString&) - sets an archive with a single file or folder.
- *  Compressor(const QString&) - only set the archive path to be created.
+ *  	Compressor(const QString&) - only set the archive path to be created.
  *
  *  Methods:
  *
