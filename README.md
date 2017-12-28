@@ -3,8 +3,8 @@
   <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">  <br>
 </p>
 
-> C++ Cross-Platform header that Modernizes libarchive using Qt5. Simply extracts 7z , Tarballs , RAR   
-> and other supported formats by libarchive.   
+> C++ Cross-Platform header :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush:. Simply extracts 7z :hamburger: , Tarballs:8ball: , RAR :briefcase:    
+> and other supported formats by libarchive. :heart:    
 > --Antony Jr.
 
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1ebae88c4a4e4e9d9a494568799a9ec8)](https://www.codacy.com/app/antony-jr/QArchive?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=antony-jr/QArchive&amp;utm_campaign=Badge_Grade) 
