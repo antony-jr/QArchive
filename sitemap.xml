@@ -3,6 +3,7 @@
 <url> <loc>https://antony-jr.github.io/help.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/en/help.html" /> </url>
 <url> <loc>https://antony-jr.github.io/index.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/en/index.html" /> </url>
 <url> <loc>https://antony-jr.github.io/users.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/en/users.html" /> </url>
+<url> <loc>https://antony-jr.github.io/blog/2017/12/28/excited-with-the-new-documentation.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://antony-jr.github.io/blog/2017/12/27/writing-documentation-is-hard.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://antony-jr.github.io/blog/2017/12/27/writing-docs-like-qt.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
 <url> <loc>https://antony-jr.github.io/blog/2017/12/27/publishing-the-official-documentation.html</loc> <changefreq>weekly</changefreq> <priority>0.3</priority> </url>
@@ -13,5 +14,7 @@
 <url> <loc>https://antony-jr.github.io/docs/QArchiveExtractor.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/QArchiveExtractor.html" /> </url>
 <url> <loc>https://antony-jr.github.io/docs/QArchiveFormats.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/QArchiveFormats.html" /> </url>
 <url> <loc>https://antony-jr.github.io/docs/QArchiveReader.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/QArchiveReader.html" /> </url>
+<url> <loc>https://antony-jr.github.io/docs/UsingCompressor.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/UsingCompressor.html" /> </url>
 <url> <loc>https://antony-jr.github.io/docs/UsingExtractor.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/UsingExtractor.html" /> </url>
+<url> <loc>https://antony-jr.github.io/docs/UsingReader.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://antony-jr.github.io/docs/UsingReader.html" /> </url>
 </urlset>

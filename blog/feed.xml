@@ -4,7 +4,7 @@
         <title>QArchive Blog</title>
         <link>https://antony-jr.github.io/blog</link>
         <description>The best place to stay up-to-date with the latest QArchive news and events.</description>
-        <lastBuildDate>Wed, 27 Dec 2017 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Thu, 28 Dec 2017 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,17 @@
             <link>https://antony-jr.github.io/blog</link>
         </image>
         <copyright>Copyright © 2017 Antony Jr.</copyright>
+        <item>
+            <title><![CDATA[Excited about the new cool documentation!]]></title>
+            <link>https://antony-jr.github.io/blog/2017/12/28/excited-with-the-new-documentation.html</link>
+            <guid>https://antony-jr.github.io/blog/2017/12/28/excited-with-the-new-documentation.html</guid>
+            <pubDate>Thu, 28 Dec 2017 06:00:00 GMT</pubDate>
+            <description><![CDATA[Hey folks , The good news is , QArchive's Documentation is up and running with no errors   
+and the **best** part is , The documentation is **freakin** sexy and thus I've decided to   
+use docusarus for all my **project** documentations.
+
+I really re]]></description>
+        </item>
         <item>
             <title><![CDATA[Writing Documentation for software is the hardest part!]]></title>
             <link>https://antony-jr.github.io/blog/2017/12/27/writing-documentation-is-hard.html</link>

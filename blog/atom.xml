@@ -2,12 +2,28 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://antony-jr.github.io/blog</id>
     <title>QArchive Blog</title>
-    <updated>2017-12-27T06:00:00Z</updated>
+    <updated>2017-12-28T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://antony-jr.github.io/blog"/>
     <subtitle>The best place to stay up-to-date with the latest QArchive news and events.</subtitle>
     <logo>https://antony-jr.github.ioimg/QArchive.png</logo>
     <rights>Copyright © 2017 Antony Jr.</rights>
+    <entry>
+        <title type="html"><![CDATA[Excited about the new cool documentation!]]></title>
+        <id>https://antony-jr.github.io/blog/2017/12/28/excited-with-the-new-documentation.html</id>
+        <link href="https://antony-jr.github.io/blog/2017/12/28/excited-with-the-new-documentation.html">
+        </link>
+        <updated>2017-12-28T06:00:00Z</updated>
+        <summary type="html"><![CDATA[Hey folks , The good news is , QArchive's Documentation is up and running with no errors   
+and the **best** part is , The documentation is **freakin** sexy and thus I've decided to   
+use docusarus for all my **project** documentations.
+
+I really re]]></summary>
+        <author>
+            <name>Antony Jr.</name>
+            <uri>http://twitter.com/antonyjr0</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Writing Documentation for software is the hardest part!]]></title>
         <id>https://antony-jr.github.io/blog/2017/12/27/writing-documentation-is-hard.html</id>
