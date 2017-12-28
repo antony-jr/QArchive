@@ -14,34 +14,6 @@ So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform he
 **QArchive can be easily integrated into your project because its just a header file! it is also non-blocking so its best   
 suited for your Qt Projects!**
 
-**Depends on:** Qt5 Core Libraries and LibArchive.
-
-# Usage
-
-**Witness it with your own eye's**   
-
-```
-#include <QCoreApplication>
-#include <QDebug>
-#include "QArchive/QArchive.hpp"
-
-int main(int argc, char** argv)
-{
-    QCoreApplication app(argc, argv);
-    QArchive::Extractor e("test.7z");
-    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
-        qDebug() << "Finished all extraction!";
-        e.quit();
-        app.quit();
-    });
-    e.start();
-    return app.exec();
-}
-
-```
-
-For more information head to QArchive Docs, [QArchive Documentation](https://antony-jr.github.io/QArchive)
-
 # Getting Started
 
 Learn more about **QArchive** at the official [QArchive Documentation](https://antony-jr.github.io/QArchive)
