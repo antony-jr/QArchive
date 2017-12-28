@@ -1,13 +1,12 @@
 ---
-id: UsingExtractor
-title: Using QArchive to Extract Archives
-sidebar_label: Extracting Archives with QArchive
+id: UsingReader
+title: Using QArchive to Read Archives
+sidebar_label: Reading Archives using QArchive.
 ---
 
-Please refer the full class documentation [here](QArchiveExtractor.md)
+Please refer the full class documentation [here](QArchiveReader.md)
 
-This simple example extracts an archive.
-
+This simple example reads an archive. 
 
 ## main.cpp
 
@@ -23,32 +22,22 @@ int main(int argc, char** argv)
     /*
      * 1.Construct
     */
-    QArchive::Extractor e("test.7z");
+    QArchive::Reader e("test.7z");
 
 
     /*
      * 2.Connect Callbacks
     */
 
-    // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
-        qDebug() << "Finished all extraction!";
+    QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
+        qDebug() << archive << " :: ";
+        qDebug() << files;
         e.quit();
         app.quit();
     });
 
-    QObject::connect(&e, &QArchive::Extractor::extracting, [&](QString file) {
-        qDebug() << "Extracting:: " << file;
-    });
-
-    // emitted when a file is extracted
-    QObject::connect(&e, &QArchive::Extractor::extracted, [&](QString file) {
-        qDebug() << "Extracted:: " << file;
-    });
-
     // emitted when something goes wrong
-    QObject::connect(&e, &QArchive::Extractor::error, [&](short code, QString file) {
-        e.terminate();
+    QObject::connect(&e, &QArchive::Reader::error, [&](short code, QString file) {
         switch(code) {
         case QArchive::ARCHIVE_READ_ERROR:
             qDebug() << "unable to find archive :: " << file;
@@ -70,21 +59,18 @@ int main(int argc, char** argv)
     });
 
     /*
-     * 3.Start extraction!
+     * 3.Start reading!
     */
     e.start();
-
-    qDebug() << "Its Non-Blocking!";
-
     return app.exec();
 }
 ```
 
-## extraction.pro
+## read_archive.pro
 
 ```
 TEMPLATE = app
-TARGET = extraction
+TARGET = read_archive
 
 QT += core
 LIBS += -larchive
@@ -97,10 +83,10 @@ HEADERS += QArchive/QArchive.hpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ../extraction.pro
+ $ qmake ../read_archive.pro
  $ make -j4
- $ ./extraction
- $ # Make sure you have test.7z file!
+ $ ./read_archive
+ $ # Make sure you have archive file!
 ```
 
 Compile the above program by refering [here](AddingToYourQtProject.md)   

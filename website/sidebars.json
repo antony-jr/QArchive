@@ -5,7 +5,9 @@
 	   "AddingQArchive"
     ],
     "Guides" : [
-	   "UsingExtractor"
+	   "UsingExtractor",
+	   "UsingCompressor",
+	   "UsingReader"
     ],
     "API" : [
 	   "QArchiveFormats",

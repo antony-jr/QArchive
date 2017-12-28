@@ -115,6 +115,15 @@ class Index extends React.Component {
                   imageAlign: 'top',
                   title: 'Works with a Wide Range of Archive Formats.',
                 },
+		{
+                  content: 'This project is rated by <b>Codacy</b> with a <b>A Project Certification</b>' +
+                           ' and thus integrating this header will not affect your source , So this project is also'+
+                           ' best suited for those who care about code taste.',
+                  image: siteConfig.baseUrl + 'img/clean_code.png',
+                  imageAlign: 'top',
+                  title: 'Clean C++ API.',
+                },
+
               ]}
               layout="fourColumn"
             />
