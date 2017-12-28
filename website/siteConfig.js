@@ -49,7 +49,6 @@ const siteConfig = {
     new Date().getFullYear() +
     ' Antony Jr.',
   organizationName: 'antony-jr', // or set an env variable ORGANIZATION_NAME
-  projectName: 'QArchive', // or set an env variable PROJECT_NAME
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks
     theme: 'default',
