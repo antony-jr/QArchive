@@ -44,8 +44,7 @@ For more information head to QArchive Docs, [QArchive Documentation](https://ant
 
 # Getting Started
 
-All information :heart: to use and install **QArchive** is documented [here](https://antony-jr.github.io/QArchive)   
-Please go to the documentation site for more information!
+Learn more about **QArchive** at the official {QArchive Documentation](https://antony-jr.github.io/QArchive)
 
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
