@@ -3,6 +3,10 @@
   <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">  <br>
 </p>
 
+> C++ Cross-Platform header that Modernizes libarchive using Qt5. Simply extracts 7z , Tarballs , RAR   
+> and other supported formats by libarchive.   
+> --Antony Jr.
+
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1ebae88c4a4e4e9d9a494568799a9ec8)](https://www.codacy.com/app/antony-jr/QArchive?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=antony-jr/QArchive&amp;utm_campaign=Badge_Grade) 
 
 For a **long time** I've been searching for a easy to use archive library for **C++** with **Qt** support , I came accross    
@@ -14,34 +18,6 @@ So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform he
 **QArchive can be easily integrated into your project because its just a header file! it is also non-blocking so its best   
 suited for your Qt Projects!**
 
-**Depends on:** Qt5 Core Libraries and LibArchive.
-
-# Usage
-
-**Witness it with your own eye's**   
-
-```
-#include <QCoreApplication>
-#include <QDebug>
-#include "QArchive/QArchive.hpp"
-
-int main(int argc, char** argv)
-{
-    QCoreApplication app(argc, argv);
-    QArchive::Extractor e("test.7z");
-    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
-        qDebug() << "Finished all extraction!";
-        e.quit();
-        app.quit();
-    });
-    e.start();
-    return app.exec();
-}
-
-```
-
-For more information head to QArchive Docs, [QArchive Documentation](https://antony-jr.github.io/QArchive)
-
 # Getting Started
 
 Learn more about **QArchive** at the official [QArchive Documentation](https://antony-jr.github.io/QArchive)
@@ -50,8 +26,7 @@ Learn more about **QArchive** at the official [QArchive Documentation](https://a
 
 I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
 
-* [LibArchive](https://github.com/libarchive/libarchive)
-* [AppImages](https://github.com/appImage/appimagekit)
+* [libarchive](https://github.com/libarchive/libarchive)
 * [Qt](https://github.com/qt)
 
 
