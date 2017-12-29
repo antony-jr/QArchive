@@ -43,12 +43,29 @@ have **installed it already** for you , if not then the script will **warn** you
  $ curl -L "https://git.io/vbdTI" | bash
 ```
 
+**or** you can also use python.   
+This requires **requests** to be installed , so make sure you have installed **requests** for python.
+
+```
+ $ python -c "from requests import get;exec(get('https://git.io/vbbC1').content)"
+```
+
+**Thats it!**
+
 ### Windows
 
-Sorry but **bash** is not officially supported for windows and thus you need to **clone**   
-the **entire repo**
+You need to have **python** with **requests** installed on your pc to do this but you can also clone   
+the entire repo.
+
+```
+ > python -c "from requests import get;exec(get('https://git.io/vbbC1').content)"
+```
 
 ### MacOSX
 
-I don't own a MacOSX so you should also **clone** the **entire repo** like the windows users.
+You need to have **python** with **requests** installed on your pc to do this but you can also clone  
+the entire repo.
 
+```
+ $ python -c "from requests import get;exec(get('https://git.io/vbbC1').content)"
+```
