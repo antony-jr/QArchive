@@ -37,7 +37,7 @@ Follow the instructions specific for your platform.
 
 **Just execute this command on your project folder and everything will be done for you!**   
 You must have **curl** to do this , **don't worry** because most of the linux distro's must   
-have **installed it already** for , if not then the script will **warn** you to install it!
+have **installed it already** for you , if not then the script will **warn** you to install it!
 
 ```
  $ curl -L "https://git.io/vbdTI" | bash
