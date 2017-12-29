@@ -33,7 +33,7 @@ this little header is a perfect fit for your Qt Projects.
 
 Follow the instructions specific for your platform.
 
-#### Linux
+### Linux
 
 **Just execute this command on your project folder and everything will be done for you!**   
 You must have **curl** to do this , **don't worry** because most of the linux distro's must   
