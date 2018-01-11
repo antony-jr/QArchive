@@ -33,7 +33,6 @@ int main(int argc, char** argv)
     // emitted when all extraction is finished
     QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
         qDebug() << "Finished all extraction!";
-        e.quit();
         app.quit();
     });
 
@@ -48,7 +47,6 @@ int main(int argc, char** argv)
 
     // emitted when something goes wrong
     QObject::connect(&e, &QArchive::Extractor::error, [&](short code, QString file) {
-        e.terminate();
         switch(code) {
         case QArchive::ARCHIVE_READ_ERROR:
             qDebug() << "unable to find archive :: " << file;
@@ -86,7 +84,7 @@ int main(int argc, char** argv)
 TEMPLATE = app
 TARGET = extraction
 
-QT += core
+QT += core concurrent
 LIBS += -larchive
 SOURCES += main.cpp
 HEADERS += QArchive/QArchive.hpp
@@ -97,7 +95,7 @@ HEADERS += QArchive/QArchive.hpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ../extraction.pro
+ $ qmake ..
  $ make -j4
  $ ./extraction
  $ # Make sure you have test.7z file!

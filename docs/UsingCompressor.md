@@ -39,7 +39,6 @@ int main(int argc, char** argv)
     });
     QObject::connect(&e, &QArchive::Compressor::error, [&](short code, QString file) {
         qDebug() << "error code:: " << code << " :: " << file;
-        e.terminate();
         app.quit();
     });
     /*
@@ -59,7 +58,7 @@ int main(int argc, char** argv)
 TEMPLATE = app
 TARGET = create_archive
 
-QT += core
+QT += core concurrent
 LIBS += -larchive
 SOURCES += main.cpp
 HEADERS += QArchive/QArchive.hpp
@@ -70,7 +69,7 @@ HEADERS += QArchive/QArchive.hpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ../create_archive.pro
+ $ qmake ..
  $ make -j4
  $ ./create_archive
  $ # Make sure you have files for the new archive!

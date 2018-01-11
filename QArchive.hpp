@@ -768,24 +768,24 @@ class Reader : public QObject
     Q_OBJECT
 public:
     explicit Reader(QObject *parent = NULL)
-	    : QObject(parent)
-    { 
-	return;
+        : QObject(parent)
+    {
+        return;
     }
     explicit Reader(const QString& archive)
-	    : QObject(NULL)
+        : QObject(NULL)
     {
         setArchive(archive);
-	return;
+        return;
     }
 
     void setArchive(const QString& archive)
     {
-	if(mutex.tryLock()){
-        Archive = QDir::cleanPath(archive);
-	mutex.unlock();
-	}
-    	return;
+        if(mutex.tryLock()) {
+            Archive = QDir::cleanPath(archive);
+            mutex.unlock();
+        }
+        return;
     }
 
     const QStringList& listFiles()
@@ -795,19 +795,19 @@ public:
 
     void clear()
     {
-	if(mutex.tryLock()){
-        Archive.clear();
-        Files.clear();
-	mutex.unlock();
-	}
-	return;
+        if(mutex.tryLock()) {
+            Archive.clear();
+            Files.clear();
+            mutex.unlock();
+        }
+        return;
     }
 
     ~Reader()
     {
-	if(Promise != nullptr){
-		stop();
-	}
+        if(Promise != nullptr) {
+            stop();
+        }
         return;
     }
 
@@ -847,14 +847,14 @@ private slots:
     void startReading()
     {
         if(Archive.isEmpty()) {
-	    mutex.unlock();
+            mutex.unlock();
             return;
         }
 
         QFileInfo fInfo(Archive);
         if(!fInfo.exists()) {
             mutex.unlock();
-	    emit error(ARCHIVE_READ_ERROR, Archive);
+            emit error(ARCHIVE_READ_ERROR, Archive);
             return;
         }
 
@@ -868,7 +868,7 @@ private slots:
 
         if((ret = archive_read_open_filename(arch, Archive.toStdString().c_str(), 10240))) {
             mutex.unlock();
-	    emit error(ARCHIVE_READ_ERROR, Archive);
+            emit error(ARCHIVE_READ_ERROR, Archive);
             return;
         }
         for (; !stopReader;) {
@@ -878,20 +878,20 @@ private slots:
             }
             if (ret != ARCHIVE_OK) {
                 mutex.unlock();
-		emit error(ARCHIVE_QUALITY_ERROR, Archive);
+                emit error(ARCHIVE_QUALITY_ERROR, Archive);
                 return;
             }
             Files << archive_entry_pathname(entry);
         }
         archive_read_close(arch);
         archive_read_free(arch);
-	mutex.unlock();
-	if(stopReader){
-		emit(stopped());
-		return;
-	}
+        mutex.unlock();
+        if(stopReader) {
+            emit(stopped());
+            return;
+        }
         emit archiveFiles(Archive, Files);
-	return;
+        return;
     }
 signals:
     void stopped(void);
