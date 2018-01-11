@@ -40,6 +40,7 @@
 #define QARCHIVE_HPP_INCLUDED
 
 #include <QtCore>
+#include <QtConcurrentRun>
 
 /*
  * Getting the libarchive headers for the
@@ -113,41 +114,42 @@ class Extractor  : public QObject
 
 public:
     explicit Extractor(QObject *parent = NULL)
-	    : QObject(parent)
+        : QObject(parent)
     {
     }
 
     explicit Extractor(const QString& filename)
-	    : QObject(NULL)
+        : QObject(NULL)
     {
         addArchive(filename);
     }
 
     explicit Extractor(const QStringList& filenames)
-	    : QObject(NULL)
+        : QObject(NULL)
     {
         addArchive(filenames);
     }
 
     explicit Extractor(const QString& filename, const QString& destination)
-        : QObject(NULL) , dest(cleanDestPath(destination))
+        : QObject(NULL), dest(cleanDestPath(destination))
     {
         addArchive(filename);
     }
 
     explicit Extractor(const QStringList& filenames, const QString& destination)
-        : QObject(NULL) , dest(cleanDestPath(destination))
+        : QObject(NULL), dest(cleanDestPath(destination))
     {
         addArchive(filenames);
     }
 
     void addArchive(const QString& filename)
     {
-        if(mutex.tryLock()){
-	    queue << filename;
+        if(mutex.tryLock()) {
+            queue << filename;
             queue.removeDuplicates();
-	}
-	return;
+            mutex.unlock();
+        }
+        return;
     }
 
     void addArchive(const QStringList& filenames)
@@ -156,27 +158,30 @@ public:
         /*
          * No need to extract the same archive twice!
         */
-        if(mutex.tryLock()){
+        if(mutex.tryLock()) {
             queue << filenames;
             queue.removeDuplicates();
-	}
-	return;
+            mutex.unlock();
+        }
+        return;
     }
 
     void removeArchive(const QString& filename)
     {
-        if(mutex.tryLock()){
-	     queue.removeAll(filename);
-	}
-	return;
+        if(mutex.tryLock()) {
+            queue.removeAll(filename);
+            mutex.unlock();
+        }
+        return;
     }
 
     void setDestination(const QString& destination)
     {
-	if(mutex.tryLock()){
-             dest = cleanDestPath(destination);
-	}
-    	return;
+        if(mutex.tryLock()) {
+            dest = cleanDestPath(destination);
+            mutex.unlock();
+        }
+        return;
     }
 
     ~Extractor() { }
@@ -184,13 +189,12 @@ public:
 public slots:
     void start(void)
     {
-	if(!mutex.tryLock()){
-		return;
-	}
-	mutex.lock();
-	Promise = new QFuture<void>;
-        *Promise = QtConcurrent::run(startExtraction);
-	return;
+        if(!mutex.tryLock()) {
+            return;
+        }
+        Promise = new QFuture<void>;
+        *Promise = QtConcurrent::run(this, &Extractor::startExtraction);
+        return;
     }
 
 signals:
@@ -202,7 +206,7 @@ signals:
 
 private slots:
     QString cleanDestPath(const QString& input)
-    {   
+    {
         QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
         if(ret.at(ret.count()) != QDir::separator()) {
             ret += QDir::separator();
@@ -226,7 +230,7 @@ private slots:
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
             return ARCHIVE_READ_ERROR;
         }
-        for (; !this->isInterruptionRequested();) {
+        for (;;) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
@@ -294,7 +298,7 @@ private slots:
         return ret;
     }
 
-    void startExtraction(void)
+    void startExtraction()
     {
         short error_code = NO_ARCHIVE_ERROR;
         const char *destination = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
@@ -309,7 +313,7 @@ private slots:
             }
         }
 
-        for(auto i = 0; i < queue.size() && !this->isInterruptionRequested(); ++i) {
+        for(auto i = 0; i < queue.size(); ++i) {
             emit extracting(queue.at(i));
             if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
                 emit error(error_code, queue.at(i));
@@ -318,9 +322,9 @@ private slots:
             }
             emit extracted(queue.at(i));
         }
+        mutex.unlock();
         queue.clear();
         emit finished();
-	mutex.unlock();
         return;
     }
 
