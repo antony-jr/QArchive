@@ -790,11 +790,7 @@ public:
 
     const QStringList& listFiles()
     {
-	if(mutex.tryLock()){
-		mutex.unlock();
-		return Files;
-	}
-        return QStringList();
+        return Files;
     }
 
     void clear()
