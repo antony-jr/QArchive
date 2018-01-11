@@ -116,30 +116,35 @@ public:
     explicit Extractor(QObject *parent = NULL)
         : QObject(parent)
     {
+        return;
     }
 
     explicit Extractor(const QString& filename)
         : QObject(NULL)
     {
         addArchive(filename);
+        return;
     }
 
     explicit Extractor(const QStringList& filenames)
         : QObject(NULL)
     {
         addArchive(filenames);
+        return;
     }
 
     explicit Extractor(const QString& filename, const QString& destination)
         : QObject(NULL), dest(cleanDestPath(destination))
     {
         addArchive(filename);
+        return;
     }
 
     explicit Extractor(const QStringList& filenames, const QString& destination)
         : QObject(NULL), dest(cleanDestPath(destination))
     {
         addArchive(filenames);
+        return;
     }
 
     void addArchive(const QString& filename)
@@ -904,7 +909,7 @@ private:
     QMutex mutex;
     QString Archive;
     QStringList Files;
-    QFuture<void> *Promise;
+    QFuture<void> *Promise = nullptr;
 }; // Class Reader Ends
 
 } // QArchive Namespace Ends.
