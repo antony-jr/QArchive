@@ -107,41 +107,47 @@ enum {
  *	void error(short , const QString&) - emitted when something goes wrong!
  *
 */
-class Extractor  : public QThread
+class Extractor  : public QObject
 {
     Q_OBJECT
 
 public:
     explicit Extractor(QObject *parent = NULL)
+	    : QObject(parent)
     {
     }
 
     explicit Extractor(const QString& filename)
+	    : QObject(NULL)
     {
         addArchive(filename);
     }
 
     explicit Extractor(const QStringList& filenames)
+	    : QObject(NULL)
     {
         addArchive(filenames);
     }
 
     explicit Extractor(const QString& filename, const QString& destination)
-        : dest(cleanDestPath(destination))
+        : QObject(NULL) , dest(cleanDestPath(destination))
     {
         addArchive(filename);
     }
 
     explicit Extractor(const QStringList& filenames, const QString& destination)
-        : dest(cleanDestPath(destination))
+        : QObject(NULL) , dest(cleanDestPath(destination))
     {
         addArchive(filenames);
     }
 
     void addArchive(const QString& filename)
     {
-        queue << filename;
-        queue.removeDuplicates();
+        if(mutex.tryLock()){
+	    queue << filename;
+            queue.removeDuplicates();
+	}
+	return;
     }
 
     void addArchive(const QStringList& filenames)
@@ -150,50 +156,42 @@ public:
         /*
          * No need to extract the same archive twice!
         */
-        queue << filenames;
-        queue.removeDuplicates();
+        if(mutex.tryLock()){
+            queue << filenames;
+            queue.removeDuplicates();
+	}
+	return;
     }
 
     void removeArchive(const QString& filename)
     {
-        queue.removeAll(filename);
+        if(mutex.tryLock()){
+	     queue.removeAll(filename);
+	}
+	return;
     }
 
     void setDestination(const QString& destination)
     {
-        dest = cleanDestPath(destination);
-    }
-
-    void run() override
-    {
-        short error_code = NO_ARCHIVE_ERROR;
-        const char *destination = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
-
-        if(destination != NULL) {
-            /*
-             * Check if the directory exist!
-             */
-            if(!QDir(dest).exists()) {
-                emit error(INVALID_DEST_PATH, queue.takeFirst());
-                return;
-            }
-        }
-
-        for(auto i = 0; i < queue.size() && !this->isInterruptionRequested(); ++i) {
-            emit extracting(queue.at(i));
-            if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
-                emit error(error_code, queue.at(i));
-                queue.removeAll(queue.at(i));
-                return;
-            }
-            emit extracted(queue.at(i));
-        }
-        queue.clear();
-        emit finished();
-        return;
+	if(mutex.tryLock()){
+             dest = cleanDestPath(destination);
+	}
+    	return;
     }
 
     ~Extractor() { }
+
+public slots:
+    void start(void)
+    {
+	if(!mutex.tryLock()){
+		return;
+	}
+	mutex.lock();
+	Promise = new QFuture<void>;
+        *Promise = QtConcurrent::run(startExtraction);
+	return;
+    }
 
 signals:
     void finished();
@@ -201,12 +199,10 @@ signals:
     void extracting(const QString&);
     void status(const QString&, const QString&);
     void error(short, const QString&);
-private:
-    QStringList queue;
-    QString	dest;
 
+private slots:
     QString cleanDestPath(const QString& input)
-    {
+    {   
         QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
         if(ret.at(ret.count()) != QDir::separator()) {
             ret += QDir::separator();
@@ -298,6 +294,41 @@ private:
         return ret;
     }
 
+    void startExtraction(void)
+    {
+        short error_code = NO_ARCHIVE_ERROR;
+        const char *destination = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
+
+        if(destination != NULL) {
+            /*
+             * Check if the directory exist!
+             */
+            if(!QDir(dest).exists()) {
+                emit error(INVALID_DEST_PATH, queue.takeFirst());
+                return;
+            }
+        }
+
+        for(auto i = 0; i < queue.size() && !this->isInterruptionRequested(); ++i) {
+            emit extracting(queue.at(i));
+            if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
+                emit error(error_code, queue.at(i));
+                queue.removeAll(queue.at(i));
+                return;
+            }
+            emit extracted(queue.at(i));
+        }
+        queue.clear();
+        emit finished();
+	mutex.unlock();
+        return;
+    }
+
+private:
+    QMutex mutex; // thread-safe!
+    QStringList queue;
+    QString	dest;
+    QFuture<void> *Promise; // Promise suits this good than future!
 }; // Extractor Class Ends
 
 /*
