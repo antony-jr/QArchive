@@ -76,7 +76,7 @@ enum {
 
 
 /*
- * Class Extractor <- Inherits QThread
+ * Class Extractor <- Inherits QObject.
  * ---------------
  *
  *  Takes care of extraction of archives with the help
@@ -97,9 +97,8 @@ enum {
  *					the QString.
  *
  *  Slots:
- *	void start(void)	      - starts the extractor. (Inherited from QThread)
- *	refer QtDocs for stoping a QThread Properly , for most cases use quit() and wait()
- *
+ *	void start(void)	      - starts the extractor.
+ *	void stop(void)		      - stops the extractor.
  *  Signals:
  *	void finished()		        - emitted when all extraction job is done.
  *	void extracting(const QString&) - emitted with the filename beign extracted.
@@ -184,9 +183,19 @@ public:
         return;
     }
 
-    ~Extractor() { }
+    ~Extractor()
+    {
+	if(Promise != nullptr){
+		stop();
+	}
+	return;
+    }
 
 public slots:
+    bool isRunning() const {
+	    return Promise->isRunning();
+    }
+
     void start(void)
     {
         if(!mutex.tryLock()) {
@@ -197,7 +206,23 @@ public slots:
         return;
     }
 
+    void stop(void)
+    {
+	/*
+	 * If mutex is not locked then that means 
+	 * there is no start called or the operation is 
+	 * finished , so doing stop is useless.
+	 */
+        if(mutex.tryLock()){
+		mutex.unlock();
+		return;
+	}
+	stopExtraction = true;
+	return;
+    }
+
 signals:
+    void stopped();
     void finished();
     void extracted(const QString&);
     void extracting(const QString&);
@@ -230,7 +255,7 @@ private slots:
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
             return ARCHIVE_READ_ERROR;
         }
-        for (;;) {
+        for (;!stopExtraction;) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
@@ -274,7 +299,7 @@ private slots:
 #else
         off_t offset;
 #endif
-        for (int ret = 0;;) {
+        for (int ret = 0; !stopExtraction;) {
             ret = archive_read_data_block(arch, &buff, &size, &offset);
             if (ret == ARCHIVE_EOF)
                 return (ARCHIVE_OK);
@@ -309,30 +334,39 @@ private slots:
              */
             if(!QDir(dest).exists()) {
                 emit error(INVALID_DEST_PATH, queue.takeFirst());
+		mutex.unlock();
                 return;
             }
         }
 
-        for(auto i = 0; i < queue.size(); ++i) {
+        for(auto i = 0; i < queue.size() && !stopExtraction; ++i) {
             emit extracting(queue.at(i));
             if( (error_code = extract(queue.at(i).toStdString().c_str(), destination)) ) {
                 emit error(error_code, queue.at(i));
                 queue.removeAll(queue.at(i));
-                return;
+                mutex.unlock();
+		return;
             }
-            emit extracted(queue.at(i));
+	    if(!stopExtraction){
+            	emit extracted(queue.at(i));
+	    }
         }
         mutex.unlock();
         queue.clear();
+	if(stopExtraction){
+		emit(stopped());
+		return;
+	}
         emit finished();
         return;
     }
 
 private:
+    bool stopExtraction = false; // stop flag!
     QMutex mutex; // thread-safe!
     QStringList queue;
     QString	dest;
-    QFuture<void> *Promise; // Promise suits this good than future!
+    QFuture<void> *Promise = nullptr; // Promise suits this good than future!
 }; // Extractor Class Ends
 
 /*

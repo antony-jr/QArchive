@@ -19,8 +19,7 @@ int main(int argc, char** argv)
     // emitted when all extraction is finished
     QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
         qDebug() << "Finished all extraction!";
-        e.quit();
-        app.quit();
+	app.quit();
     });
 
     QObject::connect(&e, &QArchive::Extractor::extracting, [&](QString file) {
@@ -32,9 +31,14 @@ int main(int argc, char** argv)
         qDebug() << "Extracted:: " << file;
     });
 
+    QObject::connect(&e, &QArchive::Extractor::stopped,
+    [&](){
+    	qDebug() << "Stopped Successfully!";
+	app.quit();
+    });
+
     // emitted when something goes wrong
     QObject::connect(&e, &QArchive::Extractor::error, [&](short code, QString file) {
-        e.terminate();
         switch(code) {
         case QArchive::ARCHIVE_READ_ERROR:
             qDebug() << "unable to find archive :: " << file;
@@ -50,7 +54,6 @@ int main(int argc, char** argv)
             break;
         default:
             qDebug() << "unknown error. :: " << file;
-            e.wait();
 	    app.quit();
             break;
         }
@@ -63,8 +66,8 @@ int main(int argc, char** argv)
 
     QTimer::singleShot(1000 , &app , 
     [&](){ 
-	qDebug() << "Interruption Request!";
-	e.requestInterruption();
+	qDebug() << "Stopping extraction";
+    	e.stop();
     });
     qDebug() << "Its Non-Blocking!";
 
