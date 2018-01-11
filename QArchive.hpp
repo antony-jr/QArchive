@@ -185,15 +185,16 @@ public:
 
     ~Extractor()
     {
-	if(Promise != nullptr){
-		stop();
-	}
-	return;
+        if(Promise != nullptr) {
+            stop();
+        }
+        return;
     }
 
 public slots:
-    bool isRunning() const {
-	    return Promise->isRunning();
+    bool isRunning() const
+    {
+        return Promise->isRunning();
     }
 
     void start(void)
@@ -208,17 +209,17 @@ public slots:
 
     void stop(void)
     {
-	/*
-	 * If mutex is not locked then that means 
-	 * there is no start called or the operation is 
-	 * finished , so doing stop is useless.
-	 */
-        if(mutex.tryLock()){
-		mutex.unlock();
-		return;
-	}
-	stopExtraction = true;
-	return;
+        /*
+         * If mutex is not locked then that means
+         * there is no start called or the operation is
+         * finished , so doing stop is useless.
+         */
+        if(mutex.tryLock() && !Promise->isRunning()) {
+            mutex.unlock();
+            return;
+        }
+        stopExtraction = true;
+        return;
     }
 
 signals:
@@ -255,7 +256,7 @@ private slots:
         if((ret = archive_read_open_filename(arch, filename, 10240))) {
             return ARCHIVE_READ_ERROR;
         }
-        for (;!stopExtraction;) {
+        for (; !stopExtraction;) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
@@ -334,7 +335,7 @@ private slots:
              */
             if(!QDir(dest).exists()) {
                 emit error(INVALID_DEST_PATH, queue.takeFirst());
-		mutex.unlock();
+                mutex.unlock();
                 return;
             }
         }
@@ -345,18 +346,18 @@ private slots:
                 emit error(error_code, queue.at(i));
                 queue.removeAll(queue.at(i));
                 mutex.unlock();
-		return;
+                return;
             }
-	    if(!stopExtraction){
-            	emit extracted(queue.at(i));
-	    }
+            if(!stopExtraction) {
+                emit extracted(queue.at(i));
+            }
         }
         mutex.unlock();
         queue.clear();
-	if(stopExtraction){
-		emit(stopped());
-		return;
-	}
+        if(stopExtraction) {
+            emit(stopped());
+            return;
+        }
         emit finished();
         return;
     }
@@ -425,51 +426,51 @@ class Compressor : public QObject
     Q_OBJECT
 public:
     explicit Compressor(QObject *parent = NULL)
-	    : QObject(parent)
+        : QObject(parent)
     {
-	return;
+        return;
     }
 
     explicit Compressor(const QString& archive)
-	    : QObject(NULL)
+        : QObject(NULL)
     {
         setArchive(archive);
-	return;
+        return;
     }
 
     explicit Compressor(const QString& archive, const QStringList& files)
-    	    : QObject(NULL)
+        : QObject(NULL)
     {
         setArchive(archive);
         addFiles(files);
-	return;
+        return;
 
     }
 
     explicit Compressor(const QString& archive, const QString& file)
-    	    : QObject(NULL)
+        : QObject(NULL)
     {
         setArchive(archive);;
         addFiles(file);
-	return;
+        return;
     }
 
     void setArchive(const QString& archive)
     {
-	if(mutex.tryLock()){
-        archivePath = QDir::cleanPath(archive);
-	mutex.unlock();
-	}
-	return;
+        if(mutex.tryLock()) {
+            archivePath = QDir::cleanPath(archive);
+            mutex.unlock();
+        }
+        return;
     }
 
     void setArchiveFormat(short type)
     {
-	if(mutex.tryLock()){
-        archiveFormat = type;
-	mutex.unlock();
-	}
-	return;
+        if(mutex.tryLock()) {
+            archiveFormat = type;
+            mutex.unlock();
+        }
+        return;
     }
 
     void addFiles(const QString& file)
@@ -477,59 +478,97 @@ public:
         /*
          * No like files can exist in a filesystem!
         */
-	if(mutex.tryLock()){
-        nodes << file;
-        nodes.removeDuplicates();
-	mutex.unlock();
-	}
-	return;
+        if(mutex.tryLock()) {
+            nodes << file;
+            nodes.removeDuplicates();
+            mutex.unlock();
+        }
+        return;
     }
 
     void addFiles(const QStringList& files)
     {
-	if(mutex.tryLock()){
-        nodes << files;
-        nodes.removeDuplicates();
-	mutex.unlock();
-	}
-	return;
+        if(mutex.tryLock()) {
+            nodes << files;
+            nodes.removeDuplicates();
+            mutex.unlock();
+        }
+        return;
     }
 
     void removeFiles(const QString& file)
     {
-	if(mutex.tryLock()){
-        if(!nodes.isEmpty()) {
-            nodes.removeAll(file);
+        if(mutex.tryLock()) {
+            if(!nodes.isEmpty()) {
+                nodes.removeAll(file);
+            }
+            mutex.unlock();
         }
-	mutex.unlock();
-	}
-	return;
+        return;
     }
 
     void removeFiles(const QStringList& files)
     {
-	if(mutex.tryLock()){
-        if(!nodes.isEmpty()) {
-            for(QStringListIterator filesIt(files); filesIt.hasNext();) {
-                removeFiles(filesIt.next());
+        if(mutex.tryLock()) {
+            if(!nodes.isEmpty()) {
+                for(QStringListIterator filesIt(files); filesIt.hasNext();) {
+                    removeFiles(filesIt.next());
+                }
             }
+            mutex.unlock();
         }
-	mutex.unlock();
-	}
-	return;
+        return;
     }
 
-    ~Compressor() { }
+    ~Compressor()
+    {
+        if(Promise != nullptr) {
+            stop(); // Just in case.
+        }
+        return;
+    }
 
 public slots:
 
+    bool isRunning() const
+    {
+        return Promise->isRunning();
+    }
+
+    void start(void)
+    {
+        if(!mutex.tryLock()) {
+            return;
+        }
+        Promise = new QFuture<void>;
+        *Promise = QtConcurrent::run(this, &Compressor::startCompression);
+        return;
+    }
+
+    void stop(void)
+    {
+        /*
+         * If mutex is not locked then that means
+         * there is no start called or the operation is
+         * finished , so doing stop is useless.
+         */
+        if(mutex.tryLock() && !Promise->isRunning()) {
+            mutex.unlock();
+            return;
+        }
+        stopCompression = true;
+        return;
+    }
+
+
+
 private slots:
-    
+
     /*
      * Checks if the files are valid , use only on runtime!
     */
     void checkNodes()
-    {e
+    {
         for(QStringListIterator nodeIt(nodes); nodeIt.hasNext();) {
             QString currentNode(nodeIt.next());
             QFileInfo fInfo(currentNode);
@@ -573,6 +612,7 @@ private slots:
         checkNodes(); // clear unwanted files
         qDebug() << nodes;
         if(nodes.isEmpty() || archivePath.isEmpty()) {
+            mutex.unlock();
             return;
         }
         if(archiveFormat == NO_FORMAT) {
@@ -617,7 +657,7 @@ private slots:
         archive_write_open_filename(a, archivePath.toStdString().c_str());
 
         QStringListIterator nodeIt(nodes);
-        while (nodeIt.hasNext() && !this->isInterruptionRequested()) {
+        while (nodeIt.hasNext() && !stopCompression) {
             struct archive *disk = archive_read_disk_new();
             archive_read_disk_set_standard_lookup(disk);
             QString currentNode = nodeIt.next();
@@ -628,16 +668,18 @@ private slots:
             r = archive_read_disk_open(disk, currentNode.toStdString().c_str());
             if (r != ARCHIVE_OK) {
                 emit error(DISK_OPEN_ERROR, currentNode);
+                mutex.unlock();
                 return;
             }
 
-            for (; !this->isInterruptionRequested();) {
+            for (; !stopCompression;) {
                 entry = archive_entry_new();
                 r = archive_read_next_header2(disk, entry);
                 if (r == ARCHIVE_EOF)
                     break;
                 if (r != ARCHIVE_OK) {
                     emit error(DISK_READ_ERROR, currentNode);
+                    mutex.unlock();
                     return;
                 }
                 archive_read_disk_descend(disk);
@@ -645,6 +687,7 @@ private slots:
 
                 if (r == ARCHIVE_FATAL) {
                     emit error(ARCHIVE_FATAL_ERROR, currentNode);
+                    mutex.unlock();
                     return;
                 }
                 if (r > ARCHIVE_FAILED) {
@@ -652,7 +695,7 @@ private slots:
                      * into the target archive. */
                     fd = open(archive_entry_sourcepath(entry), O_RDONLY);
                     len = read(fd, buff, sizeof(buff));
-                    while (len > 0) {
+                    while (len > 0 && !stopCompression) {
                         archive_write_data(a, buff, len);
                         len = read(fd, buff, sizeof(buff));
                     }
@@ -662,14 +705,23 @@ private slots:
             }
             archive_read_close(disk);
             archive_read_free(disk);
-            emit compressed(currentNode);
+            if(!stopCompression) {
+                emit compressed(currentNode);
+            }
         }
         archive_write_close(a);
         archive_write_free(a);
+        if(stopCompression) {
+            mutex.unlock();
+            emit(stopped());
+            return;
+        }
         nodes.clear();
-        emit finished(); 
+        mutex.unlock();
+        emit finished();
+        return;
     }
-    
+
 signals:
     void stopped();
     void finished();
@@ -679,6 +731,7 @@ signals:
 private:
     bool stopCompression = false;
     QMutex mutex;
+    QFuture<void> *Promise = nullptr;
     QString archivePath;
     QStringList nodes;
     short archiveFormat = NO_FORMAT; // Default
