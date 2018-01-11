@@ -20,18 +20,16 @@ sidebar_label: QArchive::Compressor
 
 ### Slots
 
-All slots used by you are **inherited** from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
-
 |               |             |
 |---------------|-------------|
 | **void**  	| start(void) |
-| **void**      | quit(void)  |
-| **void**      | wait(void)  |
+| **void**      | stop(void)  |
 
 ### Signals
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
+| **void**	      | stopped(void)								        |
 | **void**            | finished(void)                        	                                        |
 | **void**    	      | compressing(const QString& file)                                                |
 | **void**    	      | compressed(const QString& file)                                       	        |
@@ -74,12 +72,17 @@ Sets the format of the archive which is going to be created. refer the **[suppor
 #### void start(void)
 This member function is a **[SLOT]**
 
-Starts the compression of all files in the archive. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**.
+Starts the compression of all files in the archive.
 
-#### void quit(void)
+#### void stop(void)
 This member function is a **[SLOT]**
 
-Quits the compressor thread. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
+Stops the compressor. **void stopped(void)** signal will be emitted if this slot is successfull.
+
+#### void stopped(void)
+This member function is a **[SIGNAL]**
+
+Emitted when **void stop(void)** is successfull.
 
 #### void finished(void)
 This member function is a **[SIGNAL]** 

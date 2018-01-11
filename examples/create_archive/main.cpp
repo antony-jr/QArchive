@@ -26,7 +26,6 @@ int main(int argc, char** argv)
     });
     QObject::connect(&e, &QArchive::Compressor::error, [&](short code, QString file) {
         qDebug() << "error code:: " << code << " :: " << file;
-        e.terminate();
         app.quit();
     });
     /*

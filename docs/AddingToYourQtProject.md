@@ -7,10 +7,10 @@ sidebar_label: Adding QArchive to Your Qt Project
 |	    |				       |		
 |-----------|----------------------------------|
 |  Header:  | #include "QArchive/QArchive.hpp" |
-|   qmake:  | QT += core		       |
+|   qmake:  | QT += core concurrent	       |
 |   	    | LIBS += -larchive		       |
 |	    | HEADERS += QArchive/QArchive.hpp |
-|Inherits:  | [QThread](http://doc.qt.io/qt-5/qthread.html)|	
+| Inherits: | QObject			       |
 
 **QArchive** is just a header and all you have to do after installation is to add   
 it in your **.pro** file ( **Qt Project file** ).
@@ -20,7 +20,7 @@ it in your **.pro** file ( **Qt Project file** ).
 Append these **lines** to your **Qt Project file**.
 
 ```
-QT += core
+QT += core concurrent
 LIBS += -larchive
 HEADERS += QArchive/QArchive.hpp
 ```

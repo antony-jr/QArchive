@@ -16,18 +16,16 @@ sidebar_label: QArchive::Reader
 
 ### Slots
 
-All slots used by you are **inherited** from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
-
 |               |             |
 |---------------|-------------|
 | **void**  	| start(void) |
-| **void**      | quit(void)  |
-| **void**      | wait(void)  |
+| **void**      | stop(void)  |
 
 ### Signals
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
+| **void**	      | stopped(void)									|
 | **void**            | archiveFiles(const QString& archive, const QStringList& files)                  |
 | **void**  	      | error(short **[errorCode](QArchiveErrorCodes.md)** , const QString& what)	    |  
 
@@ -52,12 +50,12 @@ Clears all cached **filenames** and **archive paths**
 #### void start(void)
 This member function is a **[SLOT]**
 
-Reads all files in the archive. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**.
+Start reading all files in the archive.
 
-#### void quit(void)
+#### void stop(void)
 This member function is a **[SLOT]**
 
-Quits the Reader thread. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
+Stops the Reader. **void stopped(void)** signal is emitted when this is successfull.
 
 #### void archiveFiles(const QString& archive, const QStringList& files)
 This member function is a **[SIGNAL]**

@@ -32,7 +32,6 @@ int main(int argc, char** argv)
     QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
         qDebug() << archive << " :: ";
         qDebug() << files;
-        e.quit();
         app.quit();
     });
 
@@ -72,7 +71,7 @@ int main(int argc, char** argv)
 TEMPLATE = app
 TARGET = read_archive
 
-QT += core
+QT += core concurrent
 LIBS += -larchive
 SOURCES += main.cpp
 HEADERS += QArchive/QArchive.hpp
@@ -83,7 +82,7 @@ HEADERS += QArchive/QArchive.hpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ../read_archive.pro
+ $ qmake ..
  $ make -j4
  $ ./read_archive
  $ # Make sure you have archive file!

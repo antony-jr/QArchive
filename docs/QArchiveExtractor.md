@@ -23,18 +23,16 @@ This class runs on a seperate thread to avoid blocking by **libarchive**.
 
 ### Slots
 
-All slots used by you are **inherited** from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
-
 |               |             |
 |---------------|-------------|
 | **void**  	| start(void) |
-| **void**      | quit(void)  |
-| **void**      | wait(void)  |
+| **void**      | stop(void)  |
 
 ### Signals
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
+| **void**	      | stopped(void)								        |
 | **void**            | finished(void)                        	                                        |
 | **void**    	      | extracting(const QString& archive)                                              |
 | **void**    	      | extracted(const QString& archive)      	                                        |
@@ -84,12 +82,18 @@ Sets the destination where the archive(s) will be extracted. Default is **the pr
 #### void start(void)
 This member function is a **[SLOT]**
 
-Starts the extraction of all archives in the queue. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**.
+Starts the extraction of all archives in the queue.
 
-#### void quit(void)
+#### void stop(void)
 This member function is a **[SLOT]**
 
-Quits the extraction thread. Inherited from **[QThread](http://doc.qt.io/qt-5/qthread.html)**
+Stops the extraction of all archives in the queue. This slot is **asyc** and thus you need to wait for the
+**void stopped(void)** signal , Which confirms that the stop call was successfull.
+
+#### void stopped(void)
+This member function is a **[SIGNAL]**
+
+Emitted when **void stop(void)** is successfull , i.e When the extraction is stopped successfully.
 
 #### void finished(void)
 This member function is a **[SIGNAL]** 
