@@ -32,6 +32,7 @@ This class runs on a seperate thread to avoid blocking by **libarchive**.
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
+| **void**	      | stopped(void)								        |
 | **void**            | finished(void)                        	                                        |
 | **void**    	      | extracting(const QString& archive)                                              |
 | **void**    	      | extracted(const QString& archive)      	                                        |
@@ -86,7 +87,13 @@ Starts the extraction of all archives in the queue.
 #### void stop(void)
 This member function is a **[SLOT]**
 
-Stops the extraction of all archives in the queue.
+Stops the extraction of all archives in the queue. This slot is **asyc** and thus you need to wait for the
+**void stopped(void)** signal , Which confirms that the stop call was successfull.
+
+#### void stopped(void)
+This member function is a **[SIGNAL]**
+
+Emitted when **void stop(void)** is successfull , i.e When the extraction is stopped successfully.
 
 #### void finished(void)
 This member function is a **[SIGNAL]** 

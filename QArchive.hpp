@@ -385,7 +385,7 @@ enum {
 };
 
 /*
- * Class Compressor <- Inherits QThread.
+ * Class Compressor <- Inherits QObject.
  * ----------------
  *
  *  Compresses files and folder into a archive.
@@ -408,10 +408,11 @@ enum {
  *	void removeFiles(const QStringList&) - removes a list of files from the archive.
  *
  *  Slots:
- *	void start() - starts or resumes the compression. (Inherited from QThread)
- *	refer QtDocs for stoping a QThread Properly , for most cases use quit() and wait()
+ *	void start() - starts the compression.
+ *	void stop()  - stops the compression.
  *
  *  Signals:
+ *      void stopped() - Emitted when the process is stopped successfully.
  * 	void finished() - Emitted when all jobs are done.
  * 	void compressing(const QString&) - Emitted with the file beign compressed.
  * 	void compressed(const QString&)  - Emitted with file had been compressed.
@@ -419,40 +420,56 @@ enum {
  *
 */
 
-class Compressor : public QThread
+class Compressor : public QObject
 {
     Q_OBJECT
 public:
     explicit Compressor(QObject *parent = NULL)
+	    : QObject(parent)
     {
+	return;
     }
 
     explicit Compressor(const QString& archive)
+	    : QObject(NULL)
     {
         setArchive(archive);
+	return;
     }
 
     explicit Compressor(const QString& archive, const QStringList& files)
+    	    : QObject(NULL)
     {
         setArchive(archive);
         addFiles(files);
+	return;
 
     }
 
     explicit Compressor(const QString& archive, const QString& file)
+    	    : QObject(NULL)
     {
         setArchive(archive);;
         addFiles(file);
+	return;
     }
 
     void setArchive(const QString& archive)
     {
+	if(mutex.tryLock()){
         archivePath = QDir::cleanPath(archive);
+	mutex.unlock();
+	}
+	return;
     }
 
     void setArchiveFormat(short type)
     {
+	if(mutex.tryLock()){
         archiveFormat = type;
+	mutex.unlock();
+	}
+	return;
     }
 
     void addFiles(const QString& file)
@@ -460,33 +477,98 @@ public:
         /*
          * No like files can exist in a filesystem!
         */
+	if(mutex.tryLock()){
         nodes << file;
         nodes.removeDuplicates();
+	mutex.unlock();
+	}
+	return;
     }
 
     void addFiles(const QStringList& files)
     {
+	if(mutex.tryLock()){
         nodes << files;
         nodes.removeDuplicates();
+	mutex.unlock();
+	}
+	return;
     }
 
     void removeFiles(const QString& file)
     {
+	if(mutex.tryLock()){
         if(!nodes.isEmpty()) {
             nodes.removeAll(file);
         }
+	mutex.unlock();
+	}
+	return;
     }
 
     void removeFiles(const QStringList& files)
     {
+	if(mutex.tryLock()){
         if(!nodes.isEmpty()) {
             for(QStringListIterator filesIt(files); filesIt.hasNext();) {
                 removeFiles(filesIt.next());
             }
         }
+	mutex.unlock();
+	}
+	return;
     }
 
-    void run() override
+    ~Compressor() { }
+
+public slots:
+
+private slots:
+    
+    /*
+     * Checks if the files are valid , use only on runtime!
+    */
+    void checkNodes()
+    {e
+        for(QStringListIterator nodeIt(nodes); nodeIt.hasNext();) {
+            QString currentNode(nodeIt.next());
+            QFileInfo fInfo(currentNode);
+            if(!fInfo.exists()) {
+                nodes.removeAll(currentNode);
+                emit error(FILE_NOT_EXIST, currentNode);
+            }
+        }
+    }
+
+    /*
+     * Automatically finds the file format from archive extension
+    */
+    void getArchiveFormat()
+    {
+        QFileInfo fInfo(archivePath);
+        QString ext = fInfo.suffix();
+
+        if(ext.toLower() == "bz") {
+            archiveFormat = BZIP;
+        }
+        if(ext.toLower() == "bz2") {
+            archiveFormat = BZIP2;
+        } else if(ext.toLower() == "gz") {
+            archiveFormat = GZIP;
+        } else if(ext.toLower() == "cpio") {
+            archiveFormat = CPIO;
+        } else if(ext.toLower() == "rar") {
+            archiveFormat = RAR;
+        } else if(ext.toLower() == "zip") {
+            archiveFormat = ZIP;
+        } else if(ext.toLower() == "7z") {
+            archiveFormat = SEVEN_ZIP;
+        } else {
+            archiveFormat = NO_FORMAT; // default
+        }
+    }
+
+    void startCompression()
     {
         checkNodes(); // clear unwanted files
         qDebug() << nodes;
@@ -585,64 +667,21 @@ public:
         archive_write_close(a);
         archive_write_free(a);
         nodes.clear();
-        emit finished();
+        emit finished(); 
     }
-
-    ~Compressor() { }
-
+    
 signals:
+    void stopped();
     void finished();
     void compressing(const QString&);
     void compressed(const QString&);
     void error(short, const QString&);
-
 private:
+    bool stopCompression = false;
+    QMutex mutex;
     QString archivePath;
     QStringList nodes;
     short archiveFormat = NO_FORMAT; // Default
-
-    /*
-     * Checks if the files are valid , use only on runtime!
-    */
-    void checkNodes()
-    {
-        for(QStringListIterator nodeIt(nodes); nodeIt.hasNext();) {
-            QString currentNode(nodeIt.next());
-            QFileInfo fInfo(currentNode);
-            if(!fInfo.exists()) {
-                nodes.removeAll(currentNode);
-                emit error(FILE_NOT_EXIST, currentNode);
-            }
-        }
-    }
-
-    /*
-     * Automatically finds the file format from archive extension
-    */
-    void getArchiveFormat()
-    {
-        QFileInfo fInfo(archivePath);
-        QString ext = fInfo.suffix();
-
-        if(ext.toLower() == "bz") {
-            archiveFormat = BZIP;
-        }
-        if(ext.toLower() == "bz2") {
-            archiveFormat = BZIP2;
-        } else if(ext.toLower() == "gz") {
-            archiveFormat = GZIP;
-        } else if(ext.toLower() == "cpio") {
-            archiveFormat = CPIO;
-        } else if(ext.toLower() == "rar") {
-            archiveFormat = RAR;
-        } else if(ext.toLower() == "zip") {
-            archiveFormat = ZIP;
-        } else if(ext.toLower() == "7z") {
-            archiveFormat = SEVEN_ZIP;
-        } else {
-            archiveFormat = NO_FORMAT; // default
-        }
-    }
 }; // Compressor Class Ends
 
 /*
