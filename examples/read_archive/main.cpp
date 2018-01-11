@@ -19,7 +19,6 @@ int main(int argc, char** argv)
     QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
         qDebug() << archive << " :: ";
         qDebug() << files;
-        e.quit();
         app.quit();
     });
 

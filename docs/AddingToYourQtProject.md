@@ -7,9 +7,10 @@ sidebar_label: Adding QArchive to Your Qt Project
 |	    |				       |		
 |-----------|----------------------------------|
 |  Header:  | #include "QArchive/QArchive.hpp" |
-|   qmake:  | QT += core concurrent		       |
+|   qmake:  | QT += core concurrent	       |
 |   	    | LIBS += -larchive		       |
 |	    | HEADERS += QArchive/QArchive.hpp |
+| Inherits: | QObject			       |
 
 **QArchive** is just a header and all you have to do after installation is to add   
 it in your **.pro** file ( **Qt Project file** ).

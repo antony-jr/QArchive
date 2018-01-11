@@ -738,7 +738,7 @@ private:
 }; // Compressor Class Ends
 
 /*
- * Class Reader <- Inherits QThread.
+ * Class Reader <- Inherits QObject.
  * ------------
  *
  * Gets the list of files inside a archive.
@@ -754,42 +754,111 @@ private:
  *	const QStringList& listFiles() - get the files stored in this class.
  *
  * Slots:
- * 	start() - Starts the operation. (Inherited from QThread)
+ * 	start() - Starts the operation.
+ * 	stop()  - Stops the operation.
  *
  * Signals:
+ *      void stopped() - Emitted when stop() is successfull.
  *	void error(short , const QString&) - Emitted when something goes wrong.
  * 	void archiveFiles(const QString& , const QStringList&) - Emitted when we got all the files from the archive.
 */
 
-class Reader : public QThread
+class Reader : public QObject
 {
     Q_OBJECT
 public:
-    explicit Reader(QObject *parent = NULL) { }
+    explicit Reader(QObject *parent = NULL)
+	    : QObject(parent)
+    { 
+	return;
+    }
     explicit Reader(const QString& archive)
+	    : QObject(NULL)
     {
         setArchive(archive);
+	return;
     }
 
     void setArchive(const QString& archive)
     {
+	if(mutex.tryLock()){
         Archive = QDir::cleanPath(archive);
+	mutex.unlock();
+	}
+    	return;
     }
 
     const QStringList& listFiles()
     {
-        return Files;
+	if(mutex.tryLock()){
+		mutex.unlock();
+		return Files;
+	}
+        return QStringList();
     }
 
-    void run() override
+    void clear()
+    {
+	if(mutex.tryLock()){
+        Archive.clear();
+        Files.clear();
+	mutex.unlock();
+	}
+	return;
+    }
+
+    ~Reader()
+    {
+	if(Promise != nullptr){
+		stop();
+	}
+        return;
+    }
+
+public slots:
+    bool isRunning() const
+    {
+        return Promise->isRunning();
+    }
+
+    void start(void)
+    {
+        if(!mutex.tryLock()) {
+            return;
+        }
+        Promise = new QFuture<void>;
+        *Promise = QtConcurrent::run(this, &Reader::startReading);
+        return;
+    }
+
+    void stop(void)
+    {
+        /*
+         * If mutex is not locked then that means
+         * there is no start called or the operation is
+         * finished , so doing stop is useless.
+         */
+        if(mutex.tryLock() && !Promise->isRunning()) {
+            mutex.unlock();
+            return;
+        }
+        stopReader = true;
+        return;
+    }
+
+
+private slots:
+    void startReading()
     {
         if(Archive.isEmpty()) {
+	    mutex.unlock();
             return;
         }
 
         QFileInfo fInfo(Archive);
         if(!fInfo.exists()) {
-            emit error(ARCHIVE_READ_ERROR, Archive);
+            mutex.unlock();
+	    emit error(ARCHIVE_READ_ERROR, Archive);
             return;
         }
 
@@ -802,39 +871,43 @@ public:
         archive_read_support_filter_all(arch);
 
         if((ret = archive_read_open_filename(arch, Archive.toStdString().c_str(), 10240))) {
-            emit error(ARCHIVE_READ_ERROR, Archive);
+            mutex.unlock();
+	    emit error(ARCHIVE_READ_ERROR, Archive);
             return;
         }
-        for (; !this->isInterruptionRequested();) {
+        for (; !stopReader;) {
             ret = archive_read_next_header(arch, &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
             }
             if (ret != ARCHIVE_OK) {
-                emit error(ARCHIVE_QUALITY_ERROR, Archive);
+                mutex.unlock();
+		emit error(ARCHIVE_QUALITY_ERROR, Archive);
                 return;
             }
             Files << archive_entry_pathname(entry);
         }
         archive_read_close(arch);
         archive_read_free(arch);
+	mutex.unlock();
+	if(stopReader){
+		emit(stopped());
+		return;
+	}
         emit archiveFiles(Archive, Files);
+	return;
     }
-
-    void clear()
-    {
-        Archive.clear();
-        Files.clear();
-    }
-
-    ~Reader() { }
 signals:
+    void stopped(void);
     void archiveFiles(const QString&, const QStringList&);
     void error(short, const QString&);
 
 private:
+    bool stopReader = false;
+    QMutex mutex;
     QString Archive;
     QStringList Files;
+    QFuture<void> *Promise;
 }; // Class Reader Ends
 
 } // QArchive Namespace Ends.
