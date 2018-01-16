@@ -240,7 +240,7 @@ private slots:
     QString cleanDestPath(const QString& input)
     {
         QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
-        if(ret.at(ret.count()) != QDir::separator()) {
+        if(ret.at(ret.count() - 1) != QDir::separator()) {
             ret += QDir::separator();
         }
         return ret;
