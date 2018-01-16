@@ -333,7 +333,8 @@ private slots:
     void startExtraction()
     {
         short error_code = NO_ARCHIVE_ERROR;
-        const char *destination = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
+        std::string dest_str = dest.toStdString();
+        const char *destination = (dest.isEmpty()) ? NULL : dest_str.c_str();
 
         if(destination != NULL) {
             /*
