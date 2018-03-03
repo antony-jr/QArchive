@@ -13,19 +13,28 @@ from shutil import rmtree
 QArchive = {
         "username" : "antony-jr",
         "repo"     : "QArchive",
-        "mkdir"    : "QArchive",
+        "mkdir"    : {
+            "QArchive",
+            "QArchive/src",
+            "QArchive/include"
+        },
         "install"  : {
-            "QArchive.hpp" : "QArchive/QArchive.hpp",
+            "CMakeLists.txt"       : "QArchive/CMakeLists.txt",
+            "QArchive.pro"         : "QArchive/QArchive.pro",
+            "QArchive"             : "QArchive/QArchive",
+            "include/QArchive.hpp" : "QArchive/include/QArchive.hpp",
+            "src/QArchive.cc"      : "QArchive/src/QArchive.cc",
             "LICENSE"      : "QArchive/LICENSE"
         }
 }
 
 def installPackage(config):
     print("Installing " + config["repo"])
-    print("Creating Directory " + config["mkdir"])
-    if os.path.exists(config["mkdir"]):
-        rmtree(config["mkdir"])
-    os.mkdir(config["mkdir"]) # Make the directory!
+    for i in config["mkdir"]:
+     print("Creating Directory " + i)
+     if os.path.exists(i):
+         rmtree(i)
+     os.mkdir(i) # Make the directory!
     print("Downloading the latest release from github... ")
 
     # Write files from the repo
