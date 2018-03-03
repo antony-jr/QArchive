@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include "QArchive.hpp"
+#include <QArchive>
 
 int main(int argc, char** argv)
 {

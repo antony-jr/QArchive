@@ -1,10 +1,11 @@
 TEMPLATE = app
 TARGET = extract_to
-INCLUDEPATH += . ../../
+INCLUDEPATH += . ../../ ../../include
 DEFINES += QT_DEPRECATED_WARNINGS
 
 LIBS += -larchive
 QT   += core concurrent
 
-SOURCES += main.cpp
-HEADERS += ../../QArchive.hpp
+SOURCES += main.cpp ../../src/QArchive.cc
+HEADERS += ../../include/QArchive.hpp
+
