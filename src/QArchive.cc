@@ -30,7 +30,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * -----------------------------------------------------------------------------
- *  @filename 	 	: QArchive.cpp
+ *  @filename 	 	: QArchive.cc
  *  @description 	: C++ Cross-Platform helper library that Modernizes libarchive
  *  			  using Qt5. Simply extracts 7z  , Tarballs  , RAR
  *  			  and other supported formats by libarchive.
