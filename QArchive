@@ -1,0 +1,5 @@
+/*
+ * Proxy Header file for QArchive.
+ * -------------------------------
+*/
+#include "include/QArchive.hpp"
