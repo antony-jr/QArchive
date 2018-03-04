@@ -3,7 +3,7 @@
   <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">  <br>
 </p>
 
-> C++ Cross-Platform header :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush:. Simply extracts 7z :hamburger: , Tarballs:8ball: , RAR :briefcase:    
+> C++ Cross-Platform library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush:. Simply extracts 7z :hamburger: , Tarballs:8ball: , RAR :briefcase:    
 > and other supported formats by libarchive. :heart:    
 > --Antony Jr.
 
@@ -13,14 +13,27 @@ For a **long time** I've been searching for a easy to use archive library for **
 **libarchive** , it was super cool :heart: but it did'nt have a official **C++** binding. Some C++ Wrappers for libarchive exists    
 like **moor** but I needed something so simple as **1,2,3 and also support Qt's event loop.**    
 
-So **QArchive** is the result of the above :dog: , it is a C++ Cross-Platform header :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
+So **QArchive** is the result of the above :dog: , it is a very small C++ Cross-Platform library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
 
 **QArchive can be easily integrated into your project because its just a header file! it is also non-blocking so its best   
 suited for your Qt Projects!**
 
+# Installation
+
+**Just execute this command on your project folder and everything will be done for you!**   
+This requires **requests** to be installed , so make sure you have installed **requests** for python.
+This applies for all **platforms**.
+
+```
+ $ python -c "from requests import get;exec(get('https://git.io/vbbC1').content)"
+```
+
+**or** You can also add this project as a **git submodule**.
+
+
 # Getting Started
 
-Learn more about **QArchive** at the official [QArchive Documentation](https://antony-jr.github.io/QArchive)
+Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive)
 
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
