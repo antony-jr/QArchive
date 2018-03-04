@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "docusaurus": "^1.0.3"
+  },
+  "dependencies": {
+    "npm": "^5.7.1"
   }
 }

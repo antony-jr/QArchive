@@ -13,7 +13,7 @@ This simple example compresses a set of files and thus creates an archive!
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include "QArchive/QArchive.hpp"
+#include <QArchive>
 
 int main(int argc, char** argv)
 {
@@ -59,9 +59,12 @@ TEMPLATE = app
 TARGET = create_archive
 
 QT += core concurrent
-LIBS += -larchive
 SOURCES += main.cpp
-HEADERS += QArchive/QArchive.hpp
+LIBS += -larchive
+HEADERS += QArchive/include/QArchive.hpp
+SOURCES += QArchive/src/QArchive.cc
+INCLUDEPATH += QArchive/include \
+	       QArchive
 ```
 
 ## Compilation and Execution
