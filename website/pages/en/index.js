@@ -117,11 +117,11 @@ class Index extends React.Component {
                 },
 		{
                   content: 'QArchive does not like leaving heavy traces for the users and thus '+
-                           'it is packed with all its amazing features in a single C++ header file , this ' +
+                           'it is packed with all its amazing features in a very small C++ library , this ' +
                            'makes QArchive easier to integrate with your project.',
-                  image: siteConfig.baseUrl + 'img/header.png',
+                  image: siteConfig.baseUrl + 'img/light.png',
                   imageAlign: 'top',
-                  title: 'Header only library!',
+                  title: 'Light Weight!',
                 },
 		{
                   content: 'This project is rated by <b>Codacy</b> with a <b>A Project Certification</b>' +
@@ -147,8 +147,8 @@ class Index extends React.Component {
 		    'Some C++ Wrappers for libarchive exists like moor but I needed something so simple as 1,2,3 and'+
 		    ' also support Qt\'s event loop.'+
 		    ''+
-		    'So QArchive is the result of the above , it is a C++ Cross-Platform header that Modernizes libarchive'+
-		    'using Qt5. Simply extracts 7z , Tarballs , RAR and other supported formats by libarchive.',
+		    'So QArchive is the result of the above , it is a very small C++ Cross-Platform library that Modernizes libarchive '+
+		    'using Qt5. Simply extracts 7z , Tarballs , RAR and other supported formats by libarchive. ',
                   title: 'Why Create QArchive ?',
                 },
               ]}

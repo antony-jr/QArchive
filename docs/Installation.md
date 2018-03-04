@@ -36,14 +36,6 @@ Follow the instructions specific for your platform.
 ### Linux
 
 **Just execute this command on your project folder and everything will be done for you!**   
-You must have **curl** to do this , **don't worry** because most of the linux distro's must   
-have **installed it already** for you , if not then the script will **warn** you to install it!
-
-```
- $ curl -L "https://git.io/vbdTI" | bash
-```
-
-**or** you can also use python.   
 This requires **requests** to be installed , so make sure you have installed **requests** for python.
 
 ```
