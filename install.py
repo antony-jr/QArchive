@@ -14,7 +14,6 @@ QArchive = {
         "username" : "antony-jr",
         "repo"     : "QArchive",
         "mkdir"    : {
-            "QArchive",
             "QArchive/src",
             "QArchive/include"
         },
@@ -30,6 +29,17 @@ QArchive = {
 
 def installPackage(config):
     print("Installing " + config["repo"])
+    # Make parent directory first.
+    if os.path.isfile(config["repo"]):
+        print("Deleting duplicate file(s)... ")
+        os.remove(config["repo"])
+        os.mkdir(config["repo"])
+    else:
+     if os.path.exists("QArchive"):
+         rmtree("QArchive")
+     else:
+         os.mkdir("QArchive")
+
     for i in config["mkdir"]:
      print("Creating Directory " + i)
      if os.path.exists(i):
@@ -45,8 +55,7 @@ def installPackage(config):
             fp.write(it)
         fp.close()
 
-    print("Thank you for choosing "+config["repo"])
-    print("Successfully Installed "+config["repo"] + "!")
+    print("Installed "+config["repo"]+".")
     return True
 
 if __name__ == "__main__":
