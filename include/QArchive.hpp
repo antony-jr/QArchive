@@ -52,9 +52,22 @@ extern "C" {
 #include <archive.h>
 #include <archive_entry.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 }
+
+/*
+ * To fix build errors on vs.
+ * --------------------------
+ *  Fixed by https://github.com/hcaihao
+*/
+#if defined(_MSC_VER)
+#include <io.h>
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+// ------
 
 namespace QArchive   // QArchive Namespace Start
 {
