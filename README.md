@@ -18,6 +18,13 @@ So **QArchive** is the result of the above :dog: , it is a very small C++ Cross-
 **QArchive can be easily integrated into your project because its just a header and a source file! it is also non-blocking   
 so its best suited for your Qt Projects!**
 
+**Witness QArchive with your own eyes!**   
+
+<p align="center">
+  <img src=".img/code.png" alt="QArchive Poster"><br>
+</p>
+
+
 # Installation
 
 **Just execute this command on your project folder and everything will be done for you!**   
