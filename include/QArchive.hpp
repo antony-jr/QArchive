@@ -119,16 +119,23 @@ enum {
  *	    void error(short , const QString&) - emitted when something goes wrong!
  *
 */
+
+/*
+ * I did not implement a copy constructor or
+ * a asignment operator since QObject and its
+ * desendents cannot be copied.
+*/
+
 class Extractor  : public QObject
 {
     Q_OBJECT
-
 public:
     explicit Extractor(QObject *parent = nullptr);
     explicit Extractor(const QString& filename);
     explicit Extractor(const QStringList& filenames);
     explicit Extractor(const QString& filename, const QString& destination);
     explicit Extractor(const QStringList& filenames, const QString& destination);
+    void swap(Extractor&);
     void addArchive(const QString& filename);
     void addArchive(const QStringList& filenames);
     void removeArchive(const QString& filename);

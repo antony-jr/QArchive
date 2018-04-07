@@ -11,7 +11,6 @@ int main(int argc, char** argv)
     */
     QArchive::Extractor e("test.7z");
 
-
     /*
      * 2.Connect Callbacks
     */

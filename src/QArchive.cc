@@ -59,6 +59,7 @@ static void deleteArchiveWriter(struct archive *aw)
 
 // ---
 
+
 /*
  * QArchive::Extractor.
  * -----------------------
@@ -149,7 +150,7 @@ void QArchive::Extractor::removeArchive(const QString& filename)
     return;
 }
 
-void QArchive::Extractor::setDestination(const QString& destination)
+void QArchive::Extractor::setDefaultDestination(const QString& destination)
 {
     if(mutex.tryLock()) {
         dest = cleanDestPath(destination);
@@ -383,6 +384,8 @@ QArchive::Compressor::~Compressor()
 }
 
 /* ------ */
+
+
 
 /*
  * Public Methods.
