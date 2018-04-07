@@ -4,8 +4,8 @@ title: Installing QArchive to your Project.
 sidebar_label: Installation
 ---
 
-**QArchive** is a small header writen in C++ using Qt5 Framework and **libarchive**. This   
-little header helps you to **extract , compress and read** archives supported by **bsdtar** or   
+**QArchive** is a small library writen in C++ using Qt5 Framework and **libarchive**. This   
+little library helps you to **extract , compress and read** archives supported by **bsdtar** or   
 **libarchive**
 
 **QArchive** also supports the **Qt** event loop and does not block your main thread and thus   

@@ -48,8 +48,10 @@ INCLUDEPATH += QArchive \
 ```
 TEMPLATE = app
 TARGET = ../MyCoolApplication
-QT += core concurrent gui # Everything else you need.
-LIBS += -larchive -l../libs/QArchive/libQArchive.a # you can also use .so , its auto-generated.
+QT += core concurrent # You need these for QArchive.
+QT += gui # Modules thats needed by your app.
+# Always include libs in this order , dont change.
+LIBS += ../libs/QArchive/libQArchive.a -larchive 
 INCLUDEPATH += . .. ../libs/QArchive \
                ../libs/QArchive/include
 SOURCES += main.cpp mainwindow.cpp # All your source files.
