@@ -99,7 +99,7 @@ Since **QArchive** is a simple library you can also directly use it.
 
 |	    |				               |		
 |-----------|------------------------------------------|
-|  Header:  | #include <QArchive>	               |
+|  Header:  | #include < QArchive >	               |
 |   qmake:  | QT += core concurrent	       	       |
 |   	    | LIBS += -larchive		               |
 |	    | HEADERS += QArchive/include/QArchive.hpp |
