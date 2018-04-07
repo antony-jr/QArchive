@@ -40,6 +40,26 @@
 #include "../include/QArchive.hpp"
 
 /*
+ * Destructors for struct archive.
+ * Which is Handled by smart pointers.
+*/
+static void deleteArchiveReader(struct archive *ar)
+{
+     archive_read_close(ar);
+     archive_read_free(ar);
+     return;
+}
+
+static void deleteArchiveWriter(struct archive *aw)
+{
+    archive_write_close(aw);
+    archive_write_free(aw);
+    return;
+}
+
+// ---
+
+/*
  * QArchive::Extractor.
  * -----------------------
  *  Extractor Class Source.
@@ -166,6 +186,8 @@ void QArchive::Extractor::stop(void)
      * If mutex is not locked then that means
      * there is no start called or the operation is
      * finished , so doing stop is useless.
+     * Even if mutex is aquired by other calls,
+     * stop is useless anyway.
      */
     if(mutex.tryLock() && !Promise->isRunning()) {
         mutex.unlock();
@@ -183,6 +205,7 @@ void QArchive::Extractor::stop(void)
  *  QArchive::Extractor
  *  Internals for the extractor.
 */
+
 QString QArchive::Extractor::cleanDestPath(const QString& input)
 {
     QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
@@ -195,21 +218,19 @@ QString QArchive::Extractor::cleanDestPath(const QString& input)
 int QArchive::Extractor::extract(const char* filename, const char* dest)
 {
 
-    struct archive *arch,*ext;
-    struct archive_entry *entry;
     int ret = 0;
 
-    arch = archive_read_new();
-    ext = archive_write_disk_new();
-    archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
-    archive_read_support_format_all(arch);
-    archive_read_support_filter_all(arch);
+    arch = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
+    ext = QSharedPointer<struct archive>(archive_write_disk_new(), deleteArchiveWriter);
+    archive_write_disk_set_options(ext.data(), ARCHIVE_EXTRACT_TIME);
+    archive_read_support_format_all(arch.data());
+    archive_read_support_filter_all(arch.data());
 
-    if((ret = archive_read_open_filename(arch, filename, 10240))) {
+    if((ret = archive_read_open_filename(arch.data(), filename, 10240))) {
         return ARCHIVE_READ_ERROR;
     }
     for (; !stopExtraction;) {
-        ret = archive_read_next_header(arch, &entry);
+        ret = archive_read_next_header(arch.data(), &entry);
         if (ret == ARCHIVE_EOF) {
             break;
         }
@@ -226,42 +247,37 @@ int QArchive::Extractor::extract(const char* filename, const char* dest)
             emit status(QString(filename), QString(archive_entry_pathname(entry)));
         }
 
-        ret = archive_write_header(ext, entry);
+        ret = archive_write_header(ext.data(), entry);
         if (ret == ARCHIVE_OK) {
-            copy_data(arch, ext);
-            ret = archive_write_finish_entry(ext);
+            {
+                const void *buff;
+                size_t size;
+#if ARCHIVE_VERSION_NUMBER >= 3000000
+                int64_t offset;
+#else
+                off_t offset;
+#endif
+                for (ret = 0; !stopExtraction;) {
+                    ret = archive_read_data_block(arch.data(), &buff, &size, &offset);
+                    if (ret == ARCHIVE_EOF){
+                        break;
+                    }else 
+                    if (ret != ARCHIVE_OK){
+                        break;
+                    }else{
+                     ret = archive_write_data_block(ext.data(), buff, size, offset);
+                     if (ret != ARCHIVE_OK) {
+                         break;
+                     }
+                    }
+                }
+            }
+            ret = archive_write_finish_entry(ext.data());
             if (ret != ARCHIVE_OK) {
                 return ARCHIVE_UNCAUGHT_ERROR;
             }
         }
 
-    }
-    archive_read_close(arch);
-    archive_read_free(arch);
-    archive_write_close(ext);
-    archive_write_free(ext);
-    return NO_ARCHIVE_ERROR;
-}
-
-int QArchive::Extractor::copy_data(struct archive *arch, struct archive *ext)
-{
-    const void *buff;
-    size_t size;
-#if ARCHIVE_VERSION_NUMBER >= 3000000
-    int64_t offset;
-#else
-    off_t offset;
-#endif
-    for (int ret = 0; !stopExtraction;) {
-        ret = archive_read_data_block(arch, &buff, &size, &offset);
-        if (ret == ARCHIVE_EOF)
-            return (ARCHIVE_OK);
-        if (ret != ARCHIVE_OK)
-            return (ret);
-        ret = archive_write_data_block(ext, buff, size, offset);
-        if (ret != ARCHIVE_OK) {
-            return (ret);
-        }
     }
     return NO_ARCHIVE_ERROR;
 }

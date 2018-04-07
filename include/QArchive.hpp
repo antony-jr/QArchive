@@ -87,7 +87,6 @@ enum {
     FILE_NOT_EXIST
 };
 
-
 /*
  * Class Extractor <- Inherits QObject.
  * ---------------
@@ -104,20 +103,20 @@ enum {
  *  				  order.
  *
  *  Methods:
- *	void addArchive(const QString&)     - Add a archive to the queue.
- *	void addArchive(const QStringList&) - Add a set of archives to the queue
- *	void removeArchive(const QString&)  - Removes a archive from the queue matching
+ *	    void addArchive(const QString&)     - Add a archive to the queue.
+ *	    void addArchive(const QStringList&) - Add a set of archives to the queue
+ *	    void removeArchive(const QString&)  - Removes a archive from the queue matching
  *					the QString.
  *
  *  Slots:
- *	void start(void)	      - starts the extractor.
- *	void stop(void)		      - stops the extractor.
+ *	    void start(void)	      - starts the extractor.
+ *	    void stop(void)		      - stops the extractor.
  *  Signals:
- *	void finished()		        - emitted when all extraction job is done.
- *	void extracting(const QString&) - emitted with the filename beign extracted.
- *	void extracted(const QString&)  - emitted with the filename that has been extracted.
- *	void status(const QString& , const QString&) - emitted with the entry and the filename on extraction.
- *	void error(short , const QString&) - emitted when something goes wrong!
+ *	    void finished()		        - emitted when all extraction job is done.
+ *	    void extracting(const QString&) - emitted with the filename beign extracted.
+ *	    void extracted(const QString&)  - emitted with the filename that has been extracted.
+ *	    void status(const QString& , const QString&) - emitted with the entry and the filename on extraction.
+ *	    void error(short , const QString&) - emitted when something goes wrong!
  *
 */
 class Extractor  : public QObject
@@ -133,7 +132,7 @@ public:
     void addArchive(const QString& filename);
     void addArchive(const QStringList& filenames);
     void removeArchive(const QString& filename);
-    void setDestination(const QString& destination);
+    void setDefaultDestination(const QString& destination);
     ~Extractor();
 
 public slots:
@@ -152,16 +151,24 @@ signals:
 private slots:
     QString cleanDestPath(const QString& input);
     int extract(const char* filename, const char* dest);
-    int copy_data(struct archive *arch, struct archive *ext);
     char *concat(const char *dest, const char *src);
     void startExtraction();
 
 private:
     bool stopExtraction = false; // stop flag!
+    
+    /*
+     * libarchive structures.
+    */
+    QSharedPointer<struct archive> arch = nullptr;
+    QSharedPointer<struct archive> ext = nullptr;
+    struct archive_entry *entry; // no need to destruct.
+    // ---
+
     QMutex mutex; // thread-safe!
     QStringList queue;
-    QString	dest;
-    QFuture<void> *Promise = nullptr; // Promise suits this good than future!
+    QString	dest; // Default destination if set.
+    QFuture<void> *Promise = nullptr;
 }; // Extractor Class Ends
 
 /*
