@@ -32,8 +32,8 @@
  * -----------------------------------------------------------------------------
  *  @filename 	 	: QArchive.hpp
  *  @description 	: C++ Cross-Platform helper library that Modernizes libarchive
- *  			  using Qt5. Simply extracts 7z  , Tarballs  , RAR
- *  			  and other supported formats by libarchive.
+ *  			      using Qt5. Simply extracts 7z  , Tarballs  , RAR
+ *  			      and other supported formats by libarchive.
  * -----------------------------------------------------------------------------
 */
 #if !defined (QARCHIVE_HPP_INCLUDED)
@@ -90,6 +90,10 @@ enum {
 };
 // ---
 
+/*
+ * Signal Codes for 
+ * setFunc.
+*/
 enum {
     STARTED,
     FINISHED,
@@ -97,8 +101,12 @@ enum {
     RESUMED,
     CANCELED,
     EXTRACTED,
-    EXTRACTING
+    EXTRACTING,
+    COMPRESSED,
+    COMPRESSING
 };
+
+// ---
 
 /*
  * Class Extractor <- Inherits QObject.
@@ -284,38 +292,67 @@ public:
     explicit Compressor(const QString& archive);
     explicit Compressor(const QString& archive, const QStringList& files);
     explicit Compressor(const QString& archive, const QString& file);
-    void setArchive(const QString& archive);
-    void setArchiveFormat(short type);
-    void addFiles(const QString& file);
-    void addFiles(const QStringList& files);
-    void removeFiles(const QString& file);
-    void removeFiles(const QStringList& files);
+    Compressor &setArchive(const QString& archive);
+    Compressor &setArchiveFormat(short type);
+    Compressor &addFiles(const QString& file);
+    Compressor &addFiles(const QStringList& files);
+    Compressor &removeFiles(const QString& file);
+    Compressor &removeFiles(const QStringList& files);
     ~Compressor();
 
 public slots:
-    bool isRunning() const;
-    void start(void);
-    void stop(void);
+    Compressor &waitForFinished(void);
+    Compressor &start(void);
+    Compressor &pause(void);
+    Compressor &resume(void);
+    Compressor &cancel(void);
 
+    bool isRunning() const;
+    bool isCanceled() const;
+    bool isPaused() const;
+    bool isStarted() const;
+
+    Compressor &setFunc(short, std::function<void(void)>);
+    Compressor &setFunc(short, std::function<void(QString)>); // compressing and compressed.
+    Compressor &setFunc(std::function<void(short,QString)>); // error.
+    Compressor &setFunc(std::function<void(int)>); // progress bar.
 private slots:
-    void checkNodes();
-    void getArchiveFormat();
-    void startCompression();
+    void connectWatcher(void);
+    void checkNodes(void);
+    void getArchiveFormat(void);
+    void compress_node(QString);
 
 signals:
-    void stopped();
+    void started();
     void finished();
+    void paused();
+    void resumed();
+    void canceled();
+    void progress(int);
+
     void compressing(const QString&);
     void compressed(const QString&);
     void error(short, const QString&);
 
 private:
-    bool stopCompression = false;
+    /*
+     * Things that are needed to 
+     * create a archive.
+    */
+    char buff[16384];
+    QSharedPointer<struct archive> archive;
+    QSharedPointer<struct archive> disk;
+    struct archive_entry *entry;
+    ssize_t len;
+    int fd;
+    // ----
+
     QMutex mutex;
-    QFuture<void> *Promise = nullptr;
     QString archivePath;
     QStringList nodes;
     short archiveFormat = NO_FORMAT; // Default
+
+    QFutureWatcher<void> watcher;
 }; // Compressor Class Ends
 
 /*
