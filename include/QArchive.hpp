@@ -40,7 +40,8 @@
 #define QARCHIVE_HPP_INCLUDED
 
 #include <QtCore>
-#include <QtConcurrentRun>
+#include <QtConcurrent>
+#include <functional>
 
 /*
  * Getting the libarchive headers for the
@@ -84,7 +85,19 @@ enum {
     INVALID_DEST_PATH,
     DISK_OPEN_ERROR,
     DISK_READ_ERROR,
+    DESTINATION_NOT_FOUND,
     FILE_NOT_EXIST
+};
+// ---
+
+enum {
+    STARTED,
+    FINISHED,
+    PAUSED,
+    RESUMED,
+    CANCELED,
+    EXTRACTED,
+    EXTRACTING
 };
 
 /*
@@ -131,51 +144,69 @@ class Extractor  : public QObject
     Q_OBJECT
 public:
     explicit Extractor(QObject *parent = nullptr);
-    explicit Extractor(const QString& filename);
-    explicit Extractor(const QStringList& filenames);
-    explicit Extractor(const QString& filename, const QString& destination);
-    explicit Extractor(const QStringList& filenames, const QString& destination);
-    void swap(Extractor&);
-    void addArchive(const QString& filename);
-    void addArchive(const QStringList& filenames);
-    void removeArchive(const QString& filename);
-    void setDefaultDestination(const QString& destination);
+    explicit Extractor(const QString&);
+    explicit Extractor(const QStringList&);
+    explicit Extractor(const QString&, const QString&);
+    explicit Extractor(const QStringList&, const QString&);
+    Extractor &addArchive(const QString&);
+    Extractor &addArchive(const QStringList&);
+    Extractor &addArchive(const QString&, const QString&);
+    Extractor &addArchive(const QStringList&, const QString&);
+    Extractor &removeArchive(const QString&);
+    Extractor &removeArchive(const QStringList&);
+    Extractor &setDefaultDestination(const QString&);
     ~Extractor();
 
 public slots:
-    bool isRunning() const;
-    void start(void);
-    void stop(void);
+    Extractor &start(void);
+    Extractor &pause(void);
+    Extractor &resume(void);
+    Extractor &cancel(void);
 
+    bool isRunning() const;
+    bool isCanceled() const;
+    bool isPaused() const;
+    bool isStarted() const;
+
+    Extractor &setFunc(short, std::function<void(void)>);
+    Extractor &setFunc(short, std::function<void(QString)>); // extracting and extracted.
+    Extractor &setFunc(std::function<void(QString,QString)>); // status.
+    Extractor &setFunc(std::function<void(short,QString)>); // error.
+    Extractor &setFunc(std::function<void(int)>); // progress bar.
 signals:
-    void stopped();
+    void started();
     void finished();
+    void paused();
+    void resumed();
+    void canceled();
+    void progress(int);
+
     void extracted(const QString&);
     void extracting(const QString&);
     void status(const QString&, const QString&);
     void error(short, const QString&);
-
 private slots:
-    QString cleanDestPath(const QString& input);
-    int extract(const char* filename, const char* dest);
-    char *concat(const char *dest, const char *src);
-    void startExtraction();
+    void connectWatcher(void); // connects the watcher.
 
-private:
-    bool stopExtraction = false; // stop flag!
-    
     /*
-     * libarchive structures.
+     * Some signals cannot be redirected
+     * directly , it needs to have some
+     * special calls.
+     * Thats why these handles are for.
     */
-    QSharedPointer<struct archive> arch = nullptr;
-    QSharedPointer<struct archive> ext = nullptr;
-    struct archive_entry *entry; // no need to destruct.
-    // ---
+    void handleFinished(void);
+    void handleCanceled(void);
+    // ------
 
-    QMutex mutex; // thread-safe!
-    QStringList queue;
-    QString	dest; // Default destination if set.
-    QFuture<void> *Promise = nullptr;
+    // For the actual extraction.
+    QString cleanDestPath(const QString& input);
+    void extract(QString, QString);
+    char *concat(const char *dest, const char *src);
+private:
+    QMutex mutex;
+    QMap<QString, QString> queue;  // (1)-> Archive Path , (2)-> Destination.
+    QString	defaultDestination; // Default destination if set.
+    QFutureWatcher<void> watcher;
 }; // Extractor Class Ends
 
 /*
