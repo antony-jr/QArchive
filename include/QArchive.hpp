@@ -154,10 +154,12 @@ public:
     Extractor &addArchive(const QStringList&, const QString&);
     Extractor &removeArchive(const QString&);
     Extractor &removeArchive(const QStringList&);
+    Extractor &onlyExtract(const QString&,QString);
+    Extractor &onlyExtract(const QString&,QStringList);
     Extractor &setDefaultDestination(const QString&);
     ~Extractor();
-
 public slots:
+    Extractor &waitForFinished(void);
     Extractor &start(void);
     Extractor &pause(void);
     Extractor &resume(void);
@@ -204,7 +206,21 @@ private slots:
     char *concat(const char *dest, const char *src);
 private:
     QMutex mutex;
+    /*
+     * We use two seperate QMaps to
+     * make the sorting and lookups
+     * faster.
+    */
     QMap<QString, QString> queue;  // (1)-> Archive Path , (2)-> Destination.
+    /*
+     * This holds the data on which file
+     * we only have to extract in case
+     * tha user only wants to extract
+     * a single file.
+    */
+    QMap<QString, QStringList> extTable; // (1)-> Archive Path , (2)-> Path of file inside archive.
+    // ---
+
     QString	defaultDestination; // Default destination if set.
     QFutureWatcher<void> watcher;
 }; // Extractor Class Ends

@@ -112,7 +112,8 @@ Extractor::~Extractor()
 {
     if(isRunning()) {
         cancel();
-        watcher.waitForFinished(); // block any-thread until every
+        waitForFinished();
+        // blocks any-thread until every
         // job is stopped successfully ,
         // Otherwise this can cause a
         // segfault.
@@ -192,6 +193,39 @@ Extractor &Extractor::removeArchive(const QStringList &filenames)
     return *this;
 }
 
+Extractor &Extractor::onlyExtract(const QString &archive, QString filepath)
+{
+    QMutexLocker locker(&mutex);
+    if(!queue.contains(archive)) {
+        return *this;
+    }
+    if(!extTable[archive].contains(filepath)) {
+        QString path = queue.value(archive);
+        filepath.prepend(((path.isEmpty()) ? defaultDestination : path));
+        extTable[archive] << filepath;
+    }
+    return *this;
+}
+
+Extractor &Extractor::onlyExtract(const QString &archive,QStringList filepaths)
+{
+    QMutexLocker locker(&mutex);
+    if(!queue.contains(archive)) {
+        return *this;
+    }
+    QStringList filepathsnew;
+    Q_FOREACH(QString file, filepaths) {
+        if(extTable[archive].contains(file)) {
+            filepaths.removeAll(file);
+        }
+        QString path = queue.value(archive);
+        file.prepend(((path.isEmpty()) ? defaultDestination : path));
+        filepathsnew.append(file);
+    }
+    extTable[archive] << filepathsnew;
+    return *this;
+}
+
 Extractor &Extractor::setDefaultDestination(const QString& destination)
 {
     QMutexLocker locker(&mutex);
@@ -206,6 +240,13 @@ Extractor &Extractor::setDefaultDestination(const QString& destination)
  * ---------------
  *  Extractor
 */
+Extractor &Extractor::waitForFinished(void)
+{
+    watcher.waitForFinished(); // Sync.
+    mutex.unlock(); // Remember the lock at 'start'
+    return *this;
+}
+
 Extractor &Extractor::start(void)
 {
     if(isPaused()) {
@@ -407,6 +448,8 @@ void Extractor::extract(QString file,QString dest)
                                (default_dest != NULL) ? default_dest : NULL);
     // ---
 
+    QString checkfile;
+    bool extract = false;
     int ret = NO_ARCHIVE_ERROR;
 
     // Signal that we are extracting this archive.
@@ -446,34 +489,44 @@ void Extractor::extract(QString file,QString dest)
             emit status(QString(filename), QString(archive_entry_pathname(entry)));
         }
 
-        ret = archive_write_header(ext.data(), entry);
-        if (ret == ARCHIVE_OK) {
-            {
-                const void *buff;
-                size_t size;
+        checkfile = QString(archive_entry_pathname(entry));
+        if(extTable.contains(filename)) {
+            auto table = extTable[filename];
+            extract = (table.contains(checkfile)) ? true : false;
+        } else {
+            extract = true;
+        }
+
+        if(extract) {
+            ret = archive_write_header(ext.data(), entry);
+            if (ret == ARCHIVE_OK) {
+                {
+                    const void *buff;
+                    size_t size;
 #if ARCHIVE_VERSION_NUMBER >= 3000000
-                int64_t offset;
+                    int64_t offset;
 #else
-                off_t offset;
+                    off_t offset;
 #endif
-                for (ret = 0;;) {
-                    ret = archive_read_data_block(arch.data(), &buff, &size, &offset);
-                    if (ret == ARCHIVE_EOF) {
-                        break;
-                    } else if (ret != ARCHIVE_OK) {
-                        break;
-                    } else {
-                        ret = archive_write_data_block(ext.data(), buff, size, offset);
-                        if (ret != ARCHIVE_OK) {
+                    for (ret = 0;;) {
+                        ret = archive_read_data_block(arch.data(), &buff, &size, &offset);
+                        if (ret == ARCHIVE_EOF) {
                             break;
+                        } else if (ret != ARCHIVE_OK) {
+                            break;
+                        } else {
+                            ret = archive_write_data_block(ext.data(), buff, size, offset);
+                            if (ret != ARCHIVE_OK) {
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            ret = archive_write_finish_entry(ext.data());
-            if (ret != ARCHIVE_OK) {
-                emit(error(ARCHIVE_UNCAUGHT_ERROR, file));
-                return;
+                ret = archive_write_finish_entry(ext.data());
+                if (ret != ARCHIVE_OK) {
+                    emit(error(ARCHIVE_UNCAUGHT_ERROR, file));
+                    return;
+                }
             }
         }
 
