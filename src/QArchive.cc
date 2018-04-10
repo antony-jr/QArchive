@@ -702,7 +702,6 @@ Compressor &Compressor::start(void)
     }
     bool noTar = false;
     archive =  QSharedPointer<struct archive>(archive_write_new(), deleteArchiveWriter);
-    archive_read_disk_set_standard_lookup(disk.data());
     
     switch (archiveFormat) {
      case BZIP:
@@ -882,11 +881,16 @@ void Compressor::compress_node(QString currentNode)
 {
     QMutexLocker locker(&mutex);
     int r;
+    int fd;
+    ssize_t len;
+    char buff[16384];
 
-    // Signal that we are compressing this file.
+    // Signal that we are compressing this file. 
     emit(compressing(currentNode));
 
-    disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
+    QSharedPointer<struct archive> disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
+    archive_read_disk_set_standard_lookup(disk.data());
+
     r = archive_read_disk_open(disk.data(), currentNode.toStdString().c_str());
     if (r != ARCHIVE_OK) {
             emit error(DISK_OPEN_ERROR, currentNode);
@@ -894,7 +898,7 @@ void Compressor::compress_node(QString currentNode)
     }
 
     for (;;) {
-        entry = archive_entry_new();
+        struct archive_entry *entry = archive_entry_new();
         r = archive_read_next_header2(disk.data(), entry);
         if (r == ARCHIVE_EOF){
                 break;

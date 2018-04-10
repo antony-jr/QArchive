@@ -5,35 +5,23 @@
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-
-    /*
-     * 1.Construct
-    */
-    QArchive::Compressor e("test.7z", "TestDir");
-    //			Archive		|--> Can also
-    //			can be		     simply add
-    //			detected	     directories.
-    //			with extension.
-
-    /*
-     * 2.Connect Callbacks
-    */
-
-    // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Compressor::finished, [&]() {
+    QArchive::Compressor c;
+    c.setArchive("test.7z")
+     .addFiles(QStringList() << "TestDir/Ed_Sheeran_-_Castle_On_The_Hill_Official_Lyric_Video-7Qp5vcuMIlk.webm"
+                             << "TestDir/README.md"
+                             << "TestDir/Ed_Sheeran_-_Thinking_Out_Loud_Official_Video-lp-EO5I60KA.mkv"
+     )
+     .setFunc(QArchive::COMPRESSING , [&](QString file){
+        qDebug() << "Compressing:: " << file;
+     })
+     .setFunc(QArchive::FINISHED , [&]() {
         qDebug() << "Finished all jobs";
         app.quit();
-    });
-    QObject::connect(&e, &QArchive::Compressor::error, [&](short code, QString file) {
+     })
+     .setFunc([&](short code, QString file) {
         qDebug() << "error code:: " << code << " :: " << file;
         app.quit();
-    });
-    /*
-     * 3.Start extraction!
-    */
-    e.start();
-
-    qDebug() << "Its Non-Blocking!";
-
+     })
+     .start();
     return app.exec();
 }

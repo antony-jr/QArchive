@@ -335,17 +335,7 @@ signals:
     void error(short, const QString&);
 
 private:
-    /*
-     * Things that are needed to 
-     * create a archive.
-    */
-    char buff[16384];
     QSharedPointer<struct archive> archive;
-    QSharedPointer<struct archive> disk;
-    struct archive_entry *entry;
-    ssize_t len;
-    int fd;
-    // ----
 
     QMutex mutex;
     QString archivePath;
