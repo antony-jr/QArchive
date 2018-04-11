@@ -320,7 +320,7 @@ private slots:
     void connectWatcher(void);
     void checkNodes(void);
     void getArchiveFormat(void);
-    void compress_node(QString);
+    void compress_node(QString,QString);
 
 signals:
     void started();
@@ -339,7 +339,7 @@ private:
 
     QMutex mutex;
     QString archivePath;
-    QStringList nodes;
+    QMap<QString , QString> nodes; // (1)-> File path , (2)-> entry in archive.
     short archiveFormat = NO_FORMAT; // Default
 
     QFutureWatcher<void> watcher;

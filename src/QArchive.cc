@@ -635,37 +635,66 @@ Compressor &Compressor::addFiles(const QString& file)
      * No like files can exist in a filesystem!
     */
     QMutexLocker locker(&mutex);
-    nodes << file;
-    nodes.removeDuplicates();
+    if(!nodes.contains(file)){
+        QFileInfo checkfile(file);
+        if(checkfile.isFile()){
+            nodes.insert( file , checkfile.fileName());
+        }else{
+             QDir dir(file);
+              QFileInfoList list = dir.entryInfoList(QDir::AllEntries);
+              for (int i = 0; i < list.size(); i++)
+              {
+                 if(list.at(i).filePath() != "." || list.at(i).filePath() != ".."){
+                         QString filep = list.at(i).filePath();
+                         nodes.insert( filep , filep );
+                 }
+              }
+        }
+    }
     return *this;
 }
 
 Compressor &Compressor::addFiles(const QStringList& files)
 {
     QMutexLocker locker(&mutex);
-    nodes << files;
-    nodes.removeDuplicates();
+    Q_FOREACH(QString file , files)
+    {
+        if(!nodes.contains(file)){
+         QFileInfo checkfile(file);
+         if(checkfile.isFile()){
+             nodes.insert( file , checkfile.fileName());
+         }else{
+             QDir dir(file);
+             QFileInfoList list = dir.entryInfoList(QDir::AllEntries);
+             for (int i = 0; i < list.size(); i++)
+             {
+                if(list.at(i).filePath() != "." || list.at(i).filePath() != ".."){
+                        QString filep = list.at(i).filePath();
+                        nodes.insert( filep , filep );
+                }
+             }
+         }
+        }
+    }
     return *this;
 }
 
 Compressor &Compressor::removeFiles(const QString& file)
 {
     QMutexLocker locker(&mutex);
-    if(!nodes.isEmpty()) {
-        nodes.removeAll(file);
-    }
+    nodes.remove(file);
     return *this;
 }
 
 Compressor &Compressor::removeFiles(const QStringList& files)
 {
     QMutexLocker locker(&mutex);
-    if(!nodes.isEmpty()) {
-        for(QStringListIterator filesIt(files); filesIt.hasNext();) {
-             if(!nodes.isEmpty()) {
-                nodes.removeAll(filesIt.next());
-             }
-        }
+    if(nodes.isEmpty()){
+        return *this;
+    }
+    Q_FOREACH(QString file , files)
+    {
+        nodes.remove(file);
     }
     return *this;
 }
@@ -733,8 +762,16 @@ Compressor &Compressor::start(void)
     archive_write_open_filename(archive.data(), archivePath.toStdString().c_str());
     QFuture<void> *future = new QFuture<void>;
     mutex.unlock();
-    *future = QtConcurrent::map(nodes, [this](QString node){        
-            compress_node(node);
+
+    // Copy the keys to the heap or else
+    // this will cause a segfault.
+    QList<QString> *keys = new QList<QString>;
+    QList<QString> copy = nodes.uniqueKeys();
+    keys->swap(copy);
+    // ---
+
+    *future = QtConcurrent::map(*keys, [this](QString key){        
+            compress_node(key , nodes.value(key));
             return;
     });
     watcher.setFuture(*future);
@@ -842,14 +879,14 @@ void Compressor::connectWatcher(void)
 
 void Compressor::checkNodes(void)
 {
-    for(QStringListIterator nodeIt(nodes); nodeIt.hasNext();) {
-        QString currentNode(nodeIt.next());
-        QFileInfo fInfo(currentNode);
-        if(!fInfo.exists()) {
-            nodes.removeAll(currentNode);
-            emit error(FILE_NOT_EXIST, currentNode);
+    Q_FOREACH(QString key , nodes.uniqueKeys()){
+        QFileInfo fInfo(key);
+        if(!fInfo.exists()){
+            nodes.remove(key);
+            emit error(FILE_NOT_EXIST, key);
         }
     }
+    return;
 }
 
 void Compressor::getArchiveFormat()
@@ -877,7 +914,7 @@ void Compressor::getArchiveFormat()
     }
 }
 
-void Compressor::compress_node(QString currentNode)
+void Compressor::compress_node(QString filepath , QString entrypath)
 {
     QMutexLocker locker(&mutex);
     int r;
@@ -886,14 +923,14 @@ void Compressor::compress_node(QString currentNode)
     char buff[16384];
 
     // Signal that we are compressing this file. 
-    emit(compressing(currentNode));
+    emit(compressing(filepath));
 
     QSharedPointer<struct archive> disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
     archive_read_disk_set_standard_lookup(disk.data());
 
-    r = archive_read_disk_open(disk.data(), currentNode.toStdString().c_str());
+    r = archive_read_disk_open(disk.data(), filepath.toStdString().c_str());
     if (r != ARCHIVE_OK) {
-            emit error(DISK_OPEN_ERROR, currentNode);
+            emit error(DISK_OPEN_ERROR, filepath);
             return;
     }
 
@@ -904,20 +941,21 @@ void Compressor::compress_node(QString currentNode)
                 break;
         }
         if (r != ARCHIVE_OK) {
-                emit error(DISK_READ_ERROR, currentNode);
+                emit error(DISK_READ_ERROR, filepath);
                 return;
         }
         archive_read_disk_descend(disk.data());
+        archive_entry_set_pathname(entry , entrypath.toStdString().c_str());
         r = archive_write_header(archive.data() , entry);
 
         if (r == ARCHIVE_FATAL) {
-            emit error(ARCHIVE_FATAL_ERROR, currentNode);
+            emit error(ARCHIVE_FATAL_ERROR, filepath);
             return;
         }
         if (r > ARCHIVE_FAILED) {
                 /* For now, we use a simpler loop to copy data
                  * into the target archive. */
-                fd = open(archive_entry_sourcepath(entry), O_RDONLY);
+                fd = open(filepath.toStdString().c_str(), O_RDONLY);
                 len = read(fd, buff, sizeof(buff));
                 while (len > 0) {
                     archive_write_data(archive.data(), buff, len);
@@ -929,7 +967,7 @@ void Compressor::compress_node(QString currentNode)
     }
 
     // Signal that we compressed this file.
-    emit compressed(currentNode);
+    emit compressed(filepath);
     return;
 }
 
