@@ -45,15 +45,27 @@
 */
 static void deleteArchiveReader(struct archive *ar)
 {
-    archive_read_close(ar);
-    archive_read_free(ar);
+    if(ar){
+        archive_read_close(ar);
+        archive_read_free(ar);
+    }
     return;
 }
 
 static void deleteArchiveWriter(struct archive *aw)
 {
-    archive_write_close(aw);
-    archive_write_free(aw);
+    if(aw){
+        archive_write_close(aw);
+        archive_write_free(aw);
+    }
+    return;
+}
+
+static void deleteArchiveEntry(struct archive_entry *entry)
+{
+    if(entry){
+        archive_entry_free(entry);
+    }
     return;
 }
 
@@ -61,7 +73,6 @@ static void deleteArchiveWriter(struct archive *aw)
 
 
 using namespace QArchive;
-
 
 /*
  * Extractor Class Source.
@@ -72,39 +83,41 @@ using namespace QArchive;
 Extractor::Extractor(QObject *parent)
     : QObject(parent)
 {
-    connectWatcher();
+    Watcher = new QFutureWatcher<void>(this);
+    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
+    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
+    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
+    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
+    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
+    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
     return;
 }
 
 Extractor::Extractor(const QString &filename)
     : QObject(nullptr)
 {
-    connectWatcher();
-    addArchive(filename);
-    return;
-}
-
-Extractor::Extractor(const QStringList &filenames)
-    : QObject(nullptr)
-{
-    connectWatcher();
-    addArchive(filenames);
+    Watcher = new QFutureWatcher<void>(this);
+    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
+    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
+    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
+    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
+    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
+    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
+    setArchive(filename);
     return;
 }
 
 Extractor::Extractor(const QString &filename, const QString &destination)
     : QObject(nullptr)
 {
-    connectWatcher();
-    addArchive(filename, destination);
-    return;
-}
-
-Extractor::Extractor(const QStringList& filenames, const QString& destination)
-    : QObject(nullptr)
-{
-    connectWatcher();
-    addArchive(filenames, destination);
+    Watcher = new QFutureWatcher<void>(this);
+    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
+    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
+    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
+    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
+    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
+    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
+    setArchive(filename, destination);
     return;
 }
 
@@ -113,6 +126,7 @@ Extractor::~Extractor()
     if(isRunning()) {
         cancel();
         waitForFinished();
+        Watcher->disconnect();
         // blocks any-thread until every
         // job is stopped successfully ,
         // Otherwise this can cause a
@@ -128,108 +142,39 @@ Extractor::~Extractor()
  * ---------------
  *  Extractor
 */
-Extractor &Extractor::addArchive(const QString &filename)
+Extractor &Extractor::setArchive(const QString &filename)
 {
     QMutexLocker locker(&mutex);
-    if(!queue.contains(filename)) { // Do not add duplicate filenames.
-        queue.insert(filename, QString());
-    }
+    ArchivePath = QString(filename);
     return *this;
 }
 
-Extractor &Extractor::addArchive(const QString &filename, const QString &destination)
+Extractor &Extractor::setArchive(const QString &filename, const QString &destination)
 {
     QMutexLocker locker(&mutex);
-    if(!queue.contains(filename)) { // Do not add duplicate filenames.
-        queue.insert(filename, cleanDestPath(destination));
-    }
+    ArchivePath = QString(filename);
+    Destination = QString(destination);
     return *this;
 }
 
-Extractor &Extractor::addArchive(const QStringList& filenames)
+Extractor &Extractor::onlyExtract(const QString &filepath)
 {
     QMutexLocker locker(&mutex);
-    /*
-     * We can sync here since this process
-     * will be done in a blinding speed that
-     * not even the gui will get disturbed.
-    */
-    Q_FOREACH(QString filename, filenames) {
-        // Note: Do not use addArchive function
-        // because anything with mutex called
-        // frequently can be dangerous.
-
-        if(!queue.contains(filename)) { // Do not add duplicate filenames.
-            queue.insert(filename, QString());
-        }
-    }
-    return *this;
-}
-
-Extractor &Extractor::addArchive(const QStringList& filenames, const QString &destination)
-{
-    QMutexLocker locker(&mutex);
-    Q_FOREACH(QString filename, filenames) {
-        if(!queue.contains(filename)) { // Do not add duplicate filenames.
-            queue.insert(filename, cleanDestPath(destination));
-        }
-    }
-    return *this;
-}
-
-Extractor &Extractor::removeArchive(const QString &filename)
-{
-    QMutexLocker locker(&mutex);
-    queue.remove(filename);
-    return *this;
-}
-
-Extractor &Extractor::removeArchive(const QStringList &filenames)
-{
-    QMutexLocker locker(&mutex);
-    Q_FOREACH(QString filename, filenames) {
-        queue.remove(filename);
-    }
-    return *this;
-}
-
-Extractor &Extractor::onlyExtract(const QString &archive, QString filepath)
-{
-    QMutexLocker locker(&mutex);
-    if(!queue.contains(archive)) {
+    if(OnlyExtract.contains(filepath)){
         return *this;
     }
-    if(!extTable[archive].contains(filepath)) {
-        QString path = queue.value(archive);
-        filepath.prepend(((path.isEmpty()) ? defaultDestination : path));
-        extTable[archive] << filepath;
-    }
+    OnlyExtract << (Destination + filepath);
     return *this;
 }
 
-Extractor &Extractor::onlyExtract(const QString &archive,QStringList filepaths)
+Extractor &Extractor::onlyExtract(const QStringList &filepaths)
 {
     QMutexLocker locker(&mutex);
-    if(!queue.contains(archive)) {
-        return *this;
-    }
-    QStringList filepathsnew;
-    Q_FOREACH(QString file, filepaths) {
-        if(extTable[archive].contains(file)) {
-            filepaths.removeAll(file);
+    Q_FOREACH(QString filepath , filepaths){
+        if(!OnlyExtract.contains(filepath)){
+            OnlyExtract << (Destination + filepath);
         }
-        QString path = queue.value(archive);
-        file.prepend(((path.isEmpty()) ? defaultDestination : path));
-        filepathsnew.append(file);
     }
-    extTable[archive] << filepathsnew;
-    return *this;
-}
-
-Extractor &Extractor::setDefaultDestination(const QString& destination)
-{
-    QMutexLocker locker(&mutex);
-    defaultDestination = cleanDestPath(destination);
     return *this;
 }
 
@@ -242,71 +187,181 @@ Extractor &Extractor::setDefaultDestination(const QString& destination)
 */
 Extractor &Extractor::waitForFinished(void)
 {
-    watcher.waitForFinished(); // Sync.
-    mutex.unlock(); // Remember the lock at 'start'
+    Watcher->waitForFinished(); // Sync.
     return *this;
 }
 
 Extractor &Extractor::start(void)
 {
+    if(!mutex.tryLock()){
+        return *this;
+    }
+
     if(isPaused()) {
         // If the user called this to
         // resume by mistake.
+        mutex.unlock();
         resume();
         return *this;
     }
-    mutex.lock(); // Block other calls.
 
-    // Copy the keys to the heap or else
-    // this will cause a segfault.
-    QList<QString> *keys = new QList<QString>;
-    QList<QString> copy = queue.uniqueKeys();
-    keys->swap(copy);
+    // Check if the archive and the destination folder exists
+    QFileInfo check_archive(ArchivePath);
+    QFileInfo check_dest(Destination);
+    // check if file exists and if yes then is it really a file and no directory?
+    if (!check_archive.exists() || !check_archive.isFile()) {
+        mutex.unlock();
+        emit(error(ARCHIVE_READ_ERROR, ArchivePath));
+        return *this;
+    } else {
+        if(!Destination.isEmpty()) {
+        if(!check_dest.exists() || check_dest.isDir()) {
+            mutex.unlock();
+            emit(error(DESTINATION_NOT_FOUND, Destination));
+            return *this;
+            }
+        }
+    }
+    // ---
+
+    int ret = 0;
+    archive = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
+    ext = QSharedPointer<struct archive>(archive_write_disk_new(), deleteArchiveWriter);
+    if(!(archive.data() && ext.data())){
+        // No memory.
+        mutex.unlock();
+        emit(error(NOT_ENOUGH_MEMORY , ArchivePath));
+        return *this;
+    }
+    archive_write_disk_set_options(ext.data(), ARCHIVE_EXTRACT_TIME);
+    archive_read_support_format_all(archive.data());
+    archive_read_support_filter_all(archive.data());
+
+    if((ret = archive_read_open_filename(archive.data(), ArchivePath.toUtf8().constData()  , BlockSize))) {
+         mutex.unlock();
+         emit(error(ARCHIVE_READ_ERROR, ArchivePath));
+         return *this;
+     }
+
+    /*
+     * Using infinite loop can be dangerous for
+     * the gui but calculatively , This is done
+     * in blinding speed and I hope that goes for
+     * large archive too.
+     * Note: We don't do the extraction, We are just 
+     * getting the entries while staying in the
+     * current thread.
+    */
+    for (;;){
+         QSharedPointer<struct archive_entry> entry = QSharedPointer<struct archive_entry>(archive_entry_new() , deleteArchiveEntry);
+         ret = archive_read_next_header2(archive.data(), entry);
+         if (ret == ARCHIVE_EOF) {
+             break;
+         }else if (ret == ARCHIVE_FATAL) {
+             mutex.unlock();
+             emit(error(ARCHIVE_QUALITY_ERROR, ArchivePath));
+             return *this;
+         }else{
+             entries.append(entry);
+             continue;
+         }
+    }
     // ---
 
     QFuture<void> *future = new QFuture<void>;
-    *future = QtConcurrent::map(*keys,[&](QString key) {
-        extract(key, queue.value(key));
-        queue.remove(key);
+    mutex.unlock();
+    *future = QtConcurrent::map(entries ,[this](QSharedPointer<struct archive_entry> entry){
+            QMutexLocker locker(&mutex);
+            if(!Destination.isEmpty()) {
+                char* new_entry = concat(Destination.toUtf8().constData(), archive_entry_pathname(entry.data()));
+                archive_entry_set_pathname(entry.data(), new_entry);
+                free(new_entry);
+            }
+
+            int ret = 0;
+            QString checkfile = QString(archive_entry_pathname(entry.data()));
+            bool extract = (!OnlyExtract.isEmpty() && !OnlyExtract.contains(checkfile)) ? false : true;
+            if(extract) {
+
+            // Signal that we are extracting this file.
+             emit(extracting(checkfile));
+            // ---
+
+            ret = archive_write_header(ext.data(), entry.data());
+            if (ret == ARCHIVE_OK) {
+                {
+                    const void *buff;
+                    size_t size;
+#if ARCHIVE_VERSION_NUMBER >= 3000000
+                    int64_t offset;
+#else
+                    off_t offset;
+#endif
+                    for (ret = 0;;){
+                        ret = archive_read_data_block(archive.data(), &buff, &size, &offset);
+                        if (ret == ARCHIVE_EOF) {
+                            break;
+                        } else if (ret != ARCHIVE_OK) {
+                            break;
+                        } else {
+                            ret = archive_write_data_block(ext.data(), buff, size, offset);
+                            if (ret != ARCHIVE_OK) {
+                                break;
+                            }
+                        }
+                    }
+                }
+                ret = archive_write_finish_entry(ext.data());
+                if (ret == ARCHIVE_FATAL) {
+                    emit(error(ARCHIVE_UNCAUGHT_ERROR, checkfile));
+                    return;
+                }
+                
+                // Signal that we successfully extracted this file.
+                emit(extracted(checkfile));
+                // ---
+            }
+        
+        }
         return;
     });
-    watcher.setFuture(*future);
+    Watcher->setFuture(*future);
     return *this;
 }
 
 Extractor &Extractor::pause(void)
 {
-    watcher.pause();
+    Watcher->pause();
     return *this;
 }
 
 Extractor &Extractor::resume(void)
 {
-    watcher.resume();
+    Watcher->resume();
     return *this;
 }
 
 Extractor &Extractor::cancel(void)
 {
-    watcher.cancel();
+    Watcher->cancel();
     return *this;
 }
 
 bool Extractor::isRunning() const
 {
-    return watcher.isRunning();
+    return Watcher->isRunning();
 }
 bool Extractor::isCanceled() const
 {
-    return watcher.isCanceled();
+    return Watcher->isCanceled();
 }
 bool Extractor::isPaused() const
 {
-    return watcher.isPaused();
+    return Watcher->isPaused();
 }
 bool Extractor::isStarted() const
 {
-    return watcher.isStarted();
+    return Watcher->isStarted();
 }
 
 Extractor &Extractor::setFunc(short signal, std::function<void(void)> function)
@@ -343,12 +398,6 @@ Extractor &Extractor::setFunc(short signal, std::function<void(QString)> functio
     return *this;
 }
 
-Extractor &Extractor::setFunc(std::function<void(QString,QString)> function)
-{
-    connect(this, &Extractor::status, function);
-    return *this;
-}
-
 Extractor &Extractor::setFunc(std::function<void(short,QString)> function)
 {
     connect(this, &Extractor::error, function);
@@ -370,48 +419,6 @@ Extractor &Extractor::setFunc(std::function<void(int)> function)
  *  Internals for the extractor.
 */
 
-void Extractor::connectWatcher(void)
-{
-    /*
-     * Note: Signal-Signal is possible.
-    */
-    connect(&watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
-    connect(&watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
-    connect(&watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
-    connect(&watcher, &QFutureWatcher<void>::canceled, this, &Extractor::handleCanceled);
-    connect(&watcher, &QFutureWatcher<void>::finished, this, &Extractor::handleFinished);
-    connect(&watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
-    return;
-}
-// -----
-
-/*
- * Special Handles.
-*/
-void Extractor::handleFinished(void)
-{
-    /*
-     * Remember the lock on
-     * 'start' slot.
-    */
-    mutex.unlock();
-    emit(finished());
-    return;
-}
-void Extractor::handleCanceled(void)
-{
-    /*
-     * Unlock the lock that
-     * was put on 'start'
-     * slot.
-    */
-    mutex.unlock();
-    emit(canceled());
-    return;
-}
-// -----
-
-
 QString Extractor::cleanDestPath(const QString& input)
 {
     QString ret = QDir::cleanPath(QDir::toNativeSeparators(input));
@@ -419,123 +426,6 @@ QString Extractor::cleanDestPath(const QString& input)
         ret += QDir::separator();
     }
     return ret;
-}
-
-void Extractor::extract(QString file,QString dest)
-{
-    // Check if the file and the destination folder exists
-    QFileInfo check_file(file);
-    QFileInfo check_dir(dest);
-    // check if file exists and if yes then is it really a file and no directory?
-    if (!check_file.exists() || !check_file.isFile()) {
-        emit(error(ARCHIVE_READ_ERROR, file));
-        return;
-    } else {
-        if(!dest.isEmpty()) {
-            if(!check_dir.exists() || check_dir.isFile()) {
-                emit(error(DESTINATION_NOT_FOUND, file));
-                return;
-            }
-        }
-    }
-    // ---
-
-    // Deriving the destination folder.
-    const char *filename = file.toStdString().c_str();
-    const char *got_dest = (dest.isEmpty()) ? NULL : dest.toStdString().c_str();
-    const char *default_dest = (defaultDestination.isEmpty()) ? NULL : defaultDestination.toStdString().c_str();
-    char *final_dest = (char*)((got_dest != NULL) ? got_dest :
-                               (default_dest != NULL) ? default_dest : NULL);
-    // ---
-
-    QString checkfile;
-    bool extract = false;
-    int ret = NO_ARCHIVE_ERROR;
-
-    // Signal that we are extracting this archive.
-    emit(extracting(file));
-    // ---
-
-    QSharedPointer<struct archive> arch = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
-    QSharedPointer<struct archive> ext = QSharedPointer<struct archive>(archive_write_disk_new(), deleteArchiveWriter);
-    struct archive_entry *entry;
-    archive_write_disk_set_options(ext.data(), ARCHIVE_EXTRACT_TIME);
-    archive_read_support_format_all(arch.data());
-    archive_read_support_filter_all(arch.data());
-
-    if((ret = archive_read_open_filename(arch.data(), filename, 10240))) {
-        emit(error(ARCHIVE_READ_ERROR, file));
-        return;
-    }
-    for (;;) {
-        ret = archive_read_next_header(arch.data(), &entry);
-        if (ret == ARCHIVE_EOF) {
-            break;
-        }
-        if (ret != ARCHIVE_OK) {
-            emit(error(ARCHIVE_QUALITY_ERROR, file));
-            return;
-        }
-
-        if(final_dest != NULL) {
-            char* new_entry = concat(final_dest, archive_entry_pathname(entry));
-            archive_entry_set_pathname(entry, new_entry);
-
-            // Status Signal
-            emit status(QString(filename), QString(new_entry));
-            free(new_entry);
-        } else {
-            // Status Signal.
-            emit status(QString(filename), QString(archive_entry_pathname(entry)));
-        }
-
-        checkfile = QString(archive_entry_pathname(entry));
-        if(extTable.contains(filename)) {
-            auto table = extTable[filename];
-            extract = (table.contains(checkfile)) ? true : false;
-        } else {
-            extract = true;
-        }
-
-        if(extract) {
-            ret = archive_write_header(ext.data(), entry);
-            if (ret == ARCHIVE_OK) {
-                {
-                    const void *buff;
-                    size_t size;
-#if ARCHIVE_VERSION_NUMBER >= 3000000
-                    int64_t offset;
-#else
-                    off_t offset;
-#endif
-                    for (ret = 0;;) {
-                        ret = archive_read_data_block(arch.data(), &buff, &size, &offset);
-                        if (ret == ARCHIVE_EOF) {
-                            break;
-                        } else if (ret != ARCHIVE_OK) {
-                            break;
-                        } else {
-                            ret = archive_write_data_block(ext.data(), buff, size, offset);
-                            if (ret != ARCHIVE_OK) {
-                                break;
-                            }
-                        }
-                    }
-                }
-                ret = archive_write_finish_entry(ext.data());
-                if (ret != ARCHIVE_OK) {
-                    emit(error(ARCHIVE_UNCAUGHT_ERROR, file));
-                    return;
-                }
-            }
-        }
-
-    }
-
-    // Signal that we extracted this archive.
-    emit(extracted(file));
-    // ------
-    return;
 }
 
 char *Extractor::concat(const char *dest, const char *src)

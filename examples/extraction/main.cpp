@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
     QArchive::Extractor e;
 
-    e.addArchive("test.7z")
+    e.setArchive("test.7z")
     .setFunc(QArchive::EXTRACTING, [&](QString file) {
         qDebug() << "Extracting:: " << file;
     })
@@ -43,5 +43,6 @@ int main(int argc, char** argv)
         app.quit();
     })
     .start();
+    qDebug() << "Its Non Blocking!";
     return app.exec();
 }

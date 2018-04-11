@@ -73,37 +73,38 @@ typedef SSIZE_T ssize_t;
 namespace QArchive   // QArchive Namespace Start
 {
 /*
- * QArchive error codes
- * --------------------
+* QArchive error codes
+* --------------------
 */
 enum {
-    NO_ARCHIVE_ERROR,
-    ARCHIVE_QUALITY_ERROR,
-    ARCHIVE_READ_ERROR,
-    ARCHIVE_UNCAUGHT_ERROR,
-    ARCHIVE_FATAL_ERROR,
-    INVALID_DEST_PATH,
-    DISK_OPEN_ERROR,
-    DISK_READ_ERROR,
-    DESTINATION_NOT_FOUND,
-    FILE_NOT_EXIST
+NO_ARCHIVE_ERROR,
+ARCHIVE_QUALITY_ERROR,
+ARCHIVE_READ_ERROR,
+ARCHIVE_UNCAUGHT_ERROR,
+ARCHIVE_FATAL_ERROR,
+INVALID_DEST_PATH,
+DISK_OPEN_ERROR,
+DISK_READ_ERROR,
+DESTINATION_NOT_FOUND,
+FILE_NOT_EXIST,
+NOT_ENOUGH_MEMORY
 };
 // ---
 
 /*
- * Signal Codes for 
- * setFunc.
+* Signal Codes for 
+* setFunc.
 */
 enum {
-    STARTED,
-    FINISHED,
-    PAUSED,
-    RESUMED,
-    CANCELED,
-    EXTRACTED,
-    EXTRACTING,
-    COMPRESSED,
-    COMPRESSING
+STARTED,
+FINISHED,
+PAUSED,
+RESUMED,
+CANCELED,
+EXTRACTED,
+EXTRACTING,
+COMPRESSED,
+COMPRESSING
 };
 
 // ---
@@ -141,96 +142,64 @@ enum {
  *
 */
 
-/*
- * I did not implement a copy constructor or
- * a asignment operator since QObject and its
- * desendents cannot be copied.
-*/
-
 class Extractor  : public QObject
 {
     Q_OBJECT
 public:
     explicit Extractor(QObject *parent = nullptr);
     explicit Extractor(const QString&);
-    explicit Extractor(const QStringList&);
     explicit Extractor(const QString&, const QString&);
-    explicit Extractor(const QStringList&, const QString&);
-    Extractor &addArchive(const QString&);
-    Extractor &addArchive(const QStringList&);
-    Extractor &addArchive(const QString&, const QString&);
-    Extractor &addArchive(const QStringList&, const QString&);
-    Extractor &removeArchive(const QString&);
-    Extractor &removeArchive(const QStringList&);
-    Extractor &onlyExtract(const QString&,QString);
-    Extractor &onlyExtract(const QString&,QStringList);
-    Extractor &setDefaultDestination(const QString&);
+    Extractor &setArchive(const QString&);
+    Extractor &setArchive(const QString&, const QString&);
+    Extractor &onlyExtract(const QString&);
+    Extractor &onlyExtract(const QStringList&);
+    Extractor &clear(void);
     ~Extractor();
-public slots:
+
+public Q_SLOTS:
+    bool isRunning() const;
+    bool isCanceled() const;
+    bool isPaused() const;
+    bool isStarted() const;
+    
     Extractor &waitForFinished(void);
     Extractor &start(void);
     Extractor &pause(void);
     Extractor &resume(void);
     Extractor &cancel(void);
 
-    bool isRunning() const;
-    bool isCanceled() const;
-    bool isPaused() const;
-    bool isStarted() const;
-
     Extractor &setFunc(short, std::function<void(void)>);
     Extractor &setFunc(short, std::function<void(QString)>); // extracting and extracted.
-    Extractor &setFunc(std::function<void(QString,QString)>); // status.
     Extractor &setFunc(std::function<void(short,QString)>); // error.
     Extractor &setFunc(std::function<void(int)>); // progress bar.
-signals:
-    void started();
-    void finished();
-    void paused();
-    void resumed();
-    void canceled();
-    void progress(int);
 
+Q_SIGNALS:
+    void started(void);
+    void finished(void);
+    void paused(void);
+    void resumed(void);
+    void canceled(void);
+    void progress(int);
     void extracted(const QString&);
     void extracting(const QString&);
-    void status(const QString&, const QString&);
     void error(short, const QString&);
-private slots:
-    void connectWatcher(void); // connects the watcher.
 
-    /*
-     * Some signals cannot be redirected
-     * directly , it needs to have some
-     * special calls.
-     * Thats why these handles are for.
-    */
-    void handleFinished(void);
-    void handleCanceled(void);
-    // ------
-
+private Q_SLOTS:
     // For the actual extraction.
     QString cleanDestPath(const QString& input);
-    void extract(QString, QString);
     char *concat(const char *dest, const char *src);
 private:
-    QMutex mutex;
-    /*
-     * We use two seperate QMaps to
-     * make the sorting and lookups
-     * faster.
-    */
-    QMap<QString, QString> queue;  // (1)-> Archive Path , (2)-> Destination.
-    /*
-     * This holds the data on which file
-     * we only have to extract in case
-     * tha user only wants to extract
-     * a single file.
-    */
-    QMap<QString, QStringList> extTable; // (1)-> Archive Path , (2)-> Path of file inside archive.
-    // ---
+    QSharedPointer<struct archive> archive;
+    QSharedPointer<struct archive> ext;
+    QList<QSharedPointer<struct archive_entry>> entries;
 
-    QString	defaultDestination; // Default destination if set.
-    QFutureWatcher<void> watcher;
+    QMutex mutex;
+    int BlockSize = 10240; // Default BlockSize.
+    QString ArchivePath;
+    QString Destination;
+    QString Password;
+    QStringList OnlyExtract;
+    QFutureWatcher<void> *Watcher = nullptr;
 }; // Extractor Class Ends
 
 /*
