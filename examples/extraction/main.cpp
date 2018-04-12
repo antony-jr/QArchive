@@ -7,12 +7,18 @@ int main(int argc, char** argv)
     QCoreApplication app(argc, argv);
     QArchive::Extractor e;
 
+    bool once = true;
+
     e.setArchive("test.7z")
     .setFunc(QArchive::EXTRACTING, [&](QString file) {
         qDebug() << "Extracting:: " << file;
     })
     .setFunc(QArchive::EXTRACTED, [&](QString file) {
         qDebug() << "Extracted:: " << file;
+        if(once){
+        e.pause();
+        once &= false;
+        }
     })
     .setFunc([&](short code, QString file) {
         switch(code) {
@@ -37,6 +43,11 @@ int main(int argc, char** argv)
             app.quit();
             break;
         }
+    })
+    .setFunc(QArchive::PAUSED , [&]() {
+        qDebug() << "Paused";
+        qDebug() << "Resuming in 5 Seconds!";
+        QTimer::singleShot(5000 , &e , SLOT(resume()));
     })
     .setFunc(QArchive::FINISHED, [&]() {
         qDebug() << "Finished all extraction!";

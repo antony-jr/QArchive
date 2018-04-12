@@ -83,26 +83,26 @@ using namespace QArchive;
 Extractor::Extractor(QObject *parent)
     : QObject(parent)
 {
-    Watcher = new QFutureWatcher<void>(this);
-    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
-    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
-    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
-    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
-    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
-    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()) , this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()) , this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     return;
 }
 
 Extractor::Extractor(const QString &filename)
     : QObject(nullptr)
 {
-    Watcher = new QFutureWatcher<void>(this);
-    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
-    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
-    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
-    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
-    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
-    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()) , this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()) , this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     setArchive(filename);
     return;
 }
@@ -110,13 +110,13 @@ Extractor::Extractor(const QString &filename)
 Extractor::Extractor(const QString &filename, const QString &destination)
     : QObject(nullptr)
 {
-    Watcher = new QFutureWatcher<void>(this);
-    connect(Watcher, &QFutureWatcher<void>::started, this, &Extractor::started);
-    connect(Watcher, &QFutureWatcher<void>::paused, this, &Extractor::paused);
-    connect(Watcher, &QFutureWatcher<void>::resumed, this, &Extractor::resumed);
-    connect(Watcher, &QFutureWatcher<void>::canceled, this, &Extractor::canceled);
-    connect(Watcher, &QFutureWatcher<void>::finished, this, &Extractor::finished);
-    connect(Watcher, &QFutureWatcher<void>::progressValueChanged, this, &Extractor::progress);
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()) , this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()) , this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     setArchive(filename, destination);
     return;
 }
@@ -126,7 +126,7 @@ Extractor::~Extractor()
     if(isRunning()) {
         cancel();
         waitForFinished();
-        Watcher->disconnect();
+        UNBlocker->disconnect();
         // blocks any-thread until every
         // job is stopped successfully ,
         // Otherwise this can cause a
@@ -187,24 +187,18 @@ Extractor &Extractor::onlyExtract(const QStringList &filepaths)
 */
 Extractor &Extractor::waitForFinished(void)
 {
-    Watcher->waitForFinished(); // Sync.
+    UNBlocker->waitForFinished(); // Sync.
     return *this;
 }
 
 Extractor &Extractor::start(void)
 {
-    if(!mutex.tryLock()){
+    QMutexLocker locker(&mutex);
+    if(isStarted()) {
         return *this;
     }
 
-    if(isPaused()) {
-        // If the user called this to
-        // resume by mistake.
-        mutex.unlock();
-        resume();
-        return *this;
-    }
-
+    UNBlocker->setInitializer([this]() -> int {
     // Check if the archive and the destination folder exists
     QFileInfo check_archive(ArchivePath);
     QFileInfo check_dest(Destination);
@@ -212,83 +206,63 @@ Extractor &Extractor::start(void)
     if (!check_archive.exists() || !check_archive.isFile()) {
         mutex.unlock();
         emit(error(ARCHIVE_READ_ERROR, ArchivePath));
-        return *this;
+        return ARCHIVE_READ_ERROR;
     } else {
         if(!Destination.isEmpty()) {
         if(!check_dest.exists() || check_dest.isDir()) {
-            mutex.unlock();
             emit(error(DESTINATION_NOT_FOUND, Destination));
-            return *this;
+            return DESTINATION_NOT_FOUND;
             }
         }
     }
     // ---
-
-    int ret = 0;
+    
     archive = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
     ext = QSharedPointer<struct archive>(archive_write_disk_new(), deleteArchiveWriter);
     if(!(archive.data() && ext.data())){
         // No memory.
-        mutex.unlock();
         emit(error(NOT_ENOUGH_MEMORY , ArchivePath));
-        return *this;
+        return NOT_ENOUGH_MEMORY;
     }
     archive_write_disk_set_options(ext.data(), ARCHIVE_EXTRACT_TIME);
     archive_read_support_format_all(archive.data());
     archive_read_support_filter_all(archive.data());
 
     if((ret = archive_read_open_filename(archive.data(), ArchivePath.toUtf8().constData()  , BlockSize))) {
-         mutex.unlock();
          emit(error(ARCHIVE_READ_ERROR, ArchivePath));
-         return *this;
+         return ARCHIVE_READ_ERROR;
      }
-
-    /*
-     * Using infinite loop can be dangerous for
-     * the gui but calculatively , This is done
-     * in blinding speed and I hope that goes for
-     * large archive too.
-     * Note: We don't do the extraction, We are just 
-     * getting the entries while staying in the
-     * current thread.
-    */
-    for (;;){
-         QSharedPointer<struct archive_entry> entry = QSharedPointer<struct archive_entry>(archive_entry_new() , deleteArchiveEntry);
-         ret = archive_read_next_header2(archive.data(), entry);
-         if (ret == ARCHIVE_EOF) {
-             break;
-         }else if (ret == ARCHIVE_FATAL) {
-             mutex.unlock();
-             emit(error(ARCHIVE_QUALITY_ERROR, ArchivePath));
-             return *this;
-         }else{
-             entries.append(entry);
-             continue;
-         }
-    }
     // ---
+    return 0;
+    })
+    .setCondition([this]() -> int {
+        ret = archive_read_next_header(archive.data(), &entry);
+        if (ret == ARCHIVE_FATAL) {
+            ret = ARCHIVE_EOF; // set to endpoint to stop UNBlock.
+            emit(error(ARCHIVE_QUALITY_ERROR, ArchivePath));
+        }
+        return ret;
+    })
+    .setEndpoint(ARCHIVE_EOF)
+    .setExpression([this](){
+        return;
+    })
+    .setCodeBlock([this](){
+    if(!Destination.isEmpty()){
+        char* new_entry = concat(Destination.toUtf8().constData(), archive_entry_pathname(entry));
+        archive_entry_set_pathname(entry, new_entry);
+        free(new_entry);
+    }
 
-    QFuture<void> *future = new QFuture<void>;
-    mutex.unlock();
-    *future = QtConcurrent::map(entries ,[this](QSharedPointer<struct archive_entry> entry){
-            QMutexLocker locker(&mutex);
-            if(!Destination.isEmpty()) {
-                char* new_entry = concat(Destination.toUtf8().constData(), archive_entry_pathname(entry.data()));
-                archive_entry_set_pathname(entry.data(), new_entry);
-                free(new_entry);
-            }
+    QString checkfile = QString(archive_entry_pathname(entry));
+    bool extract = (!OnlyExtract.isEmpty() && !OnlyExtract.contains(checkfile)) ? false : true;
+    if(extract) {
+        // Signal that we are extracting this file.
+        emit(extracting(checkfile));
+        // ---
 
-            int ret = 0;
-            QString checkfile = QString(archive_entry_pathname(entry.data()));
-            bool extract = (!OnlyExtract.isEmpty() && !OnlyExtract.contains(checkfile)) ? false : true;
-            if(extract) {
-
-            // Signal that we are extracting this file.
-             emit(extracting(checkfile));
-            // ---
-
-            ret = archive_write_header(ext.data(), entry.data());
-            if (ret == ARCHIVE_OK) {
+        ret = archive_write_header(ext.data(), entry);
+        if (ret == ARCHIVE_OK){
                 {
                     const void *buff;
                     size_t size;
@@ -297,7 +271,7 @@ Extractor &Extractor::start(void)
 #else
                     off_t offset;
 #endif
-                    for (ret = 0;;){
+                    for (;;){
                         ret = archive_read_data_block(archive.data(), &buff, &size, &offset);
                         if (ret == ARCHIVE_EOF) {
                             break;
@@ -313,9 +287,11 @@ Extractor &Extractor::start(void)
                 }
                 ret = archive_write_finish_entry(ext.data());
                 if (ret == ARCHIVE_FATAL) {
+                    ret = ARCHIVE_EOF;
                     emit(error(ARCHIVE_UNCAUGHT_ERROR, checkfile));
                     return;
                 }
+                ret = ARCHIVE_OK;
                 
                 // Signal that we successfully extracted this file.
                 emit(extracted(checkfile));
@@ -324,49 +300,49 @@ Extractor &Extractor::start(void)
         
         }
         return;
-    });
-    Watcher->setFuture(*future);
+    })
+    .start();
     return *this;
 }
 
 Extractor &Extractor::pause(void)
 {
-    Watcher->pause();
+    UNBlocker->pause();
     return *this;
 }
 
 Extractor &Extractor::resume(void)
 {
-    Watcher->resume();
+    UNBlocker->resume();
     return *this;
 }
 
 Extractor &Extractor::cancel(void)
 {
-    Watcher->cancel();
+    UNBlocker->cancel();
     return *this;
 }
 
 bool Extractor::isRunning() const
 {
-    return Watcher->isRunning();
+    return UNBlocker->isRunning();
 }
 bool Extractor::isCanceled() const
 {
-    return Watcher->isCanceled();
+    return UNBlocker->isCanceled();
 }
 bool Extractor::isPaused() const
 {
-    return Watcher->isPaused();
+    return UNBlocker->isPaused();
 }
 bool Extractor::isStarted() const
 {
-    return Watcher->isStarted();
+    return UNBlocker->isStarted();
 }
 
 Extractor &Extractor::setFunc(short signal, std::function<void(void)> function)
 {
-    switch(signal) {
+    switch(signal){
     case STARTED:
         connect(this, &Extractor::started, function);
         break;

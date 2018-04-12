@@ -110,6 +110,264 @@ COMPRESSING
 // ---
 
 /*
+ * Class UNBlock <- Inherits QObject.
+ * -------------
+ *
+ *  This is a advanced for-loop with C++11 features
+ *  backed up by Qt5 Framework.
+*/
+class UNBlock : public QObject
+{
+    Q_OBJECT
+public:
+    explicit UNBlock(QObject *parent = nullptr)
+        : QObject(parent)
+    {
+        return;
+    }
+
+    explicit UNBlock(
+                std::function<int(void)> initializer ,
+                std::function<int(void)> condition,
+                std::function<void(void)> expression ,
+                std::function<void(void)> block,
+                int endpoint ,
+                int TIterations = 0
+    )
+        : QObject(nullptr)
+    {
+        setInitializer(initializer)
+        .setCondition(condition)
+        .setExpression(expression)
+        .setCodeBlock(block)
+        .setEndpoint(endpoint)
+        .setTotalIterations(TIterations);
+        return;
+    }
+
+    UNBlock &setInitializer(std::function<int(void)> initialize)
+    {
+        QMutexLocker locker(&Mutex);
+        initializer = initialize;
+        return *this;
+    }
+
+    UNBlock &setCondition(std::function<int(void)> con)
+    {
+        QMutexLocker locker(&Mutex);
+        condition = con;
+        return *this;
+    }
+
+    UNBlock &setExpression(std::function<void(void)> exp)
+    {
+        QMutexLocker locker(&Mutex);
+        expression = exp;
+        return *this;
+    }
+
+    UNBlock &setCodeBlock(std::function<void(void)> block)
+    {
+        QMutexLocker locker(&Mutex);
+        codeBlock = block;
+        return *this;
+    }
+
+    UNBlock &setEndpoint(int epoint)
+    {
+        QMutexLocker locker(&Mutex);
+        endpoint = epoint;
+        return *this;
+    }
+
+    UNBlock &setTotalIterations(int total)
+    {
+        QMutexLocker locker(&Mutex);
+        TIterations = total;
+        return *this;
+    }
+
+    ~UNBlock(){
+        return;
+    }
+
+public Q_SLOTS:
+    UNBlock &waitForFinished(void)
+    {
+        QEventLoop Freeze;
+        connect(this , &UNBlock::finished , &Freeze , &QEventLoop::quit);
+        Freeze.exec();
+        disconnect(this , &UNBlock::finished , &Freeze , &QEventLoop::quit);
+        return *this;
+    }
+    
+    UNBlock &start(void)
+    {
+        QMutexLocker locker(&Mutex);
+        _bStarted |= true;
+
+        Future = new QFuture<void>;
+        *Future = QtConcurrent::run(this , &UNBlock::loop);
+        return *this;
+    }
+
+    UNBlock &cancel(void)
+    {
+        QMutexLocker locker(&Mutex);
+        if(isRunning()){
+            _bIsCancelRequested |= true;
+        }
+        return *this;
+    }
+
+    UNBlock &pause(void)
+    {
+        QMutexLocker locker(&Mutex);
+        if(isStarted()){
+            _bIsPauseRequested |= true;
+        }
+        return *this;
+    }
+
+    UNBlock &resume(void)
+    {
+        QMutexLocker locker(&Mutex);
+        if(isPaused()){
+            emit(doResume());
+        }
+        return *this;
+    }
+
+    bool isRunning(void) const
+    {
+        return _bStarted;
+    }
+
+    bool isCanceled(void) const
+    {
+        return _bCanceled;
+    }
+
+    bool isPaused(void) const
+    {
+        return _bPaused;
+    }
+
+    bool isStarted(void) const
+    {
+        return _bStarted;
+    }
+
+private Q_SLOTS:
+    void loop(void)
+    {
+        emit(started());
+        if(initializer()){ // This has to be done once.
+            return;
+        }
+        int counter = 0;
+        while(condition() != endpoint)
+        {
+           /*
+            * Check if the condition is 
+            * not the endpoint.
+            * If cancel is requested then
+            * simply exit.
+           */
+           {
+            Mutex.lock();
+            if(_bIsCancelRequested){
+                _bIsCancelRequested &= false;
+                _bCanceled |= true;
+                emit(canceled());
+                Mutex.unlock();
+                break;
+            }else if(_bIsPauseRequested){
+                    Mutex.unlock();
+                    QEventLoop Freeze;
+                    _bIsPauseRequested &= false;
+                    _bPaused |= true;
+                    connect(this , SIGNAL(doResume()) , &Freeze , SLOT(quit()));
+                    emit(paused());
+                    Freeze.exec(); // Freezes the thread.
+
+                    /*
+                     * This section will 
+                     * be executed when resume
+                     * slot is shot.
+                    */
+                    _bStarted |= true;
+                    _bPaused &= false;
+                    disconnect(this , SIGNAL(resume()) , &Freeze , SLOT(quit()));
+                    emit(resumed());
+                    // ------
+            }
+            Mutex.unlock();
+           }
+           // ------
+        
+           /*
+            * Execute Instructions in 
+            * the loop.
+           */
+           codeBlock();
+           // ------
+
+           /*
+            * Give Progress for the 
+            * user if available.
+           */
+           if(TIterations){ // Avoid zero division error.
+            int percentage = static_cast<int>(((counter) * 100.0) / (TIterations));
+            emit(progress(percentage));
+            ++counter;
+           }
+           // ------
+
+           /*
+            * Expression /
+            * Increament.
+           */
+           expression();
+           // ------
+        }
+
+        emit(finished());
+        return;
+    }
+
+Q_SIGNALS:
+    void started(void);
+    void finished(void);
+    void paused(void);
+    void resumed(void);
+    void doResume(void);
+    void canceled(void);
+    void progress(int);
+    
+private:
+    bool _bStarted = false,
+         _bPaused = false,
+         _bCanceled = false,
+         _bIsCancelRequested = false,
+         _bIsPauseRequested = false;
+
+    std::function<int(void)> initializer;
+    std::function<int(void)> condition;
+    std::function<void(void)> expression;
+    std::function<void(void)> codeBlock;
+    int endpoint;
+    int TIterations = 0;
+
+    QMutex Mutex;
+    QFuture<void> *Future = nullptr;
+};
+
+/*
+ * -------
+*/
+
+/*
  * Class Extractor <- Inherits QObject.
  * ---------------
  *
@@ -185,21 +443,21 @@ Q_SIGNALS:
     void error(short, const QString&);
 
 private Q_SLOTS:
-    // For the actual extraction.
     QString cleanDestPath(const QString& input);
     char *concat(const char *dest, const char *src);
 private:
+    int ret = 0;
     QSharedPointer<struct archive> archive;
     QSharedPointer<struct archive> ext;
-    QList<QSharedPointer<struct archive_entry>> entries;
-
+    struct archive_entry *entry;
+    
     QMutex mutex;
     int BlockSize = 10240; // Default BlockSize.
     QString ArchivePath;
     QString Destination;
     QString Password;
     QStringList OnlyExtract;
-    QFutureWatcher<void> *Watcher = nullptr;
+    UNBlock *UNBlocker = nullptr;
 }; // Extractor Class Ends
 
 /*
