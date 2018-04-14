@@ -411,6 +411,7 @@ private slots:
         QFile::remove(Test4OutputFile); // TEST4
         QFile::remove(Test5OutputFile); // TEST5
         QFile::remove(Test6OutputFile); // TEST6
+        QFile::remove(TestOutputDir + "/Output.txt");  // JUNK FILE.
     }
 };
 
