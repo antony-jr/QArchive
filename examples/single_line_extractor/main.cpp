@@ -1,2 +1,2 @@
 #include <QArchive>
-main(void){while((QArchive::Extractor("test.7z").start().waitForFinished().isRunning())){}}
+main(void){while((QArchive::Extractor("Test4.zip").setPassword("Test4").start().waitForFinished().isRunning())){}}

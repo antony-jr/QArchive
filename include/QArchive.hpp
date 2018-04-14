@@ -87,7 +87,9 @@ DISK_OPEN_ERROR,
 DISK_READ_ERROR,
 DESTINATION_NOT_FOUND,
 FILE_NOT_EXIST,
-NOT_ENOUGH_MEMORY
+NOT_ENOUGH_MEMORY,
+ARCHIVE_WRONG_PASSWORD,
+ARCHIVE_PASSWORD_NOT_GIVEN
 };
 // ---
 
@@ -101,6 +103,8 @@ FINISHED,
 PAUSED,
 RESUMED,
 CANCELED,
+PASSWORD_REQUIRED,
+PROGRESS,
 EXTRACTED,
 EXTRACTING,
 COMPRESSED,
@@ -130,7 +134,7 @@ public:
                 std::function<int(void)> initializer ,
                 std::function<int(void)> condition,
                 std::function<void(void)> expression ,
-                std::function<void(void)> block,
+                std::function<int(void)> block,
                 int endpoint ,
                 int TIterations = 0
     )
@@ -166,7 +170,7 @@ public:
         return *this;
     }
 
-    UNBlock &setCodeBlock(std::function<void(void)> block)
+    UNBlock &setCodeBlock(std::function<int(void)> block)
     {
         QMutexLocker locker(&Mutex);
         codeBlock = block;
@@ -194,17 +198,21 @@ public:
 public Q_SLOTS:
     UNBlock &waitForFinished(void)
     {
-        QEventLoop Freeze;
-        connect(this , &UNBlock::finished , &Freeze , &QEventLoop::quit);
-        Freeze.exec();
-        disconnect(this , &UNBlock::finished , &Freeze , &QEventLoop::quit);
+        if(!isRunning() || Future == nullptr){
+            return *this;
+        }
+        Future->waitForFinished(); // Sync.
         return *this;
     }
     
     UNBlock &start(void)
     {
         QMutexLocker locker(&Mutex);
-        _bStarted |= true;
+        if(isRunning() || isPaused() || _bIsCancelRequested){
+            return *this;
+        }
+
+        _bStarted = true;
 
         Future = new QFuture<void>;
         *Future = QtConcurrent::run(this , &UNBlock::loop);
@@ -213,34 +221,39 @@ public Q_SLOTS:
 
     UNBlock &cancel(void)
     {
-        QMutexLocker locker(&Mutex);
-        if(isRunning()){
-            _bIsCancelRequested |= true;
+        if(!isRunning()){
+            return *this;
         }
+        setCancelRequested(true);
         return *this;
     }
 
     UNBlock &pause(void)
     {
-        QMutexLocker locker(&Mutex);
-        if(isStarted()){
-            _bIsPauseRequested |= true;
+        if(!isStarted()){
+            return *this;
         }
+        setPauseRequested(true);
         return *this;
     }
 
     UNBlock &resume(void)
     {
-        QMutexLocker locker(&Mutex);
-        if(isPaused()){
-            emit(doResume());
+        if(!isPaused()){
+            return *this;
         }
+        QMutexLocker locker(&Mutex);
+        emit(doResume());
         return *this;
     }
 
     bool isRunning(void) const
     {
-        return _bStarted;
+        bool _bFutureRunning = false;
+        if(Future != nullptr){
+            _bFutureRunning = Future->isRunning();
+        }
+        return (_bStarted | _bFutureRunning);
     }
 
     bool isCanceled(void) const
@@ -261,48 +274,45 @@ public Q_SLOTS:
 private Q_SLOTS:
     void loop(void)
     {
-        emit(started());
         if(initializer()){ // This has to be done once.
-            return;
+               setStarted(false);
+               setCanceled(true);
+               emit(canceled());
+               return;
         }
-        int counter = 0;
-        while(condition() != endpoint)
+
+        emit(started());
+
+        int counter = 1;
+        while(condition() != endpoint) 
         {
-           /*
-            * Check if the condition is 
-            * not the endpoint.
-            * If cancel is requested then
-            * simply exit.
-           */
+          // Check if cancel or pause is shot.
            {
-            Mutex.lock();
             if(_bIsCancelRequested){
-                _bIsCancelRequested &= false;
-                _bCanceled |= true;
+                setCancelRequested(false);
+                setCanceled(true);
                 emit(canceled());
-                Mutex.unlock();
-                break;
+                return;
             }else if(_bIsPauseRequested){
-                    Mutex.unlock();
                     QEventLoop Freeze;
-                    _bIsPauseRequested &= false;
-                    _bPaused |= true;
+                    setPauseRequested(false);
+                    setPaused(true);
+
                     connect(this , SIGNAL(doResume()) , &Freeze , SLOT(quit()));
                     emit(paused());
+                    
                     Freeze.exec(); // Freezes the thread.
-
                     /*
                      * This section will 
                      * be executed when resume
                      * slot is shot.
                     */
-                    _bStarted |= true;
-                    _bPaused &= false;
-                    disconnect(this , SIGNAL(resume()) , &Freeze , SLOT(quit()));
+                    setStarted(true);
+                    setPaused(false);
+                    disconnect(this , SIGNAL(doResume()) , &Freeze , SLOT(quit()));
                     emit(resumed());
                     // ------
             }
-            Mutex.unlock();
            }
            // ------
         
@@ -310,7 +320,12 @@ private Q_SLOTS:
             * Execute Instructions in 
             * the loop.
            */
-           codeBlock();
+           if(codeBlock()){
+                setStarted(false); 
+                setCanceled(true);
+                emit(canceled());
+                return;
+           }
            // ------
 
            /*
@@ -332,10 +347,50 @@ private Q_SLOTS:
            // ------
         }
 
+        // reset
+        {
+            QMutexLocker locker(&Mutex);
+            _bStarted = _bPaused = _bCanceled = _bIsCancelRequested = _bIsPauseRequested = false;
+        }
+        // ---
+
         emit(finished());
         return;
     }
 
+    void setStarted(bool ch)
+    {
+        QMutexLocker locker(&Mutex);
+        _bStarted = ch;
+        return;
+    }
+    void setPaused(bool ch)
+    {
+        QMutexLocker locker(&Mutex);
+        _bPaused = ch;
+        return;
+    }
+
+    void setCanceled(bool ch)
+    {
+        QMutexLocker locker(&Mutex);
+        _bCanceled = ch;
+        return;
+    }
+
+    void setCancelRequested(bool ch)
+    {
+        QMutexLocker locker(&Mutex);
+        _bIsCancelRequested = ch;
+        return;
+    }
+    
+    void setPauseRequested(bool ch)
+    {
+        QMutexLocker locker(&Mutex);
+        _bIsPauseRequested = ch;
+        return;
+    }
 Q_SIGNALS:
     void started(void);
     void finished(void);
@@ -355,7 +410,7 @@ private:
     std::function<int(void)> initializer;
     std::function<int(void)> condition;
     std::function<void(void)> expression;
-    std::function<void(void)> codeBlock;
+    std::function<int(void)> codeBlock;
     int endpoint;
     int TIterations = 0;
 
@@ -409,9 +464,11 @@ public:
     explicit Extractor(const QString&, const QString&);
     Extractor &setArchive(const QString&);
     Extractor &setArchive(const QString&, const QString&);
+    Extractor &setPassword(const QString&);
+    Extractor &setAskPassword(bool); 
+    Extractor &setBlocksize(int);
     Extractor &onlyExtract(const QString&);
     Extractor &onlyExtract(const QStringList&);
-    Extractor &clear(void);
     ~Extractor();
 
 public Q_SLOTS:
@@ -429,7 +486,7 @@ public Q_SLOTS:
     Extractor &setFunc(short, std::function<void(void)>);
     Extractor &setFunc(short, std::function<void(QString)>); // extracting and extracted.
     Extractor &setFunc(std::function<void(short,QString)>); // error.
-    Extractor &setFunc(std::function<void(int)>); // progress bar.
+    Extractor &setFunc(short , std::function<void(int)>); // progress bar and password required.
 
 Q_SIGNALS:
     void started(void);
@@ -438,20 +495,81 @@ Q_SIGNALS:
     void resumed(void);
     void canceled(void);
     void progress(int);
+    void passwordRequired(int);
+    void submitPassword(void);
     void extracted(const QString&);
     void extracting(const QString&);
     void error(short, const QString&);
 
 private Q_SLOTS:
+    // The actual extractor.
+    int init(void); // Allocate and Open Archive.
+    int condition(); // evaluates the condition. ( Checks if EOF ).
+    int loopContent(void); // This is the loop body. ( Writes to Disk ).
+
+    // Counts the total number of files in the archive.
+    // Warning: This function is sync.
+    int totalFileCount(void);
+    // ---
+
+    // utils
+    void clear(void);
     QString cleanDestPath(const QString& input);
     char *concat(const char *dest, const char *src);
 private:
+    
+        // Password Callback
+      static const char *password_callback(struct archive *a, void *_client_data)
+      {
+          (void)a; /* UNUSED */
+          Extractor *e = (Extractor*)_client_data;
+          if(e->AskPassword){
+           if(e->PasswordTries > 0 || e->Password.isEmpty()){
+             QEventLoop Freeze;
+             e->connect(e , SIGNAL(submitPassword()) , &Freeze , SLOT(quit()));
+             QTimer::singleShot(1000 , [e](){
+                    if(e->PasswordTries > 0){
+                    e->ret = ARCHIVE_WRONG_PASSWORD;
+                    e->error(ARCHIVE_WRONG_PASSWORD , e->ArchivePath);
+                    }
+                    emit(e->passwordRequired(e->PasswordTries));
+             }); // emit signal.
+             Freeze.exec();
+             e->disconnect(e , SIGNAL(submitPassword()) , &Freeze , SLOT(quit()));
+             if(e->Password.isEmpty()){
+                  e->ret = ARCHIVE_PASSWORD_NOT_GIVEN;
+                  e->error(ARCHIVE_PASSWORD_NOT_GIVEN , e->ArchivePath);
+                  return NULL;
+             }
+           }
+          }else{
+              if(e->Password.isEmpty()){
+                    e->ret = ARCHIVE_PASSWORD_NOT_GIVEN;
+                   e->error(ARCHIVE_PASSWORD_NOT_GIVEN , e->ArchivePath);
+                   return NULL;
+              }else if(e->PasswordTries > 0){
+                  e->ret = ARCHIVE_WRONG_PASSWORD;
+                     e->error(ARCHIVE_WRONG_PASSWORD , e->ArchivePath);
+                     return NULL;
+              }
+          }
+          e->PasswordTries += 1;
+          return e->Password.toUtf8().constData();
+      }
+      // ---
+
+
     int ret = 0;
     QSharedPointer<struct archive> archive;
     QSharedPointer<struct archive> ext;
     struct archive_entry *entry;
     
     QMutex mutex;
+    bool AskPassword = false; // Default.
+    int PasswordTries = 0; // Default.
+    int flags = ARCHIVE_EXTRACT_TIME |
+                ARCHIVE_EXTRACT_PERM | 
+                ARCHIVE_EXTRACT_SECURE_NODOTDOT; // default.
     int BlockSize = 10240; // Default BlockSize.
     QString ArchivePath;
     QString Destination;
