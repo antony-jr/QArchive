@@ -224,7 +224,8 @@ private slots:
     void usingWrongPasswordAndAfter3TriesGiveTheCorrectPassword()
     {
         QArchive::Extractor e(TestCase5ArchivePath , TestCase5OutputDir);
-        e.setPassword(Test5WrongPassword)
+        e.setAskPassword(true)
+        .setPassword(Test5WrongPassword)
         .setFunc(QArchive::PASSWORD_REQUIRED , [&e](int Tries){
             if(Tries == 3) { // CHECK IF THIS THE THIRD TRY.
                 e.setPassword(Test5Password); // CORRECT PASSWORD.
@@ -271,7 +272,8 @@ private slots:
     {
         bool gotArchivePasswordNotGiven = false;
         QArchive::Extractor e(TestCase6ArchivePath , TestCase6OutputDir);
-        e.setPassword(Test6WrongPassword)
+        e.setAskPassword(true)
+        .setPassword(Test6WrongPassword)
         .setFunc(QArchive::PASSWORD_REQUIRED , [&e](int Tries){
             (void)Tries; // UNUSED
             e.setPassword(QString()); // CANCEL PRESISTENT PASSWORD CALLBACK
@@ -287,7 +289,8 @@ private slots:
                       QFAIL(QTest::toString("bad archive! :: " + eMsg));
                       break;
                   case QArchive::ARCHIVE_UNCAUGHT_ERROR:
-                      QFAIL(QTest::toString("fatal error. :: " + eMsg));
+                      // THIS ERROR WILL ALWAYS FOLLOW PASSWORD ERRORS.
+                      QVERIFY(gotArchivePasswordNotGiven == true);
                       break;
                   case QArchive::DESTINATION_NOT_FOUND:
                       QFAIL(QTest::toString("Destination not found. ::  " + eMsg));
@@ -354,6 +357,49 @@ private slots:
 
          QVERIFY(gotDestinationNotFoundError == true); // DID WE GET THE RIGHT ERROR ?
     }
+
+    void testArchivePasswordNotGiven(void)
+    {
+        bool gotArchivePasswordNotGiven = false;
+        QArchive::Extractor(TestCase6ArchivePath , TestOutputDir)
+         .setFunc([&gotArchivePasswordNotGiven](short code , QString file){
+             (void)file; // UNUSED
+             if(code == QArchive::ARCHIVE_PASSWORD_NOT_GIVEN){
+                 QVERIFY((gotArchivePasswordNotGiven = true));
+             }else if(code == QArchive::ARCHIVE_UNCAUGHT_ERROR){
+             // THIS WILL BE THE FOLLOWING ERROR AFTER OUR EXPECTED ERROR    
+             QVERIFY(gotArchivePasswordNotGiven == true);
+             }else{
+                 QFAIL("UNEXPECTED ERROR");
+             }
+         })
+         .start()
+         .waitForFinished();
+
+         QVERIFY(gotArchivePasswordNotGiven == true); // FAIL IF WE GOT THE WRONG ERROR
+    }
+
+    void testArchiveWrongPassword(void)
+     {
+         bool gotArchiveWrongPassword = false;
+         QArchive::Extractor(TestCase6ArchivePath , TestOutputDir)
+          .setPassword("Wrong Password")
+          .setFunc([&gotArchiveWrongPassword](short code , QString file){
+              (void)file; // UNUSED
+              if(code == QArchive::ARCHIVE_WRONG_PASSWORD){
+                  QVERIFY((gotArchiveWrongPassword = true));
+              }else if(code == QArchive::ARCHIVE_UNCAUGHT_ERROR){
+              // THIS WILL BE THE FOLLOWING ERROR AFTER OUR EXPECTED ERROR
+              QVERIFY(gotArchiveWrongPassword == true);
+              }else{
+                  QFAIL("UNEXPECTED ERROR");
+              }
+          })
+          .start()
+          .waitForFinished();
+
+          QVERIFY(gotArchiveWrongPassword == true); // FAIL IF WE GOT THE WRONG ERROR
+     }
 
     void cleanupTestCase(void)
     {
