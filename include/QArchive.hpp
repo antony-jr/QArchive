@@ -82,14 +82,16 @@ enum {
     ARCHIVE_READ_ERROR,
     ARCHIVE_UNCAUGHT_ERROR,
     ARCHIVE_FATAL_ERROR,
-    INVALID_DEST_PATH,
+    ARCHIVE_WRONG_PASSWORD,
+    ARCHIVE_PASSWORD_NOT_GIVEN,
+    ARCHIVE_WRITE_OPEN_ERROR,
     DISK_OPEN_ERROR,
     DISK_READ_ERROR,
     DESTINATION_NOT_FOUND,
     FILE_NOT_EXIST,
+    INVALID_DEST_PATH,
     NOT_ENOUGH_MEMORY,
-    ARCHIVE_WRONG_PASSWORD,
-    ARCHIVE_PASSWORD_NOT_GIVEN
+    FILE_OPEN_FAILED
 };
 // ---
 
@@ -98,17 +100,17 @@ enum {
 * setFunc.
 */
 enum {
-    STARTED,
-    FINISHED,
-    PAUSED,
-    RESUMED,
     CANCELED,
-    PASSWORD_REQUIRED,
-    PROGRESS,
+    COMPRESSED,
+    COMPRESSING,
     EXTRACTED,
     EXTRACTING,
-    COMPRESSED,
-    COMPRESSING
+    FINISHED,
+    PASSWORD_REQUIRED,
+    PROGRESS,
+    RESUMED,
+    STARTED,
+    PAUSED
 };
 
 // ---
@@ -130,6 +132,7 @@ public:
         std::function<int(void)> condition,
         std::function<void(void)> expression,
         std::function<int(void)> block,
+        std::function<void(int)> deinitializer,
         int endpoint,
         int TIterations = 0);
 
@@ -137,6 +140,7 @@ public:
     UNBlock &setCondition(std::function<int(void)>);
     UNBlock &setExpression(std::function<void(void)>);
     UNBlock &setCodeBlock(std::function<int(void)>);
+    UNBlock &setDeInitializer(std::function<void(int)>);
     UNBlock &setEndpoint(int);
     UNBlock &setTotalIterations(int);
 
@@ -179,6 +183,7 @@ private:
     std::function<int(void)> condition;
     std::function<void(void)> expression;
     std::function<int(void)> codeBlock;
+    std::function<void(int)> deinitializer;
     int endpoint;
     int TIterations = 0;
 
@@ -253,9 +258,8 @@ public Q_SLOTS:
 
     Extractor &setFunc(short, std::function<void(void)>);
     Extractor &setFunc(short, std::function<void(QString)>); // extracting and extracted.
-    Extractor &setFunc(std::function<void(short,QString)>); // error.
     Extractor &setFunc(short, std::function<void(int)>);  // progress bar and password required.
-
+    Extractor &setFunc(std::function<void(short,QString)>); // error.
 Q_SIGNALS:
     void started(void);
     void finished(void);
@@ -368,8 +372,8 @@ enum {
     CPIO,
     GZIP,
     RAR,
-    ZIP,
-    SEVEN_ZIP
+    SEVEN_ZIP,
+    ZIP
 };
 
 /*
@@ -418,13 +422,17 @@ public:
     explicit Compressor(const QString& archive, const QString& file);
     Compressor &setArchive(const QString& archive);
     Compressor &setArchiveFormat(short type);
+    Compressor &setPassword(const QString&);
+    Compressor &setBlocksize(int);
+    Compressor &setCompressionLevel(int);
     Compressor &addFiles(const QString& file);
     Compressor &addFiles(const QStringList& files);
     Compressor &removeFiles(const QString& file);
     Compressor &removeFiles(const QStringList& files);
+    Compressor &clear(void);
     ~Compressor();
 
-public slots:
+public Q_SLOTS:
     Compressor &waitForFinished(void);
     Compressor &start(void);
     Compressor &pause(void);
@@ -438,35 +446,46 @@ public slots:
 
     Compressor &setFunc(short, std::function<void(void)>);
     Compressor &setFunc(short, std::function<void(QString)>); // compressing and compressed.
-    Compressor &setFunc(std::function<void(short,QString)>); // error.
     Compressor &setFunc(std::function<void(int)>); // progress bar.
-private slots:
-    void connectWatcher(void);
+    Compressor &setFunc(std::function<void(short,QString)>); // error.
+private Q_SLOTS:
+    // The actual Compressor.
+    int init(void); // Allocates everything needed.
+    int condition(void); // EOF ?
+    void expression(void); // Increament.
+    int loopContent(void); // Write to archive handle.
+    void deinit(int); // clear everything.
+    // ------
+
+    // Utils
+    QString isDirInFilesList(void);
+    void populateDirectory(void);
     void checkNodes(void);
     void getArchiveFormat(void);
-    void compress_node(QString,QString);
-
-signals:
+Q_SIGNALS:
     void started();
     void finished();
     void paused();
     void resumed();
     void canceled();
     void progress(int);
-
     void compressing(const QString&);
     void compressed(const QString&);
     void error(short, const QString&);
-
 private:
+    int ret = 0;
     QSharedPointer<struct archive> archive;
+    QSaveFile tempFile; // Temporary file for the archive.
 
     QMutex mutex;
+    int BlockSize = 10240; // Default BlockSize.
+    int CompressionLevel = 0; // Use Default.
+    short archiveFormat = NO_FORMAT; // Defaults to gzip.
     QString archivePath;
+    QString Password;
+    QMap<QString, QString>::iterator mapIter;
     QMap<QString, QString> nodes;  // (1)-> File path , (2)-> entry in archive.
-    short archiveFormat = NO_FORMAT; // Default
-
-    QFutureWatcher<void> watcher;
+    UNBlock *UNBlocker = nullptr;
 }; // Compressor Class Ends
 
 /*

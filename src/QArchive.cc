@@ -96,6 +96,7 @@ UNBlock::UNBlock(
     std::function<int(void)> condition,
     std::function<void(void)> expression,
     std::function<int(void)> block,
+    std::function<void(int)> deinitializer,
     int endpoint,
     int TIterations
 )
@@ -105,6 +106,7 @@ UNBlock::UNBlock(
     .setCondition(condition)
     .setExpression(expression)
     .setCodeBlock(block)
+    .setDeInitializer(deinitializer)
     .setEndpoint(endpoint)
     .setTotalIterations(TIterations);
     return;
@@ -149,6 +151,14 @@ UNBlock &UNBlock::setCodeBlock(std::function<int(void)> block)
     codeBlock = block;
     return *this;
 }
+
+UNBlock &UNBlock::setDeInitializer(std::function<void(int)> deinit)
+{
+    QMutexLocker locker(&Mutex);
+    deinitializer = deinit;
+    return *this;
+}
+
 
 UNBlock &UNBlock::setEndpoint(int epoint)
 {
@@ -255,14 +265,32 @@ bool UNBlock::isStarted(void) const
 
 void UNBlock::loop(void)
 {
-    if(initializer()) { // This has to be done once.
-        setStarted(false);
-        setCanceled(true);
-        emit(canceled());
+    if(initializer) {
+        if(initializer()) { // This has to be done once.
+            setStarted(false);
+            setCanceled(true);
+            if(deinitializer) {
+                deinitializer(1); // error.
+            }
+            emit(canceled());
+            return;
+        }
+    }
+    emit(started());
+
+    if(!condition) {
+        if(deinitializer) {
+            deinitializer(1); // error.
+        }
+        // reset
+        {
+            QMutexLocker locker(&Mutex);
+            _bStarted = _bPaused = _bCanceled = _bIsCancelRequested = _bIsPauseRequested = false;
+        }
+        // ---
+        emit(finished());
         return;
     }
-
-    emit(started());
 
     int counter = 1;
     while(condition() != endpoint) {
@@ -271,6 +299,9 @@ void UNBlock::loop(void)
             if(_bIsCancelRequested) {
                 setCancelRequested(false);
                 setCanceled(true);
+                if(deinitializer) {
+                    deinitializer(1); // report error.
+                }
                 emit(canceled());
                 return;
             } else if(_bIsPauseRequested) {
@@ -300,11 +331,16 @@ void UNBlock::loop(void)
          * Execute Instructions in
          * the loop.
         */
-        if(codeBlock()) {
-            setStarted(false);
-            setCanceled(true);
-            emit(canceled());
-            return;
+        if(codeBlock) {
+            if(codeBlock()) {
+                setStarted(false);
+                setCanceled(true);
+                if(deinitializer) {
+                    deinitializer(1); // Non-Zero -> error.
+                }
+                emit(canceled());
+                return;
+            }
         }
         // ------
 
@@ -323,8 +359,15 @@ void UNBlock::loop(void)
          * Expression /
          * Increament.
         */
-        expression();
+        if(expression) {
+            expression();
+        }
         // ------
+    }
+
+    // deinit
+    if(deinitializer) {
+        deinitializer(0); // Zero -> no error.
     }
 
     // reset
@@ -533,6 +576,7 @@ Extractor &Extractor::onlyExtract(const QStringList &filepaths)
 */
 Extractor &Extractor::waitForFinished(void)
 {
+    QMutexLocker locker(&mutex);
     UNBlocker->waitForFinished(); // Sync.
     return *this;
 }
@@ -547,9 +591,6 @@ Extractor &Extractor::start(void)
     UNBlocker->setInitializer([this]() -> int { return init(); })
     .setCondition([this]() -> int { return condition(); })
     .setEndpoint(ARCHIVE_EOF)
-    .setExpression([this]() {
-        return;
-    })
     .setCodeBlock([this]() {
         return loopContent();
     })
@@ -560,18 +601,21 @@ Extractor &Extractor::start(void)
 
 Extractor &Extractor::pause(void)
 {
+    QMutexLocker locker(&mutex);
     UNBlocker->pause();
     return *this;
 }
 
 Extractor &Extractor::resume(void)
 {
+    QMutexLocker locker(&mutex);
     UNBlocker->resume();
     return *this;
 }
 
 Extractor &Extractor::cancel(void)
 {
+    QMutexLocker locker(&mutex);
     UNBlocker->cancel();
     return *this;
 }
@@ -595,6 +639,7 @@ bool Extractor::isStarted() const
 
 Extractor &Extractor::setFunc(short signal, std::function<void(void)> function)
 {
+    QMutexLocker locker(&mutex);
     switch(signal) {
     case STARTED:
         connect(this, &Extractor::started, function);
@@ -619,6 +664,7 @@ Extractor &Extractor::setFunc(short signal, std::function<void(void)> function)
 
 Extractor &Extractor::setFunc(short signal, std::function<void(QString)> function)
 {
+    QMutexLocker locker(&mutex);
     if(signal == EXTRACTED) {
         connect(this, &Extractor::extracted, function);
     } else {
@@ -629,12 +675,14 @@ Extractor &Extractor::setFunc(short signal, std::function<void(QString)> functio
 
 Extractor &Extractor::setFunc(std::function<void(short,QString)> function)
 {
+    QMutexLocker locker(&mutex);
     connect(this, &Extractor::error, function);
     return *this;
 }
 
 Extractor &Extractor::setFunc(short signal, std::function<void(int)> function)
 {
+    QMutexLocker locker(&mutex);
     if(signal == PROGRESS) {
         connect(this, &Extractor::progress, function);
     } else {
@@ -819,6 +867,13 @@ void Extractor::clear(void)
     if(isRunning() || isPaused()) {
         return;
     }
+
+    archive.reset();
+    ext.reset();
+
+    ret = PasswordTries = 0;
+    AskPassword = false;
+    BlockSize = 10240;
     ArchivePath.clear();
     Destination.clear();
     Password.clear();
@@ -862,14 +917,26 @@ char *Extractor::concat(const char *dest, const char *src)
 Compressor::Compressor(QObject *parent)
     : QObject(parent)
 {
-    connectWatcher();
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     return;
 }
 
 Compressor::Compressor(const QString& archive)
     : QObject(nullptr)
 {
-    connectWatcher();
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     setArchive(archive);
     return;
 }
@@ -877,7 +944,13 @@ Compressor::Compressor(const QString& archive)
 Compressor::Compressor(const QString& archive, const QStringList& files)
     : QObject(nullptr)
 {
-    connectWatcher();
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     setArchive(archive);
     addFiles(files);
     return;
@@ -887,7 +960,13 @@ Compressor::Compressor(const QString& archive, const QStringList& files)
 Compressor::Compressor(const QString& archive, const QString& file)
     : QObject(nullptr)
 {
-    connectWatcher();
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
+    connect(UNBlocker, SIGNAL(progress(int)), this, SIGNAL(progress(int)));
     setArchive(archive);;
     addFiles(file);
     return;
@@ -895,10 +974,17 @@ Compressor::Compressor(const QString& archive, const QString& file)
 
 Compressor::~Compressor()
 {
+    if(isPaused()) {
+        resume();
+    }
     if(isRunning()) {
         cancel();
         waitForFinished();
-        mutex.unlock();
+        UNBlocker->disconnect();
+        // blocks any-thread until every
+        // job is stopped successfully ,
+        // Otherwise this can cause a
+        // segfault.
     }
     return;
 }
@@ -915,6 +1001,9 @@ Compressor::~Compressor()
 Compressor &Compressor::setArchive(const QString &archive)
 {
     QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
     archivePath = QDir::cleanPath(archive);
     return *this;
 }
@@ -922,7 +1011,40 @@ Compressor &Compressor::setArchive(const QString &archive)
 Compressor &Compressor::setArchiveFormat(short type)
 {
     QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
     archiveFormat = type;
+    return *this;
+}
+
+Compressor &Compressor::setPassword(const QString &pwd)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+    Password = QString(pwd);
+    return *this;
+}
+
+Compressor &Compressor::setCompressionLevel(int level)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+    CompressionLevel = level;
+    return *this;
+}
+
+Compressor &Compressor::setBlocksize(int size)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+    BlockSize = size;
     return *this;
 }
 
@@ -932,19 +1054,15 @@ Compressor &Compressor::addFiles(const QString& file)
      * No like files can exist in a filesystem!
     */
     QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
     if(!nodes.contains(file)) {
         QFileInfo checkfile(file);
         if(checkfile.isFile()) {
             nodes.insert( file, checkfile.fileName());
         } else {
-            QDir dir(file);
-            QFileInfoList list = dir.entryInfoList(QDir::AllEntries);
-            for (int i = 0; i < list.size(); i++) {
-                if(list.at(i).filePath() != "." || list.at(i).filePath() != "..") {
-                    QString filep = list.at(i).filePath();
-                    nodes.insert( filep, filep );
-                }
-            }
+            nodes.insert( file, file );  // Later will be populated.
         }
     }
     return *this;
@@ -953,20 +1071,16 @@ Compressor &Compressor::addFiles(const QString& file)
 Compressor &Compressor::addFiles(const QStringList& files)
 {
     QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
     Q_FOREACH(QString file, files) {
         if(!nodes.contains(file)) {
             QFileInfo checkfile(file);
             if(checkfile.isFile()) {
                 nodes.insert( file, checkfile.fileName());
             } else {
-                QDir dir(file);
-                QFileInfoList list = dir.entryInfoList(QDir::AllEntries);
-                for (int i = 0; i < list.size(); i++) {
-                    if(list.at(i).filePath() != "." || list.at(i).filePath() != "..") {
-                        QString filep = list.at(i).filePath();
-                        nodes.insert( filep, filep );
-                    }
-                }
+                nodes.insert( file, file ); // This will be later populated.
             }
         }
     }
@@ -976,6 +1090,9 @@ Compressor &Compressor::addFiles(const QStringList& files)
 Compressor &Compressor::removeFiles(const QString& file)
 {
     QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
     nodes.remove(file);
     return *this;
 }
@@ -983,12 +1100,28 @@ Compressor &Compressor::removeFiles(const QString& file)
 Compressor &Compressor::removeFiles(const QStringList& files)
 {
     QMutexLocker locker(&mutex);
-    if(nodes.isEmpty()) {
+    if(nodes.isEmpty() || isRunning() || isPaused()) {
         return *this;
     }
     Q_FOREACH(QString file, files) {
         nodes.remove(file);
     }
+    return *this;
+}
+
+Compressor &Compressor::clear(void)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+    CompressionLevel = 0; // Use Default.
+    archiveFormat = NO_FORMAT; // Defaults to gzip.
+    archivePath.clear();
+    Password.clear();
+    nodes.clear();
+    tempFile.cancelWriting();
+    archive.reset();
     return *this;
 }
 
@@ -1002,27 +1135,145 @@ Compressor &Compressor::removeFiles(const QStringList& files)
 */
 Compressor &Compressor::waitForFinished(void)
 {
-    watcher.waitForFinished(); // Sync.
+    QMutexLocker locker(&mutex);
+    UNBlocker->waitForFinished(); // Sync.
     return *this;
 }
 
 Compressor &Compressor::start(void)
 {
-    if(isPaused()) {
-        resume();
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isStarted() || isPaused()) {
         return *this;
     }
-    mutex.lock();
+
+    UNBlocker->setInitializer([this]() -> int { return init(); })
+    .setCondition([this]() -> int { return condition(); })
+    .setEndpoint(1)
+    .setExpression([this]() {
+        expression();
+    })
+    .setCodeBlock([this]() {
+        return loopContent();
+    })
+    .setDeInitializer([this](int cancel) {
+        deinit(cancel);
+    })
+    .setTotalIterations(nodes.size())
+    .start();
+
+    return *this;
+}
+
+Compressor &Compressor::pause(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->pause();
+    return *this;
+}
+
+Compressor &Compressor::resume(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->resume();
+    return *this;
+}
+
+Compressor &Compressor::cancel(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->cancel();
+    return *this;
+}
+
+bool Compressor::isRunning() const
+{
+    return UNBlocker->isRunning();
+}
+bool Compressor::isCanceled() const
+{
+    return UNBlocker->isCanceled();
+}
+bool Compressor::isPaused() const
+{
+    return UNBlocker->isPaused();
+}
+bool Compressor::isStarted() const
+{
+    return UNBlocker->isStarted();
+}
+
+Compressor &Compressor::setFunc(short signal, std::function<void(void)> function)
+{
+    QMutexLocker locker(&mutex);
+    switch(signal) {
+    case STARTED:
+        connect(this, &Compressor::started, function);
+        break;
+    case FINISHED:
+        connect(this, &Compressor::finished, function);
+        break;
+    case PAUSED:
+        connect(this, &Compressor::paused, function);
+        break;
+    case RESUMED:
+        connect(this, &Compressor::resumed, function);
+        break;
+    case CANCELED:
+        connect(this, &Compressor::canceled, function);
+        break;
+    default:
+        break;
+    };
+    return *this;
+}
+
+Compressor &Compressor::setFunc(short signal, std::function<void(QString)> function)
+{
+    QMutexLocker locker(&mutex);
+    if(signal == COMPRESSED) {
+        connect(this, &Compressor::compressed, function);
+    } else {
+        connect(this, &Compressor::compressing, function);
+    }
+    return *this;
+}
+
+Compressor &Compressor::setFunc(std::function<void(short,QString)> function)
+{
+    QMutexLocker locker(&mutex);
+    connect(this, &Compressor::error, function);
+    return *this;
+}
+
+Compressor &Compressor::setFunc(std::function<void(int)> function)
+{
+    QMutexLocker locker(&mutex);
+    connect(this, &Compressor::progress, function);
+    return *this;
+}
+
+/* ------ */
+
+/*
+ * Private Slots.
+ * ---------------
+ *  Compressor
+*/
+
+// The Actual Compressor.
+int Compressor::init(void)
+{
     checkNodes(); // clear unwanted files
+    populateDirectory(); // fills in the directories.
     if(nodes.isEmpty() || archivePath.isEmpty()) {
-        mutex.unlock();
-        emit(finished());
-        return *this;
+        return 0; // exits the operation.
     }
     if(archiveFormat == NO_FORMAT) {
         getArchiveFormat();
     }
     bool noTar = false;
+
     archive =  QSharedPointer<struct archive>(archive_write_new(), deleteArchiveWriter);
 
     switch (archiveFormat) {
@@ -1052,121 +1303,175 @@ Compressor &Compressor::start(void)
     } else {
         archive_write_set_format_ustar(archive.data());
     }
-    archive_write_open_filename(archive.data(), archivePath.toStdString().c_str());
-    QFuture<void> *future = new QFuture<void>;
-    mutex.unlock();
 
-    // Copy the keys to the heap or else
-    // this will cause a segfault.
-    QList<QString> *keys = new QList<QString>;
-    QList<QString> copy = nodes.uniqueKeys();
-    keys->swap(copy);
+    tempFile.setFileName(archivePath);
+    if(!tempFile.open(QIODevice::WriteOnly)) {
+        emit(error(ARCHIVE_WRITE_OPEN_ERROR, archivePath));
+        return ARCHIVE_WRITE_OPEN_ERROR;
+    }
+
+    /*
+     * Set config for the new archive.
+     * -------------------------------
+    */
+#if 0
+    /*
+     * Currently I don't know if libarchive supports passwords that well.
+     * So for the time beign lets keep this empty.
+    */
+    if(!Password.isEmpty() && (archiveFormat == ZIP || archiveFormat == SEVEN_ZIP)) {
+        archive_write_set_passphrase(archive.data(), Password.toUtf8().constData());
+    }
+#endif
+
+    if(CompressionLevel) {
+        QByteArray options("compression-level=");
+        options += QByteArray::number(CompressionLevel);
+        archive_write_set_options(archive.data(), options.constData());
+    }
+    archive_write_set_bytes_per_block(archive.data(), BlockSize);
+    // ------
+
+    archive_write_open_fd(archive.data(), tempFile.handle()); // Open.
+    // Start the Map Iterator.
+    mapIter = nodes.begin();
     // ---
 
-    *future = QtConcurrent::map(*keys, [this](QString key) {
-        compress_node(key, nodes.value(key));
-        return;
-    });
-    watcher.setFuture(*future);
-    return *this;
+    return 0; // no error.
+}
+// ------
+
+// Condition to check.
+int Compressor::condition(void)
+{
+    return (mapIter == nodes.end());
+}
+// ------
+
+// Expression.
+
+void Compressor::expression(void)
+{
+    ++mapIter;
+    return;
 }
 
-Compressor &Compressor::pause(void)
-{
-    watcher.pause();
-    return *this;
-}
+// ------
 
-Compressor &Compressor::resume(void)
-{
-    watcher.resume();
-    return *this;
-}
+// Loop Content.
 
-Compressor &Compressor::cancel(void)
+int Compressor::loopContent(void)
 {
-    watcher.cancel();
-    return *this;
-}
+    int r;
+    ssize_t len;
+    char buff[16384];
 
-bool Compressor::isRunning() const
-{
-    return watcher.isRunning();
-}
-bool Compressor::isCanceled() const
-{
-    return watcher.isCanceled();
-}
-bool Compressor::isPaused() const
-{
-    return watcher.isPaused();
-}
-bool Compressor::isStarted() const
-{
-    return watcher.isStarted();
-}
+    // Signal that we are compressing this file.
+    emit(compressing(mapIter.key()));
 
-Compressor &Compressor::setFunc(short signal, std::function<void(void)> function)
-{
-    switch(signal) {
-    case STARTED:
-        connect(this, &Compressor::started, function);
-        break;
-    case FINISHED:
-        connect(this, &Compressor::finished, function);
-        break;
-    case PAUSED:
-        connect(this, &Compressor::paused, function);
-        break;
-    case RESUMED:
-        connect(this, &Compressor::resumed, function);
-        break;
-    case CANCELED:
-        connect(this, &Compressor::canceled, function);
-        break;
-    default:
-        break;
-    };
-    return *this;
-}
+    auto disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
+    archive_read_disk_set_standard_lookup(disk.data());
 
-Compressor &Compressor::setFunc(short signal, std::function<void(QString)> function)
-{
-    if(signal == COMPRESSED) {
-        connect(this, &Compressor::compressed, function);
-    } else {
-        connect(this, &Compressor::compressing, function);
+    r = archive_read_disk_open(disk.data(), mapIter.key().toUtf8().constData());
+    if (r != ARCHIVE_OK) {
+        emit error(DISK_OPEN_ERROR, mapIter.key());
+        return DISK_OPEN_ERROR;
     }
-    return *this;
+
+    for (;;) {
+        auto entry = QSharedPointer<struct archive_entry>(archive_entry_new(), deleteArchiveEntry);
+        r = archive_read_next_header2(disk.data(), entry.data());
+        if (r == ARCHIVE_EOF) {
+            break;
+        }
+        if (r != ARCHIVE_OK) {
+            emit error(DISK_READ_ERROR, mapIter.key());
+            return DISK_READ_ERROR;
+        }
+        archive_read_disk_descend(disk.data());
+        archive_entry_set_pathname(entry.data(), mapIter.value().toUtf8().constData());
+        r = archive_write_header(archive.data(), entry.data());
+
+        if (r == ARCHIVE_FATAL) {
+            emit error(ARCHIVE_FATAL_ERROR, mapIter.value());
+            return ARCHIVE_FATAL_ERROR;
+        }
+        if (r > ARCHIVE_FAILED) {
+            /* For now, we use a simpler loop to copy data
+             * into the target archive. */
+            QFile file(mapIter.key());
+            if(!file.open(QIODevice::ReadOnly)) {
+                emit error(DISK_OPEN_ERROR, mapIter.key());
+                return DISK_OPEN_ERROR;
+            }
+            len = file.read(buff, sizeof(buff));
+            while (len > 0) {
+                archive_write_data(archive.data(), buff, len);
+                len = file.read(buff, sizeof(buff));
+            }
+            // Close the read
+            file.close();
+        }
+    }
+
+    // Signal that we compressed this file.
+    emit compressed(mapIter.key());
+
+    return 0;
 }
 
-Compressor &Compressor::setFunc(std::function<void(short,QString)> function)
+void Compressor::deinit(int canceled)
 {
-    connect(this, &Compressor::error, function);
-    return *this;
+    CompressionLevel = 0; // Use Default.
+    archiveFormat = NO_FORMAT; // Defaults to gzip.
+    archivePath.clear();
+    Password.clear();
+    nodes.clear();
+    archive.reset();
+    if(canceled) {
+        tempFile.cancelWriting();
+    } else {
+        tempFile.commit(); // Write the archive.
+    }
+    return;
 }
 
-Compressor &Compressor::setFunc(std::function<void(int)> function)
-{
-    connect(this, &Compressor::progress, function);
-    return *this;
-}
+// ------
 
-/* ------ */
+// Utils
 
 /*
- * Private Slots.
- * ---------------
- *  Compressor
+ * Warning this method is sync and it is
+ * intended to be used in a seperated
+ * thread.
 */
-void Compressor::connectWatcher(void)
+
+QString Compressor::isDirInFilesList(void)
 {
-    connect(&watcher, &QFutureWatcher<void>::started, this, &Compressor::started);
-    connect(&watcher, &QFutureWatcher<void>::paused, this, &Compressor::paused);
-    connect(&watcher, &QFutureWatcher<void>::resumed, this, &Compressor::resumed);
-    connect(&watcher, &QFutureWatcher<void>::canceled, this, &Compressor::canceled);
-    connect(&watcher, &QFutureWatcher<void>::finished, this, &Compressor::finished);
-    connect(&watcher, &QFutureWatcher<void>::progressValueChanged, this, &Compressor::progress);
+    QString ret;
+    for (auto iter = nodes.begin() ; iter != nodes.end() ; ++iter) {
+        if(QFileInfo(iter.key()).isDir()) {
+            ret = QString(iter.key());
+            nodes.erase(iter); // remove it from the map
+            break;
+        }
+    }
+    return ret;
+}
+
+void Compressor::populateDirectory(void)
+{
+    QString entry;
+    while(!(entry = isDirInFilesList()).isEmpty()) {
+        qDebug() << "Entry:: " << entry;
+        QDir dir(entry);
+        QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
+        for (int i = 0; i < list.size(); i++) {
+            QString file = list.at(i).filePath();
+            nodes.insert( file, file );
+        }
+        entry.clear();
+    }
     return;
 }
 
@@ -1205,63 +1510,6 @@ void Compressor::getArchiveFormat()
     } else {
         archiveFormat = NO_FORMAT; // default
     }
-}
-
-void Compressor::compress_node(QString filepath, QString entrypath)
-{
-    QMutexLocker locker(&mutex);
-    int r;
-    int fd;
-    ssize_t len;
-    char buff[16384];
-
-    // Signal that we are compressing this file.
-    emit(compressing(filepath));
-
-    QSharedPointer<struct archive> disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
-    archive_read_disk_set_standard_lookup(disk.data());
-
-    r = archive_read_disk_open(disk.data(), filepath.toStdString().c_str());
-    if (r != ARCHIVE_OK) {
-        emit error(DISK_OPEN_ERROR, filepath);
-        return;
-    }
-
-    for (;;) {
-        struct archive_entry *entry = archive_entry_new();
-        r = archive_read_next_header2(disk.data(), entry);
-        if (r == ARCHIVE_EOF) {
-            break;
-        }
-        if (r != ARCHIVE_OK) {
-            emit error(DISK_READ_ERROR, filepath);
-            return;
-        }
-        archive_read_disk_descend(disk.data());
-        archive_entry_set_pathname(entry, entrypath.toStdString().c_str());
-        r = archive_write_header(archive.data(), entry);
-
-        if (r == ARCHIVE_FATAL) {
-            emit error(ARCHIVE_FATAL_ERROR, filepath);
-            return;
-        }
-        if (r > ARCHIVE_FAILED) {
-            /* For now, we use a simpler loop to copy data
-             * into the target archive. */
-            fd = open(filepath.toStdString().c_str(), O_RDONLY);
-            len = read(fd, buff, sizeof(buff));
-            while (len > 0) {
-                archive_write_data(archive.data(), buff, len);
-                len = read(fd, buff, sizeof(buff));
-            }
-            close(fd);
-        }
-        archive_entry_free(entry);
-    }
-
-    // Signal that we compressed this file.
-    emit compressed(filepath);
-    return;
 }
 
 /* ------ //
