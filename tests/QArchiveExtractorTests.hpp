@@ -47,6 +47,13 @@ const QString TestCase6OutputDir = QString(TestOutputDir + "Test6");
  const QString Test6OutputContents = QString("TEST6SUCCESS!");
 const QString Test6WrongPassword = QString("!Test6");
 const QString Test6OutputFile = QString(TestCase6OutputDir + "/Output.txt");
+
+// TEST FOR SUPPORT TAR.
+ const QString TestCase7ArchivePath = QString(TestCasesDir + "Test7.tar.gz");
+ const QString TestCase7OutputDir = QString(TestOutputDir + "Test7");
+ const QString Test7OutputContents = QString("TEST7SUCCESS");
+ const QString Test7OutputFile = QString(TestCase7OutputDir + "/Output.txt");
+
 // ------
 
 class QArchiveExtractor : public QObject
@@ -224,7 +231,8 @@ private slots:
     void usingWrongPasswordAndAfter3TriesGiveTheCorrectPassword()
     {
         QArchive::Extractor e(TestCase5ArchivePath , TestCase5OutputDir);
-        e.setAskPassword(true)
+        e
+        .setAskPassword(true)
         .setPassword(Test5WrongPassword)
         .setFunc(QArchive::PASSWORD_REQUIRED , [&e](int Tries){
             if(Tries == 3) { // CHECK IF THIS THE THIRD TRY.
@@ -401,6 +409,62 @@ private slots:
           QVERIFY(gotArchiveWrongPassword == true); // FAIL IF WE GOT THE WRONG ERROR
      }
 
+    void isExtractorObjectReuseable(void)
+    {
+        bool firstOperationSuccess = false,
+             secondOperationSuccess = false;
+
+        QArchive::Extractor ExtractorObject(TestCase1ArchivePath , TestCase1OutputDir);
+        ExtractorObject
+        .setFunc([&](short code , QString file){
+            (void)file;
+            if(code){
+                QFAIL("OPERATION ERRORED!");
+                return;
+            }
+            return;
+        })
+        .setFunc(QArchive::FINISHED ,[&firstOperationSuccess](){
+                QVERIFY((firstOperationSuccess = true));
+                return;
+        })
+        .start()
+        .waitForFinished()
+        .setFunc(QArchive::FINISHED ,[&secondOperationSuccess](){
+                 QVERIFY((secondOperationSuccess = true));
+                 return;
+        })
+        .start()
+        .waitForFinished();
+
+        QVERIFY(firstOperationSuccess == true);
+        QVERIFY(secondOperationSuccess == true);
+    }
+
+    void supportForTar(void)
+    {
+        QArchive::Extractor(TestCase7ArchivePath , TestCase7OutputDir)
+        .setFunc([&](short code , QString file){
+             (void)file;
+             if(code){
+                 QFAIL("ERRORED WHILE EXTRACTING TAR ARCHIVE!");
+                 return;
+             }
+             return;
+         })
+        .start()
+        .waitForFinished();
+
+          // TEST THE OUTPUT FILE.
+         QFile TestOutput(Test7OutputFile);
+         QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true); // DOES IT EXIST ?
+
+         // ARE THE CONTENTS NOT MESSED UP ?
+         QVERIFY(Test7OutputContents == QString(TestOutput.readAll()));
+
+         // -------
+    }
+
     void cleanupTestCase(void)
     {
         // DELETE ALL EXTRACTED FILES
@@ -411,8 +475,7 @@ private slots:
         QFile::remove(Test4OutputFile); // TEST4
         QFile::remove(Test5OutputFile); // TEST5
         QFile::remove(Test6OutputFile); // TEST6
+        QFile::remove(Test7OutputFile);
         QFile::remove(TestOutputDir + "/Output.txt");  // JUNK FILE.
     }
 };
-
-QTEST_MAIN(QArchiveExtractor);

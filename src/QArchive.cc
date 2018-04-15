@@ -576,7 +576,6 @@ Extractor &Extractor::onlyExtract(const QStringList &filepaths)
 */
 Extractor &Extractor::waitForFinished(void)
 {
-    QMutexLocker locker(&mutex);
     UNBlocker->waitForFinished(); // Sync.
     return *this;
 }
@@ -731,7 +730,6 @@ int Extractor::init(void)
     archive_read_support_format_all(archive.data());
     archive_read_support_filter_all(archive.data());
     archive_read_set_passphrase_callback(archive.data(), (void*)this, password_callback);
-    PasswordTries = 0; // reset.
 
     if((ret = archive_read_open_filename(archive.data(), ArchivePath.toUtf8().constData(), BlockSize))) {
         error(ARCHIVE_READ_ERROR, ArchivePath);
@@ -772,6 +770,7 @@ int Extractor::condition(void)
 
 int Extractor::loopContent(void)
 {
+    PasswordTries = 0; // reset
     if(!Destination.isEmpty()) {
         char* new_entry = concat(Destination.toUtf8().constData(), archive_entry_pathname(entry));
         archive_entry_set_pathname(entry, new_entry);
@@ -800,15 +799,15 @@ int Extractor::loopContent(void)
                     if (ret == ARCHIVE_EOF) {
                         break;
                     } else if (ret != ARCHIVE_OK) {
-                        ret = ARCHIVE_EOF;
-                        error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
-                        return ARCHIVE_UNCAUGHT_ERROR;
+                                         ret = ARCHIVE_EOF;
+                 error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
+                 return ARCHIVE_UNCAUGHT_ERROR;
                     } else {
                         ret = archive_write_data_block(ext.data(), buff, size, offset);
                         if (ret != ARCHIVE_OK) {
-                            ret = ARCHIVE_EOF;
-                            error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
-                            return ARCHIVE_UNCAUGHT_ERROR;
+                                             ret = ARCHIVE_EOF;
+                 error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
+                 return ARCHIVE_UNCAUGHT_ERROR;
                         }
                     }
                 }
@@ -871,7 +870,7 @@ void Extractor::clear(void)
     archive.reset();
     ext.reset();
 
-    ret = PasswordTries = 0;
+    ret =  0;
     AskPassword = false;
     BlockSize = 10240;
     ArchivePath.clear();
@@ -1135,7 +1134,9 @@ Compressor &Compressor::clear(void)
 */
 Compressor &Compressor::waitForFinished(void)
 {
-    QMutexLocker locker(&mutex);
+    /*
+     * Note: Do not use mutex here.
+    */
     UNBlocker->waitForFinished(); // Sync.
     return *this;
 }
