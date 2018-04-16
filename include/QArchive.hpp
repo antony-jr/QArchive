@@ -521,32 +521,116 @@ class Reader : public QObject
     Q_OBJECT
 public:
     explicit Reader(QObject *parent = nullptr);
-    explicit Reader(const QString& archive);
-    void setArchive(const QString& archive);
-    const QStringList& listFiles();
-    void clear();
+    explicit Reader(const QString&);
+    Reader &setArchive(const QString&);
+    Reader &setPassword(const QString&);
+    Reader &setAskPassword(bool);
+    Reader &setBlocksize(int);
+    QJsonObject getFilesList(void);
+    Reader &clear();
     ~Reader();
 
-public slots:
+public Q_SLOTS:
+    Reader &waitForFinished(void);
+    Reader &start(void);
+    Reader &pause(void);
+    Reader &resume(void);
+    Reader &cancel(void);
+
     bool isRunning() const;
-    void start(void);
-    void stop(void);
+    bool isCanceled() const;
+     bool isPaused() const;
+     bool isStarted() const;
 
-private slots:
-    void startReading();
+     Reader &setFunc(short, std::function<void(void)>);
+     Reader &setFunc(std::function<void(int)>); // Password Required.
+     Reader &setFunc(std::function<void(QJsonObject)>); // files list.
+     Reader &setFunc(std::function<void(short,QString)>); // error.
+private Q_SLOTS:
+    int init(void);
+    int condition(void);
+    int loopContent(void);
+    void deinit(int);
 
-signals:
-    void stopped(void);
-    void archiveFiles(const QString&, const QStringList&);
+    QString getDirectoryFileName(const QString&);
+
+Q_SIGNALS:
+    void started();
+    void finished();
+    void paused();
+    void resumed();
+    void canceled();
+    void passwordRequired(int);
+    void submitPassword();
+    void filesList(QJsonObject);
     void error(short, const QString&);
 
 private:
-    bool stopReader = false;
+    int ret = 0;
+    QSharedPointer<struct archive> archive;
+    struct archive_entry *entry;
+
     QMutex mutex;
-    QString Archive;
-    QStringList Files;
-    QFuture<void> *Promise = nullptr;
+    bool AskPassword = false; // Default.
+    int PasswordTries = 0; // Default.
+    int BlockSize = 10240; // Default BlockSize.
+    QString ArchivePath;
+    QString Password;
+    QJsonObject ArchiveContents;
+    UNBlock *UNBlocker = nullptr;
+
+    /*
+     * Note that this function can only work
+     * if declared in the header.
+    */
+
+    /*
+     * Password Callback to loop until the
+     * correct password , If a empty password
+     * is given then just throw a error
+     * and quit.
+    */
+    static const char *password_callback(struct archive *a, void *_client_data)
+    {
+        
+        (void)a; /* UNUSED */
+        Reader *e = (Reader*)_client_data;
+        if(e->AskPassword) {
+            if(e->PasswordTries > 0 || e->Password.isEmpty()) {
+                QEventLoop Freeze;
+                e->connect(e, SIGNAL(submitPassword()), &Freeze, SLOT(quit()));
+                QTimer::singleShot(1000, [e]() {
+                    if(e->PasswordTries > 0) {
+                        e->ret = ARCHIVE_WRONG_PASSWORD;
+                        e->error(ARCHIVE_WRONG_PASSWORD, e->ArchivePath);
+                    }
+                    emit(e->passwordRequired(e->PasswordTries));
+                }); // emit signal.
+                Freeze.exec();
+                e->disconnect(e, SIGNAL(submitPassword()), &Freeze, SLOT(quit()));
+                if(e->Password.isEmpty()) {
+                    e->ret = ARCHIVE_PASSWORD_NOT_GIVEN;
+                    e->error(ARCHIVE_PASSWORD_NOT_GIVEN, e->ArchivePath);
+                    return NULL;
+                }
+            }
+        } else {
+            if(e->Password.isEmpty()) {
+                e->ret = ARCHIVE_PASSWORD_NOT_GIVEN;
+                e->error(ARCHIVE_PASSWORD_NOT_GIVEN, e->ArchivePath);
+                return NULL;
+            } else if(e->PasswordTries > 0) {
+                e->ret = ARCHIVE_WRONG_PASSWORD;
+                e->error(ARCHIVE_WRONG_PASSWORD, e->ArchivePath);
+                return NULL;
+            }
+        }
+        e->PasswordTries += 1;
+        return e->Password.toUtf8().constData();
+    }
+// ---
 }; // Class Reader Ends
+
 
 } // QArchive Namespace Ends.
 #endif // QARCHIVE_HPP_INCLUDED

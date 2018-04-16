@@ -1535,99 +1535,219 @@ void Compressor::getArchiveFormat()
 
 
 /*
- * Class Reader.
- * ------------------------
- *  QArchive Reader Source.
- * ---------------------------
- * Constructor and Destructor.
- * ---------------------------
+ * Reader Class Source.
 */
+// Constructor and Destructor.
+
 Reader::Reader(QObject *parent)
     : QObject(parent)
 {
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
     return;
 }
+
 Reader::Reader(const QString& archive)
     : QObject(nullptr)
 {
+    UNBlocker = new UNBlock(this);
+    connect(UNBlocker, SIGNAL(started()), this, SIGNAL(started()));
+    connect(UNBlocker, SIGNAL(paused()), this, SIGNAL(paused()));
+    connect(UNBlocker, SIGNAL(resumed()), this,SIGNAL(resumed()));
+    connect(UNBlocker, SIGNAL(canceled()), this,SIGNAL(canceled()));
+    connect(UNBlocker, SIGNAL(finished()), this, SIGNAL(finished()));
     setArchive(archive);
     return;
 }
 
 Reader::~Reader()
 {
-    if(Promise != nullptr) {
-        stop();
+    if(isPaused()){
+        resume();
+    }
+    if(isRunning() || isStarted()){
+        cancel();
+        waitForFinished();
+        UNBlocker->disconnect();
     }
     return;
 }
-
-/* ------ */
 
 /*
- * Public Method.
- * --------------
+ * Public Methods.
+ * ---------------
  *  Reader
 */
-void Reader::setArchive(const QString& archive)
+Reader &Reader::setArchive(const QString &filename)
 {
-    if(mutex.tryLock()) {
-        Archive = QDir::cleanPath(archive);
-        mutex.unlock();
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
     }
-    return;
+    clear();
+    ArchivePath = QString(filename);
+    return *this;
 }
 
-const QStringList& Reader::listFiles()
+Reader &Reader::setPassword(const QString &pwd)
 {
-    return Files;
+    QMutexLocker locker(&mutex);
+    Password = QString(pwd);
+    emit(submitPassword());
+    return *this;
 }
 
-void Reader::clear()
+Reader &Reader::setAskPassword(bool ch)
 {
-    if(mutex.tryLock()) {
-        Archive.clear();
-        Files.clear();
-        mutex.unlock();
-    }
-    return;
+    QMutexLocker locker(&mutex);
+    AskPassword = ch;
+    emit(submitPassword()); // Just in case.
+    return *this;
 }
+
+Reader &Reader::setBlocksize(int size)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+    BlockSize = size;
+    return *this;
+}
+
+Reader &Reader::clear(void)
+ {
+     if(isRunning() || isPaused()) {
+         return *this;
+     }
+
+     archive.reset();
+     ret = PasswordTries = 0;
+     AskPassword = false;
+     BlockSize = 10240;
+     ArchivePath.clear();
+     Password.clear();
+     return *this;
+ }
 
 /* ------ */
 
 /*
  * Public Slots.
- * --------------
+ * ---------------
  *  Reader
 */
+Reader &Reader::waitForFinished(void)
+{
+    UNBlocker->waitForFinished(); // Sync.
+    return *this;
+}
+
+Reader &Reader::start(void)
+{
+    QMutexLocker locker(&mutex);
+    if(isRunning() || isStarted() || isPaused()) {
+        return *this;
+    }
+
+    UNBlocker->setInitializer([this]() -> int { return init(); })
+    .setCondition([this]() -> int { return condition(); })
+    .setEndpoint(ARCHIVE_EOF)
+    .setCodeBlock([this]() {
+        return loopContent();
+    })
+    .setDeInitializer([this](int canceled) { deinit(canceled); })
+    .start();
+
+    return *this;
+}
+
+Reader &Reader::pause(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->pause();
+    return *this;
+}
+
+Reader &Reader::resume(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->resume();
+    return *this;
+}
+
+Reader &Reader::cancel(void)
+{
+    QMutexLocker locker(&mutex);
+    UNBlocker->cancel();
+    return *this;
+}
+
 bool Reader::isRunning() const
 {
-    return Promise->isRunning();
+    return UNBlocker->isRunning();
+}
+bool Reader::isCanceled() const
+{
+    return UNBlocker->isCanceled();
+}
+bool Reader::isPaused() const
+{
+    return UNBlocker->isPaused();
+}
+bool Reader::isStarted() const
+{
+    return UNBlocker->isStarted();
 }
 
-void Reader::start(void)
+Reader &Reader::setFunc(short signal, std::function<void(void)> function)
 {
-    if(!mutex.tryLock()) {
-        return;
-    }
-    Promise = new QFuture<void>;
-    *Promise = QtConcurrent::run(this, &Reader::startReading);
-    return;
+    QMutexLocker locker(&mutex);
+    switch(signal) {
+    case STARTED:
+        connect(this, &Reader::started, function);
+        break;
+    case FINISHED:
+        connect(this, &Reader::finished, function);
+        break;
+    case PAUSED:
+        connect(this, &Reader::paused, function);
+        break;
+    case RESUMED:
+        connect(this, &Reader::resumed, function);
+        break;
+    case CANCELED:
+        connect(this, &Reader::canceled, function);
+        break;
+    default:
+        break;
+    };
+    return *this;
 }
 
-void Reader::stop(void)
+Reader &Reader::setFunc(std::function<void(int)> function)
 {
-    /*
-     * If mutex is not locked then that means
-     * there is no start called or the operation is
-     * finished , so doing stop is useless.
-     */
-    if(mutex.tryLock() && !Promise->isRunning()) {
-        mutex.unlock();
-        return;
-    }
-    stopReader = true;
-    return;
+    QMutexLocker locker(&mutex);
+    connect(this , &Reader::passwordRequired , function);
+    return *this;
+}
+
+Reader &Reader::setFunc(std::function<void(QJsonObject)> function)
+{
+    QMutexLocker locker(&mutex);
+    connect(this , &Reader::filesList , function);
+    return *this;
+}
+
+Reader &Reader::setFunc(std::function<void(short,QString)> function)
+{
+    QMutexLocker locker(&mutex);
+    connect(this, &Reader::error, function);
+    return *this;
 }
 
 /* ------ */
@@ -1636,60 +1756,171 @@ void Reader::stop(void)
  * Private Slots.
  * ---------------
  *  Reader
+ *  Internals for the reader.
 */
-void Reader::startReading()
+
+// The actual reader.
+int Reader::init(void)
 {
-    if(Archive.isEmpty()) {
-        mutex.unlock();
-        return;
+    // Check if the archive exists
+    QFileInfo check_archive(ArchivePath);
+    // check if file exists and if yes then is it really a file and no directory?
+    if (!check_archive.exists() || !check_archive.isFile()) {
+        error(ARCHIVE_READ_ERROR, ArchivePath);
+        return ARCHIVE_READ_ERROR;
+    }
+    // ---
+
+    archive = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
+    if(!(archive.data())) {
+        // No memory.
+        error(NOT_ENOUGH_MEMORY, ArchivePath);
+        return NOT_ENOUGH_MEMORY;
+    }
+    archive_read_support_format_all(archive.data());
+    archive_read_support_filter_all(archive.data());
+    archive_read_set_passphrase_callback(archive.data(), (void*)this, password_callback);
+
+    if((ret = archive_read_open_filename(archive.data(), QFile::encodeName(ArchivePath).constData(), BlockSize))) {
+        error(ARCHIVE_READ_ERROR, ArchivePath);
+        return ARCHIVE_READ_ERROR;
+    }
+    // ---
+
+    return 0; // return no error.
+
+}
+
+int Reader::condition(void)
+{
+    ret = archive_read_next_header(archive.data(), &entry);
+    if (ret == ARCHIVE_FATAL) {
+        ret = ARCHIVE_EOF; // set to endpoint to stop UNBlock.
+        error(ARCHIVE_QUALITY_ERROR, ArchivePath);
+    }
+    return ret;
+}
+
+int Reader::loopContent(void)
+{
+    PasswordTries = 0; // reset
+    QString CurrentFile = QString(archive_entry_pathname(entry));
+    QJsonObject CurrentEntry;
+
+    auto entry_stat = archive_entry_stat(entry);
+    qint64 size = (qint64)entry_stat->st_size;
+    QString sizeUnits = "Bytes";
+    
+    if(size == 0){
+        sizeUnits = "None";
+        size = 0;
+    }else if(size < 1024){
+        sizeUnits = "Bytes";
+        size = size;
+    }else if(size >= 1024 && size < 1048576){
+        sizeUnits = "KiB";
+        size /= 1024;
+    }else if(size >= 1048576 && size < 1073741824){
+        sizeUnits = "MiB";
+        size /= 1048576;
+    }else{
+        sizeUnits = "GiB";
+        size /= 1073741824;
     }
 
-    QFileInfo fInfo(Archive);
-    if(!fInfo.exists()) {
-        mutex.unlock();
-        emit error(ARCHIVE_READ_ERROR, Archive);
-        return;
-    }
+    auto blockSizeInBytes = entry_stat->st_blksize;
+    auto blocks = entry_stat->st_blocks;
+    auto lastAccessT = entry_stat->st_atim;
+    auto lastModT = entry_stat->st_mtim;
+    auto lastStatusModT = entry_stat->st_ctim;
+    QFileInfo fileInfo(CurrentFile);
 
-    struct archive *arch;
-    struct archive_entry *entry;
-    int ret = 0;
-
-    arch = archive_read_new();
-    archive_read_support_format_all(arch);
-    archive_read_support_filter_all(arch);
-
-    if((ret = archive_read_open_filename(arch, Archive.toStdString().c_str(), 10240))) {
-        mutex.unlock();
-        emit error(ARCHIVE_READ_ERROR, Archive);
-        return;
-    }
-    for (; !stopReader;) {
-        ret = archive_read_next_header(arch, &entry);
-        if (ret == ARCHIVE_EOF) {
+    auto ft = archive_entry_filetype(entry);
+    QString FileType;
+    switch(ft){
+        case AE_IFREG: // Regular file
+            FileType = "RegularFile";
             break;
-        }
-        if (ret != ARCHIVE_OK) {
-            mutex.unlock();
-            emit error(ARCHIVE_QUALITY_ERROR, Archive);
-            return;
-        }
-        Files << archive_entry_pathname(entry);
+        case AE_IFLNK: // Link
+            FileType = "SymbolicLink";
+            break;
+        case AE_IFSOCK: // Socket
+            FileType = "Socket";
+            break;
+        case AE_IFCHR: // Character Device
+            FileType = "CharacterDevice";
+            break;
+        case AE_IFBLK: // Block Device
+            FileType = "BlockDevice";
+            break;
+        case AE_IFDIR: // Directory.
+            FileType = "Directory";
+            break;
+        case AE_IFIFO: // Named PIPE. (fifo)
+            FileType = "NamedPipe";
+            break;
+        default:
+            FileType = "UnknownFile";
+            break;
+    };
+    // Set the values.
+    if(FileType != "RegularFile"){
+    CurrentEntry.insert("FileName" , getDirectoryFileName(CurrentFile));
+    }else{
+    CurrentEntry.insert("FileName" , fileInfo.fileName());
     }
-    archive_read_close(arch);
-    archive_read_free(arch);
-    mutex.unlock();
-    if(stopReader) {
-        emit(stopped());
-        return;
+    CurrentEntry.insert("FileType" , QJsonValue(FileType));
+    CurrentEntry.insert("Size" , QJsonValue(size));
+    CurrentEntry.insert("SizeUnit" , sizeUnits);
+/*
+    CurrentEntry.insert("BlockSize" , QJsonValue(blockSizeInBytes));
+    CurrentEntry.insert("BlockSizeUnit" , "Bytes");
+    CurrentEntry.insert("Blocks" , QJsonValue(blocks));
+    CurrentEntry.insert("LastAccessedTime" , (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate));
+    CurrentEntry.insert("LastModifiedTime" , (QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate));
+    CurrentEntry.insert("LastStatusModifiedTime" , (QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate));
+*/
+    // Join to the main QJsonObject.
+    QString dirName = fileInfo.dir().dirName();
+    if(FileType != "RegularFile"){
+        ArchiveContents.insert(CurrentFile , CurrentEntry);
+    }else{
+        dirName += "/";
+        QJsonValue DirValue = ArchiveContents.value(dirName);
+        QJsonObject Directory = DirValue.toObject();
+        QJsonObject Files = Directory.value("Contents").toObject();
+        Files.insert(CurrentFile , CurrentEntry);
+        Directory.insert("Contents" , Files);
+        ArchiveContents.insert(dirName , Directory);
     }
-    emit archiveFiles(Archive, Files);
+    return 0; // return no error
+
+}
+
+void Reader::deinit(int canceled)
+{
+    if(!canceled){
+    emit(filesList(ArchiveContents));
+    }
     return;
 }
+
+// Utils
+QString Reader::getDirectoryFileName(const QString &dir)
+{
+    if(dir[dir.count() - 1] == "/"){
+        return dir.mid(0 , dir.count() - 1);
+    }
+    return dir;
+}
+
+// ------
+
 
 /* ------ //
  *  Class Reader Ends Here.
  * ------------------------------------
 */
+
 
 // =============================================================== //
