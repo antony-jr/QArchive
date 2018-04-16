@@ -60,6 +60,34 @@ class QArchiveExtractor : public QObject
 {
     Q_OBJECT
 private slots:
+    void initTestCase(void){
+         QDir cases(TestCasesDir);
+         if(cases.exists()){
+            if(!(
+                QFileInfo(TestCase1ArchivePath).exists() ||
+                 QFileInfo(TestCase2ArchivePath).exists() ||
+                  QFileInfo(TestCase3ArchivePath).exists() ||
+                   QFileInfo(TestCase4ArchivePath).exists() ||
+                    QFileInfo(TestCase5ArchivePath).exists() ||
+                     QFileInfo(TestCase6ArchivePath).exists() ||
+                    QFileInfo(TestCase7ArchivePath).exists()
+                )){
+                QFAIL("CANNOT FIND TEST CASE ARCHIVES");
+                return;
+            }
+         }else{
+
+             QFAIL("CANNOT FIND TEST CASES!");
+         }
+         QDir dir;
+         dir.mkpath(TestCase1OutputDir);
+         dir.mkpath(TestCase2OutputDir);
+         dir.mkpath(TestCase3OutputDir);
+         dir.mkpath(TestCase4OutputDir);
+         dir.mkpath(TestCase5OutputDir);
+         dir.mkpath(TestCase6OutputDir);
+         dir.mkpath(TestCase7OutputDir);
+    }
     void simpleExtraction(void)
     {
         QBENCHMARK {
@@ -430,6 +458,7 @@ private slots:
         })
         .start()
         .waitForFinished()
+        .setArchive(TestCase2ArchivePath , TestCase2OutputDir)
         .setFunc(QArchive::FINISHED ,[&secondOperationSuccess](){
                  QVERIFY((secondOperationSuccess = true));
                  return;
@@ -467,15 +496,7 @@ private slots:
 
     void cleanupTestCase(void)
     {
-        // DELETE ALL EXTRACTED FILES
-        QFile::remove(Test1OutputFile); // TEST1
-        QFile::remove(Test2OutputFile); // TEST2
-        QFile::remove(Test3OutputFile1); // TEST3
-        QFile::remove(Test3OutputFile2); // TEST3
-        QFile::remove(Test4OutputFile); // TEST4
-        QFile::remove(Test5OutputFile); // TEST5
-        QFile::remove(Test6OutputFile); // TEST6
-        QFile::remove(Test7OutputFile);
-        QFile::remove(TestOutputDir + "/Output.txt");  // JUNK FILE.
+        QDir dir(TestOutputDir);
+        dir.removeRecursively();
     }
 };

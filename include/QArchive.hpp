@@ -420,7 +420,9 @@ public:
     explicit Compressor(const QString& archive);
     explicit Compressor(const QString& archive, const QStringList& files);
     explicit Compressor(const QString& archive, const QString& file);
-    Compressor &setArchive(const QString& archive);
+    Compressor &setArchive(const QString &archive);
+    Compressor &setArchive(const QString &archive , const QString &file);
+    Compressor &setArchive(const QString &archive , const QStringList &files);
     Compressor &setArchiveFormat(short type);
     Compressor &setPassword(const QString&);
     Compressor &setBlocksize(int);
@@ -475,7 +477,7 @@ Q_SIGNALS:
 private:
     int ret = 0;
     QSharedPointer<struct archive> archive;
-    QSaveFile tempFile; // Temporary file for the archive.
+    QSharedPointer<QSaveFile> tempFile; // Temporary file for the archive.
 
     QMutex mutex;
     int BlockSize = 10240; // Default BlockSize.

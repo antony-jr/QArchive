@@ -731,7 +731,7 @@ int Extractor::init(void)
     archive_read_support_filter_all(archive.data());
     archive_read_set_passphrase_callback(archive.data(), (void*)this, password_callback);
 
-    if((ret = archive_read_open_filename(archive.data(), ArchivePath.toUtf8().constData(), BlockSize))) {
+    if((ret = archive_read_open_filename(archive.data(), QFile::encodeName(ArchivePath).constData(), BlockSize))) {
         error(ARCHIVE_READ_ERROR, ArchivePath);
         return ARCHIVE_READ_ERROR;
     }
@@ -870,7 +870,7 @@ void Extractor::clear(void)
     archive.reset();
     ext.reset();
 
-    ret =  0;
+    ret = PasswordTries = 0;
     AskPassword = false;
     BlockSize = 10240;
     ArchivePath.clear();
@@ -1007,6 +1007,20 @@ Compressor &Compressor::setArchive(const QString &archive)
     return *this;
 }
 
+Compressor &Compressor::setArchive(const QString &archive , const QString &file)
+{
+    setArchive(archive);
+    addFiles(file);
+    return *this;
+}
+
+Compressor &Compressor::setArchive(const QString &archive , const QStringList &files)
+ {
+     setArchive(archive);
+     addFiles(files);
+     return *this;
+ }
+
 Compressor &Compressor::setArchiveFormat(short type)
 {
     QMutexLocker locker(&mutex);
@@ -1119,7 +1133,7 @@ Compressor &Compressor::clear(void)
     archivePath.clear();
     Password.clear();
     nodes.clear();
-    tempFile.cancelWriting();
+    tempFile.reset();
     archive.reset();
     return *this;
 }
@@ -1268,7 +1282,7 @@ int Compressor::init(void)
     checkNodes(); // clear unwanted files
     populateDirectory(); // fills in the directories.
     if(nodes.isEmpty() || archivePath.isEmpty()) {
-        return 0; // exits the operation.
+        return 1; // exits the operation.
     }
     if(archiveFormat == NO_FORMAT) {
         getArchiveFormat();
@@ -1305,8 +1319,8 @@ int Compressor::init(void)
         archive_write_set_format_ustar(archive.data());
     }
 
-    tempFile.setFileName(archivePath);
-    if(!tempFile.open(QIODevice::WriteOnly)) {
+    tempFile = QSharedPointer<QSaveFile>(new QSaveFile(archivePath));
+    if(!tempFile->open(QIODevice::WriteOnly)) {
         emit(error(ARCHIVE_WRITE_OPEN_ERROR, archivePath));
         return ARCHIVE_WRITE_OPEN_ERROR;
     }
@@ -1333,7 +1347,7 @@ int Compressor::init(void)
     archive_write_set_bytes_per_block(archive.data(), BlockSize);
     // ------
 
-    archive_write_open_fd(archive.data(), tempFile.handle()); // Open.
+    archive_write_open_fd(archive.data(), tempFile->handle()); // Open.
     // Start the Map Iterator.
     mapIter = nodes.begin();
     // ---
@@ -1373,7 +1387,7 @@ int Compressor::loopContent(void)
     auto disk = QSharedPointer<struct archive>(archive_read_disk_new(), deleteArchiveReader);
     archive_read_disk_set_standard_lookup(disk.data());
 
-    r = archive_read_disk_open(disk.data(), mapIter.key().toUtf8().constData());
+    r = archive_read_disk_open(disk.data(), QFile::encodeName(mapIter.key()).constData());
     if (r != ARCHIVE_OK) {
         emit error(DISK_OPEN_ERROR, mapIter.key());
         return DISK_OPEN_ERROR;
@@ -1430,9 +1444,10 @@ void Compressor::deinit(int canceled)
     nodes.clear();
     archive.reset();
     if(canceled) {
-        tempFile.cancelWriting();
+        tempFile.reset();
     } else {
-        tempFile.commit(); // Write the archive.
+        tempFile->commit(); // Write the archive.
+        tempFile.reset();
     }
     return;
 }
