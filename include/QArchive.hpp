@@ -29,12 +29,10 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * -----------------------------------------------------------------------------
+ * =============================================================================
  *  @filename 	 	: QArchive.hpp
- *  @description 	: C++ Cross-Platform helper library that Modernizes libarchive
- *  			      using Qt5. Simply extracts 7z  , Tarballs  , RAR
- *  			      and other supported formats by libarchive.
- * -----------------------------------------------------------------------------
+ *  @description 	: Namespace and Class Declaration for QArchive.
+ * =============================================================================
 */
 #if !defined (QARCHIVE_HPP_INCLUDED)
 #define QARCHIVE_HPP_INCLUDED
@@ -45,36 +43,39 @@
 
 /*
  * Getting the libarchive headers for the
- * runtime operating system
+ * runtime operating system.
+ * ======================================
 */
 extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <archive.h>
 #include <archive_entry.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 }
+// ===
 
 /*
  * To fix build errors on vs.
- * --------------------------
+ * ==========================
  *  Fixed by https://github.com/hcaihao
 */
 #if defined(_MSC_VER)
-#include <io.h>
 #include <BaseTsd.h>
+#include <io.h>
 typedef SSIZE_T ssize_t;
 #endif
-// ------
+// ====
 
-namespace QArchive   // QArchive Namespace Start
+namespace QArchive   // QARCHIVE NAMESPACE STARTS
 {
+
 /*
-* QArchive error codes
-* --------------------
+* QARCHIVE ERROR CODES
+* ====================
 */
 enum {
     NO_ARCHIVE_ERROR,
@@ -93,11 +94,11 @@ enum {
     NOT_ENOUGH_MEMORY,
     FILE_OPEN_FAILED
 };
-// ---
+// ===
 
 /*
-* Signal Codes for
-* setFunc.
+* SIGNAL CODES FOR 'setFunc' SLOTS
+* ================================
 */
 enum {
     CANCELED,
@@ -112,15 +113,19 @@ enum {
     STARTED,
     PAUSED
 };
-
-// ---
+// ===
 
 /*
  * Class UNBlock <- Inherits QObject.
- * -------------
+ * ==============
  *
  *  This is a advanced for-loop with C++11 features
  *  backed up by Qt5 Framework.
+ *
+ * ==================================================
+ * +This class is private and thus its not intended +
+ * +to be used by the user.                         +
+ * ==================================================
 */
 class UNBlock : public QObject
 {
@@ -192,43 +197,74 @@ private:
 };
 
 /*
- * -------
+ * ===========
 */
 
 /*
  * Class Extractor <- Inherits QObject.
- * ---------------
+ * ===============
  *
  *  Takes care of extraction of archives with the help
  *  of libarchive.
  *
  *  Constructors:
- *  	Extractor(QObject *parent = NULL)
- *
- *  	Extractor(const QString&) 	- Simply extract a single archive , any format
- *  			      	  , Most likely will be used for 7zip.
- *  	Extractor(const QStringList&)	- Extract all archives from the QStringList in
- *  				  order.
+ *  ============
+ *  	Extractor(QObject *parent = NULL) - Constructs an empty Extractor Object.
+ *  	Extractor(const QString &Archive) - Constructs and sets Archive(1).
+ *  	Extractor(const QString &Archive , const QString &Destination) - Constructs and sets Archive(1) and Destination(2).
  *
  *  Methods:
- *	    void addArchive(const QString&)     - Add a archive to the queue.
- *	    void addArchive(const QStringList&) - Add a set of archives to the queue
- *	    void removeArchive(const QString&)  - Removes a archive from the queue matching
- *					the QString.
+ *  =======
+ *      setArchive(const QString &Archive) - Sets the Archive(1) Path.
+ *      setArchive(const QString &Archive , const QString &Destination) - Sets the Archive(1) and Destination(2) Path.
+ *      setPassword(const QString &Password) - Sets the password for the Archive(1).
+ *      setAskPassword(bool AskPassword) - If set true , If password is required it will be asked until the user sets the
+ *                                         correct password or a empty password.
+ *      setBlocksize(int size) - Set the blocksize.
+ *      onlyExtract(const QString &MemberInArchive) - Only Extract a Member in the given Archive(1).
+ *      onlyExtract(const QStringList &MembersInArchive) - Only Extract a list of Members in the given Archive(1).
+ *      clear(void) - Clears the extractor objects cache.
  *
  *  Slots:
- *	    void start(void)	      - starts the extractor.
- *	    void stop(void)		      - stops the extractor.
- *  Signals:
- *	    void finished()		        - emitted when all extraction job is done.
- *	    void extracting(const QString&) - emitted with the filename beign extracted.
- *	    void extracted(const QString&)  - emitted with the filename that has been extracted.
- *	    void status(const QString& , const QString&) - emitted with the entry and the filename on extraction.
- *	    void error(short , const QString&) - emitted when something goes wrong!
+ *  =====
+ *      waitForFinished(void) - Blocks the caller thread until the extraction is finished or canceled.
+ *      start(void) - Starts the extraction process in a different thread.
+ *      pause(void) - Pauses the extraction process.
+ *      resume(void) - Resumes the extraction process.
+ *      cancel(void) - Cancel the extraction process.
  *
+ *      isRunning() - Returns True if the extraction process is running.
+ *      isCanceled() - Returns True if the extraction process has been canceled.
+ *      isPaused() - Returns True if the extraction process is paused.
+ *      isStarted() - Returns True if the extraction process is started.
+ *
+ *      setFunc(short signal , std::function<void(void)> function) - Connects the lambda function to the Signal with
+ *                                                                    respect to the given signal(1) code.
+ *                                                                    This slot can connect the following signals.
+ *                                                                    started,finished,canceled,paused, and resumed.
+ *
+ *      setFunc(short signal , std::function<void(QString)> function) - Connects the lambda function to extracting or
+ *                                                                       extracting signal with respect to the given
+ *                                                                       signal(1) code.
+ *
+ *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or password required
+ *                                                                  signal with respect to the given signal(1) code.
+ *
+ *      setFunc(std::function<void(short,QString)> function) - Connects the lambda function to the error signal.
+ *
+ *  Signals:
+ *  =======
+ *      started(void) - Emitted when the extraction process is started.
+ *      finished(void) - Emitted when the extraction process is finished without any error.
+ *      canceled(void) - Emitted when the extraction process is canceled.
+ *      paused(void) - Emitted when the extraction process is paused successfully.
+ *      resumed(void) - Emitted when the extraction process is resumed successfully.
+ *      progress(int) - Emitted on progress update.
+ *      passwordRequired(int) - Emitted when password is required for the extraction.
+ *      error(short errorCode , QString eMsg) - Emitted when something goes wrong.
 */
 
-class Extractor  : public QObject
+class Extractor  : public QObject // CLASS EXTRACTOR
 {
     Q_OBJECT
 public:
@@ -242,24 +278,26 @@ public:
     Extractor &setBlocksize(int);
     Extractor &onlyExtract(const QString&);
     Extractor &onlyExtract(const QStringList&);
+    Extractor &clear(void);
     ~Extractor();
 
 public Q_SLOTS:
-    bool isRunning() const;
-    bool isCanceled() const;
-    bool isPaused() const;
-    bool isStarted() const;
-
     Extractor &waitForFinished(void);
     Extractor &start(void);
     Extractor &pause(void);
     Extractor &resume(void);
     Extractor &cancel(void);
 
+    bool isRunning() const;
+    bool isCanceled() const;
+    bool isPaused() const;
+    bool isStarted() const;
+
     Extractor &setFunc(short, std::function<void(void)>);
-    Extractor &setFunc(short, std::function<void(QString)>); // extracting and extracted.
-    Extractor &setFunc(short, std::function<void(int)>);  // progress bar and password required.
-    Extractor &setFunc(std::function<void(short,QString)>); // error.
+    Extractor &setFunc(short, std::function<void(QString)>);
+    Extractor &setFunc(short, std::function<void(int)>);
+    Extractor &setFunc(std::function<void(short,QString)>);
+
 Q_SIGNALS:
     void started(void);
     void finished(void);
@@ -274,20 +312,13 @@ Q_SIGNALS:
     void error(short, const QString&);
 
 private Q_SLOTS:
-    // The actual extractor.
-    int init(void); // Allocate and Open Archive.
-    int condition(); // evaluates the condition. ( Checks if EOF ).
-    int loopContent(void); // This is the loop body. ( Writes to Disk ).
-
-    // Counts the total number of files in the archive.
-    // Warning: This function is sync.
+    int init(void);
+    int condition();
+    int loopContent(void);
     int totalFileCount(void);
-    // ---
-
-    // utils
-    void clear(void);
     QString cleanDestPath(const QString& input);
     char *concat(const char *dest, const char *src);
+
 private:
     int ret = 0;
     QSharedPointer<struct archive> archive;
@@ -295,12 +326,12 @@ private:
     struct archive_entry *entry;
 
     QMutex mutex;
-    bool AskPassword = false; // Default.
-    int PasswordTries = 0; // Default.
+    bool AskPassword = false;
+    int PasswordTries = 0;
     int flags = ARCHIVE_EXTRACT_TIME |
                 ARCHIVE_EXTRACT_PERM |
-                ARCHIVE_EXTRACT_SECURE_NODOTDOT; // default.
-    int BlockSize = 10240; // Default BlockSize.
+                ARCHIVE_EXTRACT_SECURE_NODOTDOT;
+    int BlockSize = 10240;
     QString ArchivePath;
     QString Destination;
     QString Password;
@@ -309,15 +340,10 @@ private:
 
 
     /*
-     * Note that this function can only work
-     * if declared in the header.
-    */
-
-    /*
-     * Password Callback to loop until the
-     * correct password , If a empty password
-     * is given then just throw a error
-     * and quit.
+     * This callback makes it possible to check if the password is wrong or
+     * correct and also loop until the user gives a correct password or an
+     * empty password.
+     * ====================================================================
     */
     static const char *password_callback(struct archive *a, void *_client_data)
     {
@@ -356,14 +382,14 @@ private:
         e->PasswordTries += 1;
         return e->Password.toUtf8().constData();
     }
-// ---
+    // ==========
 
 
-}; // Extractor Class Ends
+}; // CLASS EXTRACTOR ENDS
 
 /*
- * Supported Archive Types for Compressor
- * --------------------------------------
+ * SUPPORTED ARCHIVE TYPES FOR COMPRESSOR
+ * ======================================
 */
 enum {
     NO_FORMAT,
@@ -375,44 +401,74 @@ enum {
     SEVEN_ZIP,
     ZIP
 };
+// =======
+
 
 /*
  * Class Compressor <- Inherits QObject.
- * ----------------
+ * ================
  *
  *  Compresses files and folder into a archive.
  *
  *  Constructors:
- *
- *	Compressor(QObject *parent = NULL)
- *
- *	Compressor(const QString& , const QStringList&) - sets an archive with the files from QStringList.
- *	Compressor(const QString& , const QString&) - sets an archive with a single file or folder.
- *  	Compressor(const QString&) - only set the archive path to be created.
+ *  ============
+ *      Compressor(QObject *parent = NULL) - Constructs an empty Compressor Object.
+ *      Compressor(const QString &Archive , const QStringList &files) - Constructs and Sets an Archive(1) with
+ *                                                                      the file(s) from Files(2) list.
+ *	    Compressor(const QString &Archive , const QString &file) - Constructs and Sets an Archive(1) and add a single file(2).
+ *  	Compressor(const QString &Archive) - Constructs and Set the Archive(1) path.
  *
  *  Methods:
- *
- *	void setArchive(const QString&)  - sets the archive path to be created.
- *	void setArchiveFormat(short) - sets the archive format.
- *	void addFiles(const QString&)    - add a single file or folder to the archive.
- *	void addFiles(const QStringList&)- add a list of files and folders to the archive.
- *	void removeFiles(const QString&) - removes a file from the archive.
- *	void removeFiles(const QStringList&) - removes a list of files from the archive.
+ *  =======
+ *      setArchive(const QString &Archive) - Set the Archive(1) path.
+ *      setArchive(const QString &Archive , const QString &file) - Set the Archive(1) path and add a single file(2).
+ *      setArchive(const QString &Archive, const QStringList &files) - Set the Archive(1) path and adds all file(s) from list
+ *      setArchiveFormat(short type) - Sets the Archive type(1) with respect to the format codes.
+ *      setPassword(const QString &Password) - Set Password(1) for the current Archive. ( May not work now )
+ *      setBlocksize(int size) - Set the blocksize for the compression. ( May not work now )
+ *      setCompressionLevel(int level) - Set the compression level for zip , 7zip and rar types.
+ *      addFiles(const QString &file) - Add a single file to the archive.
+ *      addFiles(const QStringList &files) - Add all file(s) from the list to the archive.
+ *      removeFiles(const QString &file) - Removes a single file from the archive.
+ *      removeFiles(const QStringList &files) - Removes all file(s) form the list from the archive.
+ *      clear(void) - Clears the Objects cache.
  *
  *  Slots:
- *	void start() - starts the compression.
- *	void stop()  - stops the compression.
+ *  =====
+ *      waitForFinished(void) - Blocks the caller thread until the comression is finished or canceled.
+ *      start(void) - Starts the compression process in a different thread.
+ *      pause(void) - Pauses the compression process.
+ *      resume(void) - Resumes the compression process.
+ *      cancel(void) - Cancel the compression process.
  *
+ *      isRunning() - Returns True if the compression process is running.
+ *      isCanceled() - Returns True if the compression process has been canceled.
+ *      isPaused() - Returns True if the compression process is paused.
+ *      isStarted() - Returns True if the compression process is started.
+ *
+ *      setFunc(short signal , std::function<void(void)> function) - Connects the lambda function to the Signal with
+ *                                                                   respect to the given signal(1) code.
+ *                                                                   This slot can connect the following signals.
+ *                                                                   started,finished,canceled,paused, and resumed.
+ *
+ *      setFunc(short signal , std::function<void(QString)> function) - Connects the lambda function to compressing or
+ *                                                                      compressed signal with respect to the given
+ *                                                                      signal(1) code.
+ *
+ *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or password required
+ *                                                                  signal with respect to the given signal(1) code.
  *  Signals:
- *      void stopped() - Emitted when the process is stopped successfully.
- * 	void finished() - Emitted when all jobs are done.
- * 	void compressing(const QString&) - Emitted with the file beign compressed.
- * 	void compressed(const QString&)  - Emitted with file had been compressed.
- * 	void error(short , const QString&) - Emitted with error code refering a file.
- *
+ *  =======
+ *      started(void) - Emitted when the compression process is started.
+ *      finished(void) - Emitted when the compression process is finished without any error.
+ *      canceled(void) - Emitted when the compression process is canceled.
+ *      paused(void) - Emitted when the compression process is paused successfully.
+ *      resumed(void) - Emitted when the compression process is resumed successfully.
+ *      progress(int) - Emitted on progress update.
+ *      error(short errorCode , QString eMsg) - Emitted when something goes wrong.
 */
 
-class Compressor : public QObject
+class Compressor : public QObject // CLASS COMPRESSOR
 {
     Q_OBJECT
 public:
@@ -421,8 +477,8 @@ public:
     explicit Compressor(const QString& archive, const QStringList& files);
     explicit Compressor(const QString& archive, const QString& file);
     Compressor &setArchive(const QString &archive);
-    Compressor &setArchive(const QString &archive , const QString &file);
-    Compressor &setArchive(const QString &archive , const QStringList &files);
+    Compressor &setArchive(const QString &archive, const QString &file);
+    Compressor &setArchive(const QString &archive, const QStringList &files);
     Compressor &setArchiveFormat(short type);
     Compressor &setPassword(const QString&);
     Compressor &setBlocksize(int);
@@ -447,19 +503,15 @@ public Q_SLOTS:
     bool isStarted() const;
 
     Compressor &setFunc(short, std::function<void(void)>);
-    Compressor &setFunc(short, std::function<void(QString)>); // compressing and compressed.
-    Compressor &setFunc(std::function<void(int)>); // progress bar.
-    Compressor &setFunc(std::function<void(short,QString)>); // error.
+    Compressor &setFunc(short, std::function<void(QString)>);
+    Compressor &setFunc(std::function<void(int)>);
+    Compressor &setFunc(std::function<void(short,QString)>);
 private Q_SLOTS:
-    // The actual Compressor.
-    int init(void); // Allocates everything needed.
-    int condition(void); // EOF ?
-    void expression(void); // Increament.
-    int loopContent(void); // Write to archive handle.
-    void deinit(int); // clear everything.
-    // ------
-
-    // Utils
+    int init(void);
+    int condition(void);
+    void expression(void);
+    int loopContent(void);
+    void deinit(int);
     QString isDirInFilesList(void);
     void populateDirectory(void);
     void checkNodes(void);
@@ -477,46 +529,76 @@ Q_SIGNALS:
 private:
     int ret = 0;
     QSharedPointer<struct archive> archive;
-    QSharedPointer<QSaveFile> tempFile; // Temporary file for the archive.
+    QSharedPointer<QSaveFile> tempFile;
 
     QMutex mutex;
-    int BlockSize = 10240; // Default BlockSize.
-    int CompressionLevel = 0; // Use Default.
-    short archiveFormat = NO_FORMAT; // Defaults to gzip.
+    int BlockSize = 10240;
+    int CompressionLevel = 0;
+    short archiveFormat = NO_FORMAT;
     QString archivePath;
     QString Password;
     QMap<QString, QString>::iterator mapIter;
     QMap<QString, QString> nodes;  // (1)-> File path , (2)-> entry in archive.
     UNBlock *UNBlocker = nullptr;
-}; // Compressor Class Ends
+}; // CLASS COMPRESSOR ENDS
 
 /*
  * Class Reader <- Inherits QObject.
- * ------------
+ * ===============
  *
- * Gets the list of files inside a archive.
+ *  Takes care of reading of archives with the help
+ *  of libarchive.
  *
- * Constructors:
- * 	Reader(QObject *parent = NULL) - Only Constructs the reader.
- * 	Reader(const QString&) - Sets a single archive and Constructs the reader.
+ *  Constructors:
+ *  ============
+ *  	Reader(QObject *parent = NULL) - Constructs an empty Reader Object.
+ *  	Reader(const QString &Archive) - Constructs and sets Archive(1).
  *
- * Methods:
+ *  Methods:
+ *  =======
+ *      setArchive(const QString &Archive) - Sets the Archive(1) Path.
+ *      setPassword(const QString &Password) - Sets the password for the Archive(1).
+ *      setAskPassword(bool AskPassword) - If set true , If password is required it will be asked until the user sets the
+ *                                         correct password or a empty password.
+ *      setBlocksize(int size) - Set the blocksize.
+ *      getFilesList(void) - Returns the list of files in QJsonObject.
+ *      clear(void) - Clears the reader objects cache.
  *
- * 	void setArchive(const QString&) - Sets a single archive
- *	void clear()			- Clears everything stored in this class.
- *	const QStringList& listFiles() - get the files stored in this class.
+ *  Slots:
+ *  =====
+ *      waitForFinished(void) - Blocks the caller thread until the reading is finished or canceled.
+ *      start(void) - Starts the reading process in a different thread.
+ *      pause(void) - Pauses the reading process.
+ *      resume(void) - Resumes the reading process.
+ *      cancel(void) - Cancel the reading process.
  *
- * Slots:
- * 	start() - Starts the operation.
- * 	stop()  - Stops the operation.
+ *      isRunning() - Returns True if the reading process is running.
+ *      isCanceled() - Returns True if the reading process has been canceled.
+ *      isPaused() - Returns True if the reading process is paused.
+ *      isStarted() - Returns True if the reading process is started.
  *
- * Signals:
- *      void stopped() - Emitted when stop() is successfull.
- *	void error(short , const QString&) - Emitted when something goes wrong.
- * 	void archiveFiles(const QString& , const QStringList&) - Emitted when we got all the files from the archive.
+ *      setFunc(short signal , std::function<void(void)> function) - Connects the lambda function to the Signal with
+ *                                                                    respect to the given signal(1) code.
+ *                                                                    This slot can connect the following signals.
+ *                                                                    started,finished,canceled,paused, and resumed.
+ *
+ *      setFunc(short signal , std::function<void(QStringJsonObject)> function) - Connects the lambda function to filesList signal.
+ *      setFunc(std::function<void(int)> function) - Connects the lambda function to password required signal.
+ *      setFunc(std::function<void(short,QString)> function) - Connects the lambda function to the error signal.
+ *
+ *  Signals:
+ *  =======
+ *      started(void) - Emitted when the reading process is started.
+ *      finished(void) - Emitted when the reading process is finished without any error.
+ *      canceled(void) - Emitted when the reading process is canceled.
+ *      paused(void) - Emitted when the reading process is paused successfully.
+ *      resumed(void) - Emitted when the reading process is resumed successfully.
+ *      progress(int) - Emitted on progress update.
+ *      passwordRequired(int) - Emitted when password is required for reading the archive.
+ *      filesList(QJsonObject) - Emitted when reading process is finished.
+ *      error(short errorCode , QString eMsg) - Emitted when something goes wrong.
 */
-
-class Reader : public QObject
+class Reader : public QObject // CLASS READER
 {
     Q_OBJECT
 public:
@@ -539,21 +621,19 @@ public Q_SLOTS:
 
     bool isRunning() const;
     bool isCanceled() const;
-     bool isPaused() const;
-     bool isStarted() const;
+    bool isPaused() const;
+    bool isStarted() const;
 
-     Reader &setFunc(short, std::function<void(void)>);
-     Reader &setFunc(std::function<void(int)>); // Password Required.
-     Reader &setFunc(std::function<void(QJsonObject)>); // files list.
-     Reader &setFunc(std::function<void(short,QString)>); // error.
+    Reader &setFunc(short, std::function<void(void)>);
+    Reader &setFunc(std::function<void(int)>);
+    Reader &setFunc(std::function<void(QJsonObject)>);
+    Reader &setFunc(std::function<void(short,QString)>);
 private Q_SLOTS:
     int init(void);
     int condition(void);
     int loopContent(void);
     void deinit(int);
-
     QString getDirectoryFileName(const QString&);
-
 Q_SIGNALS:
     void started();
     void finished();
@@ -571,28 +651,17 @@ private:
     struct archive_entry *entry;
 
     QMutex mutex;
-    bool AskPassword = false; // Default.
-    int PasswordTries = 0; // Default.
-    int BlockSize = 10240; // Default BlockSize.
+    bool AskPassword = false;
+    int PasswordTries = 0;
+    int BlockSize = 10240;
     QString ArchivePath;
     QString Password;
     QJsonObject ArchiveContents;
     UNBlock *UNBlocker = nullptr;
 
-    /*
-     * Note that this function can only work
-     * if declared in the header.
-    */
-
-    /*
-     * Password Callback to loop until the
-     * correct password , If a empty password
-     * is given then just throw a error
-     * and quit.
-    */
     static const char *password_callback(struct archive *a, void *_client_data)
     {
-        
+
         (void)a; /* UNUSED */
         Reader *e = (Reader*)_client_data;
         if(e->AskPassword) {
@@ -629,8 +698,6 @@ private:
         return e->Password.toUtf8().constData();
     }
 // ---
-}; // Class Reader Ends
-
-
-} // QArchive Namespace Ends.
+}; // CLASS READER ENDS
+} // QARCHIVE NAMESPACE ENDS
 #endif // QARCHIVE_HPP_INCLUDED

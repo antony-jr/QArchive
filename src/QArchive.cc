@@ -31,10 +31,7 @@
  *
  * -----------------------------------------------------------------------------
  *  @filename 	 	: QArchive.cc
- *  @description 	: C++ Cross-Platform helper library that Modernizes libarchive
- *  			  using Qt5. Simply extracts 7z  , Tarballs  , RAR
- *  			  and other supported formats by libarchive.
- *  			  The Source file.
+ *  @description 	: Source for QArchive Namespace.
  * -----------------------------------------------------------------------------
 */
 #include "../include/QArchive.hpp"
@@ -42,6 +39,7 @@
 /*
  * Destructors for struct archive ,
  * Which is Handled by smart pointers.
+ * ====================================
 */
 static void deleteArchiveReader(struct archive *ar)
 {
@@ -69,7 +67,7 @@ static void deleteArchiveEntry(struct archive_entry *entry)
     return;
 }
 
-// ---
+// ======
 
 using namespace QArchive;
 
@@ -80,9 +78,9 @@ using namespace QArchive;
  *  async way. Helps all other classes
  *  for making it async.
  *
- * ----------------------------
+ * ============================
  *  Constructor and Destructor.
- * ----------------------------
+ * ============================
 */
 
 UNBlock::UNBlock(QObject *parent)
@@ -117,11 +115,12 @@ UNBlock::~UNBlock()
     return;
 }
 
-// ------
+// ===================
 
 
 /*
- * UNBlock Public Methods
+ * UNBlock Public Methods.
+ * ========================
 */
 
 UNBlock &UNBlock::setInitializer(std::function<int(void)> initialize)
@@ -175,10 +174,11 @@ UNBlock &UNBlock::setTotalIterations(int total)
     return *this;
 }
 
-// ------
+// ===================================
 
 /*
  * UNBlock Public Slots.
+ * ===================================
 */
 
 
@@ -257,10 +257,11 @@ bool UNBlock::isStarted(void) const
     return _bStarted;
 }
 
-// ------
+// =======================================
 
 /*
  * UNBlock Private Slots.
+ * =======================================
 */
 
 void UNBlock::loop(void)
@@ -415,19 +416,14 @@ void UNBlock::setPauseRequested(bool ch)
     return;
 }
 
-// ------
+// =======================
 
-/*
- * ----------------------------
- * UNBlock Class Ends Here.
- * ----------------------------
-*/
 
 /*
  * Extractor Class Source.
- * ----------------------------
+ * ============================
  * Constructor and Destructor.
- * ----------------------------
+ * ============================
 */
 Extractor::Extractor(QObject *parent)
     : QObject(parent)
@@ -484,11 +480,11 @@ Extractor::~Extractor()
     return;
 }
 
-/* ------ */
+/* ============================================== */
 
 /*
  * Public Methods.
- * ---------------
+ * ==============================================
  *  Extractor
 */
 Extractor &Extractor::setArchive(const QString &filename)
@@ -567,11 +563,30 @@ Extractor &Extractor::onlyExtract(const QStringList &filepaths)
     return *this;
 }
 
-/* ------ */
+Extractor &Extractor::clear(void)
+{
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
+
+    archive.reset();
+    ext.reset();
+
+    ret = PasswordTries = 0;
+    AskPassword = false;
+    BlockSize = 10240;
+    ArchivePath.clear();
+    Destination.clear();
+    Password.clear();
+    OnlyExtract.clear();
+    return *this;
+}
+
+/* ==================================== */
 
 /*
  * Public Slots.
- * ---------------
+ * ======================================================================
  *  Extractor
 */
 Extractor &Extractor::waitForFinished(void)
@@ -690,16 +705,14 @@ Extractor &Extractor::setFunc(short signal, std::function<void(int)> function)
     return *this;
 }
 
-/* ------ */
+/* ====================================================================== */
 
 /*
  * Private Slots.
- * ---------------
+ * ===============================================================================
  *  Extractor
  *  Internals for the extractor.
 */
-
-// The actual extractor.
 int Extractor::init(void)
 {
     // Check if the archive and the destination folder exists
@@ -799,15 +812,15 @@ int Extractor::loopContent(void)
                     if (ret == ARCHIVE_EOF) {
                         break;
                     } else if (ret != ARCHIVE_OK) {
-                                         ret = ARCHIVE_EOF;
-                 error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
-                 return ARCHIVE_UNCAUGHT_ERROR;
+                        ret = ARCHIVE_EOF;
+                        error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
+                        return ARCHIVE_UNCAUGHT_ERROR;
                     } else {
                         ret = archive_write_data_block(ext.data(), buff, size, offset);
                         if (ret != ARCHIVE_OK) {
-                                             ret = ARCHIVE_EOF;
-                 error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
-                 return ARCHIVE_UNCAUGHT_ERROR;
+                            ret = ARCHIVE_EOF;
+                            error(ARCHIVE_UNCAUGHT_ERROR, checkfile);
+                            return ARCHIVE_UNCAUGHT_ERROR;
                         }
                     }
                 }
@@ -830,14 +843,7 @@ int Extractor::loopContent(void)
 
 }
 
-// ------
 
-
-/* Counts the total number of files in an archive
- * This is sync and so this was intended to be
- * used in a seperate thread , Anyway this is
- * private so we don't care.
-*/
 int Extractor::totalFileCount(void)
 {
     auto a = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
@@ -855,29 +861,6 @@ int Extractor::totalFileCount(void)
         continue;
     }
     return (archive_errno(a.data())) ? -1 : archive_file_count(a.data());
-}
-// ------
-
-
-// Utils
-
-void Extractor::clear(void)
-{
-    if(isRunning() || isPaused()) {
-        return;
-    }
-
-    archive.reset();
-    ext.reset();
-
-    ret = PasswordTries = 0;
-    AskPassword = false;
-    BlockSize = 10240;
-    ArchivePath.clear();
-    Destination.clear();
-    Password.clear();
-    OnlyExtract.clear();
-    return;
 }
 
 QString Extractor::cleanDestPath(const QString& input)
@@ -899,19 +882,14 @@ char *Extractor::concat(const char *dest, const char *src)
     return ret;
 }
 
-/* ------ //
- *  Class Extractor Ends Here.
- * -----------------------------
-*/
-
 
 /*
  * Class Compressor
- * --------------------------
+ * ====================================================
  *  QArchive Compressor Source
- * -----------------------------
+ * ====================================================
  * Constructor and Destructor.
- * -----------------------------
+ * ====================================================
 */
 Compressor::Compressor(QObject *parent)
     : QObject(parent)
@@ -988,13 +966,13 @@ Compressor::~Compressor()
     return;
 }
 
-/* ------ */
+/* ================================================================== */
 
 
 
 /*
  * Public Methods.
- * -----------------
+ * =======================================================================
  *  Compressor.
 */
 Compressor &Compressor::setArchive(const QString &archive)
@@ -1007,19 +985,19 @@ Compressor &Compressor::setArchive(const QString &archive)
     return *this;
 }
 
-Compressor &Compressor::setArchive(const QString &archive , const QString &file)
+Compressor &Compressor::setArchive(const QString &archive, const QString &file)
 {
     setArchive(archive);
     addFiles(file);
     return *this;
 }
 
-Compressor &Compressor::setArchive(const QString &archive , const QStringList &files)
- {
-     setArchive(archive);
-     addFiles(files);
-     return *this;
- }
+Compressor &Compressor::setArchive(const QString &archive, const QStringList &files)
+{
+    setArchive(archive);
+    addFiles(files);
+    return *this;
+}
 
 Compressor &Compressor::setArchiveFormat(short type)
 {
@@ -1124,7 +1102,6 @@ Compressor &Compressor::removeFiles(const QStringList& files)
 
 Compressor &Compressor::clear(void)
 {
-    QMutexLocker locker(&mutex);
     if(isRunning() || isPaused()) {
         return *this;
     }
@@ -1138,12 +1115,12 @@ Compressor &Compressor::clear(void)
     return *this;
 }
 
-/* ------ */
+/* =================================================== */
 
 
 /*
  * Public Slots.
- * -------------
+ * ========================================================================
  *  Compressor
 */
 Compressor &Compressor::waitForFinished(void)
@@ -1268,15 +1245,14 @@ Compressor &Compressor::setFunc(std::function<void(int)> function)
     return *this;
 }
 
-/* ------ */
+/* =========================================== */
 
 /*
  * Private Slots.
- * ---------------
+ * ==============================================================================
  *  Compressor
 */
 
-// The Actual Compressor.
 int Compressor::init(void)
 {
     checkNodes(); // clear unwanted files
@@ -1327,7 +1303,7 @@ int Compressor::init(void)
 
     /*
      * Set config for the new archive.
-     * -------------------------------
+     * ================================
     */
 #if 0
     /*
@@ -1345,35 +1321,26 @@ int Compressor::init(void)
         archive_write_set_options(archive.data(), options.constData());
     }
     archive_write_set_bytes_per_block(archive.data(), BlockSize);
-    // ------
+    // =======================
 
     archive_write_open_fd(archive.data(), tempFile->handle()); // Open.
     // Start the Map Iterator.
     mapIter = nodes.begin();
-    // ---
+    // ====
 
     return 0; // no error.
 }
-// ------
 
-// Condition to check.
 int Compressor::condition(void)
 {
     return (mapIter == nodes.end());
 }
-// ------
-
-// Expression.
 
 void Compressor::expression(void)
 {
     ++mapIter;
     return;
 }
-
-// ------
-
-// Loop Content.
 
 int Compressor::loopContent(void)
 {
@@ -1412,8 +1379,6 @@ int Compressor::loopContent(void)
             return ARCHIVE_FATAL_ERROR;
         }
         if (r > ARCHIVE_FAILED) {
-            /* For now, we use a simpler loop to copy data
-             * into the target archive. */
             QFile file(mapIter.key());
             if(!file.open(QIODevice::ReadOnly)) {
                 emit error(DISK_OPEN_ERROR, mapIter.key());
@@ -1437,8 +1402,8 @@ int Compressor::loopContent(void)
 
 void Compressor::deinit(int canceled)
 {
-    CompressionLevel = 0; // Use Default.
-    archiveFormat = NO_FORMAT; // Defaults to gzip.
+    CompressionLevel = 0;
+    archiveFormat = NO_FORMAT;
     archivePath.clear();
     Password.clear();
     nodes.clear();
@@ -1451,16 +1416,6 @@ void Compressor::deinit(int canceled)
     }
     return;
 }
-
-// ------
-
-// Utils
-
-/*
- * Warning this method is sync and it is
- * intended to be used in a seperated
- * thread.
-*/
 
 QString Compressor::isDirInFilesList(void)
 {
@@ -1528,17 +1483,12 @@ void Compressor::getArchiveFormat()
     }
 }
 
-/* ------ //
- *  Class Compressor Ends Here.
- * -------------------------------
-*/
-
-
 /*
  * Reader Class Source.
+ * ======================================
+ * Constructor and Destructor.
+ * ======================================
 */
-// Constructor and Destructor.
-
 Reader::Reader(QObject *parent)
     : QObject(parent)
 {
@@ -1566,20 +1516,21 @@ Reader::Reader(const QString& archive)
 
 Reader::~Reader()
 {
-    if(isPaused()){
+    if(isPaused()) {
         resume();
     }
-    if(isRunning() || isStarted()){
+    if(isRunning() || isStarted()) {
         cancel();
         waitForFinished();
         UNBlocker->disconnect();
     }
     return;
 }
+// =================================
 
 /*
  * Public Methods.
- * ---------------
+ * =====================================================
  *  Reader
 */
 Reader &Reader::setArchive(const QString &filename)
@@ -1619,26 +1570,33 @@ Reader &Reader::setBlocksize(int size)
     return *this;
 }
 
+QJsonObject Reader::getFilesList(void)
+{
+    QMutexLocker locker(&mutex);
+    return ArchiveContents;
+}
+
 Reader &Reader::clear(void)
- {
-     if(isRunning() || isPaused()) {
-         return *this;
-     }
+{
+    if(isRunning() || isPaused()) {
+        return *this;
+    }
 
-     archive.reset();
-     ret = PasswordTries = 0;
-     AskPassword = false;
-     BlockSize = 10240;
-     ArchivePath.clear();
-     Password.clear();
-     return *this;
- }
+    archive.reset();
+    ret = PasswordTries = 0;
+    AskPassword = false;
+    BlockSize = 10240;
+    ArchivePath.clear();
+    Password.clear();
+    ArchiveContents = QJsonObject();
+    return *this;
+}
 
-/* ------ */
+/* =========================================== */
 
 /*
  * Public Slots.
- * ---------------
+ * =================================================================
  *  Reader
 */
 Reader &Reader::waitForFinished(void)
@@ -1660,7 +1618,9 @@ Reader &Reader::start(void)
     .setCodeBlock([this]() {
         return loopContent();
     })
-    .setDeInitializer([this](int canceled) { deinit(canceled); })
+    .setDeInitializer([this](int canceled) {
+        deinit(canceled);
+    })
     .start();
 
     return *this;
@@ -1732,14 +1692,14 @@ Reader &Reader::setFunc(short signal, std::function<void(void)> function)
 Reader &Reader::setFunc(std::function<void(int)> function)
 {
     QMutexLocker locker(&mutex);
-    connect(this , &Reader::passwordRequired , function);
+    connect(this, &Reader::passwordRequired, function);
     return *this;
 }
 
 Reader &Reader::setFunc(std::function<void(QJsonObject)> function)
 {
     QMutexLocker locker(&mutex);
-    connect(this , &Reader::filesList , function);
+    connect(this, &Reader::filesList, function);
     return *this;
 }
 
@@ -1750,16 +1710,14 @@ Reader &Reader::setFunc(std::function<void(short,QString)> function)
     return *this;
 }
 
-/* ------ */
+/* ================================== */
 
 /*
  * Private Slots.
- * ---------------
+ * =========================================================
  *  Reader
  *  Internals for the reader.
 */
-
-// The actual reader.
 int Reader::init(void)
 {
     // Check if the archive exists
@@ -1810,20 +1768,20 @@ int Reader::loopContent(void)
     auto entry_stat = archive_entry_stat(entry);
     qint64 size = (qint64)entry_stat->st_size;
     QString sizeUnits = "Bytes";
-    
-    if(size == 0){
+
+    if(size == 0) {
         sizeUnits = "None";
         size = 0;
-    }else if(size < 1024){
+    } else if(size < 1024) {
         sizeUnits = "Bytes";
         size = size;
-    }else if(size >= 1024 && size < 1048576){
+    } else if(size >= 1024 && size < 1048576) {
         sizeUnits = "KiB";
         size /= 1024;
-    }else if(size >= 1048576 && size < 1073741824){
+    } else if(size >= 1048576 && size < 1073741824) {
         sizeUnits = "MiB";
         size /= 1048576;
-    }else{
+    } else {
         sizeUnits = "GiB";
         size /= 1073741824;
     }
@@ -1837,92 +1795,83 @@ int Reader::loopContent(void)
 
     auto ft = archive_entry_filetype(entry);
     QString FileType;
-    switch(ft){
-        case AE_IFREG: // Regular file
-            FileType = "RegularFile";
-            break;
-        case AE_IFLNK: // Link
-            FileType = "SymbolicLink";
-            break;
-        case AE_IFSOCK: // Socket
-            FileType = "Socket";
-            break;
-        case AE_IFCHR: // Character Device
-            FileType = "CharacterDevice";
-            break;
-        case AE_IFBLK: // Block Device
-            FileType = "BlockDevice";
-            break;
-        case AE_IFDIR: // Directory.
-            FileType = "Directory";
-            break;
-        case AE_IFIFO: // Named PIPE. (fifo)
-            FileType = "NamedPipe";
-            break;
-        default:
-            FileType = "UnknownFile";
-            break;
+    switch(ft) {
+    case AE_IFREG: // Regular file
+        FileType = "RegularFile";
+        break;
+    case AE_IFLNK: // Link
+        FileType = "SymbolicLink";
+        break;
+    case AE_IFSOCK: // Socket
+        FileType = "Socket";
+        break;
+    case AE_IFCHR: // Character Device
+        FileType = "CharacterDevice";
+        break;
+    case AE_IFBLK: // Block Device
+        FileType = "BlockDevice";
+        break;
+    case AE_IFDIR: // Directory.
+        FileType = "Directory";
+        break;
+    case AE_IFIFO: // Named PIPE. (fifo)
+        FileType = "NamedPipe";
+        break;
+    default:
+        FileType = "UnknownFile";
+        break;
     };
     // Set the values.
-    if(FileType != "RegularFile"){
-        CurrentEntry.insert("FileName" , getDirectoryFileName(CurrentFile));
-    }else{
-        CurrentEntry.insert("FileName" , fileInfo.fileName());
+    if(FileType != "RegularFile") {
+        CurrentEntry.insert("FileName", getDirectoryFileName(CurrentFile));
+    } else {
+        CurrentEntry.insert("FileName", fileInfo.fileName());
     }
 
-    CurrentEntry.insert("FileType" , QJsonValue(FileType));
-    CurrentEntry.insert("Size" , QJsonValue(size));
-    CurrentEntry.insert("SizeUnit" , sizeUnits);
-    CurrentEntry.insert("BlockSize" , QJsonValue(blockSizeInBytes));
-    CurrentEntry.insert("BlockSizeUnit" , "Bytes");
-    CurrentEntry.insert("Blocks" , QJsonValue(blocks));
-    if(lastAccessT){
-        CurrentEntry.insert("LastAccessedTime" , QJsonValue((QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
-    }else{
-        CurrentEntry.insert("LastAccessedTime" , "Unknown");
+    CurrentEntry.insert("FileType", QJsonValue(FileType));
+    CurrentEntry.insert("Size", QJsonValue(size));
+    CurrentEntry.insert("SizeUnit", sizeUnits);
+    CurrentEntry.insert("BlockSize", QJsonValue(blockSizeInBytes));
+    CurrentEntry.insert("BlockSizeUnit", "Bytes");
+    CurrentEntry.insert("Blocks", QJsonValue(blocks));
+    if(lastAccessT) {
+        CurrentEntry.insert("LastAccessedTime", QJsonValue((QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastAccessedTime", "Unknown");
     }
 
-    if(lastModT){
-        CurrentEntry.insert("LastModifiedTime" , QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
-    }else{
-        CurrentEntry.insert("LastModifiedTime" , "Unknown");
+    if(lastModT) {
+        CurrentEntry.insert("LastModifiedTime", QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastModifiedTime", "Unknown");
     }
 
-    if(lastStatusModT){
-        CurrentEntry.insert("LastStatusModifiedTime" , QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
-    }else{
-        CurrentEntry.insert("LastStatusModifiedTime" , "Unknown");
+    if(lastStatusModT) {
+        CurrentEntry.insert("LastStatusModifiedTime", QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
     }
 
     // Join to the main QJsonObject.
-    ArchiveContents.insert(CurrentFile , CurrentEntry);
+    ArchiveContents.insert(CurrentFile, CurrentEntry);
     return 0; // return no error
 
 }
 
 void Reader::deinit(int canceled)
 {
-    if(!canceled){
-    emit(filesList(ArchiveContents));
+    if(!canceled) {
+        emit(filesList(ArchiveContents));
     }
     return;
 }
 
 QString Reader::getDirectoryFileName(const QString &dir)
 {
-    if(dir[dir.count() - 1] == "/"){
-        return dir.mid(0 , dir.count() - 1);
+    if(dir[dir.count() - 1] == "/") {
+        return dir.mid(0, dir.count() - 1);
     }
     return dir;
 }
 
-// ------
-
-
-/* ------ //
- *  Class Reader Ends Here.
- * ------------------------------------
-*/
-
-
-// =============================================================== //
+// ================================
