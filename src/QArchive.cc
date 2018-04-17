@@ -1828,11 +1828,11 @@ int Reader::loopContent(void)
         size /= 1073741824;
     }
 
-    auto blockSizeInBytes = entry_stat->st_blksize;
-    auto blocks = entry_stat->st_blocks;
-    auto lastAccessT = entry_stat->st_atim;
-    auto lastModT = entry_stat->st_mtim;
-    auto lastStatusModT = entry_stat->st_ctim;
+    qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
+    qint64 blocks = (qint64)entry_stat->st_blocks;
+    auto lastAccessT = entry_stat->st_atim.tv_sec;
+    auto lastModT = entry_stat->st_mtim.tv_sec;
+    auto lastStatusModT = entry_stat->st_ctim.tv_sec;
     QFileInfo fileInfo(CurrentFile);
 
     auto ft = archive_entry_filetype(entry);
@@ -1865,34 +1865,37 @@ int Reader::loopContent(void)
     };
     // Set the values.
     if(FileType != "RegularFile"){
-    CurrentEntry.insert("FileName" , getDirectoryFileName(CurrentFile));
+        CurrentEntry.insert("FileName" , getDirectoryFileName(CurrentFile));
     }else{
-    CurrentEntry.insert("FileName" , fileInfo.fileName());
+        CurrentEntry.insert("FileName" , fileInfo.fileName());
     }
+
     CurrentEntry.insert("FileType" , QJsonValue(FileType));
     CurrentEntry.insert("Size" , QJsonValue(size));
     CurrentEntry.insert("SizeUnit" , sizeUnits);
-/*
     CurrentEntry.insert("BlockSize" , QJsonValue(blockSizeInBytes));
     CurrentEntry.insert("BlockSizeUnit" , "Bytes");
     CurrentEntry.insert("Blocks" , QJsonValue(blocks));
-    CurrentEntry.insert("LastAccessedTime" , (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate));
-    CurrentEntry.insert("LastModifiedTime" , (QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate));
-    CurrentEntry.insert("LastStatusModifiedTime" , (QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate));
-*/
-    // Join to the main QJsonObject.
-    QString dirName = fileInfo.dir().dirName();
-    if(FileType != "RegularFile"){
-        ArchiveContents.insert(CurrentFile , CurrentEntry);
+    if(lastAccessT){
+        CurrentEntry.insert("LastAccessedTime" , QJsonValue((QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
     }else{
-        dirName += "/";
-        QJsonValue DirValue = ArchiveContents.value(dirName);
-        QJsonObject Directory = DirValue.toObject();
-        QJsonObject Files = Directory.value("Contents").toObject();
-        Files.insert(CurrentFile , CurrentEntry);
-        Directory.insert("Contents" , Files);
-        ArchiveContents.insert(dirName , Directory);
+        CurrentEntry.insert("LastAccessedTime" , "Unknown");
     }
+
+    if(lastModT){
+        CurrentEntry.insert("LastModifiedTime" , QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
+    }else{
+        CurrentEntry.insert("LastModifiedTime" , "Unknown");
+    }
+
+    if(lastStatusModT){
+        CurrentEntry.insert("LastStatusModifiedTime" , QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
+    }else{
+        CurrentEntry.insert("LastStatusModifiedTime" , "Unknown");
+    }
+
+    // Join to the main QJsonObject.
+    ArchiveContents.insert(CurrentFile , CurrentEntry);
     return 0; // return no error
 
 }
@@ -1905,7 +1908,6 @@ void Reader::deinit(int canceled)
     return;
 }
 
-// Utils
 QString Reader::getDirectoryFileName(const QString &dir)
 {
     if(dir[dir.count() - 1] == "/"){
