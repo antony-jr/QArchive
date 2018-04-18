@@ -468,6 +468,9 @@ Extractor::Extractor(const QString &filename, const QString &destination)
 
 Extractor::~Extractor()
 {
+    if(isPaused()) {
+        resume();
+    }
     if(isRunning()) {
         cancel();
         waitForFinished();
