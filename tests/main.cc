@@ -15,7 +15,7 @@ int main(int ac, char **av)
     if(QTest::qExec(&compressorTests)) {
         return -1;
     }
-    if(QTest::qExec(&readerTests)){
+    if(QTest::qExec(&readerTests)) {
         return -1;
     }
     QTimer::singleShot(1000, &app, SLOT(quit()));

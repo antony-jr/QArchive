@@ -31,12 +31,13 @@ private slots:
     {
         QBENCHMARK {
             QArchive::Reader(TestCase1ArchivePath)
-            .setFunc([&](QJsonObject files){
-                    QVERIFY(!files["Output.txt"].toObject().isEmpty());
-             })
+            .setFunc([&](QJsonObject files)
+            {
+                QVERIFY(!files["Output.txt"].toObject().isEmpty());
+            })
             .setFunc([&](short code, QString eMsg)
             {
-                if(code){
+                if(code) {
                     QFAIL(QTest::toString("OPERATION ERRORED :: " + eMsg));
                 }
                 return;
@@ -67,11 +68,11 @@ private slots:
             // Verify if its resumed.
             QVERIFY(r.isRunning() == true);
         })
-        .setFunc([&](QJsonObject files){
-                 QVERIFY(!files["Output.txt"].toObject().isEmpty());
+        .setFunc([&](QJsonObject files) {
+            QVERIFY(!files["Output.txt"].toObject().isEmpty());
         })
         .setFunc([&](short code, QString eMsg) {
-            if(code){
+            if(code) {
                 QFAIL(QTest::toString("OPERATION ERRORED :: " + eMsg));
             }
             return;
@@ -94,7 +95,7 @@ private slots:
             return;
         })
         .setFunc([&](short code, QString eMsg) {
-            if(code){
+            if(code) {
                 QFAIL(QTest::toString("OPERATION ERRORED :: " + eMsg));
             }
             return;
@@ -112,13 +113,13 @@ private slots:
         QArchive::Reader(TestCase4ArchivePath)
         .setPassword(Test4Password)
         .setFunc([&](short code, QString eMsg) {
-            if(code){
+            if(code) {
                 QFAIL(QTest::toString("OPERATION ERRORD :: " + eMsg));
             }
             return;
         })
-        .setFunc([&](QJsonObject files){
-                 QVERIFY(!files["Output.txt"].toObject().isEmpty());
+        .setFunc([&](QJsonObject files) {
+            QVERIFY(!files["Output.txt"].toObject().isEmpty());
         })
         .start()
         .waitForFinished();
@@ -138,11 +139,11 @@ private slots:
             r.setPassword(Test5WrongPassword); // WRONG PASSWORD.
             return;
         })
-        .setFunc([&](QJsonObject files){
-                 QVERIFY(!files["Output.txt"].toObject().isEmpty());
+        .setFunc([&](QJsonObject files) {
+            QVERIFY(!files["Output.txt"].toObject().isEmpty());
         })
         .setFunc([&](short code, QString eMsg) {
-            if(code){
+            if(code) {
                 QFAIL(QTest::toString("unknown error. :: " + eMsg));
             }
             return;
@@ -212,8 +213,8 @@ private slots:
             }
             return;
         })
-        .setFunc([&](QJsonObject files){
-                 QVERIFY(!files["Output.txt"].toObject().isEmpty());
+        .setFunc([&](QJsonObject files) {
+            QVERIFY(!files["Output.txt"].toObject().isEmpty());
         })
         .start()
         .waitForFinished();
