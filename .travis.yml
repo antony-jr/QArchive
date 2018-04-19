@@ -17,6 +17,7 @@ install:
   - cmake .
   - make -j$(nproc)
   - sudo make install
+  - cd .. # return to the root dir.
 
 script:
   - mkdir build ; cd build # Check if it builds as a library.
