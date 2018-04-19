@@ -211,7 +211,8 @@ private:
  *  ============
  *  	Extractor(QObject *parent = NULL) - Constructs an empty Extractor Object.
  *  	Extractor(const QString &Archive) - Constructs and sets Archive(1).
- *  	Extractor(const QString &Archive , const QString &Destination) - Constructs and sets Archive(1) and Destination(2).
+ *  	Extractor(const QString &Archive , const QString &Destination) - Constructs and
+ *  	                                                                 sets Archive(1) and Destination(2).
  *
  *  Methods:
  *  =======
@@ -239,16 +240,17 @@ private:
  *      isStarted() - Returns True if the extraction process is started.
  *
  *      setFunc(short signal , std::function<void(void)> function) - Connects the lambda function to the Signal with
- *                                                                    respect to the given signal(1) code.
- *                                                                    This slot can connect the following signals.
- *                                                                    started,finished,canceled,paused, and resumed.
+ *                                                                   respect to the given signal(1) code.
+ *                                                                   This slot can connect the following signals.
+ *                                                                   started,finished,canceled,paused, and resumed.
  *
  *      setFunc(short signal , std::function<void(QString)> function) - Connects the lambda function to extracting or
- *                                                                       extracting signal with respect to the given
- *                                                                       signal(1) code.
+ *                                                                      extracting signal with respect to the given
+ *                                                                      signal(1) code.
  *
- *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or password required
- *                                                                  signal with respect to the given signal(1) code.
+ *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or
+ *                                                                  password required signal with respect
+ *                                                                  to the given signal(1) code.
  *
  *      setFunc(std::function<void(short,QString)> function) - Connects the lambda function to the error signal.
  *
@@ -397,7 +399,7 @@ enum {
     BZIP2,
     CPIO,
     GZIP,
-    RAR,
+    XAR,
     SEVEN_ZIP,
     ZIP
 };
@@ -415,14 +417,16 @@ enum {
  *      Compressor(QObject *parent = NULL) - Constructs an empty Compressor Object.
  *      Compressor(const QString &Archive , const QStringList &files) - Constructs and Sets an Archive(1) with
  *                                                                      the file(s) from Files(2) list.
- *	    Compressor(const QString &Archive , const QString &file) - Constructs and Sets an Archive(1) and add a single file(2).
+ *	    Compressor(const QString &Archive , const QString &file) - Constructs and Sets an Archive(1) and add
+ *	                                                               a single file(2).
  *  	Compressor(const QString &Archive) - Constructs and Set the Archive(1) path.
  *
  *  Methods:
  *  =======
  *      setArchive(const QString &Archive) - Set the Archive(1) path.
  *      setArchive(const QString &Archive , const QString &file) - Set the Archive(1) path and add a single file(2).
- *      setArchive(const QString &Archive, const QStringList &files) - Set the Archive(1) path and adds all file(s) from list
+ *      setArchive(const QString &Archive, const QStringList &files) - Set the Archive(1) path and adds all file(s)
+ *                                                                     from list
  *      setArchiveFormat(short type) - Sets the Archive type(1) with respect to the format codes.
  *      setPassword(const QString &Password) - Set Password(1) for the current Archive. ( May not work now )
  *      setBlocksize(int size) - Set the blocksize for the compression. ( May not work now )
@@ -455,8 +459,9 @@ enum {
  *                                                                      compressed signal with respect to the given
  *                                                                      signal(1) code.
  *
- *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or password required
- *                                                                  signal with respect to the given signal(1) code.
+ *      setFunc(short signal , std::function<void(int)> function) - Connects the lambda function to progress or
+ *                                                                  password required signal with respect
+ *                                                                  to the given signal(1) code.
  *  Signals:
  *  =======
  *      started(void) - Emitted when the compression process is started.
@@ -582,7 +587,8 @@ private:
  *                                                                    This slot can connect the following signals.
  *                                                                    started,finished,canceled,paused, and resumed.
  *
- *      setFunc(short signal , std::function<void(QStringJsonObject)> function) - Connects the lambda function to filesList signal.
+ *      setFunc(short signal , std::function<void(QStringJsonObject)> function) - Connects the lambda function to 
+ *                                                                                filesList signal.
  *      setFunc(std::function<void(int)> function) - Connects the lambda function to password required signal.
  *      setFunc(std::function<void(short,QString)> function) - Connects the lambda function to the error signal.
  *

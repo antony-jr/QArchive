@@ -20,9 +20,3 @@ script:
   - qmake .
   - make -j$(nproc)
   - ./tests # Run Tests
-
-after_success:
-  - cd ..
-  - cd website
-  - npm install
-  - npm run publish-gh-pages

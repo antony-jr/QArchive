@@ -1273,11 +1273,13 @@ int Compressor::init(void)
     switch (archiveFormat) {
     case BZIP:
     case BZIP2:
-    case NO_FORMAT:
         archive_write_add_filter_bzip2(archive.data());
         break;
     case GZIP:
         archive_write_add_filter_gzip(archive.data());
+        break;
+    case NO_FORMAT:
+        noTar = false;
         break;
     default:
         noTar = true;
@@ -1288,7 +1290,7 @@ int Compressor::init(void)
         if(archiveFormat == SEVEN_ZIP) {
             archive_write_set_format_7zip(archive.data());
         }
-        if(archiveFormat == RAR) {
+        if(archiveFormat == XAR) {
             archive_write_set_format_xar(archive.data());
         }
         if(archiveFormat == ZIP) {
@@ -1468,15 +1470,14 @@ void Compressor::getArchiveFormat()
 
     if(ext.toLower() == "bz") {
         archiveFormat = BZIP;
-    }
-    if(ext.toLower() == "bz2") {
+    } else if(ext.toLower() == "bz2") {
         archiveFormat = BZIP2;
     } else if(ext.toLower() == "gz") {
         archiveFormat = GZIP;
     } else if(ext.toLower() == "cpio") {
         archiveFormat = CPIO;
-    } else if(ext.toLower() == "rar") {
-        archiveFormat = RAR;
+    } else if(ext.toLower() == "xar") {
+        archiveFormat = XAR;
     } else if(ext.toLower() == "zip") {
         archiveFormat = ZIP;
     } else if(ext.toLower() == "7z") {
