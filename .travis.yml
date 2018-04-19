@@ -10,7 +10,7 @@ before_install:
 install:
   - sudo apt-get -y install qt59base
   - source /opt/qt*/bin/qt*-env.sh
-  - # sudo apt-get -y install libarchive-dev libarchive13 bsdtar bsdcpio
+  - sudo apt-get -y install libzip libzip-dev liblzma-dev 
   - wget -O libarchive.tar.gz https://libarchive.org/downloads/libarchive-3.3.2.tar.gz 
   - tar -xvf libarchive.tar.gz
   - cd libarchive-3.3.2 
