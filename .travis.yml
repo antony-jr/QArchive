@@ -11,6 +11,12 @@ install:
   - sudo apt-get -y install qt59base
   - source /opt/qt*/bin/qt*-env.sh
   - sudo apt-get -y install libarchive-dev libarchive13 bsdtar bsdcpio
+  - wget -O libarchive.tar.gz https://libarchive.org/downloads/libarchive-3.3.2.tar.gz 
+  - tar -xvf libarchive.tar.gz
+  - cd libarchive-3.3.2 
+  - cmake .
+  - make -j$(nproc)
+  - sudo make install
 
 script:
   - mkdir build ; cd build # Check if it builds as a library.
