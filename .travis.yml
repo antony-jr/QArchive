@@ -17,6 +17,7 @@ install:
   - cmake .
   - make -j$(nproc)
   - sudo make install
+  - sudo cp libarchive/libarchive.so.* /usr/lib/
   - cd .. # return to the root dir.
 
 script:
