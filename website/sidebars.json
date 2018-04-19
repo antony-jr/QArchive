@@ -12,7 +12,7 @@
     "API" : [
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",
-       "QArchiveSignalCode",
+       "QArchiveSignalCodes",
        "QArchiveExtractor",
 	   "QArchiveCompressor",
 	   "QArchiveReader"

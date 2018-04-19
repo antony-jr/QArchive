@@ -1,7 +1,7 @@
 ---
 id: QArchiveErrorCodes
-title: QArchive error codes
-sidebar_label: QArchive error codes
+title: QArchive Error Codes
+sidebar_label: QArchive Error Codes
 ---
 
 These error codes will be emitted by a common signal which follows a prototype like this  

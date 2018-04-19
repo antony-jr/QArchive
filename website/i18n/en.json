@@ -17,6 +17,8 @@
     "QArchive Compression Formats": "QArchive Compression Formats",
     "QArchiveReader": "Class QArchive::Reader",
     "QArchive::Reader": "QArchive::Reader",
+    "QArchiveSignalCodes": "QArchive Signal Codes",
+    "QArchive Signal Codes": "QArchive Signal Codes",
     "UsingCompressor": "Using QArchive to Compress a set of files",
     "Compressing files with QArchive": "Compressing files with QArchive",
     "UsingExtractor": "Using QArchive to Extract Archives",
