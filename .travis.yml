@@ -10,6 +10,7 @@ before_install:
 install:
   - sudo apt-get -y install qt59base
   - source /opt/qt*/bin/qt*-env.sh
+  - sudo apt-get -y install libarchive-dev libarchive13 bsdtar bsdcpio
 
 script:
   - mkdir build ; cd build # Check if it builds as a library.
