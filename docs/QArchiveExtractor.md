@@ -45,6 +45,7 @@ In addition to the above, QArchive::Extractor also provides a async and sync way
 | **const bool**    | [isCanceled](#bool-iscanceledvoid-const)(void)                                                 |
 | **const bool**    | [isPaused](#bool-ispausedvoid-const)(void)                                                     |
 | **const bool**    | [isStarted](#bool-isstartedvoid-const)(void)                                                   |
+| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidvoid-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(void)> function)                                                |
 | **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidqstring-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)|
 | **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidint-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(int)> function)|
 | **Extractor&**    | [setFunc](#extractor-setfuncstd-function-voidshort-qstring-function)(std::function<void(short,QString)> function)                                           |
@@ -214,14 +215,26 @@ This member function is a **[SLOT]**
 
 Returns **True** if the process has been started.
 
-### Extractor& setFunc(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)
-This member function is a **[SLOT]**
+### Extractor& setFunc(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(void)> function)
+This member function is a [SLOT]
 
 Connects the **lambda** function to the signal with respect to the **[signalCode](QArchiveSignalCodes.md)**.
+**started,finished,resumed,paused and canceled signals are only signals which can be connect with this method**.
 
 ```
  Extractor.setFunc(QArchive::FINISHED , [&](){
     qDebug() << "Finished extraction!";
+ });
+```
+
+### Extractor& setFunc(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)
+This member function is a **[SLOT]**
+
+Connects the **lambda** function to the extracting or extracted signal with respect to the **[signalCode](QArchiveSignalCodes.md)**.
+
+```
+ Extractor.setFunc(QArchive::EXTRACTING , [&](QString file){
+    qDebug() << "Extracting:: " << file;
  });
 ```
  
