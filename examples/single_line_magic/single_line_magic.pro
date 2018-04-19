@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = rarchive
+TARGET = smagic
 INCLUDEPATH += . ../../ ../../include
 LIBS += -larchive
 QT += core concurrent

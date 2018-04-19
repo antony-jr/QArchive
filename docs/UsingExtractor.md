@@ -7,73 +7,43 @@ sidebar_label: Extracting Archives with QArchive
 Please refer the full class documentation [here](QArchiveExtractor.md)
 
 This simple example extracts an archive.
+Here in this example you can see that we use a strange method called **'setFunc'** ,   
+This method is little special, It connects **lambda** functions with the desired   
+signal of the **extractor class**. This method was created to make this easy for   
+you. You can also use **QObject::connect** to connect with signals in the   
+**extractor class** like tradition qt libraries does. See [here](QArchiveSignalCodes.md) to get the signal
+codes for your desired signals.
 
-
-## main.cpp
+**Note** : All methods returns the reference to your current object and therefore you
+can use other methods right away , Except for **isXXX()** methods because they return
+bools. This feature is new to QArchive (to *The best of my knowledge*). This simply
+means that you can extract a archive with a single line like this.
 
 ```
+ QArchive::Extractor("test.7z").start().waitForFinished();
+```
+
+**Side Note** : Your event loop will not **quit** if you finish the archive process
+before you start your event loop. That is , If you extract a very small archive , It 
+will be finished before the next line gets executed ( *Yeah , Its really fast.* )   
+and therefore your program never ends , One way to solve this is to use   
+**QTimer::singleShot** to start the extractor with a **1000 miliseconds** delay.
+
+## main.cpp
+```
 #include <QCoreApplication>
-#include <QDebug>
 #include <QArchive>
 
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-
-    /*
-     * 1.Construct
-    */
-    QArchive::Extractor e("test.7z");
-
-
-    /*
-     * 2.Connect Callbacks
-    */
-
-    // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Extractor::finished, [&]() {
+    QArchive::Extractor("test.7z")
+    .setFunc(QArchive::FINISHED, [&]() {
         qDebug() << "Finished all extraction!";
         app.quit();
-    });
-
-    QObject::connect(&e, &QArchive::Extractor::extracting, [&](QString file) {
-        qDebug() << "Extracting:: " << file;
-    });
-
-    // emitted when a file is extracted
-    QObject::connect(&e, &QArchive::Extractor::extracted, [&](QString file) {
-        qDebug() << "Extracted:: " << file;
-    });
-
-    // emitted when something goes wrong
-    QObject::connect(&e, &QArchive::Extractor::error, [&](short code, QString file) {
-        switch(code) {
-        case QArchive::ARCHIVE_READ_ERROR:
-            qDebug() << "unable to find archive :: " << file;
-            app.quit();
-            break;
-        case QArchive::ARCHIVE_QUALITY_ERROR:
-            qDebug() << "bad archive! :: " << file;
-            app.quit();
-            break;
-        case QArchive::ARCHIVE_UNCAUGHT_ERROR:
-            qDebug() << "fatal error. :: " << file;
-            app.quit();
-            break;
-        default:
-            qDebug() << "unknown error. :: " << file;
-            app.quit();
-            break;
-        }
-    });
-
-    /*
-     * 3.Start extraction!
-    */
-    e.start();
-
+    })
+    .start();
     qDebug() << "Its Non-Blocking!";
-
     return app.exec();
 }
 ```

@@ -7,60 +7,44 @@ sidebar_label: Reading Archives using QArchive.
 Please refer the full class documentation [here](QArchiveReader.md)
 
 This simple example reads an archive. 
+Here in this example you can see that we use a strange method called **'setFunc'** ,   
+This method is little special, It connects **lambda** functions with the desired   
+signal of the **reader class**. This method was created to make this easy for   
+you. You can also use **QObject::connect** to connect with signals in the   
+**reader class** like tradition qt libraries does. See [here](QArchiveSignalCodes.md) to get the signal
+codes for your desired signals.
+
+**Note** : All methods returns the reference to your current object and therefore you
+can use other methods right away , Except for **isXXX()** methods because they return
+bools. This feature is new to QArchive (to *The best of my knowledge*). This simply
+means that you can read a archive with a single line like this.
+
+```
+  qDebug() << QArchive::Reader("Test.7z").start().waitForFinished().getFilesList();
+```
+
+**Side Note** : Your event loop will not **quit** if you finish the archive process
+before you start your event loop. That is , If you read a very small archive , It 
+will be finished before the next line gets executed ( *Yeah , Its really fast.* )   
+and therefore your program never ends , One way to solve this is to use   
+**QTimer::singleShot** to start the reader with a **1000 miliseconds** delay.
 
 ## main.cpp
 
 ```
 #include <QCoreApplication>
-#include <QDebug>
 #include <QArchive>
 
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-
-    /*
-     * 1.Construct
-    */
-    QArchive::Reader e("test.7z");
-
-
-    /*
-     * 2.Connect Callbacks
-    */
-
-    QObject::connect(&e, &QArchive::Reader::archiveFiles, [&](QString archive, QStringList files) {
-        qDebug() << archive << " :: ";
+    QArchive::Reader("test.7z")
+    .setFunc([&](QJsonObject files){
         qDebug() << files;
         app.quit();
-    });
-
-    // emitted when something goes wrong
-    QObject::connect(&e, &QArchive::Reader::error, [&](short code, QString file) {
-        switch(code) {
-        case QArchive::ARCHIVE_READ_ERROR:
-            qDebug() << "unable to find archive :: " << file;
-            app.quit();
-            break;
-        case QArchive::ARCHIVE_QUALITY_ERROR:
-            qDebug() << "bad archive! :: " << file;
-            app.quit();
-            break;
-        case QArchive::ARCHIVE_UNCAUGHT_ERROR:
-            qDebug() << "fatal error. :: " << file;
-            app.quit();
-            break;
-        default:
-            qDebug() << "unknown error. :: " << file;
-            app.quit();
-            break;
-        }
-    });
-
-    /*
-     * 3.Start reading!
-    */
-    e.start();
+    })
+    .start();
+    qDebug() << "Its Non-Blocking!";
     return app.exec();
 }
 ```

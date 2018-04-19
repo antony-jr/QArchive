@@ -1,0 +1,22 @@
+language: cpp
+compiler: gcc
+sudo: require
+dist: trusty
+
+before_install:
+  - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
+  - sudo apt-get update -qq
+
+install:
+  - sudo apt-get -y install qt59base
+  - source /opt/qt*/bin/qt*-env.sh
+
+script:
+  - mkdir build ; cd build # Check if it builds as a library.
+  - qmake .. 
+  - make -j$(nproc)
+  - cd ..
+  - cd tests/
+  - qmake .
+  - make -j$(nproc)
+  - ./tests # Run Tests

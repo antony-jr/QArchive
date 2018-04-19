@@ -7,51 +7,48 @@ sidebar_label: Compressing files with QArchive
 Please refer the full class documentation [here](QArchiveCompressor.md)
 
 This simple example compresses a set of files and thus creates an archive!
+Here in this example you can see that we use a strange method called **'setFunc'** ,   
+This method is little special, It connects **lambda** functions with the desired   
+signal of the **compressor class**. This method was created to make this easy for   
+you. You can also use **QObject::connect** to connect with signals in the   
+**compressor class** like tradition qt libraries does. See [here](QArchiveSignalCodes.md) to get the signal
+codes for your desired signals.
+
+**Note** : All methods returns the reference to your current object and therefore you
+can use other methods right away , Except for **isXXX()** methods because they return
+bools. This feature is new to QArchive (to *The best of my knowledge*). This simply
+means that you can compress a file with a single line like this.
+
+```
+ QArchive::Compressor("Test.7z" , "TestDir").start().waitForFinished();
+```
+
+**Side Note** : Your event loop will not **quit** if you finish the archive process
+before you start your event loop. That is , If you compress a very small file , It 
+will be finished before the next line gets executed ( *Yeah , Its really fast.* )   
+and therefore your program never ends , One way to solve this is to use   
+**QTimer::singleShot** to start the compressor with a **1000 miliseconds** delay.
 
 ## main.cpp
 
 ```
 #include <QCoreApplication>
-#include <QDebug>
 #include <QArchive>
 
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-
-    /*
-     * 1.Construct
-    */
-    QArchive::Compressor e("test.7z", "TestDir");
-    //			Archive		|--> Can also
-    //			can be		     simply add
-    //			detected	     directories.
-    //			with extension.
-
-    /*
-     * 2.Connect Callbacks
-    */
-
-    // emitted when all extraction is finished
-    QObject::connect(&e, &QArchive::Compressor::finished, [&]() {
+    QArchive::Compressor("test.7z", "TestDir")
+    .setFunc(QArchive::FINISHED , [&](){
         qDebug() << "Finished all jobs";
         app.quit();
-    });
-    QObject::connect(&e, &QArchive::Compressor::error, [&](short code, QString file) {
-        qDebug() << "error code:: " << code << " :: " << file;
-        app.quit();
-    });
-    /*
-     * 3.Start compression!
-    */
-    e.start();
-
+    })
+    .start();
     qDebug() << "Its Non-Blocking!";
-
     return app.exec();
 }
 ```
-
+i
 ## create_archive.pro
 
 ```

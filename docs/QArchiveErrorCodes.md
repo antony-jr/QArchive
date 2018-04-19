@@ -1,16 +1,29 @@
 ---
 id: QArchiveErrorCodes
-title: QArchive error codes
-sidebar_label: QArchive error codes
+title: QArchive Error Codes
+sidebar_label: QArchive Error Codes
 ---
 
-| Error Code                       	| Meaning                                                                 	|
-|----------------------------------	|-------------------------------------------------------------------------	|
-| QArchive::NO_ARCHIVE_ERROR       	| No Problem in the archive , successfully extracted.                     	|
-| QArchive::ARCHIVE_QUALITY_ERROR  	| Corrupted archive , cannot extract.                                     	|
-| QArchive::ARCHIVE_READ_ERROR     	| Cannot find the archive in the mentioned path or some other read error. 	|
-| QArchive::ARCHIVE_UNCAUGHT_ERROR 	| Unknown error.                                                          	|   
-| QArchive::INVALID_DEST_PATH       | The Destination directory does not exist or some write error.             |
-| QArchive::DISK_OPEN_ERROR         | Failed to read a file that you want to compress.                          |
-| QArchive::DISK_READ_ERROR         | Corrupt file in the list of files you wanted to compress.                 |
-| QArchive::FILE_NOT_EXIST          | The file you mentioned in the compression list is not there.              |
+These error codes will be emitted by a common signal which follows a prototype like this  
+``` error(short errorCode , QString errorMessage) ```. 
+The **errorMessage** can give a clue on what file is this error belongs to.  
+
+
+
+| Error Code                       	  | Meaning                                       |  Value  |
+|-------------------------------------|-----------------------------------------------|---------|
+| QArchive::NO_ARCHIVE_ERROR       	  | No error occured.                          	  |    0    |
+| QArchive::ARCHIVE_QUALITY_ERROR  	  | Archive has bad data.                         |    1    |
+| QArchive::ARCHIVE_READ_ERROR        | Archive does not exist or no permission.      |    2    |
+| QArchive::ARCHIVE_UNCAUGHT_ERROR    | Unknown error.                                |    3    |
+| QArchive::ARCHIVE_FATAL_ERROR       | Fatal error.                                  |    4    |
+| QArchive::ARCHIVE_WRONG_PASSWORD    | Wrong password was given for the archive.     |    5    |
+| QArchive::ARCHIVE_PASSWORD_NOT_GIVEN| Empty password was given for the archive.     |    6    |
+| QArchive::ARCHIVE_WRITE_OPEN_ERROR  | Cannot create archive.                        |    7    |
+| QArchive::DISK_OPEN_ERROR           | Cannot open the added file.                   |    8    |
+| QArchive::DISK_READ_ERROR           | Cannot read the added file.                   |    9    |
+| QArchive::DESTINATION_NOT_FOUND     | Cannot find the given extraction destination. |    10   |
+| QArchive::FILE_NOT_EXIST            | The given file does not exists for sure.      |    11   |
+| QArchive::INVALID_DEST_PATH         | Given extraction destination is invalid.      |    12   |
+| QArchive::NOT_ENOUGH_MEMORY         | Allocation error.                             |    13   |
+| QArchive::FILE_OPEN_FAILED          | Cannot open the given file but it exists.     |    14   |

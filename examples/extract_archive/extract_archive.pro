@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = rarchive
+TARGET = earchive
 INCLUDEPATH += . ../../ ../../include
 LIBS += -larchive
 QT += core concurrent
