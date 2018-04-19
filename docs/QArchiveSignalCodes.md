@@ -12,7 +12,7 @@ sidebar_label: QArchive Signal Codes
  Example **error** signal **does not** require the **signal code**.  
  **Go through the classes documentations to know more**.
 
-| Error Code                       	  | Meaning                                       |  Value  |
+| Signal Code                         | Signal                                        |  Value  |
 |-------------------------------------|-----------------------------------------------|---------|
 | CANCELED                            | Denotes the cancel signal.                    |    0    |
 | COMPRESSED                          | Denotes the compressed signal.                |    1    |

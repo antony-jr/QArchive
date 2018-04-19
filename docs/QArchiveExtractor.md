@@ -4,120 +4,306 @@ title: Class QArchive::Extractor
 sidebar_label: QArchive::Extractor
 ---
 
-The Extractor Takes care of **extraction** of archives with the help of libarchive.   
-This class runs on a seperate thread to avoid blocking by **libarchive**.
+The QArchive::Extractor class helps to extract archives that are supported by **libarchive**.
+QArchive::Extractor stores a single archive at a time , where each slots helps corresponds one action provided by libarchive.
+
+Behind the scenes, QArchive::Extractor uses smart pointers to free libarchive structs automatically and can only extract a single archive , this is to reduce memory usage and to avoid the needless copying of data. This also helps reduce the inherent overhead of storing multiple **QMap** instead of couple of **QString**'s.   
+
+In addition to the above, QArchive::Extractor also provides a async and sync way for the process. QArchive::Extractor is the class you want to use if you want a very simple syntax to extract archives in a single line and also forget about thread safety ( *Because it is reentrant by nature* ).
+
+**Note:** All functions in this class is **[reentrant](https://doc.qt.io/qt-5/threads-reentrancy.html)**.
+
+
 
 ### Public Functions
 
 |                                   |                                                                                   |
 |-----------------------------------|-----------------------------------------------------------------------------------|
-| **explicit**                      | Extractor(QObject *parent = NULL)                                                 |
-| **explicit**                      | Extractor(const QString& archive)                                                 |
-| **explicit**                      | Extractor(const QStringList& archives)                                            |
-| **explicit**                      | Extractor(const QString& archive , const QString& destination)                    |
-| **explicit**                      | Extractor(const QStringList& archives , const QString& destination)               |
-| **void**                          | addArchive(const QString& archive)                                                |
-| **void**                          | addArchive(const QStringList& archives)                                           |
-| **void**                          | removeArchive(const QString& archive)                                             |
-| **void**                          | setDestination(const QString& destination)                                        |
+| **explicit**                      | [Extractor](#explicit-extractorqobject-parent-nullptr)(QObject *parent = nullptr) |
+| **explicit**                      | [Extractor](#explicit-extractorconst-qstring-archive)(const QString &Archive)     |
+| **explicit**                      | [Extractor](#explicit-extractorconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
+| **Extractor&**                    | [setArchive](#extractor-setarchiveconst-qstring-archive)(const QString &Archive)  |
+| **Extractor&**                    | [setArchive](#extractor-setarchiveconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
+| **Extractor&**                    | [setPassword](#extractor-setpasswordconst-qstring-password)(const QString &Password)|
+| **Extractor&**                    | [setAskPassword](#extractor-setaskpasswordbool-choose)(bool choose)               |
+| **Extractor&**                    | [setBlocksize](#extractor-setblocksizeint-size)(int size)                         |
+| **Extractor&**                    | [onlyExtract](#extractor-onlyextractconst-qstring-memberinarchive)(const QString &MemberInArchive)|
+| **Extractor&**                    | [onlyExtract](#extractor-onlyextractconst-qstringlist-membersinarchive)(const QStringList &MembersInArchive)|
+| **Extractor&**                    | [clear](#extractor-clearvoid)(void)                                               |
+
 
 ### Slots
 
-|               |             |
-|---------------|-------------|
-| **void**  	| start(void) |
-| **void**      | stop(void)  |
+|                   |                                                                                                |
+|-------------------|------------------------------------------------------------------------------------------------|
+| **Extractor&**  	| [waitForFinished](#extractor-waitforfinishedvoid)(void)                                        |
+| **Extractor&**    | [start](#extractor-startvoid)(void)                                                            |
+| **Extractor&**    | [pause](#extractor-pausevoid)(void)                                                            |
+| **Extractor&**    | [resume](#extractor-resumevoid)(void)                                                          |
+| **Extractor&**    | [cancel](#extractor-cancelvoid)(void)                                                          |
+| **const bool**    | [isRunning](#bool-isrunningvoid-const)(void)                                                   |
+| **const bool**    | [isCanceled](#bool-iscanceledvoid-const)(void)                                                 |
+| **const bool**    | [isPaused](#bool-ispausedvoid-const)(void)                                                     |
+| **const bool**    | [isStarted](#bool-isstartedvoid-const)(void)                                                   |
+| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidqstring-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)|
+| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidint-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(int)> function)|
+| **Extractor&**    | [setFunc](#extractor-setfuncstd-function-voidshort-qstring-function)(std::function<void(short,QString)> function)                                           |
+
 
 ### Signals
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
-| **void**	      | stopped(void)								        |
-| **void**            | finished(void)                        	                                        |
-| **void**    	      | extracting(const QString& archive)                                              |
-| **void**    	      | extracted(const QString& archive)      	                                        |
-| **void**            | status(const QString& archive ,const QString& file)                             |
-| **void**  	      | error(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)	    |    
+| **void**	          | [started](#void-startedvoid)(void)								                |
+| **void**            | [finished](#void-finishedvoid)(void)                        	                |
+| **void**            | [paused](#void-pausedvoid)(void)                                                |
+| **void**            | [resumed](#void-resumedvoid)(void)                                              |
+| **void**            | [canceled](#void-canceledvoid)(void)                                            |
+| **void**            | [progress](#void-progressint-percentage)(int percentage)                        |
+| **void**            | [passwordRequired](#void-passwordrequiredint-tries)(int tries)                  |
+| **void**    	      | [extracting](#void-extractingconst-qstring-archive)(const QString& archive)     |
+| **void**    	      | [extracted](#void-extractedconst-qstring-archive)(const QString& archive)       |
+| **void**  	      | [error](#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml-const-qstring-file)(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)|
 
 
 ## Member Functions Documentation
 
-#### explicit Extractor(QObject *parent = NULL)
+### explicit Extractor(QObject *parent = nullptr)
 
-Constructs **Extractor** and sets the **QObject parent**.
+Constructs **Extractor** and sets the **QObject parent**. 
+If the user did not give any parent , The Extractor will be constructed 
+without any parent.
 
-#### explicit Extractor(const QString& archive)
+```
+ QObject *parent = new QObject;
+ QArchive::Extractor Extractor;
+ QArchive::Extractor Extractor(parent); // With parent;
+```
 
-Constructs **Extractor** and points to the archive given by the user , this sets the QObject parent as **0**
 
-#### explicit Extractor(const QStringList& archives)
+### explicit Extractor(const QString &Archive)
 
-This is an overloaded function. This points to a set of archive given by the user.
+Constructs **Extractor** and Sets the **Archive Path** as the given **QString**.
+This asigns no parent for the **Extractor**.
 
-#### explicit Extractor(const QString& archive , const QString& destination) 
+```
+ QArchive::Extractor Extractor("Test.7z");
+```
 
-Constructs **Extractor** , points to the archive given by the user and then set the destination where   
-the archive will be extracted.
+### explicit Extractor(const QString &Archive , const QString &Destination) 
 
-#### explicit Extractor(const QStringList& archives , const QString& destination) 
+Constructs **Extractor** and Sets the **Archive Path** and the **Destination Path**  
+as the given **QString**'s. This asigns no parent for the **Extractor**.
 
-This is an overloaded function. This points to a set of archive given by the user.
+```
+ QArchive::Extractor Extractor("Test.7z" , "MyArchives/Extracted");
+```
 
-#### void addArchive(const QString& archive)
+### Extractor& setArchive(const QString &Archive)
 
-This adds a archive to the queue.
+Sets the **Archive Path** as the given **QString**.
 
-#### void addArchive(const QStringList& archives)
+```
+ Extractor.setArchive("Test.7z");
+```
 
-This is an overloaded function. Adds a list of archives to the queue.
+### Extractor& setArchive(const QString &Archive , const QString &Destination)
 
-#### void removeArchive(const QString& archive)
+Sets the **Archive Path** and the **Destination Path** as the given **QString**'s.
 
-Removes an archive from the queue.
+```
+ Extractor.setArchive("Test.7z" , "MyArchives/Extracted");
+```
 
-#### void setDestination(const QString& destination)
+### Extractor& setBlocksize(int size)
 
-Sets the destination where the archive(s) will be extracted. Default is **the programs working directory.**
+Sets the **Archive Blocksize**.
 
-#### void start(void)
+
+### Extractor& setPassword(const QString &Password)
+
+Sets the password for **encrypted archives**.
+
+
+### Extractor& setAskPassword(bool choose)
+
+If **choose** is **True** then on wrong password or when password is needed for 
+an archive it emits **passwordRequired(int)** signal , with the number of tries
+as the argument. The password can be set with **setPassword(QString)** slot.
+If an **empty** password is set with **setPassword(QString)** slot then it will 
+result in a **QArchive::ARCHIVE_WRONG_PASSWORD** or **QArchive::ARCHIVE_PASSWORD_NOT_GIVEN**
+if the archive is **encrypted**.
+
+**Note**: 'passwordRequired' signal will be emitted until the password is empty or correct.
+'passwordRequired' signal **will not be emitted** if **setAskPassword** is set to **False**.
+
+
+### Extractor& onlyExtract(const QString &MemberInArchive)
+
+Only extracts the specified **member** in the archive.
+
+```
+ Extractor.onlyExtract("Ouput.txt");
+```
+
+### Extractor& onlyExtract(const QStringList &MembersInArchive)
+
+Only extracts the list of files in the given **QStringList**.
+
+```
+ Extractor.onlyExtract(QStringList() << "Ouput.txt" << "MyTools");
+```
+
+### Extractor& clear(void)
+
+Clears the internal cache.
+
+```
+ Extractor.clear();
+```
+
+### Extractor& waitForFinished(void)
 This member function is a **[SLOT]**
 
-Starts the extraction of all archives in the queue.
+Blocks the caller thread until the process if **finished** or **canceled**.
 
-#### void stop(void)
+```
+ QArchive::Extractor("Test.7z" , "MyArchives/Extracted").start().waitForFinished();
+```
+
+### Extractor& start(void)
 This member function is a **[SLOT]**
 
-Stops the extraction of all archives in the queue. This slot is **asyc** and thus you need to wait for the
-**void stopped(void)** signal , Which confirms that the stop call was successfull.
+Starts the extraction of the archive.
 
-#### void stopped(void)
+### Extractor& pause(void)
+This member function is a **[SLOT]**
+
+Pauses the extraction of the archive. This slot is **asyc** and thus you need to wait for the
+**paused** signal , Which confirms that the pause call was successfull.
+
+### Extractor& resume(void)
+This member function is a **[SLOT]**
+
+Resumes the extraction of the archive. This slot is **asyc** and thus you need to wait for the
+**resumed** signal , Which confirms that the resume call was successfull.
+
+### Extractor& cancel(void)
+This member function is a **[SLOT]**
+
+Cancels the extraction of the archive. This slot is **asyc** and thus you need to wait for the
+**canceled** signal , Which confirms that the cancel call was successfull.
+
+### bool isRunning(void) const
+This member function is a **[SLOT]**
+
+Returns **True** if the process is running.
+
+### bool isCanceled(void) const
+This member function is a **[SLOT]**
+
+Returns **True** if the process has been canceled.
+
+### bool isPaused(void) const
+This member function is a **[SLOT]**
+
+Returns **True** if the process is paused.
+
+### bool isStarted(void) const
+This member function is a **[SLOT]**
+
+Returns **True** if the process has been started.
+
+### Extractor& setFunc(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)
+This member function is a **[SLOT]**
+
+Connects the **lambda** function to the signal with respect to the **[signalCode](QArchiveSignalCodes.md)**.
+
+```
+ Extractor.setFunc(QArchive::FINISHED , [&](){
+    qDebug() << "Finished extraction!";
+ });
+```
+ 
+### Extractor& setFunc(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(int)> function)
+This member function is a **[SLOT]**
+
+Connects the **lambda** function to the **progress** or **passwordRequired** signal with respect
+to the **[signalCode](QArchiveSignalCodes.md)**.
+
+
+```
+ Extractor.setFunc(QArchive::PROGRESS , [&](int prog){
+    qDebug() << "Progress:: " << prog << " % Done.";
+ });
+```
+ 
+### Extractor& setFunc(std::function<void(short,QString)> function)
+This member function is a **[SLOT]**
+
+Connects the **lambda** function to the **error signal**. Refer the **[error codes](QArchiveErrorCodes.md)** for more information on
+codes passed by the **error signal**.
+
+```
+ Extractor.setFunc([&](short errorCode , QString eMsg){
+    qDebug() << eMsg << " :: " << errorCode;
+ });
+```
+ 
+### void started(void)
 This member function is a **[SIGNAL]**
 
-Emitted when **void stop(void)** is successfull , i.e When the extraction is stopped successfully.
+Emitted when the extraction is started.
 
-#### void finished(void)
+### void finished(void)
 This member function is a **[SIGNAL]** 
 
-Emitted when all jobs are done. (i.e) When all extraction is finished.
+Emitted when the extraction is finished successfully.
 
-#### void extracting(const QString& archive)
+### void paused(void)
+This member function is a **[SIGNAL]** 
+
+Emitted when the extraction is paused successfully.
+
+### void resumed(void)
+This member function is a **[SIGNAL]** 
+
+Emitted when the extraction is resumed successfully.
+
+### void canceled(void)
+This member function is a **[SIGNAL]** 
+
+Emitted when the extraction is canceled successfully.
+
+### void progress(int percentage)
 This member function is a **[SIGNAL]**
 
-Emitted when an archive is started extraction from the queue.
+Emitted when there is a progress update.
 
-#### void extracted(const QString& archive)
+### void passwordRequired(int tries)
 This member function is a **[SIGNAL]**
 
-Emitted when an archive is extracted successfully!
+Emitted when password is required for an archive with the number of
+**tries** as the argument.
 
-#### void status(const QString& archive , const QString& file)
+**Note**: 'passwordRequired' signal will be emitted until the password is empty or correct.
+'passwordRequired' signal **will not be emitted** if **setAskPassword** is set to **False**.
+The password should be **set** using **setPassword** slot. 
+
+
+### void extracting(const QString &Archive)
 This member function is a **[SIGNAL]**
 
-Emitted when a single file is extracted from an archive that is extracting from the queue.
+Emitted when a file from archive is started extraction.
 
-#### error(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)
+### void extracted(const QString &Archive)
 This member function is a **[SIGNAL]**
 
-Emitted when something goes wrong with an archive. refer the [error codes](QArchiveErrorCodes.md)
+Emitted when a file from the archive is extracted successfully!
+
+### error(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)
+This member function is a **[SIGNAL]**
+
+Emitted when something goes wrong with an archive. refer the [error codes](QArchiveErrorCodes.md).
 
 
