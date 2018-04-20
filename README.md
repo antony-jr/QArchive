@@ -49,6 +49,25 @@ This applies for all **platforms**.
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive)
 
+# Insights
+
+**What can this library do ,**
+
+  * Can extract all archives which are supported by libarchive , (i.e) tar, gzip, bzip, 7z, zip, rar, xar   
+    and much more!
+  * Extract and Read encrypted archives.
+  * Give progress on the extraction.
+  * Can give file information about the files inside the archive.
+  * Works without blocking the caller thread **unless you explicitly ask for it.**
+  * Works just like any other qt library.
+  * Does not crash your application.
+
+**What can't this library do ,**
+
+  * Creating archive's with encryption and specific blocksize's may not work sometimes.
+  * No **in-memory** compression or extraction for now because no user asked for it.
+  
+
 # Contributors
 
 My utmost **gratitude goes to these people!** :heart:
