@@ -25,6 +25,13 @@ so its best suited for your Qt Projects!**
 </p>
 
 
+**Or even smaller code!**
+
+<p align="center">
+  <img src=".img/code2.png" alt="QArchive Poster 2"><br>
+</p>
+
+
 # Installation
 
 **Just execute this command on your project folder and everything will be done for you!**   
