@@ -797,7 +797,9 @@ int Extractor::condition(void)
 
 int Extractor::loopContent(void)
 {
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     PasswordTries = 0; // reset
+#endif
     if(!Destination.isEmpty()) {
         char* new_entry = concat(Destination.toUtf8().constData(), archive_entry_pathname(entry));
         archive_entry_set_pathname(entry, new_entry);
@@ -1427,7 +1429,9 @@ void Compressor::deinit(int canceled)
     CompressionLevel = 0;
     archiveFormat = NO_FORMAT;
     archivePath.clear();
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     Password.clear();
+#endif
     nodes.clear();
     archive.reset();
     if(canceled) {
@@ -1793,7 +1797,9 @@ int Reader::condition(void)
 
 int Reader::loopContent(void)
 {
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     PasswordTries = 0; // reset
+#endif
     QString CurrentFile = QString(archive_entry_pathname(entry));
     QJsonObject CurrentEntry;
 
