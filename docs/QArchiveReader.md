@@ -24,7 +24,7 @@ In addition to the above, QArchive::Reader also provides a async and sync way fo
 | **Reader&**                       | [setPassword](#reader-setpasswordconst-qstring-password)(const QString &Password) |
 | **Reader&**                       | [setAskPassword](#reader-setaskpasswordbool-choose)(bool choose)                  |
 | **Reader&**                       | [setBlocksize](#reader-setblocksizeint-size)(int size)                            |
-| **QJsonObject**                   | [getFilesList](#reader-getfileslistvoid)(void)                                                            |
+| **QJsonObject**                   | [getFilesList](#qjsonobject-getfileslistvoid)(void)                                                            |
 | **Reader&**                       | [clear](#reader-clearvoid)(void)                                                  |
 
 
@@ -118,7 +118,7 @@ if the archive is **encrypted**.
 'passwordRequired' signal **will not be emitted** if **setAskPassword** is set to **False**.
 
 
-### Reader& getFilesList(void)
+### QJsonObject getFilesList(void)
 
 Returns the list of files in a **QJsonObject**.It returns empty if something bad happend.
 The json object follows the following structure to carry files information with it.
