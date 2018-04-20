@@ -21,7 +21,7 @@ QArchive::Reader stores a single archive at a time , where each slots helps corr
 <tr><td><strong>Reader&amp;</strong></td><td><a href="#reader-setpasswordconst-qstring-password">setPassword</a>(const QString &amp;Password)</td></tr>
 <tr><td><strong>Reader&amp;</strong></td><td><a href="#reader-setaskpasswordbool-choose">setAskPassword</a>(bool choose)</td></tr>
 <tr><td><strong>Reader&amp;</strong></td><td><a href="#reader-setblocksizeint-size">setBlocksize</a>(int size)</td></tr>
-<tr><td><strong>QJsonObject</strong></td><td><a href="#reader-getfileslistvoid">getFilesList</a>(void)</td></tr>
+<tr><td><strong>QJsonObject</strong></td><td><a href="#qjsonobject-getfileslistvoid">getFilesList</a>(void)</td></tr>
 <tr><td><strong>Reader&amp;</strong></td><td><a href="#reader-clearvoid">clear</a>(void)</td></tr>
 </tbody>
 </table>
@@ -93,7 +93,7 @@ result in a <strong>QArchive::ARCHIVE_WRONG_PASSWORD</strong> or <strong>QArchiv
 if the archive is <strong>encrypted</strong>.</p>
 <p><strong>Note</strong>: 'passwordRequired' signal will be emitted until the password is empty or correct.
 'passwordRequired' signal <strong>will not be emitted</strong> if <strong>setAskPassword</strong> is set to <strong>False</strong>.</p>
-<h3><a class="anchor" aria-hidden="true" name="reader-getfileslistvoid"></a><a href="#reader-getfileslistvoid" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Reader&amp; getFilesList(void)</h3>
+<h3><a class="anchor" aria-hidden="true" name="qjsonobject-getfileslistvoid"></a><a href="#qjsonobject-getfileslistvoid" aria-hidden="true" class="hash-link" ><svg aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>QJsonObject getFilesList(void)</h3>
 <p>Returns the list of files in a <strong>QJsonObject</strong>.It returns empty if something bad happend.
 The json object follows the following structure to carry files information with it.</p>
 <pre><code class="hljs">  QJsonObject(
