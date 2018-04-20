@@ -31,9 +31,12 @@ And you need to follow some **rules when updating the source files**.
  * **Update the docs** if you add any new method to a **class**.
  * Do not add **unwanted file(s)** and doing so will make your **pull request invalid**.
  
-Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
+After making changes to the source file(s) , open a pull request and give a good title and mention the issue you opened   
+before. Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
 
 ### Reference
 
-libarchive - https://github.com/libarchive/libarchive
-linux kernel coding style - https://www.kernel.org/doc/html/v4.10/process/coding-style.html
+libarchive - https://github.com/libarchive/libarchive   
+linux kernel coding style - https://www.kernel.org/doc/html/v4.10/process/coding-style.html   
+astyle - http://astyle.sourceforge.net/
+Qt Documentation - https://doc.qt.io/qt-5/
