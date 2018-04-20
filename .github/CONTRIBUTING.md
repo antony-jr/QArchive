@@ -8,7 +8,7 @@ new contributors and let them know how a open source project works. All contribu
 
 ### Reporting Issues
 
-Before you **open an issue** make sure you have no **duplicates** and **feel free to open issue to ask anything** but make   
+Before you **open an issue** make sure you have no **duplicates**. **Feel free to open an issue to ask anything** but make   
 sure you follow the **issue template** which will not be that hard. Be specific about your issue if its a **bug** or a   
 **feature request** because contributors can **only** make **QArchive** more cool by reading the **issues**.
 And last but not the least , **Thank You for your Time!** :heart:
@@ -17,26 +17,26 @@ And last but not the least , **Thank You for your Time!** :heart:
 
 If you wish to develop some **code** for the project then you are much **welcomed** but make sure you **open an issue first** to   
 describe the cause why we need to improve the code after that **open a pull request** and do **follow the pull request template**.   
-And you need to follow some **rules when updating the source files**.
+And you need to follow the following **rules when updating the source files**.
 
- * You must follow the **[linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)**.
+ * You **must** follow the **[linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)**.
  * You **can** use **[Artistic Styles](http://astyle.sourceforge.net/)** to automatically format your code to follow the
    **linux kernel coding style** with this command -> ``` $ astyle --style=linux src/QArchive.cc ```.
- * You must follow **google's** conventions for c++ file extensions , (i.e) for **source file(s)** you must use **.cc**
+ * You **must** follow **google's** conventions for c++ file extensions , (i.e) for **source file(s)** you must use **.cc**
    extension and for **header file(s)** you must use **.hpp**.
  * Use comments only to write why we need a **class** or a **function** and not **what**.
- * If you create a new method then you must be consistent as other methods and you must return a ```*this``` if your 
+ * If you create a new method then you **must** be consistent as other methods and you **must** return ```*this``` if your 
    method return type is **void** , this is for the **user interface**.
- * You can do whatever with **private slots** and can return any return type if you desire.
+ * You **can** do whatever with **private slots** and can return any return type if you desire.
  * **Update the docs** if you add any new method to a **class**.
- * Do not add **unwanted file(s)** and doing so will make your **pull request invalid**.
+ * **Do not** add **unwanted file(s)** and doing so will make your **pull request invalid**.
  
-After making changes to the source file(s) , open a pull request and give a good title and mention the issue you opened   
-before. Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
+After making changes to the source file(s) , open a pull request and give a **good title** and **mention** the **issue you opened   
+before**. Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
 
 ### Reference
 
 libarchive - https://github.com/libarchive/libarchive   
 linux kernel coding style - https://www.kernel.org/doc/html/v4.10/process/coding-style.html   
-astyle - http://astyle.sourceforge.net/
+astyle - http://astyle.sourceforge.net/   
 Qt Documentation - https://doc.qt.io/qt-5/
