@@ -49,6 +49,15 @@ This applies for all **platforms**.
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive)
 
+# Contributors
+
+My utmost **gratitude goes to these people!** :heart:
+
+|[<img src="https://avatars1.githubusercontent.com/u/1927154?v=4" width="100px;"/><br /><sub><b>Matthieu Petiot</b></sub>](https://github.com/ardeidae)<br />[💬](#question-ardeidae "Answering Questions") [📖](https://github.com/antony-jr/QArchive/commits?author=ardeidae "Documentation") [👀](#review-ardeidae "Reviewed Pull Requests") [📢](#talk-ardeidae "Talks")| 
+
+You can also **become one of them by contributing to this project** , to know more read **[CONTRIBUTING.md](.github/CONTRIBUTING.md)**.
+
+
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
 I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
