@@ -47,7 +47,7 @@ This applies for all **platforms**.
 
 # Getting Started
 
-Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive)
+Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive).
 
 # Insights
 
@@ -68,7 +68,7 @@ Learn more about **QArchive** at the official [documentation](https://antony-jr.
   * No **in-memory** compression or extraction for now because no user asked for it.
   
 
-# Contributors
+# Contributors [![QArchive Contributors](https://img.shields.io/github/contributors/antony-jr/QArchive.svg)](https://github.com/antony-jr/QArchive/graphs/contributors)
 
 My utmost **gratitude goes to these people!** :heart:
 
