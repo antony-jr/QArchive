@@ -16,8 +16,9 @@ install:
   - cd libarchive-3.3.2 
   - cmake .
   - make -j$(nproc)
-  - sudo make install
-  - sudo cp libarchive/libarchive.so.* /usr/lib/
+  - mkdir install
+  - make DESTDIR=install/ install
+  - sudo cp -r install/usr/local/* /usr/
   - cd .. # return to the root dir.
 
 script:
