@@ -108,6 +108,7 @@ private slots:
         QVERIFY(true);
     }
 
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     void usingPassword(void)
     {
         QArchive::Reader(TestCase4ArchivePath)
@@ -151,6 +152,7 @@ private slots:
         .start()
         .waitForFinished();
     }
+#endif
 
     void testInvalidArchivePath(void)
     {

@@ -170,6 +170,7 @@ private slots:
         QVERIFY(QFileInfo(Test3OutputFile2).exists() == false);
     }
 
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     void usingPassword(void)
     {
         QArchive::Extractor(TestCase4ArchivePath, TestCase4OutputDir)
@@ -302,6 +303,7 @@ private slots:
         }
 
     }
+#endif // ARCHIVE_VERSION_NUMBER CHECK.
 
     void testInvalidArchivePath(void)
     {
@@ -339,6 +341,7 @@ private slots:
         QVERIFY(gotDestinationNotFoundError == true); // DID WE GET THE RIGHT ERROR ?
     }
 
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     void testArchivePasswordNotGiven(void)
     {
         bool gotArchivePasswordNotGiven = false;
@@ -381,6 +384,7 @@ private slots:
 
         QVERIFY(gotArchiveWrongPassword == true); // FAIL IF WE GOT THE WRONG ERROR
     }
+#endif
 
     void isExtractorObjectReuseable(void)
     {

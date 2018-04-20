@@ -275,8 +275,10 @@ public:
     explicit Extractor(const QString&, const QString&);
     Extractor &setArchive(const QString&);
     Extractor &setArchive(const QString&, const QString&);
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     Extractor &setPassword(const QString&);
     Extractor &setAskPassword(bool);
+#endif
     Extractor &setBlocksize(int);
     Extractor &onlyExtract(const QString&);
     Extractor &onlyExtract(const QStringList&);
@@ -307,8 +309,10 @@ Q_SIGNALS:
     void resumed(void);
     void canceled(void);
     void progress(int);
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     void passwordRequired(int);
     void submitPassword(void);
+#endif
     void extracted(const QString&);
     void extracting(const QString&);
     void error(short, const QString&);
@@ -328,19 +332,24 @@ private:
     struct archive_entry *entry;
 
     QMutex mutex;
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     bool AskPassword = false;
     int PasswordTries = 0;
+#endif
     int flags = ARCHIVE_EXTRACT_TIME |
                 ARCHIVE_EXTRACT_PERM |
                 ARCHIVE_EXTRACT_SECURE_NODOTDOT;
     int BlockSize = 10240;
     QString ArchivePath;
     QString Destination;
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     QString Password;
+#endif
     QStringList OnlyExtract;
     UNBlock *UNBlocker = nullptr;
 
 
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     /*
      * This callback makes it possible to check if the password is wrong or
      * correct and also loop until the user gives a correct password or an
@@ -385,8 +394,7 @@ private:
         return e->Password.toUtf8().constData();
     }
     // ==========
-
-
+#endif
 }; // CLASS EXTRACTOR ENDS
 
 /*
@@ -485,7 +493,9 @@ public:
     Compressor &setArchive(const QString &archive, const QString &file);
     Compressor &setArchive(const QString &archive, const QStringList &files);
     Compressor &setArchiveFormat(short type);
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     Compressor &setPassword(const QString&);
+#endif
     Compressor &setBlocksize(int);
     Compressor &setCompressionLevel(int);
     Compressor &addFiles(const QString& file);
@@ -541,7 +551,9 @@ private:
     int CompressionLevel = 0;
     short archiveFormat = NO_FORMAT;
     QString archivePath;
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     QString Password;
+#endif
     QMap<QString, QString>::iterator mapIter;
     QMap<QString, QString> nodes;  // (1)-> File path , (2)-> entry in archive.
     UNBlock *UNBlocker = nullptr;
@@ -587,7 +599,7 @@ private:
  *                                                                    This slot can connect the following signals.
  *                                                                    started,finished,canceled,paused, and resumed.
  *
- *      setFunc(short signal , std::function<void(QStringJsonObject)> function) - Connects the lambda function to 
+ *      setFunc(short signal , std::function<void(QStringJsonObject)> function) - Connects the lambda function to
  *                                                                                filesList signal.
  *      setFunc(std::function<void(int)> function) - Connects the lambda function to password required signal.
  *      setFunc(std::function<void(short,QString)> function) - Connects the lambda function to the error signal.
@@ -611,8 +623,10 @@ public:
     explicit Reader(QObject *parent = nullptr);
     explicit Reader(const QString&);
     Reader &setArchive(const QString&);
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     Reader &setPassword(const QString&);
     Reader &setAskPassword(bool);
+#endif
     Reader &setBlocksize(int);
     QJsonObject getFilesList(void);
     Reader &clear();
@@ -631,7 +645,9 @@ public Q_SLOTS:
     bool isStarted() const;
 
     Reader &setFunc(short, std::function<void(void)>);
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     Reader &setFunc(std::function<void(int)>);
+#endif
     Reader &setFunc(std::function<void(QJsonObject)>);
     Reader &setFunc(std::function<void(short,QString)>);
 private Q_SLOTS:
@@ -646,8 +662,10 @@ Q_SIGNALS:
     void paused();
     void resumed();
     void canceled();
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     void passwordRequired(int);
     void submitPassword();
+#endif
     void filesList(QJsonObject);
     void error(short, const QString&);
 
@@ -657,14 +675,19 @@ private:
     struct archive_entry *entry;
 
     QMutex mutex;
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     bool AskPassword = false;
     int PasswordTries = 0;
+#endif
     int BlockSize = 10240;
     QString ArchivePath;
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     QString Password;
+#endif
     QJsonObject ArchiveContents;
     UNBlock *UNBlocker = nullptr;
 
+#if ARCHIVE_VERSION_NUMBER >= 3003002
     static const char *password_callback(struct archive *a, void *_client_data)
     {
 
@@ -704,6 +727,7 @@ private:
         return e->Password.toUtf8().constData();
     }
 // ---
+#endif
 }; // CLASS READER ENDS
 } // QARCHIVE NAMESPACE ENDS
 #endif // QARCHIVE_HPP_INCLUDED
