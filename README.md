@@ -21,13 +21,6 @@ so its best suited for your Qt Projects!**
 **Witness QArchive with your own eyes!**   
 
 <p align="center">
-  <img src=".img/code.png" alt="QArchive Poster"><br>
-</p>
-
-
-**Or even smaller code!**
-
-<p align="center">
   <img src=".img/code2.png" alt="QArchive Poster 2"><br>
 </p>
 
