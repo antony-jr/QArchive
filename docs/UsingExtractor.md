@@ -29,6 +29,8 @@ will be finished before the next line gets executed ( *Yeah , Its really fast.* 
 and therefore your program never ends , One way to solve this is to use   
 **QTimer::singleShot** to start the extractor with a **1000 miliseconds** delay.
 
+**IMPORTANT** : Do not use the class without explicit declaration.
+
 ## main.cpp
 ```
 #include <QCoreApplication>
@@ -37,7 +39,14 @@ and therefore your program never ends , One way to solve this is to use
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-    QArchive::Extractor("test.7z")
+    
+    // Do not use: QArchive::Extractor("test.7z")
+    // when using setFunc as signal and slots
+    // has some limitations.
+
+    QArchive::Extractor Extractor("test.7z");
+
+    Extractor
     .setFunc(QArchive::FINISHED, [&]() {
         qDebug() << "Finished all extraction!";
         app.quit();

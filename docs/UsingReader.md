@@ -29,6 +29,8 @@ will be finished before the next line gets executed ( *Yeah , Its really fast.* 
 and therefore your program never ends , One way to solve this is to use   
 **QTimer::singleShot** to start the reader with a **1000 miliseconds** delay.
 
+**IMPORTANT** : Do not use the class without explicit declaration.
+
 ## main.cpp
 
 ```
@@ -38,7 +40,14 @@ and therefore your program never ends , One way to solve this is to use
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-    QArchive::Reader("test.7z")
+
+    // Do not use: QArchive::Reader("test.7z")
+    // when using setFunc as signal and slots
+    // has some limitations.
+
+    QArchive::Reader Reader("test.7z");
+
+    Reader
     .setFunc([&](QJsonObject files){
         qDebug() << files;
         app.quit();

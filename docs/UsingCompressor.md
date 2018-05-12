@@ -29,6 +29,8 @@ will be finished before the next line gets executed ( *Yeah , Its really fast.* 
 and therefore your program never ends , One way to solve this is to use   
 **QTimer::singleShot** to start the compressor with a **1000 miliseconds** delay.
 
+**IMPORTANT** : Do not use the class without explicit declaration.
+
 ## main.cpp
 
 ```
@@ -38,7 +40,14 @@ and therefore your program never ends , One way to solve this is to use
 int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
-    QArchive::Compressor("test.7z", "TestDir")
+
+    // Do not use: QArchive::Compressor("test.7z")
+    // when using setFunc as signal and slots
+    // has some limitations.
+
+    QArchive::Compressor Compressor("test.7z", "TestDir");
+
+    Compressor
     .setFunc(QArchive::FINISHED , [&](){
         qDebug() << "Finished all jobs";
         app.quit();
@@ -48,7 +57,7 @@ int main(int argc, char** argv)
     return app.exec();
 }
 ```
-i
+
 ## create_archive.pro
 
 ```
