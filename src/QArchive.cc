@@ -1826,9 +1826,22 @@ int Reader::loopContent(void)
 
     qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
     qint64 blocks = (qint64)entry_stat->st_blocks;
+
+    // For portability reasons
+    #if __APPLE__
+        #define st_atim st_atimespec
+        #define st_ctim st_ctimespec
+        #define st_mtim st_mtimespec
+    #endif
     auto lastAccessT = entry_stat->st_atim.tv_sec;
     auto lastModT = entry_stat->st_mtim.tv_sec;
     auto lastStatusModT = entry_stat->st_ctim.tv_sec;
+    #if __APPLE__
+        #undef st_atim
+        #undef st_ctim
+        #undef st_mtim
+    #endif
+
     QFileInfo fileInfo(CurrentFile);
 
     auto ft = archive_entry_filetype(entry);
