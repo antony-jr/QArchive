@@ -67,11 +67,28 @@ Learn more about **QArchive** at the official [documentation](https://antony-jr.
 
 My utmost **gratitude goes to these people!** :heart:
 
-|[<img src="https://avatars1.githubusercontent.com/u/1927154?v=4" width="100px;"/><br /><sub><b>Matthieu Petiot</b></sub>](https://github.com/ardeidae)<br />[💬](#question-ardeidae "Answering Questions") [📖](https://github.com/antony-jr/QArchive/commits?author=ardeidae "Documentation") [👀](#review-ardeidae "Reviewed Pull Requests") [📢](#talk-ardeidae "Talks")|
-
-
-|[<img src="https://avatars1.githubusercontent.com/u/660896?v=4" width="100px;"/><br /><sub><b>Adrien Bertrand</b></sub>](https://github.com/adriweb)<br />[💬](#question-adriweb "Answering Questions") [📖](https://github.com/antony-jr/QArchive/commits?author=adriweb "Documentation") [👀](#review-adriweb "Reviewed Pull Requests") [📢](#talk-adriweb "Talks")| 
-
+<table>
+    <tr align="center">
+        <td>
+            <img src="https://avatars1.githubusercontent.com/u/1927154?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/ardeidae">Matthieu Petiot</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=ardeidae">💻</a>
+        </td>
+        <td>
+            <img src="https://avatars1.githubusercontent.com/u/660896?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/adriweb">Adrien Bertrand</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=adriweb">💻</a>
+        </td>
+    </tr>
+</table>
 
 You can also **become one of them by contributing to this project** , to know more read **[CONTRIBUTING.md](.github/CONTRIBUTING.md)**.
 
