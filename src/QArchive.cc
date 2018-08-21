@@ -1824,19 +1824,33 @@ int Reader::loopContent(void)
         size /= 1073741824;
     }
 
+    // MSVC (and maybe Windows in general?) workaround
+    #if _MSC_VER
+    qint64 blockSizeInBytes = 512;
+    qint64 blocks = (qint64) ceil(entry_stat->st_size / blockSizeInBytes);
+    #else
     qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
     qint64 blocks = (qint64)entry_stat->st_blocks;
+    #endif
 
     // For portability reasons
     #if __APPLE__
-        #define st_atim st_atimespec
-        #define st_ctim st_ctimespec
-        #define st_mtim st_mtimespec
+        #define st_atim st_atimespec.tv_sec
+        #define st_ctim st_ctimespec.tv_sec
+        #define st_mtim st_mtimespec.tv_sec
+    #elif _MSC_VER
+        #define st_atim st_atime
+        #define st_ctim st_ctime
+        #define st_mtim st_mtime
+    #else
+        #define st_atim st_atim.tv_sec
+        #define st_ctim st_ctim.tv_sec
+        #define st_mtim st_mtim.tv_sec
     #endif
-    auto lastAccessT = entry_stat->st_atim.tv_sec;
-    auto lastModT = entry_stat->st_mtim.tv_sec;
-    auto lastStatusModT = entry_stat->st_ctim.tv_sec;
-    #if __APPLE__
+    auto lastAccessT = entry_stat->st_atim;
+    auto lastModT = entry_stat->st_mtim;
+    auto lastStatusModT = entry_stat->st_ctim;
+    #if __APPLE__ || _MSC_VER
         #undef st_atim
         #undef st_ctim
         #undef st_mtim
