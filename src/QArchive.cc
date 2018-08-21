@@ -1825,7 +1825,7 @@ int Reader::loopContent(void)
     }
 
     // MSVC (and maybe Windows in general?) workaround
-    #if _MSC_VER
+    #if defined(_WIN32) && !defined(__CYGWIN__)
     qint64 blockSizeInBytes = 512;
     qint64 blocks = (qint64) ceil(entry_stat->st_size / blockSizeInBytes);
     #else
@@ -1838,7 +1838,7 @@ int Reader::loopContent(void)
         #define st_atim st_atimespec.tv_sec
         #define st_ctim st_ctimespec.tv_sec
         #define st_mtim st_mtimespec.tv_sec
-    #elif _MSC_VER
+    #elif defined(_WIN32) && !defined(__CYGWIN__)
         #define st_atim st_atime
         #define st_ctim st_ctime
         #define st_mtim st_mtime
@@ -1850,7 +1850,7 @@ int Reader::loopContent(void)
     auto lastAccessT = entry_stat->st_atim;
     auto lastModT = entry_stat->st_mtim;
     auto lastStatusModT = entry_stat->st_ctim;
-    #if __APPLE__ || _MSC_VER
+    #if __APPLE__ || (defined(_WIN32) && !defined(__CYGWIN__))
         #undef st_atim
         #undef st_ctim
         #undef st_mtim
