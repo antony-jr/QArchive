@@ -3,6 +3,8 @@
 #include <QJsonObject>
 #include <QTimer>
 #include <qarchivediskextractor_p.hpp>
+#include <iostream>
+#include <string>
 
 int main(int ac , char **av)
 {
@@ -15,6 +17,16 @@ int main(int ac , char **av)
 	DiskExtractorPrivate e(archive);
 	QObject::connect(&e , &DiskExtractorPrivate::info ,[&](QJsonObject info){
 			qDebug() << info;
+	});
+	QObject::connect(&e , &DiskExtractorPrivate::passwordRequired , [&](int tried){
+			using std::cin;	
+			using std::string;
+			using std::cout;
+			string pwd;
+			cout << "Enter Password(Tries = " << tried << "): ";
+			cin >> pwd;
+			e.setPassword(QString::fromStdString(pwd));
+			return;
 	});
 	QTimer::singleShot(0, [&](){
 		e.getInfo();

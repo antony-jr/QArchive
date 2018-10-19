@@ -31,7 +31,39 @@ using namespace QArchive;
 #define st_ctim st_ctim.tv_sec
 #define st_mtim st_mtim.tv_sec
 #endif
- 
+
+void DiskExtractorPrivate::emitArchiveAuthenticationFailed()
+{
+	emit error(ArchiveAuthenticationFailed);
+	return;
+}
+
+void DiskExtractorPrivate::emitPasswordRequired()
+{
+	emit passwordRequired(_nPasswordTriedCount);
+	return;
+}
+
+const char *QArchive::sendPasswordRequiredSignal(DiskExtractorPrivate *e)
+{
+	if(e->_nPasswordTriedCount >= e->_nPasswordTryLimit){
+		e->emitArchiveAuthenticationFailed();
+		return NULL;
+	}
+	e->emitPasswordRequired();
+	e->_mPasswordWait.exec();
+	++(e->_nPasswordTriedCount);
+	return (e->_mPassword).toLatin1().constData();
+}
+
+
+
+static const char *passwordCallback(archive *a , void *client)
+{
+	(void)a;
+	return sendPasswordRequiredSignal(((DiskExtractorPrivate*)client));
+}
+
 static QString getDirectoryFileName(const QString &dir)
 {
     if(dir[dir.count() - 1] == QStringLiteral("/")) {
@@ -75,17 +107,20 @@ static void ignoreDeleteQFile(QFile *f)
 DiskExtractorPrivate::DiskExtractorPrivate()
 	: DISK_EXTRACTOR_CONSTRUCTOR
 {
+	connect(this , &DiskExtractorPrivate::passwordSubmitted , &_mPasswordWait , &QEventLoop::quit , Qt::QueuedConnection);
 }
 
 DiskExtractorPrivate::DiskExtractorPrivate(QFile *inputArchive)
 	: DISK_EXTRACTOR_CONSTRUCTOR
 {
+	connect(this , &DiskExtractorPrivate::passwordSubmitted , &_mPasswordWait , &QEventLoop::quit , Qt::QueuedConnection);
 	setArchive(inputArchive);
 }
 
 DiskExtractorPrivate::DiskExtractorPrivate(const QString &inputArchivePath)
 	: DISK_EXTRACTOR_CONSTRUCTOR
 {
+	connect(this , &DiskExtractorPrivate::passwordSubmitted , &_mPasswordWait , &QEventLoop::quit , Qt::QueuedConnection);
 	setArchive(inputArchivePath);
 }
 
@@ -208,6 +243,7 @@ void DiskExtractorPrivate::setPassword(const QString &passwd)
 		return;
 	}
 	_mPassword = passwd;
+	emit passwordSubmitted();
 	return;
 }
 
@@ -250,27 +286,39 @@ void DiskExtractorPrivate::clear()
 
 void DiskExtractorPrivate::getInfo()
 {
-    if(_mArchive.isEmpty()){
-	    return;
+	if(!processArchiveInformation())
+		emit info(_mInfo);
+	return;
+}
+
+int DiskExtractorPrivate::processArchiveInformation()
+{
+    if(_mArchive.isNull()){
+	    return -1;
     }
     int ret = 0;
     archive_entry *entry = nullptr;
     auto inArchive = QSharedPointer<struct archive>(archive_read_new(), deleteArchiveReader);
     if(!(inArchive.data())){
 	    emit error(NotEnoughMemory);
-	    return;
+	    return -2;
     }
     archive_read_support_format_all(inArchive.data());
     archive_read_support_filter_all(inArchive.data());
 #if ARCHIVE_VERSION_NUMBER >= 3003002
-//    archive_read_set_passphrase_callback(inArchive.data(), (void*)this, passwordCallback);
+    archive_read_set_passphrase_callback(inArchive.data(), this , passwordCallback);
 #endif
 
+    /*
+     * Don't use the handle for _mArchive since we need to use it later for 
+     * extraction , So we let libarchive create a new fp and destroy it later.
+    */
     if((ret = archive_read_open_filename(inArchive.data(), _mArchive->fileName().toLatin1().constData() ,_nBlockSize))) {
         error(ArchiveReadError);
-	return;
+	return -3;
     }
 
+    _mInfo = QJsonObject(); /* clear previous archive information. */
     for (;;) {
         ret = archive_read_next_header(inArchive.data(), &entry);
         if (ret == ARCHIVE_EOF){
@@ -278,7 +326,7 @@ void DiskExtractorPrivate::getInfo()
         }
         if (ret != ARCHIVE_OK) {
             emit error(ArchiveCorrupted);
-	    return;
+	    return -4;
         }
         QString CurrentFile = QString(archive_entry_pathname(entry));
    	QJsonObject CurrentEntry;
@@ -377,6 +425,5 @@ void DiskExtractorPrivate::getInfo()
     _mInfo.insert(CurrentFile , CurrentEntry);
     QCoreApplication::processEvents();
     }
-    emit info(_mInfo);
-    return;
+    return 0;
 }
