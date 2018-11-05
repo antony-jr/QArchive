@@ -28,12 +28,6 @@ enum : short {
 
 };
 
-/*
- * Workaround for the warning message in the c++ compiler.
-*/
-class DiskExtractorPrivate;
-const char *sendPasswordRequiredSignal(DiskExtractorPrivate*);
-
 class DiskExtractorPrivate : public QObject {
 	Q_OBJECT
 	public:
@@ -47,7 +41,6 @@ class DiskExtractorPrivate : public QObject {
 		void setBlockSize(int);
 		void setOutputDirectory(const QString&);
 		void setPassword(const QString&);
-		void setPasswordTryLimit(int);
 		void addFilter(const QString&);
 		void addFilter(const QStringList&);
 		void clear();
@@ -61,34 +54,25 @@ class DiskExtractorPrivate : public QObject {
 	private Q_SLOTS:
 		int processArchiveInformation();
 	Q_SIGNALS:
-		void error(short);
-		void progress(int);
-		void info(QJsonObject);
 		void started();
 		void canceled();
 		void paused();
 		void resumed();
 		void finished();
-		void passwordRequired(int);
-		void passwordSubmitted();
+		void error(short);
+		void progress(int);
+		void getInfoRequirePassword(int);
+		void extractionRequirePassword(int);
+		void info(QJsonObject);
 	private:
-		QSharedPointer<archive> _mInArchive = nullptr,
-					_mOutArchive = nullptr;
-		int _nPasswordTryLimit = 3,
-		    _nPasswordTriedCount = 0,
+		int _nPasswordTriedCountGetInfo = 0,
+		    _nPasswordTriedCountExtract = 0,
 		    _nBlockSize = 10240;
 		QString _mOutputDirectory,
 			_mPassword;
-		QJsonObject _mInfo;
-		QEventLoop _mPasswordWait;
+		QSharedPointer<QJsonObject> _mInfo;
 		QSharedPointer<QStringList> _mExtractFilters = nullptr;
 		QSharedPointer<QFile> _mArchive = nullptr;
-
-		friend const char *sendPasswordRequiredSignal(DiskExtractorPrivate *e);
-		/* Private Functions used by the friend function to send the signal ,
-		 * Since only the member functions can emit signals efficiently and correctly. */
-		void emitArchiveAuthenticationFailed();
-		void emitPasswordRequired();
 };
 }
 #endif // QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
