@@ -19,6 +19,7 @@ int main(int ac , char **av)
 	QCoreApplication app(ac , av);
 	QString archive(av[1]);
 	DiskExtractorPrivate e(archive);
+	e.setShowProgress(false);
 	auto metaObject = e.metaObject();
 	QObject::connect(&e , &DiskExtractorPrivate::info ,[&](QJsonObject info){
 			qDebug() << info;
@@ -33,6 +34,13 @@ int main(int ac , char **av)
 	QObject::connect(&e , &DiskExtractorPrivate::error , [&](short code){
 			qDebug() << "ERROR CODE: " << code;
 			app.quit();
+			return;
+	});
+
+	QObject::connect(&e , &DiskExtractorPrivate::progress , [&](QString file , int d , int t , int p){
+			(void)d;
+			(void)t;
+			qDebug() << "Extracting: " << file << " , Done: " << p << " %.";
 			return;
 	});
 
@@ -63,8 +71,6 @@ int main(int ac , char **av)
 	});
 
 	QTimer::singleShot(0 , [&](){
-		metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("getInfo()")))
-			   .invoke(&e , Qt::QueuedConnection);
 		metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("start()")))
 			   .invoke(&e , Qt::QueuedConnection);
 	});

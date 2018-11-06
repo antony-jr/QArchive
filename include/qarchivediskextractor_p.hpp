@@ -45,6 +45,7 @@ class DiskExtractorPrivate : public QObject {
 		void setArchive(QFile*);
 		void setArchive(const QString&);
 		void setBlockSize(int);
+		void setShowProgress(bool);
 		void setOutputDirectory(const QString&);
 		void setPassword(const QString&);
 		void addFilter(const QString&);
@@ -70,7 +71,7 @@ class DiskExtractorPrivate : public QObject {
 		void resumed();
 		void finished();
 		void error(short);
-		void progress(int);
+		void progress(QString , int , int , int);
 		void getInfoRequirePassword(int);
 		void extractionRequirePassword(int);
 		void info(QJsonObject);
@@ -80,7 +81,8 @@ class DiskExtractorPrivate : public QObject {
 		     _bCancelRequested = false,
 		     _bPaused = false,
 		     _bStarted = false,
-		     _bFinished = false;
+		     _bFinished = false,
+		     _bNoProgress = false;
 		int _nPasswordTriedCountGetInfo = 0,
 		    _nPasswordTriedCountExtract = 0,
 		    _nProcessedEntries = 0,

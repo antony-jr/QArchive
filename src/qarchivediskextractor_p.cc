@@ -37,14 +37,6 @@ using namespace QArchive;
 #define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a) , "Passphrase required for this entry")
 #define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
 
-static QString getDirectoryFileName(const QString &dir)
-{
-    if(dir[dir.count() - 1] == QStringLiteral("/")) {
-        return dir.mid(0, dir.count() - 1);
-    }
-    return dir;
-}
-
 static void deleteArchiveRead(struct archive *ar)
 {
 	if(ar){
@@ -68,6 +60,23 @@ static void ignoreDeleteQFile(QFile *file)
 	(void)file;
 	return;
 }
+
+static char *concat(const char *dest, const char *src)
+{
+    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
+    strcpy(ret, dest);
+    strcat(ret, src);
+    return ret;
+}
+
+static QString getDirectoryFileName(const QString &dir)
+{
+    if(dir[dir.count() - 1] == QStringLiteral("/")) {
+	    return dir.mid(0, dir.count() - 1);
+    }
+    return dir;
+}
+
 
 DiskExtractorPrivate::DiskExtractorPrivate()
 	: DISK_EXTRACTOR_CONSTRUCTOR
@@ -96,6 +105,9 @@ DiskExtractorPrivate::~DiskExtractorPrivate()
 
 void DiskExtractorPrivate::setArchive(QFile *archive)
 {
+    if(_bStarted || _bPaused){
+	    return;
+    }
     if(archive == nullptr) {
 	emit error(InvalidQFile);
         return;
@@ -128,6 +140,9 @@ void DiskExtractorPrivate::setArchive(QFile *archive)
 
 void DiskExtractorPrivate::setArchive(const QString &archivePath)
 {
+    if(_bStarted || _bPaused){
+	    return;
+    }
     if(archivePath.isEmpty()) {
         return;
     }
@@ -182,21 +197,39 @@ void DiskExtractorPrivate::setArchive(const QString &archivePath)
 
 void DiskExtractorPrivate::setBlockSize(int n)
 {
+	if(_bStarted || _bPaused){
+		return;
+	}
 	_nBlockSize = n;
 	return;
 }
 
 void DiskExtractorPrivate::setOutputDirectory(const QString &destination)
 {
-    /* Check if its a directory and not a file , Also check if it exists. */
-    if(destination.isEmpty() || !QFileInfo(destination).isDir() || !QFileInfo::exists(destination)) {
+   if(_bStarted || _bPaused){
+	   return;
+   }
+   QFileInfo info(destination);
+   /* Check if its a directory and not a file , Also check if it exists. */
+   if(destination.isEmpty() || !info.isDir() || !QFileInfo::exists(destination)) {
         emit error(InvalidOutputDirectory);
 	return;
     }
-    _mOutputDirectory = destination;
+    
+    /* Check if we have the permission to read and write. */
+    if(!info.isWritable() || !info.isReadable()){
+	    emit error(NoPermissionToWrite);
+	    return;
+    }
+    _mOutputDirectory = info.absoluteFilePath();
     return;
 }
 
+void DiskExtractorPrivate::setShowProgress(bool c)
+{
+	_bNoProgress = !c;
+	return;
+}
 
 void DiskExtractorPrivate::setPassword(const QString &passwd)
 {
@@ -209,6 +242,9 @@ void DiskExtractorPrivate::setPassword(const QString &passwd)
 
 void DiskExtractorPrivate::addFilter(const QString &filter)
 {
+	if(_bStarted || _bPaused){
+		return;
+	}
 	if(filter.isEmpty()){
 		return;
 	}
@@ -218,6 +254,9 @@ void DiskExtractorPrivate::addFilter(const QString &filter)
 
 void DiskExtractorPrivate::addFilter(const QStringList &filters)
 {
+	if(_bStarted || _bPaused){
+		return;
+	}
 	if(filters.isEmpty()){
 		return;
 	}
@@ -227,6 +266,9 @@ void DiskExtractorPrivate::addFilter(const QStringList &filters)
 
 void DiskExtractorPrivate::clear()
 {
+	if(_bStarted || _bPaused){
+		return;
+	}
 	_mInfo.clear();
 	_mInfo = QSharedPointer<QJsonObject>(new QJsonObject);
 	_mExtractFilters->clear();
@@ -261,15 +303,10 @@ void DiskExtractorPrivate::getInfo()
 
 void DiskExtractorPrivate::start()
 {
-	/* 
-	 * If _mArchiveRead is already allocated then
-	 * it means that the extraction already started 
-	 * or the extraction is paused.
-	*/
-	if((!_mArchiveRead.isNull() && !_mArchiveWrite.isNull()) || _mArchive.isNull()){
+	if(_bStarted || _bPaused || _mArchive.isNull()){
 		return;
 	}
-	else if(_nTotalEntries == -1){
+	else if(_nTotalEntries == -1 && !_bNoProgress){
 		short errorCode = getTotalEntriesCount();
 		if(_nTotalEntries == -1){
 			if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded){
@@ -428,7 +465,16 @@ short DiskExtractorPrivate::extract()
 	return err;
 	}
 
-	++_nProcessedEntries;	
+	if(_nTotalEntries > 0){
+	++_nProcessedEntries;
+	emit progress(QString(archive_entry_pathname(entry)),
+		      _nProcessedEntries,
+		      _nTotalEntries,
+		      (_nProcessedEntries*100)/_nTotalEntries);
+	}else{
+	emit progress(QString(archive_entry_pathname(entry)) , 0 , 0 , 0);
+	}
+
 	QCoreApplication::processEvents();
 	if(_bPauseRequested){
 		_bPauseRequested = false;
@@ -470,7 +516,15 @@ short DiskExtractorPrivate::extract()
 	return err;
 	}
 
+	if(_nTotalEntries > 0){
 	++_nProcessedEntries;
+	emit progress(QString(archive_entry_pathname(entry)),
+		      _nProcessedEntries,
+		      _nTotalEntries,
+		      (_nProcessedEntries*100)/_nTotalEntries);
+	}else{
+	emit progress(QString(archive_entry_pathname(entry)), 0 , 0 , 0);
+	}
 
 	/*
 	 * Process events to know if the user canceled
@@ -502,6 +556,17 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry)
 {
 	if(_mArchiveRead.isNull() || _mArchiveWrite.isNull() || _mArchive.isNull()){
 		return ArchiveNotGiven;
+	}
+
+	if(!_mExtractFilters->isEmpty() && 
+	   !_mExtractFilters->contains(QString(archive_entry_pathname(entry)))){
+			return NoError;
+		}
+
+	if(!_mOutputDirectory.isEmpty()) {
+		char *new_entry = concat(_mOutputDirectory.toLatin1().constData(), archive_entry_pathname(entry));
+		archive_entry_set_pathname(entry, new_entry);
+		free(new_entry);
 	}
 
 	int ret = archive_write_header(_mArchiveWrite.data() , entry);
