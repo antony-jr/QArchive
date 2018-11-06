@@ -19,7 +19,8 @@ int main(int ac , char **av)
 	QCoreApplication app(ac , av);
 	QString archive(av[1]);
 	DiskExtractorPrivate e(archive);
-	e.setShowProgress(false);
+	e.setShowProgress(true);
+	e.setOutputDirectory("Output/");
 	auto metaObject = e.metaObject();
 	QObject::connect(&e , &DiskExtractorPrivate::info ,[&](QJsonObject info){
 			qDebug() << info;
@@ -30,6 +31,29 @@ int main(int ac , char **av)
 			app.quit();
 			return;
 	});
+
+	QObject::connect(&e , &DiskExtractorPrivate::started , [&](){
+			QTimer::singleShot(1000 , [&](){
+			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("pause()")))
+			   .invoke(&e , Qt::QueuedConnection);		
+			 });
+			return;
+	});
+
+	QObject::connect(&e , &DiskExtractorPrivate::resumed , [&](){
+			qDebug() << "RESUMED!";
+	});
+
+	QObject::connect(&e , &DiskExtractorPrivate::paused , [&](){
+			qDebug() << "PAUSED!";
+			QTimer::singleShot(5000 , [&](){
+			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("resume()")))
+			   .invoke(&e , Qt::QueuedConnection);		
+			 });
+			return;
+	});
+
+
 
 	QObject::connect(&e , &DiskExtractorPrivate::error , [&](short code){
 			qDebug() << "ERROR CODE: " << code;
