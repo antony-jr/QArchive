@@ -1,7 +1,6 @@
 #include <qarchivediskextractor_p.hpp>
 #include <QFileInfo>
 #include <QDateTime>
-#include <QScopedPointer>
 #include <QCoreApplication>
 extern "C" {
 #include <archive.h>
@@ -17,8 +16,9 @@ extern "C" {
 using namespace QArchive;
 
 #define DISK_EXTRACTOR_CONSTRUCTOR QObject(),\
+				   _nFlags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT),\
 				   _mInfo(QSharedPointer<QJsonObject>(new QJsonObject)), \
-				   _mExtractFilters(QSharedPointer<QStringList>(new QStringList))
+				   _mExtractFilters(QSharedPointer<QStringList>(new QStringList)) 
 
 #if defined(__APPLE__)
 #define st_atim st_atimespec.tv_sec
@@ -34,8 +34,8 @@ using namespace QArchive;
 #define st_mtim st_mtim.tv_sec
 #endif
 
-#define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a.data()) , "Passphrase required for this entry")
-#define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a.data()) , "Incorrect passphrase")
+#define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a) , "Passphrase required for this entry")
+#define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
 
 static QString getDirectoryFileName(const QString &dir)
 {
@@ -45,39 +45,23 @@ static QString getDirectoryFileName(const QString &dir)
     return dir;
 }
 
-struct ScopedPointerArchiveReadDeleter
+static void deleteArchiveRead(struct archive *ar)
 {
-    static inline void cleanup(struct archive *ar)
-    {
-       if(ar) {
-	       archive_read_close(ar);
-	       archive_read_free(ar);
-       }
-       return;
-    }
-};
+	if(ar){
+		archive_read_close(ar);
+		archive_read_free(ar);
+	}
+	return;
+}
 
-struct ScopedPointerArchiveWriteDeleter
+static void deleteArchiveWrite(struct archive *aw)
 {
-    static inline void cleanup(struct archive *aw)
-    {
-	    if(aw) {
-		    archive_write_close(aw);
-		    archive_write_free(aw);
-	    }
-	    return;
-    }
-};
-
-struct ScopedPointerArchiveEntryDeleter
-{
-    static inline void cleanup(struct archive_entry *entry){
-	    if(entry){
-		    archive_entry_free(entry);
-	    }
-	    return;
-    }
-};
+	if(aw){
+		archive_write_close(aw);
+		archive_write_free(aw);
+	}
+	return;
+}
 
 static void ignoreDeleteQFile(QFile *file)
 {
@@ -93,17 +77,18 @@ DiskExtractorPrivate::DiskExtractorPrivate()
 DiskExtractorPrivate::DiskExtractorPrivate(QFile *inputArchive)
 	: DISK_EXTRACTOR_CONSTRUCTOR
 {
-	setArchive(inputArchive);
+		setArchive(inputArchive);
 }
 
 DiskExtractorPrivate::DiskExtractorPrivate(const QString &inputArchivePath)
 	: DISK_EXTRACTOR_CONSTRUCTOR
 {
-	setArchive(inputArchivePath);
+		setArchive(inputArchivePath);
 }
 
 DiskExtractorPrivate::~DiskExtractorPrivate()
 {
+	_mArchiveRead.clear();
 	_mArchive.clear();
 	_mExtractFilters.clear();
 }
@@ -111,11 +96,11 @@ DiskExtractorPrivate::~DiskExtractorPrivate()
 
 void DiskExtractorPrivate::setArchive(QFile *archive)
 {
-    clear(); /* clear old data. */
     if(archive == nullptr) {
 	emit error(InvalidQFile);
         return;
     }
+    clear();
     _mArchive = QSharedPointer<QFile>(archive, ignoreDeleteQFile);
     
     /* Check if exists */
@@ -143,11 +128,10 @@ void DiskExtractorPrivate::setArchive(QFile *archive)
 
 void DiskExtractorPrivate::setArchive(const QString &archivePath)
 {
-    clear(); /* clear old data */
     if(archivePath.isEmpty()) {
         return;
     }
-
+    clear();
     try {
         _mArchive = QSharedPointer<QFile>(new QFile);
     } catch ( ... ) {
@@ -248,59 +232,425 @@ void DiskExtractorPrivate::clear()
 	_mExtractFilters->clear();
 	_mPassword.clear();
 	_mOutputDirectory.clear();
+	_mArchive.clear();
+	_nBlockSize = 10240;
+	_nPasswordTriedCountGetInfo = _nPasswordTriedCountExtract = 0;
+	_nTotalEntries = -1;
+	_bPauseRequested = _bCancelRequested = _bPaused = _bStarted = _bFinished = false;
 	return;
 }
 
 void DiskExtractorPrivate::getInfo()
 {
-	int ret = processArchiveInformation();
-	if(!ret)
+	if(!_mInfo->isEmpty()){
 		emit info(*(_mInfo.data()));
-	else if(ret == -4)
+		return;
+	}
+
+	short ret = processArchiveInformation();
+	if(!ret){
+		emit info(*(_mInfo.data()));
+	}else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded){
 		emit getInfoRequirePassword(_nPasswordTriedCountGetInfo);
+		++_nPasswordTriedCountGetInfo;
+	}else{
+		emit error(ret);
+	}
 	return;
 }
 
-int DiskExtractorPrivate::processArchiveInformation()
+void DiskExtractorPrivate::start()
+{
+	/* 
+	 * If _mArchiveRead is already allocated then
+	 * it means that the extraction already started 
+	 * or the extraction is paused.
+	*/
+	if((!_mArchiveRead.isNull() && !_mArchiveWrite.isNull()) || _mArchive.isNull()){
+		return;
+	}
+	else if(_nTotalEntries == -1){
+		short errorCode = getTotalEntriesCount();
+		if(_nTotalEntries == -1){
+			if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded){
+			emit extractionRequirePassword(_nPasswordTriedCountExtract);
+			++_nPasswordTriedCountExtract;
+			}else{
+				emit error(errorCode);
+				return;
+			}
+		}
+	}
+
+		
+	_bStarted = true;
+	emit started();
+
+	short ret = extract();
+	if(!ret){
+		_bStarted = false;
+		_bFinished = true;
+		emit finished();
+	}else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded){
+		_bStarted = false;
+		emit extractionRequirePassword(_nPasswordTriedCountExtract);
+		++_nPasswordTriedCountExtract;
+	}else if(ret == OperationCanceled){
+		_bStarted = false;
+		emit canceled();
+	}else if(ret < 0){
+		_bStarted = false;
+		_bPaused = true;
+		emit paused();
+	}else{
+		_bStarted = false;
+		emit error(ret);
+	}
+	return;
+}
+
+void DiskExtractorPrivate::pause()
+{
+	if(_bStarted && !_bPaused){
+		_bPauseRequested = true;
+	}
+	return;
+}
+
+void DiskExtractorPrivate::resume()
+{
+	if(!_bPaused){
+		return;
+	}
+	_bPaused = false;
+	_bStarted = true;
+	emit resumed();
+	
+	short ret = extract();
+	if(!ret){
+		_bStarted = false;
+		_bFinished = true;
+		emit finished();
+	}else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded){
+		_bStarted = false;
+		emit extractionRequirePassword(_nPasswordTriedCountExtract);
+		++_nPasswordTriedCountExtract;
+	}else if(ret == OperationCanceled){
+		_bStarted = false;
+		emit canceled();
+	}else if(ret < 0){
+		_bStarted = false;
+		_bPaused = true;
+		emit paused();
+	}else{
+		_bStarted = false;
+		emit error(ret);
+	}
+	
+	return;
+}
+
+void DiskExtractorPrivate::cancel()
+{
+	if(_bStarted && !_bPaused && !_bFinished){
+		_bCancelRequested = true;
+	}
+	return;
+}
+
+short DiskExtractorPrivate::extract()
 {
     if(_mArchive.isNull()){
-	    return -1;
+	    return ArchiveNotGiven;
+    }
+    int ret = 0;
+    short err = NoError;
+    archive_entry *entry = nullptr;
+ 
+    if(_mArchiveRead.isNull() && _mArchiveWrite.isNull()){
+    _nProcessedEntries = 0;
+    /*
+     * Reset any previous operations 
+     * on the file.
+    */
+    auto prev = _mArchive->pos();
+    _mArchive->seek(0);
+
+    _mArchiveRead = QSharedPointer<struct archive>(archive_read_new() , deleteArchiveRead);
+    _mArchiveWrite = QSharedPointer<struct archive>(archive_write_disk_new(), deleteArchiveWrite);
+    if(!_mPassword.isEmpty()){
+	    archive_read_add_passphrase(_mArchiveRead.data() , _mPassword.toLatin1().constData());
+    }
+    if(!_mArchiveRead.data() && !_mArchiveWrite.data()){
+	    _mArchiveRead.clear();
+	    _mArchiveWrite.clear();
+	    _mArchive->seek(prev);
+	    return NotEnoughMemory;
+    }
+    archive_read_support_format_all(_mArchiveRead.data());
+    archive_read_support_filter_all(_mArchiveRead.data());
+    if((ret = archive_read_open_fd(_mArchiveRead.data() , _mArchive->handle() ,_nBlockSize))) {
+	   _mArchiveRead.clear();
+	   _mArchiveWrite.clear();
+	   _mArchive->seek(prev);
+	   return ArchiveReadError;
+    }
+
+    if((ret = archive_write_disk_set_options(_mArchiveWrite.data(), _nFlags))){
+	    _mArchiveRead.clear();
+	    _mArchiveWrite.clear();
+	    _mArchive->seek(prev);
+	    return ArchiveWriteError;
+    }
+ 
+    for (;;) {
+        ret = archive_read_next_header(_mArchiveRead.data() , &entry);
+        if (ret == ARCHIVE_EOF){
+            break;
+	}
+        if (ret != ARCHIVE_OK) {
+	    err = ArchiveCorrupted;
+            if(PASSWORD_NEEDED(_mArchiveRead.data())){
+		err = ArchivePasswordNeeded;
+	    }else if(PASSWORD_INCORRECT(_mArchiveRead.data())){
+		err = ArchivePasswordIncorrect;		
+	    }
+	    _mArchiveRead.clear();
+	    _mArchiveWrite.clear();
+	    _mArchive->seek(prev);
+	    return err;
+        }
+
+	if((err = writeData(entry))){
+	_mArchiveRead.clear();
+	_mArchiveWrite.clear();
+	_mArchive->seek(prev);
+	return err;
+	}
+
+	++_nProcessedEntries;	
+	QCoreApplication::processEvents();
+	if(_bPauseRequested){
+		_bPauseRequested = false;
+		return -1;
+	}
+
+	if(_bCancelRequested){
+		_bCancelRequested = false;
+		_mArchiveRead.clear();
+		_mArchiveWrite.clear();
+		_mArchive->seek(prev);
+		return OperationCanceled; 
+	}
+    }
+    _mArchive->seek(prev);
+    }else{
+     for (;;) {
+        ret = archive_read_next_header(_mArchiveRead.data() , &entry);
+        if (ret == ARCHIVE_EOF){
+            break;
+	}
+        if (ret != ARCHIVE_OK) {
+	    err = ArchiveCorrupted;
+            if(PASSWORD_NEEDED(_mArchiveRead.data())){
+		err = ArchivePasswordNeeded;
+	    }else if(PASSWORD_INCORRECT(_mArchiveRead.data())){
+		err = ArchivePasswordIncorrect;		
+	    }
+	    _mArchiveRead.clear();
+	    _mArchiveWrite.clear();
+	    _mArchive->seek(0);
+	    return err;
+	}
+
+	if((err = writeData(entry))){
+	_mArchiveRead.clear();
+	_mArchiveWrite.clear();
+	_mArchive->seek(0);
+	return err;
+	}
+
+	++_nProcessedEntries;
+
+	/*
+	 * Process events to know if the user canceled
+	 * or paused the extraction
+	*/
+	QCoreApplication::processEvents();
+	if(_bPauseRequested){
+		_bPauseRequested = false;
+		return -1;
+	}
+	
+	if(_bCancelRequested){
+		_bCancelRequested = false;
+		_mArchiveRead.clear();
+		_mArchiveWrite.clear();
+		_mArchive->seek(0);
+		return OperationCanceled; 
+	}
+
+    }
+    }
+    /* free memory. */
+    _mArchiveRead.clear();
+    _mArchiveWrite.clear();
+    return NoError;
+}
+
+short DiskExtractorPrivate::writeData(struct archive_entry *entry)
+{
+	if(_mArchiveRead.isNull() || _mArchiveWrite.isNull() || _mArchive.isNull()){
+		return ArchiveNotGiven;
+	}
+
+	int ret = archive_write_header(_mArchiveWrite.data() , entry);
+	if (ret == ARCHIVE_OK) {
+		const void *buff;
+                size_t size;
+#if ARCHIVE_VERSION_NUMBER >= 3000000
+                int64_t offset;
+#else
+                off_t offset;
+#endif
+                for (;;) {
+                    ret = archive_read_data_block(_mArchiveRead.data(), &buff, &size, &offset);
+                    if (ret == ARCHIVE_EOF) {
+                        break;
+                    } else if (ret != ARCHIVE_OK) {
+			       short err = ArchiveCorrupted;
+			       if(PASSWORD_NEEDED(_mArchiveRead.data())){
+				       err = ArchivePasswordNeeded;
+			       }else if(PASSWORD_INCORRECT(_mArchiveRead.data())){
+				       err = ArchivePasswordIncorrect;		
+			       }
+			       return err;
+		    } else {
+                        ret = archive_write_data_block(_mArchiveWrite.data(), buff, size, offset);
+                        if (ret != ARCHIVE_OK) {
+			    return ArchiveWriteError;
+                        }
+                    }
+                }
+	}else{
+		return ArchiveHeaderWriteError;
+	}
+
+        ret = archive_write_finish_entry(_mArchiveWrite.data());
+        if (ret == ARCHIVE_FATAL) {
+           return ArchiveHeaderWriteError;
+        }
+	return NoError;
+}
+
+short DiskExtractorPrivate::getTotalEntriesCount()
+{
+    if(_mArchive.isNull()){
+	    return ArchiveNotGiven;
+    }
+    /*
+     * Reset any previous operations 
+     * on the file.
+    */
+    auto prev = _mArchive->pos();
+    _mArchive->seek(0);
+
+    int ret = 0;
+    int count = 0;
+    archive_entry *entry = nullptr;
+    struct archive *inArchive = archive_read_new();
+    if(!_mPassword.isEmpty()){
+	    archive_read_add_passphrase(inArchive , _mPassword.toLatin1().constData());
+    }
+    if(!inArchive){
+	    _mArchive->seek(prev);
+	    return NotEnoughMemory;
+    }
+    archive_read_support_format_all(inArchive);
+    archive_read_support_filter_all(inArchive);
+    if((ret = archive_read_open_fd(inArchive , _mArchive->handle() ,_nBlockSize))) {
+	archive_read_close(inArchive);
+	archive_read_free(inArchive);
+	_mArchive->seek(prev);
+	return ArchiveReadError;
+    }
+    for (;;) {
+        ret = archive_read_next_header(inArchive , &entry);
+        if (ret == ARCHIVE_EOF){
+            break;
+	}
+        if (ret != ARCHIVE_OK) {
+	    short err = ArchiveCorrupted;
+            if(PASSWORD_NEEDED(inArchive)){
+		err = ArchivePasswordNeeded;
+	    }else if(PASSWORD_INCORRECT(inArchive)){
+		err = ArchivePasswordIncorrect;		
+	    }
+	    archive_read_close(inArchive);
+	    archive_read_free(inArchive);
+	    _mArchive->seek(prev);
+	    return err;
+        }
+	count += 1;
+    }
+
+    _mArchive->seek(prev);
+    /* Set total number of entries. */
+    _nTotalEntries = count;
+    
+    /* free memory. */
+    archive_read_close(inArchive);
+    archive_read_free(inArchive);
+    return NoError;
+}
+
+short DiskExtractorPrivate::processArchiveInformation()
+{
+    if(_mArchive.isNull()){
+	    return ArchiveNotGiven;
     }
 
     /*
      * Reset any previous operations 
      * on the file.
     */
+    auto prev = _mArchive->pos();
     _mArchive->seek(0);
 
     int ret = 0;
     archive_entry *entry = nullptr;
-    QScopedPointer<struct archive , ScopedPointerArchiveReadDeleter> inArchive(archive_read_new());
+    struct archive *inArchive = archive_read_new();
     if(!_mPassword.isEmpty()){
-	    archive_read_add_passphrase(inArchive.data() , _mPassword.toLatin1().constData());
+	    archive_read_add_passphrase(inArchive , _mPassword.toLatin1().constData());
     }
-    if(!(inArchive.data())){
-	    emit error(NotEnoughMemory);
-	    return -2;
+    if(!inArchive){
+	    _mArchive->seek(prev);
+	    return NotEnoughMemory;
     }
-    archive_read_support_format_all(inArchive.data());
-    archive_read_support_filter_all(inArchive.data());
-    if((ret = archive_read_open_fd(inArchive.data(), _mArchive->handle() ,_nBlockSize))) {
-        error(ArchiveReadError);
-	return -3;
+    archive_read_support_format_all(inArchive);
+    archive_read_support_filter_all(inArchive);
+    if((ret = archive_read_open_fd(inArchive , _mArchive->handle() ,_nBlockSize))) {
+	archive_read_close(inArchive);
+	archive_read_free(inArchive);
+	_mArchive->seek(prev);
+	return ArchiveReadError;
     }
     for (;;) {
-        ret = archive_read_next_header(inArchive.data(), &entry);
+        ret = archive_read_next_header(inArchive , &entry);
         if (ret == ARCHIVE_EOF){
             break;
         }
         if (ret != ARCHIVE_OK) {
-            if(PASSWORD_NEEDED(inArchive) || PASSWORD_INCORRECT(inArchive)){
-		return -4;		
+	    short err = ArchiveCorrupted;
+            if(PASSWORD_NEEDED(inArchive)){
+		err = ArchivePasswordNeeded;
+	    }else if(PASSWORD_INCORRECT(inArchive)){
+		err = ArchivePasswordIncorrect;		
 	    }
-
-	    emit error(ArchiveCorrupted);
-	    return -5;
+	    archive_read_close(inArchive);
+	    archive_read_free(inArchive);
+	    _mArchive->seek(prev);
+	    return err;
         }
         QString CurrentFile = QString(archive_entry_pathname(entry));
    	QJsonObject CurrentEntry;
@@ -397,7 +747,15 @@ int DiskExtractorPrivate::processArchiveInformation()
         CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
     }
     _mInfo->insert(CurrentFile , CurrentEntry);
-    QCoreApplication::processEvents();
     }
-    return 0;
+
+    _mArchive->seek(prev);
+
+    /* Set total number of entries. */
+    _nTotalEntries = _mInfo->size();
+    
+    /* free memory. */
+    archive_read_close(inArchive);
+    archive_read_free(inArchive);
+    return NoError;
 }

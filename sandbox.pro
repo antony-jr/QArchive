@@ -4,7 +4,7 @@ TARGET = sandbox
 INCLUDEPATH += . include
 DEFINES += QT_DEPRECATED_WARNINGS
 
-QT += core
+QT += core concurrent
 LIBS += -larchive
 
 # Inputs 

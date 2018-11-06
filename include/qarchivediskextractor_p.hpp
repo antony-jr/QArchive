@@ -13,12 +13,18 @@ struct archive_entry;
 
 namespace QArchive {
 enum : short {
+	NoError,
+	OperationCanceled,
+	ArchiveNotGiven,
 	ArchiveDoesNotExists,
 	ArchiveReadError,
+	ArchiveWriteError,
+	ArchiveHeaderWriteError,
 	ArchiveCorrupted,
 	ArchiveIsNotReadable,
 	ArchiveIsNotOpened,
-	ArchiveAuthenticationFailed,
+	ArchivePasswordNeeded,
+	ArchivePasswordIncorrect,
 	CannotOpenArchive,
 	NoPermissionToReadArchive,
 	NoPermissionToWrite,
@@ -46,13 +52,17 @@ class DiskExtractorPrivate : public QObject {
 		void clear();
 
 		void getInfo();
-	//	void start();
-	//	void cancel();
-	//	void pause();
-	//	void resume();
+	
+		void start();
+		void cancel();
+		void pause();
+		void resume();
 	
 	private Q_SLOTS:
-		int processArchiveInformation();
+		short getTotalEntriesCount();
+		short processArchiveInformation();	
+		short writeData(struct archive_entry*);
+		short extract();
 	Q_SIGNALS:
 		void started();
 		void canceled();
@@ -64,12 +74,23 @@ class DiskExtractorPrivate : public QObject {
 		void getInfoRequirePassword(int);
 		void extractionRequirePassword(int);
 		void info(QJsonObject);
+
 	private:
+		bool _bPauseRequested = false,
+		     _bCancelRequested = false,
+		     _bPaused = false,
+		     _bStarted = false,
+		     _bFinished = false;
 		int _nPasswordTriedCountGetInfo = 0,
 		    _nPasswordTriedCountExtract = 0,
-		    _nBlockSize = 10240;
+		    _nProcessedEntries = 0,
+		    _nTotalEntries = -1,
+		    _nBlockSize = 10240,
+		    _nFlags = 0; 
 		QString _mOutputDirectory,
 			_mPassword;
+		QSharedPointer<struct archive> _mArchiveRead = nullptr,
+					       _mArchiveWrite = nullptr;
 		QSharedPointer<QJsonObject> _mInfo;
 		QSharedPointer<QStringList> _mExtractFilters = nullptr;
 		QSharedPointer<QFile> _mArchive = nullptr;
