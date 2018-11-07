@@ -1,74 +1,64 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include <QVector>
-#include <QMetaObject>
-#include <QMetaMethod>
 #include <QJsonObject>
-#include <QtConcurrent>
 #include <QTimer>
-#include <qarchivediskextractor_p.hpp>
 #include <iostream>
 #include <string>
+#include <qarchivediskextractor.hpp>
 
 int main(int ac , char **av)
 {
 	if(ac == 1)
 		return -1;
-
-	using QArchive::DiskExtractorPrivate;
+	using QArchive::DiskExtractor;
 	QCoreApplication app(ac , av);
 	QString archive(av[1]);
-	DiskExtractorPrivate e(archive);
-	e.setShowProgress(true);
-	e.setOutputDirectory("Output/");
-	auto metaObject = e.metaObject();
-	QObject::connect(&e , &DiskExtractorPrivate::info ,[&](QJsonObject info){
+	DiskExtractor e(archive);
+	QObject::connect(&e , &DiskExtractor::info ,[&](QJsonObject info){
 			qDebug() << info;
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::finished , [&](){
+	QObject::connect(&e , &DiskExtractor::finished , [&](){
 			app.quit();
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::started , [&](){
+	QObject::connect(&e , &DiskExtractor::started , [&](){
 			QTimer::singleShot(1000 , [&](){
-			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("pause()")))
-			   .invoke(&e , Qt::QueuedConnection);		
-			 });
+				e.pause();
+			});	
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::resumed , [&](){
+	QObject::connect(&e , &DiskExtractor::resumed , [&](){
 			qDebug() << "RESUMED!";
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::paused , [&](){
+	QObject::connect(&e , &DiskExtractor::paused , [&](){
 			qDebug() << "PAUSED!";
 			QTimer::singleShot(5000 , [&](){
-			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("resume()")))
-			   .invoke(&e , Qt::QueuedConnection);		
-			 });
+				e.resume();
+			});
 			return;
 	});
 
 
 
-	QObject::connect(&e , &DiskExtractorPrivate::error , [&](short code){
+	QObject::connect(&e , &DiskExtractor::error , [&](short code){
 			qDebug() << "ERROR CODE: " << code;
 			app.quit();
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::progress , [&](QString file , int d , int t , int p){
+	QObject::connect(&e , &DiskExtractor::progress , [&](QString file , int d , int t , int p){
 			(void)d;
 			(void)t;
 			qDebug() << "Extracting: " << file << " , Done: " << p << " %.";
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::extractionRequirePassword , [&](int tried){
+	QObject::connect(&e , &DiskExtractor::extractionRequirePassword , [&](int tried){
 			using std::cin;	
 			using std::string;
 			using std::cout;
@@ -76,12 +66,11 @@ int main(int ac , char **av)
 			cout << "Enter Password(Tries = " << tried << "): ";
 			cin >> pwd;
 			e.setPassword(QString::fromStdString(pwd));
-			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("start()")))
-			   .invoke(&e , Qt::QueuedConnection);	
+			e.start();
 			return;
 	});
 
-	QObject::connect(&e , &DiskExtractorPrivate::getInfoRequirePassword , [&](int tried){
+	QObject::connect(&e , &DiskExtractor::getInfoRequirePassword , [&](int tried){
 			using std::cin;	
 			using std::string;
 			using std::cout;
@@ -89,14 +78,11 @@ int main(int ac , char **av)
 			cout << "Enter Password(Tries = " << tried << "): ";
 			cin >> pwd;
 			e.setPassword(QString::fromStdString(pwd));
-			metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("getInfo()")))
-			   .invoke(&e , Qt::QueuedConnection);
+			e.getInfo();
 			return;
 	});
-
 	QTimer::singleShot(0 , [&](){
-		metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature("start()")))
-			   .invoke(&e , Qt::QueuedConnection);
+	e.start();
 	});
 	return app.exec();
 }

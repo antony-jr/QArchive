@@ -4,9 +4,9 @@ TARGET = sandbox
 INCLUDEPATH += . include
 DEFINES += QT_DEPRECATED_WARNINGS
 
-QT += core concurrent
+QT += core
 LIBS += -larchive
 
 # Inputs 
-SOURCES += src/qarchivediskextractor_p.cc sandbox.cc
-HEADERS += include/qarchivediskextractor_p.hpp
+SOURCES += src/qarchivediskextractor_p.cc src/qarchivediskextractor.cc sandbox.cc
+HEADERS += include/qarchivediskextractor_p.hpp include/qarchivediskextractor.hpp
