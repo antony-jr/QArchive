@@ -81,8 +81,6 @@ int main(int ac , char **av)
 			e.getInfo();
 			return;
 	});
-	QTimer::singleShot(0 , [&](){
 	e.start();
-	});
 	return app.exec();
 }

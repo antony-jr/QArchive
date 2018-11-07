@@ -7,14 +7,16 @@
 #include <QThread>
 #include <QJsonObject>
 
-namespace QArchive {
+namespace QArchive
+{
 class DiskExtractorPrivate;
-class DiskExtractor : public QObject {
-	Q_OBJECT
+class DiskExtractor : public QObject
+{
+    Q_OBJECT
 public:
-    DiskExtractor(QObject *parent = nullptr , bool singleThreaded = true);
-    DiskExtractor(QFile* , bool singleThreaded = true);
-    DiskExtractor(const QString& , bool singleThreaded = true);
+    DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(QFile*, bool singleThreaded = true);
+    DiskExtractor(const QString&, bool singleThreaded = true);
     ~DiskExtractor();
 
 public Q_SLOTS:
