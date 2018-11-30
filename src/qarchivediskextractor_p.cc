@@ -37,9 +37,23 @@ using namespace QArchive;
 #define st_mtim st_mtim.tv_sec
 #endif
 
+/*
+ * Small patch to fix errors on MSC ,
+ * fixed by https://github.com/hcaihao
+*/
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+#include <io.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a) , "Passphrase required for this entry")
 #define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
 
+/*
+ * Custom deallocators to be used in Qt smart
+ * pointers.
+*/
 static void deleteArchiveRead(struct archive *ar)
 {
     if(ar) {
@@ -64,6 +78,8 @@ static void ignoreDeleteQFile(QFile *file)
     return;
 }
 
+
+/* Basic string manupilation utilities. */
 static char *concat(const char *dest, const char *src)
 {
     char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
@@ -79,6 +95,7 @@ static QString getDirectoryFileName(const QString &dir)
     }
     return dir;
 }
+
 
 
 DiskExtractorPrivate::DiskExtractorPrivate()
@@ -244,10 +261,7 @@ void DiskExtractorPrivate::setPassword(const QString &passwd)
 
 void DiskExtractorPrivate::addFilter(const QString &filter)
 {
-    if(_bStarted || _bPaused) {
-        return;
-    }
-    if(filter.isEmpty()) {
+    if(_bStarted || _bPaused || filter.isEmpty()) {
         return;
     }
     *(_mExtractFilters.data()) << filter;
@@ -256,10 +270,7 @@ void DiskExtractorPrivate::addFilter(const QString &filter)
 
 void DiskExtractorPrivate::addFilter(const QStringList &filters)
 {
-    if(_bStarted || _bPaused) {
-        return;
-    }
-    if(filters.isEmpty()) {
+    if(_bStarted || _bPaused || filters.isEmpty()) {
         return;
     }
     *(_mExtractFilters.data()) << filters;
