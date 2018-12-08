@@ -61,6 +61,16 @@ DiskExtractor::DiskExtractor(const QString &archivePath, bool singleThreaded)
     );
 }
 
+DiskExtractor::DiskExtractor(const QString &archivePath , const QString &outputDirectory , bool singleThreaded)
+    : QObject()
+{
+    CONSTRUCT(
+	setArchive(archivePath);
+	setOutputDirectory(outputDirectory);
+    );
+}
+
+
 DiskExtractor::~DiskExtractor()
 {
     return;
@@ -82,6 +92,12 @@ void DiskExtractor::setArchive(const QString &archivePath)
                       Qt::QueuedConnection,
                       Q_ARG(QString, archivePath));
     return;
+}
+
+void DiskExtractor::setArchive(const QString &archivePath , const QString &outputDirectory)
+{
+	setArchive(archivePath);
+	setOutputDirectory(outputDirectory);
 }
 
 void DiskExtractor::setBlockSize(int n)

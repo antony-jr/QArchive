@@ -1,6 +1,5 @@
-INCLUDEPATH += . ../ ../include/
+include(../QArchive.pri)
+INCLUDEPATH += . 
 QT += core concurrent testlib
-LIBS += -larchive
-SOURCES += main.cc ../src/QArchive.cc
-HEADERS += QArchiveExtractorTests.hpp QArchiveCompressorTests.hpp QArchiveReaderTests.hpp \
-           ../include/QArchive.hpp
+SOURCES += main.cc 
+HEADERS += QArchiveExtractorTests.hpp

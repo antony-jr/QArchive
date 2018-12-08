@@ -17,11 +17,13 @@ public:
     DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);
     DiskExtractor(QFile*, bool singleThreaded = true);
     DiskExtractor(const QString&, bool singleThreaded = true);
+    DiskExtractor(const QString& , const QString& , bool singleThreaded = true);
     ~DiskExtractor();
 
 public Q_SLOTS:
     void setArchive(QFile*);
     void setArchive(const QString&);
+    void setArchive(const QString& , const QString&);
     void setBlockSize(int);
     void setShowProgress(bool);
     void setOutputDirectory(const QString&);

@@ -102,16 +102,6 @@ DiskExtractorPrivate::DiskExtractorPrivate()
     : DISK_EXTRACTOR_CONSTRUCTOR {
 }
 
-DiskExtractorPrivate::DiskExtractorPrivate(QFile *inputArchive)
-    : DISK_EXTRACTOR_CONSTRUCTOR {
-    setArchive(inputArchive);
-}
-
-DiskExtractorPrivate::DiskExtractorPrivate(const QString &inputArchivePath)
-    : DISK_EXTRACTOR_CONSTRUCTOR {
-    setArchive(inputArchivePath);
-}
-
 DiskExtractorPrivate::~DiskExtractorPrivate()
 {
     _mArchiveWrite.clear();
@@ -228,7 +218,7 @@ void DiskExtractorPrivate::setOutputDirectory(const QString &destination)
     if(_bStarted || _bPaused) {
         return;
     }
-    QFileInfo info(destination);
+    QFileInfo info(destination + "/");
     /* Check if its a directory and not a file , Also check if it exists. */
     if(destination.isEmpty() || !info.isDir() || !QFileInfo::exists(destination)) {
         emit error(InvalidOutputDirectory);

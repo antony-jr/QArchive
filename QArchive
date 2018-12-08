@@ -33,4 +33,5 @@
  *  The Traditional Proxy files used in all Qt Modules , it just points to our
  *  Original API Header.
 */
-#include "include/QArchive.hpp"
+#include "include/qarchive_enums.hpp"
+#include "include/qarchivediskextractor.hpp"
