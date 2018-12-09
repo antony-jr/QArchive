@@ -13,12 +13,17 @@ set(CMAKE_AUTOMOC ON)
 
 # Find the QtCore library.
 find_package(Qt5Core)
-find_package(Qt5Concurrent)
 
 # Include Directories.
 include_directories(.)
 include_directories(include)
 
-add_library(QArchive src/QArchive.cc include/QArchive.hpp)
-target_link_libraries(QArchive PUBLIC Qt5::Core Qt5::Concurrent archive)
+add_library(QArchive 
+	    src/qarchivediskextractor_p.cc
+	    src/qarchivediskextractor.cc
+	    include/qarchivediskextractor_p.hpp
+	    include/qarchivediskextractor.hpp
+	    include/qarchive_enums.hpp)
+
+target_link_libraries(QArchive PUBLIC Qt5::Core archive)
 target_include_directories(QArchive PUBLIC . include)

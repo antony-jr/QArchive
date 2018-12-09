@@ -1,10 +1,10 @@
 #include <QCoreApplication>
-#include <QArchiveExtractorTests.hpp>
+#include <QArchiveDiskExtractorTests.hpp>
 
 int main(int ac, char **av)
 {
     QCoreApplication app(ac, av);
-    QArchiveExtractor extractorTests;
+    QArchiveDiskExtractor extractorTests;
     if(QTest::qExec(&extractorTests)) {
         return -1;
     }

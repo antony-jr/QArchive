@@ -4,7 +4,7 @@
 #include <QSignalSpy>
 
 
-class QArchiveExtractor : public QObject
+class QArchiveDiskExtractor : public QObject
 {
     Q_OBJECT
 private slots:
@@ -67,8 +67,8 @@ private slots:
 	     resumedEmitted = false;
 	QObject::connect(&e , &QArchive::DiskExtractor::started , [&]() {
             startedEmitted = true;
-	    QTimer::singleShot(100, &e, SLOT(pause()));
-            return;
+	    e.pause();
+	    return;
         });
         QObject::connect(&e , &QArchive::DiskExtractor::paused , [&]() {
 	    pausedEmitted = true;
@@ -128,13 +128,25 @@ private slots:
 
     void isExtractorObjectReuseable(void)
     {
-        QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir);
+        QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
+	QFile TestOutput;
 	QSignalSpy spyInfo(&e, SIGNAL(finished()));
+	e.setPassword(Test5Password);
         e.start();
-        e.setArchive(TestCase2ArchivePath, TestCase2OutputDir);
+
+	QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
+	TestOutput.setFileName(Test5OutputFile);
+        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+        QVERIFY(Test5OutputContents == QString(TestOutput.readAll()));
+	TestOutput.close();
+
+        e.setArchive(TestCase7ArchivePath, TestCase7OutputDir);
 	e.start();
 
-	QVERIFY(spyInfo.wait() || spyInfo.count() == 2); /* Two finished signal should be emitted. */
+	QVERIFY(spyInfo.wait() || spyInfo.count() == 2);
+	TestOutput.setFileName(Test7OutputFile);
+        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+        QVERIFY(Test7OutputContents == QString(TestOutput.readAll()));
     }
     
     void cleanupTestCase(void)
