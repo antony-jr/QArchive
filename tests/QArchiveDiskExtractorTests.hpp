@@ -1,6 +1,7 @@
 #include <QArchive>
 #include <QTest>
 #include <QTimer>
+#include <QJsonObject>
 #include <QSignalSpy>
 
 
@@ -116,6 +117,14 @@ private slots:
 	QFile TestOutput(Test4OutputFile);
         QVERIFY(TestOutput.open(QIODevice::ReadOnly) == true);
         QVERIFY(Test4OutputContents == QString(TestOutput.readAll()));
+    }
+
+    void informationExtraction(void)
+    {
+	QArchive::DiskExtractor e(TestCase1ArchivePath);
+	QSignalSpy spyInfo(&e , SIGNAL(info(QJsonObject)));
+	e.getInfo();
+	QVERIFY(spyInfo.wait() || spyInfo.count());
     }
 
     void testInvalidArchivePath(void)
