@@ -6,68 +6,59 @@
 
 using namespace QArchive;
 
-#define CONSTRUCT(code) _mExtractor.reset(new DiskExtractorPrivate); \
-			if(!singleThreaded){ \
-				_mThread.reset(new QThread);\
-				_mExtractor->moveToThread(_mThread.data());\
-			} \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::started ,\
-				this , &DiskExtractor::started , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::canceled ,\
-				this , &DiskExtractor::canceled , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::paused ,\
-				this , &DiskExtractor::paused , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::resumed ,\
-				this , &DiskExtractor::resumed , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::finished ,\
-				this , &DiskExtractor::finished , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::error ,\
-				this , &DiskExtractor::error , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::progress ,\
-				this , &DiskExtractor::progress , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::getInfoRequirePassword ,\
-				this , &DiskExtractor::getInfoRequirePassword , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::extractionRequirePassword ,\
-				this , &DiskExtractor::extractionRequirePassword , Qt::DirectConnection); \
-			connect(_mExtractor.data() , &DiskExtractorPrivate::info,\
-				this , &DiskExtractor::info , Qt::DirectConnection); \
-			code
-
 static QMetaMethod getMethod(DiskExtractorPrivate *o, const char *mId)
 {
     auto metaObject = o->metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(mId)));
 }
 
-DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded)
+DiskExtractor::DiskExtractor(bool singleThreaded , QObject *parent)
     : QObject(parent)
 {
-    CONSTRUCT();
+	_mExtractor.reset(new DiskExtractorPrivate);
+	if(!singleThreaded){
+		_mThread.reset(new QThread);
+		_mExtractor->moveToThread(_mThread.data());
+	}
+	connect(_mExtractor.data() , &DiskExtractorPrivate::started ,
+		this , &DiskExtractor::started , Qt::DirectConnection); 
+	connect(_mExtractor.data() , &DiskExtractorPrivate::canceled ,
+		this , &DiskExtractor::canceled , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::paused ,
+		this , &DiskExtractor::paused , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::resumed ,
+		this , &DiskExtractor::resumed , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::finished ,
+		this , &DiskExtractor::finished , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::error ,
+		this , &DiskExtractor::error , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::progress ,
+		this , &DiskExtractor::progress , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::getInfoRequirePassword ,
+		this , &DiskExtractor::getInfoRequirePassword , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::extractionRequirePassword ,
+		this , &DiskExtractor::extractionRequirePassword , Qt::DirectConnection);
+	connect(_mExtractor.data() , &DiskExtractorPrivate::info,
+		this , &DiskExtractor::info , Qt::DirectConnection);
 }
 
-DiskExtractor::DiskExtractor(QFile *archive, bool singleThreaded)
-    : QObject()
+DiskExtractor::DiskExtractor(QFile *archive, bool singleThreaded , QObject *parent)
+    : DiskExtractor(singleThreaded , parent)
 {
-    CONSTRUCT(
         setArchive(archive);
-    );
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, bool singleThreaded)
-    : QObject()
+DiskExtractor::DiskExtractor(const QString &archivePath, bool singleThreaded , QObject *parent)
+    : DiskExtractor(singleThreaded , parent)
 {
-    CONSTRUCT(
         setArchive(archivePath);
-    );
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath , const QString &outputDirectory , bool singleThreaded)
-    : QObject()
+DiskExtractor::DiskExtractor(const QString &archivePath , const QString &outputDirectory , bool singleThreaded , QObject *parent)
+    : DiskExtractor(singleThreaded , parent)
 {
-    CONSTRUCT(
 	setArchive(archivePath);
 	setOutputDirectory(outputDirectory);
-    );
 }
 
 

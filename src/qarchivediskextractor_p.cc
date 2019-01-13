@@ -18,11 +18,6 @@ extern "C" {
 
 using namespace QArchive;
 
-#define DISK_EXTRACTOR_CONSTRUCTOR QObject(),\
-				   _nFlags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT),\
-				   _mInfo(QSharedPointer<QJsonObject>(new QJsonObject)), \
-				   _mExtractFilters(QSharedPointer<QStringList>(new QStringList))
-
 #if defined(__APPLE__)
 #define st_atim st_atimespec.tv_sec
 #define st_ctim st_ctimespec.tv_sec
@@ -99,7 +94,11 @@ static QString getDirectoryFileName(const QString &dir)
 
 
 DiskExtractorPrivate::DiskExtractorPrivate()
-    : DISK_EXTRACTOR_CONSTRUCTOR {
+    : QObject(),
+      _nFlags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT),
+      _mInfo(QSharedPointer<QJsonObject>(new QJsonObject)),
+      _mExtractFilters(QSharedPointer<QStringList>(new QStringList))
+{
 }
 
 DiskExtractorPrivate::~DiskExtractorPrivate()
