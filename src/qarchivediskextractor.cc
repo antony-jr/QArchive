@@ -12,7 +12,7 @@ static QMetaMethod getMethod(DiskExtractorPrivate *o, const char *mId)
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(mId)));
 }
 
-DiskExtractor::DiskExtractor(bool singleThreaded , QObject *parent)
+DiskExtractor::DiskExtractor(QObject *parent , bool singleThreaded )
     : QObject(parent)
 {
 	_mExtractor.reset(new DiskExtractorPrivate);
@@ -42,20 +42,20 @@ DiskExtractor::DiskExtractor(bool singleThreaded , QObject *parent)
 		this , &DiskExtractor::info , Qt::DirectConnection);
 }
 
-DiskExtractor::DiskExtractor(QFile *archive, bool singleThreaded , QObject *parent)
-    : DiskExtractor(singleThreaded , parent)
+DiskExtractor::DiskExtractor(QFile *archive, QObject *parent , bool singleThreaded)
+    : DiskExtractor(parent , singleThreaded)
 {
         setArchive(archive);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, bool singleThreaded , QObject *parent)
-    : DiskExtractor(singleThreaded , parent)
+DiskExtractor::DiskExtractor(const QString &archivePath, QObject *parent , bool singleThreaded)
+    : DiskExtractor(parent , singleThreaded)
 {
         setArchive(archivePath);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath , const QString &outputDirectory , bool singleThreaded , QObject *parent)
-    : DiskExtractor(singleThreaded , parent)
+DiskExtractor::DiskExtractor(const QString &archivePath , const QString &outputDirectory , QObject *parent , bool singleThreaded)
+    : DiskExtractor(parent , singleThreaded)
 {
 	setArchive(archivePath);
 	setOutputDirectory(outputDirectory);

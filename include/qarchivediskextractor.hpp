@@ -14,10 +14,10 @@ class DiskExtractor : public QObject
 {
     Q_OBJECT
 public:
-    DiskExtractor(bool singleThreaded = true , QObject *parent = nullptr);
-    DiskExtractor(QFile*, bool singleThreaded = true , QObject *parent = nullptr);
-    DiskExtractor(const QString&, bool singleThreaded = true , QObject *parent = nullptr);
-    DiskExtractor(const QString& , const QString& , bool singleThreaded = true , QObject *parent = nullptr);
+    DiskExtractor(QObject *parent = nullptr , bool singleThreaded = true);
+    DiskExtractor(QFile*, QObject *parent = nullptr , bool singleThreaded = true);
+    DiskExtractor(const QString&, QObject *parent = nullptr ,  bool singleThreaded = true);
+    DiskExtractor(const QString& , const QString& , QObject *parent = nullptr , bool singleThreaded = true );
     ~DiskExtractor();
 
 public Q_SLOTS:

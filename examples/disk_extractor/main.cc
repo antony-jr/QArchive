@@ -23,8 +23,7 @@ int main(int ac, char **av)
     QString DestinationPath = QString(av[2]);
 
     /* Construct DiskExtractor Object. */
-    DiskExtractor Extractor(ArchivePath, DestinationPath);
-    
+    DiskExtractor Extractor(ArchivePath , DestinationPath);
     /* Connect Signals with Slots (in this case lambda functions). */
     QObject::connect(&Extractor , &DiskExtractor::extractionRequirePassword , [&](int tries){
 	string passwd;
