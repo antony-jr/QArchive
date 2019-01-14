@@ -64,8 +64,8 @@ private:
          b_Started = false,
          b_Finished = false,
          b_NoProgress = false,
-	 b_ArchiveOpened = false; 
-   int n_PasswordTriedCountGetInfo = 0,
+         b_ArchiveOpened = false;
+    int n_PasswordTriedCountGetInfo = 0,
         n_PasswordTriedCountExtract = 0,
         n_ProcessedEntries = 0,
         n_TotalEntries = -1,
@@ -74,7 +74,7 @@ private:
 
     QString m_OutputDirectory,
             m_Password,
-	    m_ArchivePath;
+            m_ArchivePath;
     QFile *m_Archive = nullptr;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;

@@ -14,16 +14,16 @@ class DiskExtractor : public QObject
 {
     Q_OBJECT
 public:
-    DiskExtractor(QObject *parent = nullptr , bool singleThreaded = true);
-    DiskExtractor(QFile*, QObject *parent = nullptr , bool singleThreaded = true);
-    DiskExtractor(const QString&, QObject *parent = nullptr ,  bool singleThreaded = true);
-    DiskExtractor(const QString& , const QString& , QObject *parent = nullptr , bool singleThreaded = true );
+    DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(QFile*, QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
+    DiskExtractor(const QString&, const QString&, QObject *parent = nullptr, bool singleThreaded = true );
     ~DiskExtractor();
 
 public Q_SLOTS:
     void setArchive(QFile*);
     void setArchive(const QString&);
-    void setArchive(const QString& , const QString&);
+    void setArchive(const QString&, const QString&);
     void setBlockSize(int);
     void setShowProgress(bool);
     void setOutputDirectory(const QString&);
@@ -52,8 +52,8 @@ Q_SIGNALS:
     void info(QJsonObject);
 
 private:
-    QScopedPointer<DiskExtractorPrivate> _mExtractor;
-    QScopedPointer<QThread> _mThread;
+    QScopedPointer<DiskExtractorPrivate> m_Extractor;
+    QScopedPointer<QThread> m_Thread;
 };
 }
 #endif // QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED

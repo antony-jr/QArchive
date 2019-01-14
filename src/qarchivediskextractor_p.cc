@@ -42,9 +42,20 @@ using namespace QArchive;
 typedef SSIZE_T ssize_t;
 #endif
 
+/*
+ * Helpful macros to check if an archive error is caused due to
+ * faulty passwords.
+ * Expects a pointer to a struct archive , returns 1 if password
+ * is needed or incorrect.
+*/
 #define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a) , "Passphrase required for this entry")
 #define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
 
+
+/*
+ * This function destructs struct archive which is set
+ * in the read mode via QSharedPointer.
+*/
 static void ArchiveReadDestructor(struct archive *ar)
 {
     if(ar) {
@@ -54,6 +65,10 @@ static void ArchiveReadDestructor(struct archive *ar)
     return;
 }
 
+/*
+ * This function destructs struct archive which is set in the
+ * write mode via QSharedPointer.
+*/
 static void ArchiveWriteDestructor(struct archive *aw)
 {
     if(aw) {
@@ -63,9 +78,12 @@ static void ArchiveWriteDestructor(struct archive *aw)
     return;
 }
 
-
-
-/* Basic string manupilation utilities. */
+/*
+ * This function returns an allocated c string which is the combination
+ * of the given c strings.
+ * Automatically allocates space for the new c string but does not
+ * free it automatically.
+*/
 static char *concat(const char *dest, const char *src)
 {
     char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
@@ -74,6 +92,10 @@ static char *concat(const char *dest, const char *src)
     return ret;
 }
 
+/*
+ * This function converts a string from "/home/antonyjr/"
+ * to "/home/antonyjr" , i.e Removes the trailing '/' if found.
+*/
 static QString getDirectoryFileName(const QString &dir)
 {
     if(dir[dir.count() - 1] == QStringLiteral("/")) {
@@ -82,8 +104,14 @@ static QString getDirectoryFileName(const QString &dir)
     return dir;
 }
 
-
-
+/*
+ * DiskExtractorPrivate constructor constructs the object which is the private class
+ * implementation to the DiskExtractor.
+ * This class is responsible for extraction and information retrival of the data
+ * inside an archive.
+ * This class only extracts the data to the disk and hence the name DiskExtractor.
+ * This class will not be able to extract or work in-memory.
+*/
 DiskExtractorPrivate::DiskExtractorPrivate()
     : QObject(),
       n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT)
@@ -97,6 +125,9 @@ DiskExtractorPrivate::~DiskExtractorPrivate()
 }
 
 
+/*
+ * Sets the given pointer to QFile as the Archive file itself.
+ */
 void DiskExtractorPrivate::setArchive(QFile *archive)
 {
     if(b_Started || b_Paused) {
@@ -107,6 +138,10 @@ void DiskExtractorPrivate::setArchive(QFile *archive)
     return;
 }
 
+/*
+ * Sets the archive path as the given QString which will be later
+ * opened to be used as the Archive file.
+*/
 void DiskExtractorPrivate::setArchive(const QString &archivePath)
 {
     if(b_Started || b_Paused || archivePath.isEmpty()) {
@@ -117,6 +152,7 @@ void DiskExtractorPrivate::setArchive(const QString &archivePath)
     return;
 }
 
+/* Blocksize to be used when extracting the given archive. */
 void DiskExtractorPrivate::setBlockSize(int n)
 {
     if(b_Started || b_Paused) {
@@ -126,6 +162,7 @@ void DiskExtractorPrivate::setBlockSize(int n)
     return;
 }
 
+/* Sets the directory where the extraction data to be extracted.*/
 void DiskExtractorPrivate::setOutputDirectory(const QString &destination)
 {
     if(b_Started || b_Paused || destination.isEmpty()) {
@@ -135,12 +172,16 @@ void DiskExtractorPrivate::setOutputDirectory(const QString &destination)
     return;
 }
 
+/* Enables/Disables the progress of the extraction with respect to the
+ * given bool. */
 void DiskExtractorPrivate::setShowProgress(bool c)
 {
     b_NoProgress = !c;
     return;
 }
 
+/*
+ * Sets the password for the archive when extracting the data. */
 void DiskExtractorPrivate::setPassword(const QString &passwd)
 {
     if(passwd.isEmpty()) {
@@ -150,6 +191,11 @@ void DiskExtractorPrivate::setPassword(const QString &passwd)
     return;
 }
 
+/*
+ * Adds extract filters , if set , only the files in the filter
+ * will be extracted , the filter has to correspond to the exact
+ * path given in the archive.
+*/
 void DiskExtractorPrivate::addFilter(const QString &filter)
 {
     if(b_Started || b_Paused || filter.isEmpty()) {
@@ -159,6 +205,8 @@ void DiskExtractorPrivate::addFilter(const QString &filter)
     return;
 }
 
+/*
+ * Overload of addFilter to accept list of QStrings. */
 void DiskExtractorPrivate::addFilter(const QStringList &filters)
 {
     if(b_Started || b_Paused || filters.isEmpty()) {
@@ -168,6 +216,8 @@ void DiskExtractorPrivate::addFilter(const QStringList &filters)
     return;
 }
 
+/*
+ * Clears all internal data and sets it back to default. */
 void DiskExtractorPrivate::clear()
 {
     if(b_Started || b_Paused) {
@@ -194,6 +244,8 @@ void DiskExtractorPrivate::clear()
     return;
 }
 
+/*
+ * Returns the information of the archive through info signal. */
 void DiskExtractorPrivate::getInfo()
 {
     if(b_Started || b_Paused) {
@@ -222,6 +274,8 @@ void DiskExtractorPrivate::getInfo()
     return;
 }
 
+/*
+ * Starts the extractor. */
 void DiskExtractorPrivate::start()
 {
     if(b_Started || b_Paused) {
@@ -288,6 +342,8 @@ void DiskExtractorPrivate::start()
     return;
 }
 
+/*
+ * Pauses the extractor. */
 void DiskExtractorPrivate::pause()
 {
     if(b_Started && !b_Paused) {
@@ -296,6 +352,8 @@ void DiskExtractorPrivate::pause()
     return;
 }
 
+/*
+ * Resumes the extractor. */
 void DiskExtractorPrivate::resume()
 {
     if(!b_Paused) {
@@ -328,6 +386,8 @@ void DiskExtractorPrivate::resume()
     return;
 }
 
+/*
+ * Cancels the extraction. */
 void DiskExtractorPrivate::cancel()
 {
     if(b_Started && !b_Paused && !b_Finished) {
@@ -335,6 +395,7 @@ void DiskExtractorPrivate::cancel()
     }
     return;
 }
+
 
 short DiskExtractorPrivate::openArchive()
 {

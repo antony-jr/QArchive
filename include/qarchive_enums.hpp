@@ -4,7 +4,7 @@ namespace QArchive
 {
 
 /*
- * Common error codes , these are most likely will be 
+ * Common error codes , these are most likely will be
  * used across all QArchive Objects , Thus these are
  * given an global error code values.
 */
@@ -15,7 +15,7 @@ enum : short {
 };
 
 /*
- * DiskExtractor error codes , these error codes are 
+ * DiskExtractor error codes , these error codes are
  * only valid for the DiskExtractor class.
  * The class is responsible for extraction of data from
  * Archives.
