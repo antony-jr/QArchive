@@ -10,8 +10,8 @@ namespace QArchive
 */
 enum : short {
     NoError = 0,
-    OperationCanceled,
-    NotEnoughMemory
+    NotEnoughMemory,
+    NoPermissionToWrite
 };
 
 /*
@@ -33,9 +33,38 @@ enum : short {
     ArchivePasswordIncorrect,
     CannotOpenArchive,
     NoPermissionToReadArchive,
-    NoPermissionToWrite,
     InvalidOutputDirectory,
     InvalidArchiveFile,
+};
+
+/*
+ * DiskCompressor Supported Formats.
+ * These codes are used to represent Archive formats in form
+ * of a short integer.
+*/
+enum : short {
+    NoFormat = 18,
+    ZipFormat,
+    SevenZipFormat,
+    BZipFormat,
+    BZip2Format,
+    GZipFormat,
+    XarFormat
+};
+
+/*
+ * DiskCompressor error codes.
+*/
+enum : short {
+    ArchiveFileNameNotGiven = 25,
+    ArchiveFileAlreadyExists,
+    ArchiveWriteOpenError,
+    ArchiveFatalError,
+    FileDoesNotExist,
+    DiskReadError,
+    DiskOpenError,
+    NoPermissionToReadFile,
+    NoFilesToCompress
 };
 }
 #endif

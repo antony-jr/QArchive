@@ -4,8 +4,12 @@
 #include <QString>
 #include <QStringList>
 #include <QFile>
-#include <QHash>
+#include <QPair>
+#include <QSaveFile>
+#include <QLinkedList>
 #include <QScopedPointer>
+#include <QSharedPointer>
+#include <qarchiveutils_p.hpp>
 
 namespace QArchive {
 class DiskCompressorPrivate : public QObject {
@@ -14,33 +18,41 @@ public:
 	DiskCompressorPrivate();
 	~DiskCompressorPrivate();
 public Q_SLOTS:
-	void setArchive(const QString&);
-	void setArchive(QFile*);
+	void setFileName(const QString&);
 	void setArchiveFormat(short);
 	void setPassword(const QString&);
-	void setCompression(const QString&);
-	void setCompressionLevel(int);
 	void setBlockSize(int);
 	void addFiles(const QString&);
 	void addFiles(const QStringList&);
 	void addFiles(const QString& , const QString&);
 	void addFiles(const QStringList& , const QStringList&);
 	void removeFiles(const QString&);
-	void removeFiles(const QStringList&);
-	
+	void removeFiles(const QStringList&);	
+	void removeFiles(const QString& , const QString&);
+	void removeFiles(const QStringList& , const QStringList&);
 	void listStaggedFiles();
+	void clear();
 
 	void start();
 	void cancel();
 	void pause();
 	void resume();
+
+private Q_SLOTS:
+	bool guessArchiveFormat();
+	bool confirmFiles();
+	short compress();
+
 Q_SIGNALS:
-	void staggedFiles(QStringList);
-	void error(short);
+	void progress(QString, int, int, int);
+	void staggedFiles(QLinkedList<QPair<QString , QString>>*);
+	void error(short , QString);
 	void started();
 	void canceled();
 	void paused();
 	void resumed();
+	void finished();
+
 private:
 	bool b_PauseRequested = false,
 	     b_CancelRequested = false,
@@ -49,15 +61,14 @@ private:
 	     b_Finished = false;
 	
 	QString m_ArchivePath,
-		/* Down below are only used for ZIP archives. */
-		m_Password, 
-		m_Compression;
-
-	QFile *m_Archive = nullptr;
-	short m_ArchiveFormat = NoFormat; /* Defaults to ZIP. */
-	int n_CompressionLevel = 0, /* Only used for GZIP. */
-	    n_BlockSize = 10240;
-	QScopedPointer<QHash<QString , QString>> m_StaggedFiles;
+		m_Password; /* Only used for ZIP. */
+	short m_ArchiveFormat = 0; /* Defaults to ZIP. */
+	int n_BlockSize = 0,
+	    n_TotalEntries = 0;
+	QSharedPointer<struct archive> m_ArchiveWrite = nullptr;
+	QScopedPointer<QSaveFile> m_TemporaryFile;
+	QScopedPointer<QLinkedList<QPair<QString , QString>>> m_ConfirmedFiles;
+	QScopedPointer<QLinkedList<QPair<QString , QString>>> m_StaggedFiles;
 };
 }
 #endif // QARCHIVE_DISK_COMPRESSOR_PRIVATE_HPP_INCLUDED

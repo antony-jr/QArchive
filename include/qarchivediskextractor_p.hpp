@@ -8,9 +8,7 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QJsonObject>
-
-struct archive;
-struct archive_entry;
+#include <qarchiveutils_p.hpp>
 
 namespace QArchive
 {

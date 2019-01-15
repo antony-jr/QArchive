@@ -1,3 +1,11 @@
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QFileInfo>
+
+#include <qarchivediskextractor_p.hpp>
+#include <qarchiveutils_p.hpp>
+#include <qarchive_enums.hpp>
+
 extern "C" {
 #include <archive.h>
 #include <archive_entry.h>
@@ -8,15 +16,6 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 }
-
-#include <QCoreApplication>
-#include <QDateTime>
-#include <QFileInfo>
-
-#include <qarchivediskextractor_p.hpp>
-#include <qarchive_enums.hpp>
-
-using namespace QArchive;
 
 #if defined(__APPLE__)
 #define st_atim st_atimespec.tv_sec
@@ -52,57 +51,7 @@ typedef SSIZE_T ssize_t;
 #define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
 
 
-/*
- * This function destructs struct archive which is set
- * in the read mode via QSharedPointer.
-*/
-static void ArchiveReadDestructor(struct archive *ar)
-{
-    if(ar) {
-        archive_read_close(ar);
-        archive_read_free(ar);
-    }
-    return;
-}
-
-/*
- * This function destructs struct archive which is set in the
- * write mode via QSharedPointer.
-*/
-static void ArchiveWriteDestructor(struct archive *aw)
-{
-    if(aw) {
-        archive_write_close(aw);
-        archive_write_free(aw);
-    }
-    return;
-}
-
-/*
- * This function returns an allocated c string which is the combination
- * of the given c strings.
- * Automatically allocates space for the new c string but does not
- * free it automatically.
-*/
-static char *concat(const char *dest, const char *src)
-{
-    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
-    strcpy(ret, dest);
-    strcat(ret, src);
-    return ret;
-}
-
-/*
- * This function converts a string from "/home/antonyjr/"
- * to "/home/antonyjr" , i.e Removes the trailing '/' if found.
-*/
-static QString getDirectoryFileName(const QString &dir)
-{
-    if(dir[dir.count() - 1] == QStringLiteral("/")) {
-        return dir.mid(0, dir.count() - 1);
-    }
-    return dir;
-}
+using namespace QArchive;
 
 /*
  * DiskExtractorPrivate constructor constructs the object which is the private class
@@ -220,7 +169,7 @@ void DiskExtractorPrivate::addFilter(const QStringList &filters)
  * Clears all internal data and sets it back to default. */
 void DiskExtractorPrivate::clear()
 {
-    if(b_Started || b_Paused) {
+    if(b_Started) {
         return;
     }
     n_BlockSize = 10240;
@@ -320,7 +269,7 @@ void DiskExtractorPrivate::start()
     emit started();
 
     errorCode = extract();
-    if(!errorCode) {
+    if(errorCode == NoError) {
         b_Started = false;
         b_Finished = true;
         emit finished();
@@ -330,8 +279,8 @@ void DiskExtractorPrivate::start()
         ++n_PasswordTriedCountExtract;
     } else if(errorCode == OperationCanceled) {
         b_Started = false;
-        emit canceled();
-    } else if(errorCode < 0) {
+	emit canceled();
+    } else if(errorCode == OperationPaused) {
         b_Started = false;
         b_Paused = true;
         emit paused();
@@ -364,7 +313,7 @@ void DiskExtractorPrivate::resume()
     emit resumed();
 
     short ret = extract();
-    if(!ret) {
+    if(ret == NoError) {
         b_Started = false;
         b_Finished = true;
         emit finished();
@@ -375,7 +324,7 @@ void DiskExtractorPrivate::resume()
     } else if(ret == OperationCanceled) {
         b_Started = false;
         emit canceled();
-    } else if(ret < 0) {
+    } else if(ret == OperationPaused) {
         b_Started = false;
         b_Paused = true;
         emit paused();
@@ -561,7 +510,7 @@ short DiskExtractorPrivate::extract()
             QCoreApplication::processEvents();
             if(b_PauseRequested) {
                 b_PauseRequested = false;
-                return -1;
+                return OperationPaused;
             }
 
             if(b_CancelRequested) {
@@ -616,7 +565,7 @@ short DiskExtractorPrivate::extract()
             QCoreApplication::processEvents();
             if(b_PauseRequested) {
                 b_PauseRequested = false;
-                return -1;
+                return OperationPaused;
             }
 
             if(b_CancelRequested) {
