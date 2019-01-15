@@ -218,10 +218,8 @@ void DiskCompressorPrivate::start()
 		return;
 	}else{
 		/* Guess Archive Format if not given. */
-		if(m_ArchiveFormat == NoFormat){
 		if(!guessArchiveFormat()){
 			m_ArchiveFormat = ZipFormat; /* Default format. */
-		}
 		}
 
 		/* Confirm files. */
@@ -305,14 +303,15 @@ bool DiskCompressorPrivate::guessArchiveFormat()
 	}
 	
 	auto ext = QFileInfo(m_TemporaryFile->fileName()).suffix().toLower();
-
-    if(ext == "bz") {
+	if(ext == "bz") {
 	    m_ArchiveFormat = BZipFormat;
     } else if(ext == "bz2") {
 	    m_ArchiveFormat = BZip2Format;
     } else if(ext == "gz") {
 	    m_ArchiveFormat = GZipFormat;
-    } else if(ext == "xar") {
+    } else if(ext == "xz"){
+	    m_ArchiveFormat = XzFormat;	    
+    }else if(ext == "xar") {
 	    m_ArchiveFormat = XarFormat;
     } else if(ext == "zip") {
 	    m_ArchiveFormat = ZipFormat;
@@ -419,6 +418,10 @@ short DiskCompressorPrivate::compress()
 			archive_write_add_filter_gzip(m_ArchiveWrite.data());	
 			archive_write_set_format_ustar(m_ArchiveWrite.data());
 			break;
+		case XzFormat:
+			archive_write_add_filter_xz(m_ArchiveWrite.data());
+			archive_write_set_format_ustar(m_ArchiveWrite.data());
+			break;
 		case XarFormat:
 			archive_write_add_filter_none(m_ArchiveWrite.data());
 			archive_write_set_format_xar(m_ArchiveWrite.data());
@@ -520,9 +523,9 @@ short DiskCompressorPrivate::compress()
 		}
 		
                 emit progress(QString(node.second),
-                              m_ConfirmedFiles->size(),
+                              (n_TotalEntries - m_ConfirmedFiles->size()),
                               n_TotalEntries,
-                              (m_ConfirmedFiles->size()*100)/n_TotalEntries);
+                              ((n_TotalEntries - m_ConfirmedFiles->size())*100)/n_TotalEntries);
        
 
             QCoreApplication::processEvents();

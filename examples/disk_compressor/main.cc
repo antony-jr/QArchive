@@ -49,6 +49,12 @@ int main(int ac, char **av)
         return;
     });
 
+    QObject::connect(&Compressor , &DiskCompressorPrivate::progress , [&](QString file ,
+			    						  int proc , int total , int percent){
+	qInfo() << "Progress::" << file << ":: Done ( " << proc << " / " << total << ") " << percent << "%.";
+	return;
+    });
+
     /* Start the Compressor. 
      * Note:
      *    You don't really have to worry about the event loop since all method calls 

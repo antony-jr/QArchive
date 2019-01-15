@@ -49,6 +49,7 @@ enum : short {
     BZipFormat,
     BZip2Format,
     GZipFormat,
+    XzFormat,
     XarFormat
 };
 
