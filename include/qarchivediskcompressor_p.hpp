@@ -60,10 +60,9 @@ private:
 	     b_Started = false,
 	     b_Finished = false;
 	
-	QString m_ArchivePath,
-		m_Password; /* Only used for ZIP. */
+	QString m_Password; /* Only used for ZIP. */
 	short m_ArchiveFormat = 0; /* Defaults to ZIP. */
-	int n_BlockSize = 0,
+	int n_BlockSize = 10240,
 	    n_TotalEntries = 0;
 	QSharedPointer<struct archive> m_ArchiveWrite = nullptr;
 	QScopedPointer<QSaveFile> m_TemporaryFile;

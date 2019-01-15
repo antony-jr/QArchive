@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QVector>
 #include <QDir>
+#include <QDebug>
 
 #include <qarchivediskcompressor_p.hpp>
 #include <qarchiveutils_p.hpp>
@@ -38,7 +39,7 @@ void DiskCompressorPrivate::setFileName(const QString &fileName)
 	if(b_Started || b_Paused){
 		return;
 	}
-	m_ArchivePath = fileName; /* later will be validated for permissions. */
+	m_TemporaryFile->setFileName(fileName);
 	return;
 }
 
@@ -191,11 +192,10 @@ void DiskCompressorPrivate::clear()
 		return;
 	}
 	b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = false;
-	m_ArchivePath.clear();
 	m_Password.clear(); 
 
 	m_ArchiveFormat = NoFormat;
-	n_BlockSize = 0;
+	n_BlockSize = 10240;
 
 	m_ConfirmedFiles->clear();
 	m_StaggedFiles->clear();
@@ -237,6 +237,7 @@ void DiskCompressorPrivate::start()
 	if(ret == NoError){
 		b_Started = false;
 		b_Finished = true;
+		m_TemporaryFile->commit();
 		emit finished();
 	}else if(ret == OperationCanceled){
 		b_Started = false;
@@ -262,6 +263,7 @@ void DiskCompressorPrivate::resume()
 	if(ret == NoError){
 		b_Started = false;
 		b_Finished = true;
+		m_TemporaryFile->commit();
 		emit finished();
 	}else if(ret == OperationCanceled){
 		b_Started = false;
@@ -339,7 +341,7 @@ bool DiskCompressorPrivate::confirmFiles()
 		QFileInfo info(/* file path given by the user = */node.second);
 		
 		/* Check if the file exists. */
-		if(info.exists()){
+		if(!info.exists()){
 			emit error(FileDoesNotExist , info.filePath());
 			return false;
 		}
@@ -410,21 +412,24 @@ short DiskCompressorPrivate::compress()
 		switch (m_ArchiveFormat) {
 		case BZipFormat:
 		case BZip2Format:
-			archive_write_set_format_ustar(m_ArchiveWrite.data());
 			archive_write_add_filter_bzip2(m_ArchiveWrite.data());
+			archive_write_set_format_ustar(m_ArchiveWrite.data());
 			break;
 		case GZipFormat:
-			archive_write_set_format_ustar(m_ArchiveWrite.data());
 			archive_write_add_filter_gzip(m_ArchiveWrite.data());	
+			archive_write_set_format_ustar(m_ArchiveWrite.data());
 			break;
 		case XarFormat:
+			archive_write_add_filter_none(m_ArchiveWrite.data());
 			archive_write_set_format_xar(m_ArchiveWrite.data());
 			break;
 		case SevenZipFormat:
+			archive_write_add_filter_none(m_ArchiveWrite.data());
 			archive_write_set_format_7zip(m_ArchiveWrite.data());
 			break;
 		case ZipFormat:
 		default:
+			archive_write_add_filter_none(m_ArchiveWrite.data());
 			archive_write_set_format_zip(m_ArchiveWrite.data());
 			break;
 		}
@@ -459,7 +464,6 @@ short DiskCompressorPrivate::compress()
 	/* Start compressing files. */
 	while(!m_ConfirmedFiles->isEmpty()){
 		auto node = m_ConfirmedFiles->takeFirst();
-		
 		/*
 		 * TODO:
 		 * 	Implement a failsafe copy mechanism.
@@ -491,9 +495,11 @@ short DiskCompressorPrivate::compress()
 				emit error(DiskReadError, node.second);
 				return DiskReadError;
 			}
+			
 			archive_read_disk_descend(disk.data());
 			archive_entry_set_pathname(entry.data(), (node.first).toUtf8().constData());
 			r = archive_write_header(m_ArchiveWrite.data(), entry.data());
+			
 			if (r == ARCHIVE_FATAL) {
 				emit error(ArchiveFatalError, node.second);
 				return ArchiveFatalError;
@@ -532,5 +538,6 @@ short DiskCompressorPrivate::compress()
                 return OperationCanceled;
             }
 	}
+	m_ArchiveWrite.clear();
 	return NoError;
 }

@@ -1,6 +1,17 @@
 #include <QCoreApplication>
 #include <QDebug>
+#include <QMetaMethod>
+#include <QMetaObject>
 #include <qarchivediskcompressor_p.hpp>
+#include <qarchive_enums.hpp>
+
+using QArchive::DiskCompressorPrivate;
+static QMetaMethod getMethod(DiskCompressorPrivate *object , const char *function)
+{
+    auto metaObject = object->metaObject();
+    return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
+}
+
 
 int main(int ac, char **av)
 {
@@ -9,31 +20,30 @@ int main(int ac, char **av)
         return 0;
     }
     
-    using QArchive::DiskCompressorPrivate;
     QCoreApplication app(ac, av);
-
-    /* Get Archive Destination Information. */
     QString ArchivePath = QString(av[1]);
     QStringList Files;
     
     for(auto i = 2; i < ac ; ++i){
-	    QString file = QString(av[2]);
+	    QString file = QString(av[i]);
 	    Files.append(file);
     }
 
     /* Construct DiskCompressor Object. */
-    DiskCompressorPrivate Compressor();
+    DiskCompressorPrivate Compressor;
+    Compressor.setFileName(ArchivePath);
+    Compressor.addFiles(Files);
     
     /* Connect Signals with Slots (in this case lambda functions). */
-    QObject::connect(&Compressor , &DiskCompressor::started , [&](){
+    QObject::connect(&Compressor , &DiskCompressorPrivate::started , [&](){
         qInfo() << "[+] Starting Compressor... ";
     });
-    QObject::connect(&Compressor , &DiskCompressor::finished , [&](){
+    QObject::connect(&Compressor , &DiskCompressorPrivate::finished , [&](){
         qInfo() << "[+] Compressed File(s) Successfully!";
         app.quit();
         return;
     });
-    QObject::connect(&Compressor , &DiskCompressor::error , [&](short code , QString file){
+    QObject::connect(&Compressor , &DiskCompressorPrivate::error , [&](short code , QString file){
         qInfo() << "[-] An error has occured :: " << code << " :: " << file;
         app.quit();
         return;
@@ -45,6 +55,6 @@ int main(int ac, char **av)
      *    to the extractor object is queued and only gets executed when the event
      *    loop starts , most likely.
     */
-    Compressor.start(); 
+    getMethod(&Compressor , "start()").invoke(&Compressor ,Qt::QueuedConnection);
     return app.exec();
 }
