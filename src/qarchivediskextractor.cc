@@ -6,10 +6,10 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(DiskExtractorPrivate *o, const char *mId)
+static QMetaMethod getMethod(DiskExtractorPrivate *object , const char *function)
 {
-    auto metaObject = o->metaObject();
-    return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(mId)));
+    auto metaObject = object->metaObject();
+    return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
 
 DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded )

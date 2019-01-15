@@ -1,7 +1,6 @@
 #include <qarchiveutils_p.hpp>
 #include <QString>
 
-
 extern "C" {
 #include <archive.h>
 #include <archive_entry.h>
@@ -39,6 +38,14 @@ void ArchiveWriteDestructor(struct archive *aw)
     return;
 }
 
+void ArchiveEntryDestructor(struct archive_entry *e)
+{
+    if(e){
+        archive_entry_free(e);
+    }
+    return;
+}
+
 /*
  * This function returns an allocated c string which is the combination
  * of the given c strings.
@@ -64,5 +71,3 @@ QString getDirectoryFileName(const QString &dir)
     }
     return dir;
 }
-
-

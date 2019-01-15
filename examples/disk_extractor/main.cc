@@ -6,7 +6,7 @@
 
 int main(int ac, char **av)
 {
-    if(ac == 1) {
+    if(ac < 2) {
         qDebug() << "Usage: " << av[0] << " [ARCHIVE PATH] [DESTINATION PATH]";
         return 0;
     }

@@ -21,5 +21,4 @@ void ArchiveEntryDestructor(archive_entry*);
 /* Basic string manupilators.  */
 char *concat(const char*, const char*);
 QString getDirectoryFileName(const QString&);
-
 #endif // QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
