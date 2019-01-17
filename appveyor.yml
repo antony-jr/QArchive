@@ -3,7 +3,12 @@ install:
  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
 
 build_script:
+  - git clone --recursive https://github.com/libarchive/libarchive
+  - cd libarchive
+  - cmake -G "MinGW Makefiles" .
+  - mingw32-make 
+  - mingw32-make install
+  - cd ..
   - cd tests
-  - cmake
   - qmake
   - mingw32-make
