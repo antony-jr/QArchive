@@ -65,6 +65,10 @@ DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDi
 
 DiskExtractor::~DiskExtractor()
 {
+    if(!m_Thread.isNull()){
+	    m_Thread->quit();
+	    m_Thread->wait();
+    }
     return;
 }
 
