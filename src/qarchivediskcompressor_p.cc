@@ -177,15 +177,6 @@ void DiskCompressorPrivate::removeFiles(const QStringList &entryNames , const QS
 	return;
 }
 
-void DiskCompressorPrivate::listStaggedFiles()
-{
-	if(b_Started || b_Paused || m_StaggedFiles->isEmpty()){
-		return;
-	}
-	emit staggedFiles(m_StaggedFiles.data());
-	return;
-}
-
 void DiskCompressorPrivate::clear()
 {
 	if(b_Started){

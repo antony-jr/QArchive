@@ -35,3 +35,4 @@
 */
 #include "include/qarchive_enums.hpp"
 #include "include/qarchivediskextractor.hpp"
+#include "include/qarchivediskcompressor.hpp"

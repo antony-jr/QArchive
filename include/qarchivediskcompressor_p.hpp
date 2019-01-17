@@ -30,7 +30,6 @@ public Q_SLOTS:
 	void removeFiles(const QStringList&);	
 	void removeFiles(const QString& , const QString&);
 	void removeFiles(const QStringList& , const QStringList&);
-	void listStaggedFiles();
 	void clear();
 
 	void start();
@@ -45,7 +44,6 @@ private Q_SLOTS:
 
 Q_SIGNALS:
 	void progress(QString, int, int, int);
-	void staggedFiles(QLinkedList<QPair<QString , QString>>*);
 	void error(short , QString);
 	void started();
 	void canceled();

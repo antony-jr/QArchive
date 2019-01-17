@@ -1,17 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include <QMetaMethod>
-#include <QMetaObject>
-#include <qarchivediskcompressor_p.hpp>
-#include <qarchive_enums.hpp>
-
-using QArchive::DiskCompressorPrivate;
-static QMetaMethod getMethod(DiskCompressorPrivate *object , const char *function)
-{
-    auto metaObject = object->metaObject();
-    return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
-}
-
+#include <QArchive>
 
 int main(int ac, char **av)
 {
@@ -19,7 +8,8 @@ int main(int ac, char **av)
         qDebug() << "Usage: " << av[0] << " [ARCHIVE PATH] [FILE(S)]";
         return 0;
     }
-    
+
+    using QArchive::DiskCompressor;    
     QCoreApplication app(ac, av);
     QString ArchivePath = QString(av[1]);
     QStringList Files;
@@ -30,26 +20,25 @@ int main(int ac, char **av)
     }
 
     /* Construct DiskCompressor Object. */
-    DiskCompressorPrivate Compressor;
-    Compressor.setFileName(ArchivePath);
+    DiskCompressor Compressor(ArchivePath);
     Compressor.addFiles(Files);
     
     /* Connect Signals with Slots (in this case lambda functions). */
-    QObject::connect(&Compressor , &DiskCompressorPrivate::started , [&](){
+    QObject::connect(&Compressor , &DiskCompressor::started , [&](){
         qInfo() << "[+] Starting Compressor... ";
     });
-    QObject::connect(&Compressor , &DiskCompressorPrivate::finished , [&](){
+    QObject::connect(&Compressor , &DiskCompressor::finished , [&](){
         qInfo() << "[+] Compressed File(s) Successfully!";
         app.quit();
         return;
     });
-    QObject::connect(&Compressor , &DiskCompressorPrivate::error , [&](short code , QString file){
+    QObject::connect(&Compressor , &DiskCompressor::error , [&](short code , QString file){
         qInfo() << "[-] An error has occured :: " << code << " :: " << file;
         app.quit();
         return;
     });
 
-    QObject::connect(&Compressor , &DiskCompressorPrivate::progress , [&](QString file ,
+    QObject::connect(&Compressor , &DiskCompressor::progress , [&](QString file ,
 			    						  int proc , int total , int percent){
 	qInfo() << "Progress::" << file << ":: Done ( " << proc << " / " << total << ") " << percent << "%.";
 	return;
@@ -61,6 +50,6 @@ int main(int ac, char **av)
      *    to the extractor object is queued and only gets executed when the event
      *    loop starts , most likely.
     */
-    getMethod(&Compressor , "start()").invoke(&Compressor ,Qt::QueuedConnection);
+    Compressor.start();
     return app.exec();
 }
