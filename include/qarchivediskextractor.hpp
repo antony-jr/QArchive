@@ -45,7 +45,7 @@ Q_SIGNALS:
     void paused();
     void resumed();
     void finished();
-    void error(short);
+    void error(short , QString);
     void progress(QString, int, int, int);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);

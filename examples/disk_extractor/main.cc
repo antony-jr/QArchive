@@ -46,8 +46,8 @@ int main(int ac, char **av)
         app.quit();
         return;
     });
-    QObject::connect(&Extractor , &DiskExtractor::error , [&](short code){
-        qInfo() << "[-] An error has occured :: " << code;
+    QObject::connect(&Extractor , &DiskExtractor::error , [&](short code , QString archive){
+        qInfo() << "[-] An error has occured :: " << archive << ":: " << code ;
         app.quit();
         return;
     });

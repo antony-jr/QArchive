@@ -207,7 +207,7 @@ void DiskExtractorPrivate::getInfo()
 
     /* Open the Archive. */
     if((errorCode = openArchive()) != NoError) {
-        emit error(errorCode);
+        emit error(errorCode , m_ArchivePath);
         return;
     }
 
@@ -218,7 +218,7 @@ void DiskExtractorPrivate::getInfo()
         emit getInfoRequirePassword(n_PasswordTriedCountGetInfo);
         ++n_PasswordTriedCountGetInfo;
     } else {
-        emit error(errorCode);
+        emit error(errorCode , m_Archive->fileName());
     }
     return;
 }
@@ -234,14 +234,14 @@ void DiskExtractorPrivate::start()
 
     /* Open the Archive. */
     if((errorCode = openArchive()) != NoError) {
-        emit error(errorCode);
+        emit error(errorCode , m_ArchivePath);
         return;
     }
 
     /* Check and Set Output Directory. */
     if(!m_OutputDirectory.isEmpty()) {
         if((errorCode = checkOutputDirectory()) != NoError) {
-            emit error(errorCode);
+            emit error(errorCode , m_Archive->fileName());
             return;
         }
     }
@@ -257,7 +257,7 @@ void DiskExtractorPrivate::start()
                 emit extractionRequirePassword(n_PasswordTriedCountExtract);
                 ++n_PasswordTriedCountExtract;
             } else {
-                emit error(errorCode);
+                emit error(errorCode , m_Archive->fileName());
                 return;
             }
         }
@@ -286,7 +286,7 @@ void DiskExtractorPrivate::start()
         emit paused();
     } else {
         b_Started = false;
-        emit error(errorCode);
+        emit error(errorCode , m_Archive->fileName());
     }
     return;
 }
@@ -330,7 +330,7 @@ void DiskExtractorPrivate::resume()
         emit paused();
     } else {
         b_Started = false;
-        emit error(ret);
+        emit error(ret , m_Archive->fileName());
     }
     return;
 }
