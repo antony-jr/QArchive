@@ -101,10 +101,10 @@ void DiskExtractor::setBlockSize(int n)
     return;
 }
 
-void DiskExtractor::setShowProgress(bool choice)
+void DiskExtractor::setCalculateProgress(bool choice)
 {
     getMethod(m_Extractor,
-              "setShowProgress(bool)").invoke(m_Extractor.data(),
+              "setCalculateProgress(bool)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(bool, choice));
     return;

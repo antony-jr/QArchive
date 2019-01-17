@@ -123,7 +123,7 @@ void DiskExtractorPrivate::setOutputDirectory(const QString &destination)
 
 /* Enables/Disables the progress of the extraction with respect to the
  * given bool. */
-void DiskExtractorPrivate::setShowProgress(bool c)
+void DiskExtractorPrivate::setCalculateProgress(bool c)
 {
     b_NoProgress = !c;
     return;

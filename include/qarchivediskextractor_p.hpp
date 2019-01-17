@@ -22,7 +22,7 @@ public Q_SLOTS:
     void setArchive(QFile*);
     void setArchive(const QString&);
     void setBlockSize(int);
-    void setShowProgress(bool);
+    void setCalculateProgress(bool);
     void setOutputDirectory(const QString&);
     void setPassword(const QString&);
     void addFilter(const QString&);
