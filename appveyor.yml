@@ -5,7 +5,7 @@ install:
 build_script:
   - git clone --recursive https://github.com/libarchive/libarchive
   - cd libarchive
-  - cmake . -G %makefiles%
+  - cmake . -G "MinGW Makefiles"
   - mingw32-make 
   - mingw32-make install
   - cd ..
