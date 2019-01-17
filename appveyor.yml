@@ -1,7 +1,8 @@
 install:
-  - set QTDIR=C:\Qt\5.5\mingw492_32
-  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+ - set QTDIR=C:\Qt\5.10.1\mingw53_32
+ - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin
+
 build_script:
-  - mkdir build
-  - qmake ..
+  - cd tests
+  - qmake
   - mingw32-make
