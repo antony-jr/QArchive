@@ -4,5 +4,6 @@ install:
 
 build_script:
   - cd tests
+  - cmake
   - qmake
   - mingw32-make
