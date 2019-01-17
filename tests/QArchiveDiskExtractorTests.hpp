@@ -38,16 +38,13 @@ private slots:
         dir.mkpath(TestCase6OutputDir);
         dir.mkpath(TestCase7OutputDir);
     }
+
     void simpleExtraction(void)
     {
         QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir);
-        QObject::connect(&e, &QArchive::DiskExtractor::error, [&](short code) {
-            auto scode = QString::number(code);
-            scode.prepend("error :: ");
-            QFAIL(QTest::toString(scode));
-            return;
-        });
-        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+        QObject::connect(&e, &QArchive::DiskExtractor::error, 
+			this , &QArchiveDiskExtractorTests::defaultErrorHandler);
+	QSignalSpy spyInfo(&e, SIGNAL(finished()));
         e.start();
 
         /*  Must emit exactly one signal. */
@@ -65,7 +62,9 @@ private slots:
         bool startedEmitted = false,
              pausedEmitted = false,
              resumedEmitted = false;
-        QObject::connect(&e, &QArchive::DiskExtractor::started, [&]() {
+         QObject::connect(&e, &QArchive::DiskExtractor::error, 
+			this , &QArchiveDiskExtractorTests::defaultErrorHandler);	
+	QObject::connect(&e, &QArchive::DiskExtractor::started, [&]() {
             startedEmitted = true;
             e.pause();
             return;
@@ -99,13 +98,9 @@ private slots:
     {
         QArchive::DiskExtractor e(TestCase4ArchivePath, TestCase4OutputDir);
         e.setPassword(Test4Password);
-        QObject::connect(&e, &QArchive::DiskExtractor::error, [&](short code) {
-            auto scode = QString::number(code);
-            scode.prepend("error :: ");
-            QFAIL(QTest::toString(scode));
-            return;
-        });
-
+  QObject::connect(&e, &QArchive::DiskExtractor::error, 
+			this , &QArchiveDiskExtractorTests::defaultErrorHandler);
+	
         QSignalSpy spyInfo(&e, SIGNAL(finished()));
         e.start();
 
@@ -120,15 +115,18 @@ private slots:
     void informationExtraction(void)
     {
         QArchive::DiskExtractor e(TestCase1ArchivePath);
-        QSignalSpy spyInfo(&e, SIGNAL(info(QJsonObject)));
+          QObject::connect(&e, &QArchive::DiskExtractor::error, 
+			this , &QArchiveDiskExtractorTests::defaultErrorHandler);
+	
+	QSignalSpy spyInfo(&e, SIGNAL(info(QJsonObject)));
         e.getInfo();
         QVERIFY(spyInfo.wait() || spyInfo.count());
     }
 
     void testInvalidArchivePath(void)
     {
-        QArchive::DiskExtractor e("THISDOESNOTEXISTS", TestOutputDir);
-        QSignalSpy spyInfo(&e, SIGNAL(error(short)));
+        QArchive::DiskExtractor e("THISDOESNOTEXISTS", TestOutputDir); 
+	QSignalSpy spyInfo(&e, SIGNAL(error(short , QString)));
         e.start();
         QVERIFY(spyInfo.wait() || spyInfo.count());
     }
@@ -136,7 +134,10 @@ private slots:
     void isExtractorObjectReuseable(void)
     {
         QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
-        QFile TestOutput;
+          QObject::connect(&e, &QArchive::DiskExtractor::error, 
+			this , &QArchiveDiskExtractorTests::defaultErrorHandler);
+	
+	QFile TestOutput;
         QSignalSpy spyInfo(&e, SIGNAL(finished()));
         e.setPassword(Test5Password);
         e.start();
@@ -161,7 +162,14 @@ private slots:
         QDir dir(TestOutputDir);
         dir.removeRecursively();
     }
-
+protected slots:
+    void defaultErrorHandler(short code , QString archive)
+    {
+	    auto scode = QString::number(code);
+            scode.prepend(("error::" + archive) + ":: ");
+            QFAIL(QTest::toString(scode));
+	    return;
+    }
 private:
     /*
      * Test Input file paths and other
