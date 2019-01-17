@@ -5,7 +5,7 @@
 #define OperationCanceled -1
 #endif
 
-#ifndef OperationPaused 
+#ifndef OperationPaused
 #define OperationPaused -2
 #endif
 

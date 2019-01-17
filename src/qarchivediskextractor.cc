@@ -6,7 +6,7 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(QScopedPointer<DiskExtractorPrivate> &object , const char *function)
+static QMetaMethod getMethod(QScopedPointer<DiskExtractorPrivate> &object, const char *function)
 {
     auto metaObject = object->metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
@@ -19,7 +19,7 @@ DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded )
     if(!singleThreaded) {
         m_Thread.reset(new QThread);
         m_Thread->start();
-	m_Extractor->moveToThread(m_Thread.data());
+        m_Extractor->moveToThread(m_Thread.data());
     }
     connect(m_Extractor.data(), &DiskExtractorPrivate::started,
             this, &DiskExtractor::started, Qt::DirectConnection);

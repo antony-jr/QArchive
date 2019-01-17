@@ -40,7 +40,7 @@ void ArchiveWriteDestructor(struct archive *aw)
 
 void ArchiveEntryDestructor(struct archive_entry *e)
 {
-    if(e){
+    if(e) {
         archive_entry_free(e);
     }
     return;

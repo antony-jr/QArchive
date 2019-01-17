@@ -279,7 +279,7 @@ void DiskExtractorPrivate::start()
         ++n_PasswordTriedCountExtract;
     } else if(errorCode == OperationCanceled) {
         b_Started = false;
-	emit canceled();
+        emit canceled();
     } else if(errorCode == OperationPaused) {
         b_Started = false;
         b_Paused = true;
