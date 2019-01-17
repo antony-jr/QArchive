@@ -55,6 +55,11 @@ DiskCompressor::DiskCompressor(const QString &fileName, short format, QObject *p
 
 DiskCompressor::~DiskCompressor()
 {
+	if(!m_Thread.isNull()){
+		m_Thread->quit();
+		m_Thread->wait();
+	}
+	return;
 }
 
 void DiskCompressor::setFileName(const QString &fileName)
