@@ -1,13 +1,11 @@
 #include <QCoreApplication>
-#include <QArchiveDiskExtractorTests.hpp>
+#include <TestRunner.hpp>
 
 int main(int ac, char **av)
 {
     QCoreApplication app(ac, av);
-    QArchiveDiskExtractor extractorTests;
-    if(QTest::qExec(&extractorTests)) {
-        return -1;
-    }
-    QTimer::singleShot(1000, &app, SLOT(quit()));
+    TestRunner TestRun;
+    QObject::connect(&TestRun, &TestRunner::finished, &app, &QCoreApplication::quit);
+    QTimer::singleShot(1000, &TestRun, SLOT(start()));
     return app.exec();
 }

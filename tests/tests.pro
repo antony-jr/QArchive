@@ -1,5 +1,5 @@
 include(../QArchive.pri)
 INCLUDEPATH += . 
 QT += core concurrent testlib
-SOURCES += main.cc 
-HEADERS += QArchiveDiskExtractorTests.hpp
+SOURCES += main.cc TestRunner.cc
+HEADERS += TestRunner.hpp QArchiveDiskExtractorTests.hpp

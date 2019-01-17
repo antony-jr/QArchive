@@ -238,7 +238,7 @@ void DiskCompressorPrivate::start()
         return;
     } else {
         /* Guess Archive Format if not given. */
-        if(!ArchiveFormat) { /* if ArchiveFormat == 0 then no format is set. */
+        if(!m_ArchiveFormat) { /* if ArchiveFormat == 0 then no format is set. */
             if(!guessArchiveFormat()) {
                 m_ArchiveFormat = ZipFormat; /* Default format. */
             }
