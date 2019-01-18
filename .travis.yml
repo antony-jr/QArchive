@@ -13,11 +13,12 @@ install:
   - sudo apt-get -y install libzip-dev liblzma-dev libarchive-dev libarchive13
 
 script:
-  - mkdir build ; cd build # Check if it builds as a library.
-  - qmake .. 
+  - git clone https://github.com/libarchive/libarchive.git
+  - cd libarchive
+  - cmake .
   - make -j$(nproc)
-  - cd ..
-  - cd tests/
+  - sudo make install
+  - cd ../tests
   - qmake .
   - make -j$(nproc)
   - ./tests # Run Tests
