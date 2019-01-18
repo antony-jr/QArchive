@@ -5,15 +5,11 @@ environment:
   matrix:
   - MINGW_ARCH: i686
     MINGW_ROOT: C:\msys64\mingw32
-    QT_DIR: C:\Qt\5.11.1\mingw53_32
-  - MINGW_ARCH: i686
-    MINGW_ROOT: C:\msys64\mingw32
     CMAKE_GENERATOR: 'MSYS Makefiles'
     QT_DIR: C:\Qt\5.10.1\mingw53_32
 
 install:
-  - set QTDIR=C:\Qt\5.10.1\mingw53_32
-  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;C:\msys64\usr\bin\;
+  - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin;C:\msys64\usr\bin\;
   - bash -lc "pacman --needed --noconfirm -S mingw-w64-i686-boost mingw-w64-i686-libarchive"
 
 build_script:
