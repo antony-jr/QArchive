@@ -447,7 +447,7 @@ short DiskExtractorPrivate::extract()
 
         m_ArchiveRead = QSharedPointer<struct archive>(archive_read_new(), ArchiveReadDestructor);
         m_ArchiveWrite = QSharedPointer<struct archive>(archive_write_disk_new(), ArchiveWriteDestructor);
-        if(!m_Password.isEmpty()) {
+       	if(!m_Password.isEmpty()) {
             archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toLatin1().constData());
         }
         if(!m_ArchiveRead.data() && !m_ArchiveWrite.data()) {

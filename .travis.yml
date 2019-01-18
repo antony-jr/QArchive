@@ -18,7 +18,6 @@ script:
   - cmake .
   - make -j$(nproc)
   - sudo make install
-  - sudo mkpath /usr/lib/pkgconfig
   - sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
   - sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
   - cd ../tests
