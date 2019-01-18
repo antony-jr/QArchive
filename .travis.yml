@@ -17,7 +17,7 @@ script:
   - cd libarchive
   - cmake .
   - make -j$(nproc)
-  - sudo make install
+  - sudo make DESTDIR=/usr/ install
   - cd ../tests
   - qmake .
   - make -j$(nproc)
