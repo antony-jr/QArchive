@@ -1,7 +1,7 @@
 language: cpp
 compiler: gcc
 sudo: require
-dist: trusty
+dist: xenial
 
 before_install:
   - sudo add-apt-repository ppa:beineri/opt-qt593-trusty -y
@@ -10,15 +10,10 @@ before_install:
 install:
   - sudo apt-get -y install qt59base
   - source /opt/qt*/bin/qt*-env.sh
-  - sudo apt-get -y install libzip-dev liblzma-dev
+  - sudo apt-get -y install libzip-dev liblzma-dev libarchive-dev libarchive
 
 script:
-  - git clone https://github.com/libarchive/libarchive.git
-  - cd libarchive
-  - cmake .
-  - make -j$(nproc)
-  - sudo make DESTDIR=/usr/ install
-  - cd ../tests
+  - cd tests
   - qmake .
   - make -j$(nproc)
   - ./tests # Run Tests
