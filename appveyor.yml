@@ -7,15 +7,18 @@ environment:
     MINGW_ROOT: C:\msys64\mingw32
     CMAKE_GENERATOR: 'MSYS Makefiles'
     QT_DIR: C:\Qt\5.10.1\mingw53_32
-    MINGW_BUILD : 1
+    MINGW_BUILD: 1
 
 install:
-  - set PATH=%QT_DIR%\bin;%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
-  - bash -lc "pacman --needed --noconfirm -S mingw-w64-i686-boost mingw-w64-i686-libarchive"
+  - set PATH=%QT_DIR%\bin;%PATH%
+
+  # MinGW Build
+  - if defined MINGW_ROOT set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
+  - if defined MINGW_ARCH bash -lc "pacman --needed --noconfirm -S mingw-w64-%MINGW_ARCH%-boost mingw-w64-%MINGW_ARCH%-libarchive"
 
 build_script:
   - cd tests
   - qmake .
-  - mingw32-make
-  - ls
-  - dir 
+  - if defined MINGW_BUILD mingw32-make -j%NUMBER_OF_PROCESSORS%
+  - cd release
+  - ./tests.exe
