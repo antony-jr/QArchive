@@ -9,7 +9,7 @@ environment:
     QT_DIR: C:\Qt\5.10.1\mingw53_32
 
 install:
-  - set PATH=%PATH%;%QT_DIR%\bin;C:\MinGW\bin;C:\msys64\usr\bin\;
+  - set PATH=%QT_DIR%\bin;%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
   - bash -lc "pacman --needed --noconfirm -S mingw-w64-i686-boost mingw-w64-i686-libarchive"
 
 build_script:
