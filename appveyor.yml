@@ -21,4 +21,5 @@ build_script:
   - qmake .
   - if defined MINGW_BUILD mingw32-make -j%NUMBER_OF_PROCESSORS%
   - cd release
-  - ./tests.exe
+  - ls
+  - tests.exe
