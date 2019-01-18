@@ -15,4 +15,5 @@ install:
 build_script:
   - cd tests
   - qmake .
-  - mingw32-make 
+  - mingw32-make
+  - release/tests.exe 
