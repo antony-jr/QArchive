@@ -8,6 +8,14 @@ environment:
     CMAKE_GENERATOR: 'MSYS Makefiles'
     QT_DIR: C:\Qt\5.10.1\mingw53_32
     MINGW_BUILD: 1
+  - MSVC_ARCH: x86
+    CMAKE_GENERATOR: 'NMake Makefiles'
+    QT_DIR: C:\Qt\5.10.1\msvc2015
+    MSVC_BUILD: 1
+  - MSVC_ARCH: x64
+    CMAKE_GENERATOR: 'NMake Makefiles'
+    QT_DIR: C:\Qt\5.10.1\msvc2015_64
+    MSVC_BUILD: 1
 
 install:
   - set PATH=%QT_DIR%\bin;%PATH%
@@ -15,11 +23,23 @@ install:
   # MinGW Build
   - if defined MINGW_ROOT set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
   - if defined MINGW_ARCH bash -lc "pacman --needed --noconfirm -S mingw-w64-%MINGW_ARCH%-boost mingw-w64-%MINGW_ARCH%-libarchive"
+    
+  # MSVC
+  - if defined MSVC_ARCH call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %MSVC_ARCH% 
+  - if defined MSVC_BUILD cd "C:\Tools\vcpkg"
+  - if defined MSVC_BUILD git pull
+  - if defined MSVC_BUILD .\bootstrap-vcpkg.bat
+  - if defined MSVC_BUILD cd %APPVEYOR_BUILD_FOLDER%
+  - if defined MSVC_BUILD appveyor-retry vcpkg update
+  - if defined MSVC_ARCH appveyor-retry vcpkg install libarchive:%MSVC_ARCH%-windows
+  - if defined MSVC_BUILD cd "C:\tools\vcpkg"
+  - if defined MSVC_BUILD vcpkg integrate install
+  - if defined MSVC_BUILD cd %APPVEYOR_BUILD_FOLDER%
 
 build_script:
   - cd tests
   - qmake .
   - if defined MINGW_BUILD mingw32-make -j%NUMBER_OF_PROCESSORS%
+  - if defined MSVC_BUILD nmake
   - cd release
-  - ls
   - tests.exe
