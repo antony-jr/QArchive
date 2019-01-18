@@ -766,9 +766,9 @@ short DiskExtractorPrivate::processArchiveInformation()
         }
 
         // MSVC (and maybe Windows in general?) workaround
-#if defined(_MSC_VER)
+#elif defined(_WIN32) && !defined(__CYGWIN__)
 	qint64 blockSizeInBytes = 512;
-        qint64 blocks = (qint64) ceil(entry_stat->st_size / blockSizeInBytes);
+        qint64 blocks = (qint64) (entry_stat->st_size / blockSizeInBytes);
 #else
         qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
         qint64 blocks = (qint64)entry_stat->st_blocks;
