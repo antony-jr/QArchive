@@ -17,7 +17,10 @@ script:
   - cd libarchive
   - cmake .
   - make -j$(nproc)
-  - PREFIX=/usr/ sudo make DESTDIR=/ install
+  - sudo make install
+  - sudo mkpath /usr/lib/pkgconfig
+  - sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
+  - sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
   - cd ../tests
   - qmake .
   - make -j$(nproc)
