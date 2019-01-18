@@ -12,44 +12,11 @@ environment:
     QT_DIR: C:\Qt\5.11.1\mingw53_32
 
 install:
-  - set PATH=%QT_DIR%\bin;%PATH%
-  
-  # MinGW
-  - if defined MINGW_ROOT set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
-  - if defined MINGW_ARCH bash -lc "pacman --needed --noconfirm -S mingw-w64-%MINGW_ARCH%-boost mingw-w64-%MINGW_ARCH%-libarchive"
-  
-  # MSVC
-  - if defined MSVC_ARCH call "%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" %MSVC_ARCH%
-  
-  # Hack to update vcpkg to maybe make things work
-  - if defined MSVC_ARCH cd "C:\Tools\vcpkg"
-  - if defined MSVC_ARCH git pull
-  - if defined MSVC_ARCH .\bootstrap-vcpkg.bat
-  - if defined MSVC_ARCH cd %APPVEYOR_BUILD_FOLDER%
-  
-  # Install vcpkg stuff
-  - if defined MSVC_ARCH appveyor-retry vcpkg update
-  - if defined MSVC_ARCH appveyor-retry vcpkg install libarchive:x86-windows
-  - if defined MSVC_ARCH appveyor-retry vcpkg install libarchive:x64-windows
-  
-  # Since we want to use vcpkg, ensure that it's integrated into the
-  # build environment.
-  - if defined MSVC_ARCH cd c:\tools\vcpkg
-  - if defined MSVC_ARCH vcpkg integrate install
-  - if defined MSVC_ARCH cd %APPVEYOR_BUILD_FOLDER%
+  - set QTDIR=C:\Qt\5.10.1\mingw53_32
+  - set PATH=%PATH%;%QTDIR%\bin;C:\MinGW\bin;
+  - bash -lc "pacman --needed --noconfirm -S mingw-w64-i686-boost mingw-w64-i686-libarchive"
 
 build_script:
-  - if not defined CMAKE_GENERATOR if not defined MSVC_ARCH qmake %APPVEYOR_BUILD_FOLDER%
-  - if not defined CMAKE_GENERATOR if defined MSVC_ARCH qmake -spec win32-msvc -tp vc %APPVEYOR_BUILD_FOLDER%
-  - if not defined CMAKE_GENERATOR if defined MSVC_ARCH msbuild QArchive.vcxproj /p:Configuration=DEBUG
-  - if not defined CMAKE_GENERATOR if defined MINGW_ROOT mingw32-make -j%NUMBER_OF_PROCESSORS%
-  - if not defined CMAKE_GENERATOR if defined MINGW_ROOT mingw32-make check
-
-  # Validate CMake
-  - if defined CMAKE_GENERATOR cmake -E make_directory build
-  - if defined CMAKE_GENERATOR cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBUILD_SHARED_LIBS=ON -DCMAKE_PREFIX_PATH="%QT_DIR%" ..
-  - if defined CMAKE_GENERATOR cmake --build build
-  - if defined CMAKE_GENERATORset CTEST_OUTPUT_ON_FAILURE=ON
-  - if defined CMAKE_GENERATOR cmake --build build --target test
-  - if defined CMAKE_GENERATOR cmake --build build --target features
-  - if defined CMAKE_GENERATOR cmake --build build --target install
+  - cd tests
+  - qmake .
+  - mingw32-make 
