@@ -1,10 +1,12 @@
 #ifndef TEST_RUNNER_HPP_INCLUDED
 #define TEST_RUNNER_HPP_INCLUDED
 #include <QObject>
+#include <QTemporaryDir>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QScopedPointer>
 #include <QArchiveDiskExtractorTests.hpp>
+#include <QArchiveDiskCompressorTests.hpp>
 
 class TestRunner : public QObject
 {
@@ -19,8 +21,10 @@ private Q_SLOTS:
 Q_SIGNALS:
     void finished();
 private:
+    QScopedPointer<QTemporaryDir> m_TempDir;
     QScopedPointer<QFuture<void>> m_Future;
     QScopedPointer<QFutureWatcher<void>> m_FutureWatcher;
+    QScopedPointer<QArchiveDiskCompressorTests> m_CompressorTests;
     QScopedPointer<QArchiveDiskExtractorTests> m_ExtractorTests;
 };
 #endif
