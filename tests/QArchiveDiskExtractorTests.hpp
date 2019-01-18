@@ -20,7 +20,7 @@ public:
     {
     }
 private slots:
-    void initTestCase(void)
+    void initTestCase()
     {
         QDir cases(TestCasesDir);
         if(cases.exists()) {
@@ -29,9 +29,7 @@ private slots:
                    QFileInfo(TestCase2ArchivePath).exists() &&
                    QFileInfo(TestCase3ArchivePath).exists() &&
                    QFileInfo(TestCase4ArchivePath).exists() &&
-                   QFileInfo(TestCase5ArchivePath).exists() &&
-                   QFileInfo(TestCase6ArchivePath).exists() &&
-                   QFileInfo(TestCase7ArchivePath).exists()
+                   QFileInfo(TestCase5ArchivePath).exists()
                )) {
                 QFAIL("cannot find test case files.");
                 return;
@@ -42,7 +40,7 @@ private slots:
         }
     }
 
-    void simpleExtraction(void)
+    void simpleExtraction()
     {
         QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir);
         QObject::connect(&e, &QArchive::DiskExtractor::error,
@@ -59,7 +57,7 @@ private slots:
         QVERIFY(Test1OutputContents == QString(TestOutput.readAll()));
     }
 
-    void usingPauseResume(void)
+    void usingPauseResume()
     {
         QArchive::DiskExtractor e(TestCase2ArchivePath, TestCase2OutputDir);
         bool startedEmitted = false,
@@ -97,7 +95,33 @@ private slots:
         QVERIFY(Test2OutputContents == QString(TestOutput.readAll()));
     }
 
-    void usingPassword(void)
+    void usingExtractFilters()
+    {
+	/*
+	 * Note:
+	 * Only files present in the filter gets extracted.
+	*/
+	QArchive::DiskExtractor e(TestCase3ArchivePath, TestCase3OutputDir);
+        QObject::connect(&e, &QArchive::DiskExtractor::error,
+                         this, &QArchiveDiskExtractorTests::defaultErrorHandler);
+        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+
+	e.addFilter(QFileInfo(Test3OutputFile2).fileName());
+        e.start();
+
+	/* Test3OutputFile1 should not exists. */
+	QVERIFY(!QFileInfo::exists(Test3OutputFile1));
+
+        /*  Must emit exactly one signal. */
+        QVERIFY(spyInfo.wait() || spyInfo.count());
+
+        /* Test the output file and also the contents. */
+        QFile TestOutput(Test3OutputFile2);
+        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+        QVERIFY(Test3Output2Contents == QString(TestOutput.readAll())); 
+    }
+
+    void usingPassword()
     {
         QArchive::DiskExtractor e(TestCase4ArchivePath, TestCase4OutputDir);
         e.setPassword(Test4Password);
@@ -115,9 +139,9 @@ private slots:
         QVERIFY(Test4OutputContents == QString(TestOutput.readAll()));
     }
 
-    void informationExtraction(void)
+    void informationExtraction()
     {
-        QArchive::DiskExtractor e(TestCase1ArchivePath);
+        QArchive::DiskExtractor e(TestCase5ArchivePath);
         QObject::connect(&e, &QArchive::DiskExtractor::error,
                          this, &QArchiveDiskExtractorTests::defaultErrorHandler);
 
@@ -126,7 +150,7 @@ private slots:
         QVERIFY(spyInfo.wait() || spyInfo.count());
     }
 
-    void testMultiThreadedExtractor(void)
+    void runningExtractorNonSingleThreaded()
     {
         QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir,
                                   /*parent=*/nullptr, /*singleThread=*/false);
@@ -144,7 +168,7 @@ private slots:
         QVERIFY(Test1OutputContents == QString(TestOutput.readAll()));
     }
 
-    void testInvalidArchivePath(void)
+    void testInvalidArchivePath()
     {
         QArchive::DiskExtractor e("THISDOESNOTEXISTS", TestOutputDir);
         QSignalSpy spyInfo(&e, SIGNAL(error(short, QString)));
@@ -152,7 +176,7 @@ private slots:
         QVERIFY(spyInfo.wait() || spyInfo.count());
     }
 
-    void isExtractorObjectReuseable(void)
+    void isExtractorObjectReuseable()
     {
         QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
         QObject::connect(&e, &QArchive::DiskExtractor::error,
@@ -160,7 +184,6 @@ private slots:
 
         QFile TestOutput;
         QSignalSpy spyInfo(&e, SIGNAL(finished()));
-        e.setPassword(Test5Password);
         e.start();
 
         QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
@@ -169,16 +192,17 @@ private slots:
         QVERIFY(Test5OutputContents == QString(TestOutput.readAll()));
         TestOutput.close();
 
-        e.setArchive(TestCase7ArchivePath, TestCase7OutputDir);
-        e.start();
+        e.setArchive(TestCase4ArchivePath, TestCase4OutputDir);
+        e.setPassword(Test4Password);
+	e.start();
 
         QVERIFY(spyInfo.wait() || spyInfo.count() == 2);
-        TestOutput.setFileName(Test7OutputFile);
+        TestOutput.setFileName(Test4OutputFile);
         QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
-        QVERIFY(Test7OutputContents == QString(TestOutput.readAll()));
+        QVERIFY(Test4OutputContents == QString(TestOutput.readAll()));
     }
 
-    void cleanupTestCase(void)
+    void cleanupTestCase()
     {
         QDir dir(TestOutputDir);
         dir.removeRecursively();

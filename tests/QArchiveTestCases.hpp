@@ -36,24 +36,16 @@ public:
 
         TestCase3ArchivePath = QString(TestCasesDir + "Test3.7z");
         TestCase3OutputDir = QString(TestOutputDir + "Test3");
-        Test3OutputFile1 = QString(TestCase3OutputDir + "/ThisMayBeExtracted.txt");
-        Test3OutputFile2 = QString(TestCase3OutputDir + "/ThisShouldNotBeExtracted.txt");
+        Test3OutputFile1 = QString(TestCase3OutputDir + "/Output3_1.txt");
+        Test3OutputFile2 = QString(TestCase3OutputDir + "/Output3_2.txt");
 
         TestCase4ArchivePath = QString(TestCasesDir + "Test4.zip");
         TestCase4OutputDir = QString(TestOutputDir + "Test4");
         Test4OutputFile = QString(TestCase4OutputDir + "/Output.txt");
 
-        TestCase5ArchivePath = QString(TestCasesDir + "Test5.zip");
+        TestCase5ArchivePath = QString(TestCasesDir + "Test5.tar.gz");
         TestCase5OutputDir = QString(TestOutputDir + "Test5");
         Test5OutputFile = QString(TestCase5OutputDir + "/Output.txt");
-
-        TestCase6ArchivePath = QString(TestCasesDir + "Test6.zip");
-        TestCase6OutputDir = QString(TestOutputDir + "Test6");
-        Test6OutputFile = QString(TestCase6OutputDir + "/Output.txt");
-
-        TestCase7ArchivePath = QString(TestCasesDir + "Test7.tar.gz");
-        TestCase7OutputDir = QString(TestOutputDir + "Test7");
-        Test7OutputFile = QString(TestCase7OutputDir + "/Output.txt");
     }
 
     ~QArchiveTestCases()
@@ -78,23 +70,14 @@ public:
             TestCase5ArchivePath,
             TestCase5OutputDir,
             Test5OutputFile,
-            TestCase6ArchivePath,
-            TestCase6OutputDir,
-            Test6OutputFile,
-            TestCase7ArchivePath,
-            TestCase7OutputDir,
-            Test7OutputFile,
             TemporaryFilePath;
     const QString Test1OutputContents = QString("TEST1SUCCESS!");
     const QString Test2OutputContents = QString("TEST2SUCCESS!");
+    const QString Test3Output1Contents = QString("TEST3SUCCESS1!");
+    const QString Test3Output2Contents = QString("TEST3SUCCESS2!");
     const QString Test4Password = QString("Test4");
     const QString Test4OutputContents = QString("TEST4SUCCESS!");
     const QString Test5OutputContents = QString("TEST5SUCCESS!");
-    const QString Test5Password = QString("Test5");
-    const QString Test5WrongPassword = QString("!Test5");
-    const QString Test6OutputContents = QString("TEST6SUCCESS!");
-    const QString Test6WrongPassword = QString("!Test6");
-    const QString Test7OutputContents = QString("TEST7SUCCESS");
 };
 
 #endif // QARCHIVE_TEST_CASES_HPP_INCLUDED
