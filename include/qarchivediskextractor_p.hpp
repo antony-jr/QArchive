@@ -71,7 +71,7 @@ private:
         n_Flags = 0;
 
     QString m_OutputDirectory,
-            m_Password,
+	    m_Password,
             m_ArchivePath;
     QFile *m_Archive = nullptr;
     QSharedPointer<struct archive> m_ArchiveRead;

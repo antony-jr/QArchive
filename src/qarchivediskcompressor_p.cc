@@ -73,10 +73,14 @@ void DiskCompressorPrivate::setArchiveFormat(short format)
 /* Only used for ZIP Archives , other formats are ignored. */
 void DiskCompressorPrivate::setPassword(const QString &passwd)
 {
+#if ARCHIVE_VERSION_NUMBER >= 3003003 
     if(b_Started || b_Paused) {
         return;
     }
     m_Password = passwd;
+#else
+    (void)passwd;
+#endif
     return;
 }
 
@@ -211,7 +215,9 @@ void DiskCompressorPrivate::clear()
         return;
     }
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = false;
+#if ARCHIVE_VERSION_NUMBER >= 3003003
     m_Password.clear();
+#endif
 
     m_ArchiveFormat = 0;
     n_BlockSize = 10240;
@@ -470,10 +476,12 @@ short DiskCompressorPrivate::compress()
          * ability to use passwords and thus until the user uses Zip format , the
          * password even if given is ignored.
         */
-        if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
+#if ARCHIVE_VERSION_NUMBER >= 3003003
+	if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
             archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());
             archive_write_set_options(m_ArchiveWrite.data(), "zip:encryption=traditional");
         }
+#endif
 
         /* Set explicit blocksize if the user gives one. */
         if(n_BlockSize) {

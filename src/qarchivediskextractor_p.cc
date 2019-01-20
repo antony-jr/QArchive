@@ -133,10 +133,14 @@ void DiskExtractorPrivate::setCalculateProgress(bool c)
  * Sets the password for the archive when extracting the data. */
 void DiskExtractorPrivate::setPassword(const QString &passwd)
 {
+#if ARCHIVE_VERSION_NUMBER >= 3003003
     if(passwd.isEmpty()) {
         return;
     }
     m_Password = passwd;
+#else
+    (void)passwd;
+#endif
     return;
 }
 
@@ -178,7 +182,9 @@ void DiskExtractorPrivate::clear()
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;
 
     m_ArchivePath.clear();
+#if ARCHIVE_VERSION_NUMBER >= 3003003
     m_Password.clear();
+#endif
     m_OutputDirectory.clear();
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
@@ -214,10 +220,14 @@ void DiskExtractorPrivate::getInfo()
     errorCode = processArchiveInformation();
     if(!errorCode) {
         emit info(*(m_Info.data()));
-    } else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
+    }
+#if ARCHIVE_VERSION_NUMBER >= 3003003
+    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
         emit getInfoRequirePassword(n_PasswordTriedCountGetInfo);
         ++n_PasswordTriedCountGetInfo;
-    } else {
+    }
+#endif
+    else {
         emit error(errorCode , m_Archive->fileName());
     }
     return;
@@ -253,13 +263,18 @@ void DiskExtractorPrivate::start()
         if(n_TotalEntries == -1) {
             /* If the total entries is unchanged then there must be an
             * error. */
-            if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
+#if ARCHIVE_VERSION_NUMBER >= 3003003 
+  	    if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
                 emit extractionRequirePassword(n_PasswordTriedCountExtract);
                 ++n_PasswordTriedCountExtract;
             } else {
                 emit error(errorCode , m_Archive->fileName());
                 return;
             }
+#else
+	    emit error(errorCode , m_Archive->fileName());
+	    return;
+#endif
         }
     }
 
@@ -273,11 +288,15 @@ void DiskExtractorPrivate::start()
         b_Started = false;
         b_Finished = true;
         emit finished();
-    } else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
+    } 
+#if ARCHIVE_VERSION_NUMBER >= 3003003
+    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
-    } else if(errorCode == OperationCanceled) {
+    }
+#endif
+    else if(errorCode == OperationCanceled) {
         b_Started = false;
         emit canceled();
     } else if(errorCode == OperationPaused) {
@@ -317,11 +336,15 @@ void DiskExtractorPrivate::resume()
         b_Started = false;
         b_Finished = true;
         emit finished();
-    } else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded) {
+    } 
+#if ARCHIVE_VERSION_NUMBER >= 3003003
+    else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded) {
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
-    } else if(ret == OperationCanceled) {
+    }
+#endif
+    else if(ret == OperationCanceled) {
         b_Started = false;
         emit canceled();
     } else if(ret == OperationPaused) {
@@ -447,16 +470,19 @@ short DiskExtractorPrivate::extract()
 
         m_ArchiveRead = QSharedPointer<struct archive>(archive_read_new(), ArchiveReadDestructor);
         m_ArchiveWrite = QSharedPointer<struct archive>(archive_write_disk_new(), ArchiveWriteDestructor);
-       	if(!m_Password.isEmpty()) {
-            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toLatin1().constData());
-        }
-        if(!m_ArchiveRead.data() && !m_ArchiveWrite.data()) {
+        if(!m_ArchiveRead.data() || !m_ArchiveWrite.data()) {
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
             m_Archive->seek(prev);
             return NotEnoughMemory;
         }
-        archive_read_support_format_all(m_ArchiveRead.data());
+
+#if ARCHIVE_VERSION_NUMBER >= 3003003 
+	if(!m_Password.isEmpty()) {
+            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toLatin1().constData());
+        }
+#endif
+	archive_read_support_format_all(m_ArchiveRead.data());
         archive_read_support_filter_all(m_ArchiveRead.data());
         if((ret = archive_read_open_fd(m_ArchiveRead.data(), m_Archive->handle(),n_BlockSize))) {
             m_ArchiveRead.clear();
@@ -654,13 +680,17 @@ short DiskExtractorPrivate::getTotalEntriesCount()
     int count = 0;
     archive_entry *entry = nullptr;
     struct archive *inArchive = archive_read_new();
-    if(!m_Password.isEmpty()) {
-        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
-    }
     if(!inArchive) {
         m_Archive->seek(prev);
         return NotEnoughMemory;
     }
+
+#if ARCHIVE_VERSION_NUMBER >= 3003003 
+    if(!m_Password.isEmpty()) {
+        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
+    }
+#endif
+
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
     if((ret = archive_read_open_fd(inArchive, m_Archive->handle(),n_BlockSize))) {
@@ -711,13 +741,15 @@ short DiskExtractorPrivate::processArchiveInformation()
     int ret = 0;
     archive_entry *entry = nullptr;
     struct archive *inArchive = archive_read_new();
-    if(!m_Password.isEmpty()) {
-        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
-    }
     if(!inArchive) {
         m_Archive->seek(prev);
         return NotEnoughMemory;
     }
+#if ARCHIVE_VERSION_NUMBER >= 3003003 
+    if(!m_Password.isEmpty()) {
+        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
+    }
+#endif 
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
     if((ret = archive_read_open_fd(inArchive, m_Archive->handle(),n_BlockSize))) {
