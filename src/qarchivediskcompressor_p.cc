@@ -342,8 +342,8 @@ bool DiskCompressorPrivate::guessArchiveFormat()
     } else if(ext == "gz") {
         m_ArchiveFormat = GZipFormat;
     } else if(ext == "xz") {
-        m_ArchiveFormat = XzFormat;
-    else if(ext == "tar"){
+        m_ArchiveFormat = XzFormat; 
+    } else if(ext == "tar"){
 	m_ArchiveFormat = TarFormat;
     } else if(ext == "xar") {
         m_ArchiveFormat = XarFormat;
