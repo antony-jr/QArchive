@@ -43,7 +43,7 @@ enum : short {
  * of a short integer.
 */
 enum : short {
-    NoFormat = 18,
+    TarFormat = 18,
     ZipFormat,
     SevenZipFormat,
     BZipFormat,

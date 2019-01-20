@@ -343,6 +343,8 @@ bool DiskCompressorPrivate::guessArchiveFormat()
         m_ArchiveFormat = GZipFormat;
     } else if(ext == "xz") {
         m_ArchiveFormat = XzFormat;
+    else if(ext == "tar"){
+	m_ArchiveFormat = TarFormat;
     } else if(ext == "xar") {
         m_ArchiveFormat = XarFormat;
     } else if(ext == "zip") {
@@ -350,7 +352,7 @@ bool DiskCompressorPrivate::guessArchiveFormat()
     } else if(ext == "7z") {
         m_ArchiveFormat = SevenZipFormat;
     } else {
-        m_ArchiveFormat = NoFormat;
+        m_ArchiveFormat = 0;
         return false;
     }
 
@@ -454,6 +456,10 @@ short DiskCompressorPrivate::compress()
             archive_write_add_filter_xz(m_ArchiveWrite.data());
             archive_write_set_format_ustar(m_ArchiveWrite.data());
             break;
+	case TarFormat:
+	    archive_write_add_filter_none(m_ArchiveWrite.data());
+	    archive_write_set_format_ustar(m_ArchiveWrite.data());
+	    break;
         case XarFormat:
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_xar(m_ArchiveWrite.data());
