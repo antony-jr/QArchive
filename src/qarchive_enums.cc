@@ -1,7 +1,9 @@
 #include <QString>
 #include <qarchive_enums.hpp>
 
-QString errorCodeToString(short errorCode) {
+using namespace QArchive;
+
+QString QArchive::errorCodeToString(short errorCode) {
 	QString errorString;
 	switch(errorCode){
 		case NoError:

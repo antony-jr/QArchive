@@ -4,12 +4,8 @@ title: Class QArchive::DiskExtractor
 sidebar_label: QArchive::DiskExtractor
 ---
 
-The QArchive::Extractor class helps to extract archives that are supported by **libarchive**.
-QArchive::Extractor stores a single archive at a time , where each slots helps corresponds one action provided by libarchive.
-
-Behind the scenes, QArchive::Extractor uses smart pointers to free libarchive structs automatically and can only extract a single archive , this is to reduce memory usage and to avoid the needless copying of data. This also helps reduce the inherent overhead of storing multiple **QMap** instead of couple of **QString**'s.   
-
-In addition to the above, QArchive::Extractor also provides a async and sync way for the process. QArchive::Extractor is the class you want to use if you want a very simple syntax to extract archives in a single line and also forget about thread safety ( *Because it is reentrant by nature* ).
+The QArchive::DiskExtractor class helps to extract archives that are based on the disk, (i.e) The storage of the computer.
+This class can extract all formats supported by libarchive.
 
 **Note:** All functions in this class is **[reentrant](https://doc.qt.io/qt-5/threads-reentrancy.html)**.
 
@@ -17,11 +13,17 @@ In addition to the above, QArchive::Extractor also provides a async and sync way
 
 ### Public Functions
 
-|                                   |                                                                                   |
-|-----------------------------------|-----------------------------------------------------------------------------------|
-| **explicit**                      | [Extractor](#explicit-extractorqobject-parent-nullptr)(QObject *parent = nullptr) |
-| **explicit**                      | [Extractor](#explicit-extractorconst-qstring-archive)(const QString &Archive)     |
+|                                                                                   |
+|-----------------------------------------------------------------------------------|
+| [DiskExtractor](#)(bool singleThreaded = true , )  |
+| [DiskExtractor](#)(const QString &ArchivePath , )                                        |
 | **explicit**                      | [Extractor](#explicit-extractorconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
+
+### Slots
+
+
+|                   |                                                                                                |
+|-------------------|------------------------------------------------------------------------------------------------|
 | **Extractor&**                    | [setArchive](#extractor-setarchiveconst-qstring-archive)(const QString &Archive)  |
 | **Extractor&**                    | [setArchive](#extractor-setarchiveconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
 | **Extractor&**                    | [setPassword](#extractor-setpasswordconst-qstring-password)(const QString &Password)|
@@ -30,25 +32,10 @@ In addition to the above, QArchive::Extractor also provides a async and sync way
 | **Extractor&**                    | [onlyExtract](#extractor-onlyextractconst-qstring-memberinarchive)(const QString &MemberInArchive)|
 | **Extractor&**                    | [onlyExtract](#extractor-onlyextractconst-qstringlist-membersinarchive)(const QStringList &MembersInArchive)|
 | **Extractor&**                    | [clear](#extractor-clearvoid)(void)                                               |
-
-
-### Slots
-
-|                   |                                                                                                |
-|-------------------|------------------------------------------------------------------------------------------------|
-| **Extractor&**  	| [waitForFinished](#extractor-waitforfinishedvoid)(void)                                        |
 | **Extractor&**    | [start](#extractor-startvoid)(void)                                                            |
 | **Extractor&**    | [pause](#extractor-pausevoid)(void)                                                            |
 | **Extractor&**    | [resume](#extractor-resumevoid)(void)                                                          |
 | **Extractor&**    | [cancel](#extractor-cancelvoid)(void)                                                          |
-| **const bool**    | [isRunning](#bool-isrunningvoid-const)(void)                                                   |
-| **const bool**    | [isCanceled](#bool-iscanceledvoid-const)(void)                                                 |
-| **const bool**    | [isPaused](#bool-ispausedvoid-const)(void)                                                     |
-| **const bool**    | [isStarted](#bool-isstartedvoid-const)(void)                                                   |
-| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidvoid-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(void)> function)                                                |
-| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidqstring-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(QString)> function)|
-| **Extractor&**    | [setFunc](#extractor-setfuncshort-signalcode-qarchive-docs-qarchivesignalcodeshtml-std-function-voidint-function)(short **[signalCode](QArchiveSignalCodes.md)** , std::function<void(int)> function)|
-| **Extractor&**    | [setFunc](#extractor-setfuncstd-function-voidshort-qstring-function)(std::function<void(short,QString)> function)                                           |
 
 
 ### Signals

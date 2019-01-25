@@ -52,7 +52,7 @@ int main(int ac, char **av)
 		(void)archive;
 		return;
 	}	
-	qInfo() << "[-] An error has occured :: " << QArchive::errorCodeToString(code) << ":: " << archive ;
+	qInfo() << "[-] An error has occured :: " << QArchive::errorCodeToString(code) << "::" << archive ;
         app.quit();
         return;
     });
