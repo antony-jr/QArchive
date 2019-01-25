@@ -19,8 +19,6 @@ public:
     DiskExtractor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
     DiskExtractor(const QString&, const QString&, QObject *parent = nullptr, bool singleThreaded = true );
     ~DiskExtractor();
-
-    static QString errorCodeToString(short);
 public Q_SLOTS:
     void setArchive(QFile*);
     void setArchive(const QString&);

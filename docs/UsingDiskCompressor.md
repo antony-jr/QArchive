@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     QObject::connect(&Compressor , &DiskCompressor::error ,
     [&](short code , QString file){
         qInfo() << "An error has occured ::" 
-		<< DiskCompressor::errorCodeToString(code) 
+		<< QArchive::errorCodeToString(code) 
 		<< "::" 
 		<< file;
         app.quit();

@@ -1,7 +1,12 @@
 #ifndef QARCHIVE_ENUMS_HPP_INCLUDED
 #define QARCHIVE_ENUMS_HPP_INCLUDED
+class QString;
 namespace QArchive
 {
+/* A function that converts the enum value to its variable
+ * name to be used by users.
+*/
+QString errorCodeToString(short);
 
 /*
  * Common error codes , these are most likely will be

@@ -180,7 +180,3 @@ void DiskCompressor::resume()
     .invoke(m_Compressor.data(), Qt::QueuedConnection);
     return;
 }
-
-QString DiskCompressor::errorCodeToString(short errorCode){
-	return DiskCompressorPrivate::errorCodeToString(errorCode);
-}

@@ -18,8 +18,6 @@ class DiskExtractorPrivate : public QObject
 public:
     DiskExtractorPrivate();
     ~DiskExtractorPrivate();
-
-    static QString errorCodeToString(short);
 public Q_SLOTS:
     void setArchive(QFile*);
     void setArchive(const QString&);

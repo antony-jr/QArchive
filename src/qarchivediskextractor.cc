@@ -185,7 +185,3 @@ void DiskExtractor::resume()
     getMethod(m_Extractor, "resume()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
-
-QString DiskExtractor::errorCodeToString(short errorCode){
-	return DiskExtractorPrivate::errorCodeToString(errorCode);
-}
