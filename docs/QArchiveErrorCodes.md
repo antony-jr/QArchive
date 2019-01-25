@@ -4,13 +4,8 @@ title: QArchive Error Codes
 sidebar_label: QArchive Error Codes
 ---
 
-These error codes will be emitted by a common signal present in compressor and extractor classes
- which follows a prototype like this ``` error(short errorCode , QString file) ```. 
-The **file** can give a clue on what file is this error belongs to.
-
-You can also convert error code to a QString which is the variable name for that error
-code using the static member method ```errorCodeToString``` present in all compressor 
-and extractor classes.
+You convert error code to a QString which is the variable name for that error
+code using the function ```errorCodeToString``` present in the QArchive namespace.
 
 
 | Variable Name                       	  | Value   |

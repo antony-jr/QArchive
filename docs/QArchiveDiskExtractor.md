@@ -1,7 +1,7 @@
 ---
-id: QArchiveExtractor
-title: Class QArchive::Extractor
-sidebar_label: QArchive::Extractor
+id: QArchiveDiskExtractor
+title: Class QArchive::DiskExtractor
+sidebar_label: QArchive::DiskExtractor
 ---
 
 The QArchive::Extractor class helps to extract archives that are supported by **libarchive**.
