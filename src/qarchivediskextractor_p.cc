@@ -267,14 +267,10 @@ void DiskExtractorPrivate::start()
   	    if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
                 emit extractionRequirePassword(n_PasswordTriedCountExtract);
                 ++n_PasswordTriedCountExtract;
-            } else {
-                emit error(errorCode , m_Archive->fileName());
-                return;
-            }
-#else
+	    }
+#endif
 	    emit error(errorCode , m_Archive->fileName());
 	    return;
-#endif
         }
     }
 
@@ -294,6 +290,7 @@ void DiskExtractorPrivate::start()
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
+	emit error(errorCode , m_Archive->fileName());
     }
 #endif
     else if(errorCode == OperationCanceled) {
@@ -342,6 +339,7 @@ void DiskExtractorPrivate::resume()
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
+	emit error(ret , m_Archive->fileName());
     }
 #endif
     else if(ret == OperationCanceled) {

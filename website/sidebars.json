@@ -5,17 +5,14 @@
 	   "AddingQArchive"
     ],
     "Guides" : [
-	   "UsingExtractor",
-	   "UsingCompressor",
-	   "UsingReader"
+	   "UsingDiskExtractor",
+	   "UsingDiskCompressor"
     ],
     "API" : [
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",
-       "QArchiveSignalCodes",
-       "QArchiveExtractor",
-	   "QArchiveCompressor",
-	   "QArchiveReader"
+	   "QArchiveDiskExtractor",
+	   "QArchiveDiskCompressor"
     ]
   }
 }

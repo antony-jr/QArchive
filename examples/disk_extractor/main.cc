@@ -47,7 +47,12 @@ int main(int ac, char **av)
         return;
     });
     QObject::connect(&Extractor , &DiskExtractor::error , [&](short code , QString archive){
-        qInfo() << "[-] An error has occured :: " << DiskExtractor::errorCodeToString(code) << ":: " << archive ;
+        if(code == QArchive::ArchivePasswordNeeded || 
+	   code == QArchive::ArchivePasswordIncorrect){
+		(void)archive;
+		return;
+	}	
+	qInfo() << "[-] An error has occured :: " << DiskExtractor::errorCodeToString(code) << ":: " << archive ;
         app.quit();
         return;
     });
