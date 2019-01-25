@@ -7,7 +7,7 @@ sidebar_label: Installation
 **Before installing QArchive , make sure you have the below mentioned dependencies installed   
   , particularly in Windows , libarchive is very hard to setup.
   Make sure you install the latest release of libarchive to utilize all features of 
-  QArchive**.
+  QArchive(needs atleast libarchive v3.3.3 to use passwords)**.
 
 ## Dependencies
 

@@ -19,6 +19,8 @@ class DiskCompressorPrivate : public QObject
 public:
     DiskCompressorPrivate();
     ~DiskCompressorPrivate();
+
+    static QString errorCodeToString(short);
 public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);

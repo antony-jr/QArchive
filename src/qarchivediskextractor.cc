@@ -186,3 +186,6 @@ void DiskExtractor::resume()
     return;
 }
 
+QString DiskExtractor::errorCodeToString(short errorCode){
+	return DiskExtractorPrivate::errorCodeToString(errorCode);
+}

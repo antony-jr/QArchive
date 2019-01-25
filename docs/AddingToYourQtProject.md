@@ -22,6 +22,7 @@ Other directory structures may work but this is the efficient one.
   --src
      ---main.cpp
      ---mainwindow.cpp
+     ---helper.hpp
      ---src.pro
   --MyCoolApplication.pro
 ```
@@ -29,17 +30,14 @@ Other directory structures may work but this is the efficient one.
 ### The Library Subdir Project file (libs.pro)
 
 This is where you keep all third party libraries including **QArchive**.
-Just add a **git submodule** or execute the steps mentioned in the **Installation**   
-in the **libs** directory of your project folder.
-
+Just execute the steps mentioned in the **Installation** in the **libs**   
+directory of your project folder.
 
 
 ```
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = QArchive
-INCLUDEPATH += QArchive \
-	       QArchive/include
 ```
 
 
@@ -48,14 +46,14 @@ INCLUDEPATH += QArchive \
 ```
 TEMPLATE = app
 TARGET = ../MyCoolApplication
-QT += core concurrent # You need these for QArchive.
-QT += gui # Modules thats needed by your app.
+QT += core gui # Modules typically needed for any GUI App.
+
 # Always include libs in this order , dont change.
 LIBS += ../libs/QArchive/libQArchive.a -larchive 
 INCLUDEPATH += . .. ../libs/QArchive \
                ../libs/QArchive/include
 SOURCES += main.cpp mainwindow.cpp # All your source files.
-# Add your header files too..
+HEADERS += helper.hpp # Add your header files.
 ```
 
 ### Your Main Project file ( MyCoolApplication.pro )
@@ -65,8 +63,6 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS = libs \ # Always use this order
 	  src
-INCLUDEPATH += . libs/QArchive \
-               libs/QArchive/include
 ```
 
 ### Including QArchive in your Source
@@ -95,29 +91,28 @@ you can take a look at QArchive's **CMakeLists.txt**.
 
 ## Directly Adding QArchive to your Project
 
-Since **QArchive** is a simple library you can also directly use it.
+You can also add **QArchive** directly to your project if you consider your project is 
+small.
 
 |	    |				               |		
 |-----------|------------------------------------------|
 |  Header:  | #include < QArchive >	               |
-|   qmake:  | QT += core concurrent	       	       |
-|   	    | LIBS += -larchive		               |
-|	    | HEADERS += QArchive/include/QArchive.hpp |
-|           | SOURCES += QArchive/src/QArchive.cc      |
+|   qmake:  | include(QArchive/QArchive.pri)           |
 | Inherits: | QObject			               |
 
-**QArchive** is just a header and a source and all you have to do after installation is to add   
-it in your **.pro** file ( **Qt Project file** ).
+
+You just need to include the **QArchive.pri** file in your project **.pro** file in order
+to include everything needed for you to use it in your entire application. 
+This method is less complicated and could be done for small projects but in large projects
+this is very inefficient where the **QArchive source files** could be compiled multiple 
+times.
 
 ### Qt Project file (**.pro**)
 
-Append these **lines** to your **Qt Project file**.
+Prepend or append these **lines** to your **Qt Project file**.
 
 ```
-QT += core concurrent
-LIBS += -larchive
-HEADERS += QArchive/include/QArchive.hpp
-SOURCES += QArchive/src/QArchive.cc
+include(QArchive/QArchive.pri)
 ```
 
 ### Including QArchive in your Source

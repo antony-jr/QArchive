@@ -5,9 +5,8 @@ sidebar_label: QArchive Error Codes
 ---
 
 These error codes will be emitted by a common signal which follows a prototype like this  
-``` error(short errorCode , QString errorMessage) ```. 
-The **errorMessage** can give a clue on what file is this error belongs to.  
-
+``` error(short errorCode , QString file) ```. 
+The **file** can give a clue on what file is this error belongs to.  
 
 
 | Error Code                       	  | Meaning                                       |  Value  |

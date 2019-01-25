@@ -33,8 +33,9 @@ int main(int ac, char **av)
         return;
     });
     QObject::connect(&Compressor , &DiskCompressor::error , [&](short code , QString file){
-        qInfo() << "[-] An error has occured :: " << code << " :: " << file;
-        app.quit();
+        qInfo() << "[-] An error has occured :: " << DiskCompressor::errorCodeToString(code) << " :: " << file;
+        
+	app.quit();
         return;
     });
 

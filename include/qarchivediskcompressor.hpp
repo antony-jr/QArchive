@@ -19,6 +19,7 @@ public:
     DiskCompressor(const QString&, short, QObject *parent = nullptr, bool singleThreaded = true);
     ~DiskCompressor();
 
+    static QString errorCodeToString(short);
 public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
