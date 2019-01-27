@@ -1,7 +1,7 @@
 ---
 id: SimpleExtractorGuide
 title: Simple Extractor using QArchive
-sidebar_label: Creating a Simple Extractor using QArchive
+sidebar_label: Creating a Simple Extractor
 ---
 
 Please refer the full class documentation [here](QArchiveDiskExtractor.md)

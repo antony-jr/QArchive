@@ -1,7 +1,7 @@
 ---
 id: ExtractingPasswordProtectedArchiveGuide
 title: Extracting encrypted Archives using QArchive
-sidebar_label: Extracting Password Protected Archives using QArchive
+sidebar_label: Extracting Encrypted Archives
 ---
 
 Please refer the full class documentation [here](QArchiveDiskExtractor.md)

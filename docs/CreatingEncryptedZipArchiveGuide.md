@@ -1,7 +1,7 @@
 ---
 id: CreatingEncryptedZipArchiveGuide
 title: Creating Encrypted ZIP Archive using QArchive
-sidebar_label: Creating Encrypted ZIP Archive using QArchive
+sidebar_label: Creating Encrypted Archive
 ---
 
 Please refer the full class documentation [here](QArchiveDiskCompressor.md)

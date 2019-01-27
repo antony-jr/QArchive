@@ -272,7 +272,7 @@ Removes **a list of file(s)** from the archive which is to be written with respe
  Compressor.addFiles(/*entry name(s)=*/ QStringList() << "Data.txt"
                                                       << "Data2.txt" ,
                      /*Actual path=*/   QStringList() << "Data/Test.txt"
-                                                      << "Data/Test2.txt"                  
+                                                      << "Data/Test2.txt"               
   );
 
 
@@ -280,7 +280,7 @@ Removes **a list of file(s)** from the archive which is to be written with respe
   Compressor.removeFiles(/*entry name(s)=*/ QStringList() << "Data.txt"
                                                           << "Data2.txt" ,
                         /*Actual path=*/   QStringList() << "Data/Test.txt"
-                                                         << "Data/Test2.txt"                  
+                                                         << "Data/Test2.txt" 
   );
 ```
 

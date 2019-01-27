@@ -1,7 +1,7 @@
 ---
 id: SimpleCompressorGuide
 title: Simple Compressor using QArchive
-sidebar_label: Creating Simple Compressor using QArchive
+sidebar_label: Creating Simple Compressor
 ---
 
 Please refer the full class documentation [here](QArchiveDiskCompressor.md)

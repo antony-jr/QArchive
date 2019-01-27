@@ -4,33 +4,62 @@
     "next": "Next",
     "previous": "Previous",
     "tagline": "A Simple Archiver for Qt Projects.",
-    "AddingQArchive": "Add QArchive to Your Qt Project",
-    "Adding QArchive to Your Qt Project": "Adding QArchive to Your Qt Project",
-    "CreatingEncryptedZipArchiveGuide": "Creating Encrypted ZIP Archive using QArchive",
-    "Creating Encrypted ZIP Archive using QArchive": "Creating Encrypted ZIP Archive using QArchive",
-    "ExtractingPasswordProtectedArchiveGuide": "Extracting encrypted Archives using QArchive",
-    "Extracting Password Protected Archives using QArchive": "Extracting Password Protected Archives using QArchive",
-    "Installation": "Installation",
-    "QArchiveDiskCompressor": "Class QArchive::DiskCompressor",
-    "QArchive::DiskCompressor": "QArchive::DiskCompressor",
-    "QArchiveDiskExtractor": "Class QArchive::DiskExtractor",
-    "QArchive::DiskExtractor": "QArchive::DiskExtractor",
-    "QArchiveErrorCodes": "QArchive Error Codes",
-    "QArchive Error Codes": "QArchive Error Codes",
-    "QArchiveFormats": "QArchive Supported Compression Formats",
-    "QArchive Compression Formats": "QArchive Compression Formats",
-    "ReportingProgressGuide": "Reporting Progress for Extraction",
-    "Reporting Progress for Extraction": "Reporting Progress for Extraction",
-    "SimpleCompressorGuide": "Simple Compressor using QArchive",
-    "Creating Simple Compressor using QArchive": "Creating Simple Compressor using QArchive",
-    "SimpleExtractorGuide": "Simple Extractor using QArchive",
-    "Creating a Simple Extractor using QArchive": "Creating a Simple Extractor using QArchive",
-    "Docs": "Docs",
-    "Help": "Help",
-    "Blog": "Blog",
-    "Getting Started": "Getting Started",
-    "Guides": "Guides",
-    "API": "API"
+    "docs": {
+      "AddingQArchive": {
+        "title": "Add QArchive to Your Qt Project",
+        "sidebar_label": "Adding QArchive to Your Qt Project"
+      },
+      "CreatingEncryptedZipArchiveGuide": {
+        "title": "Creating Encrypted ZIP Archive using QArchive",
+        "sidebar_label": "Creating Encrypted Archive"
+      },
+      "ExtractingPasswordProtectedArchiveGuide": {
+        "title": "Extracting encrypted Archives using QArchive",
+        "sidebar_label": "Extracting Encrypted Archives"
+      },
+      "Installation": {
+        "title": "Installing QArchive.",
+        "sidebar_label": "Installation"
+      },
+      "QArchiveDiskCompressor": {
+        "title": "Class QArchive::DiskCompressor",
+        "sidebar_label": "QArchive::DiskCompressor"
+      },
+      "QArchiveDiskExtractor": {
+        "title": "Class QArchive::DiskExtractor",
+        "sidebar_label": "QArchive::DiskExtractor"
+      },
+      "QArchiveErrorCodes": {
+        "title": "QArchive Error Codes",
+        "sidebar_label": "QArchive Error Codes"
+      },
+      "QArchiveFormats": {
+        "title": "QArchive Supported Compression Formats",
+        "sidebar_label": "QArchive Compression Formats"
+      },
+      "ReportingProgressGuide": {
+        "title": "Reporting Progress for Extraction",
+        "sidebar_label": "Reporting Progress"
+      },
+      "SimpleCompressorGuide": {
+        "title": "Simple Compressor using QArchive",
+        "sidebar_label": "Creating Simple Compressor"
+      },
+      "SimpleExtractorGuide": {
+        "title": "Simple Extractor using QArchive",
+        "sidebar_label": "Creating a Simple Extractor"
+      }
+    },
+    "links": {
+      "Docs": "Docs",
+      "Help": "Help",
+      "Blog": "Blog"
+    },
+    "categories": {
+      "Getting Started": "Getting Started",
+      "Guides": "Guides",
+      "API": "API"
+    }
   },
   "pages-strings": {
     "Help Translate|recruit community translators for your project": "Help Translate",

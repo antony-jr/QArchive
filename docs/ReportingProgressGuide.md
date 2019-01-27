@@ -1,7 +1,7 @@
 ---
 id: ReportingProgressGuide
 title: Reporting Progress for Extraction
-sidebar_label: Reporting Progress for Extraction
+sidebar_label: Reporting Progress
 ---
 
 Please refer the full class documentation [here](QArchiveDiskExtractor.md)
