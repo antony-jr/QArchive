@@ -3,16 +3,8 @@
 # -------------------------------
 #  QMake support for QArchive.
 # -------------------------------
-
+include(QArchive.pri)
 TEMPLATE = lib
 CONFIG += shared_and_static build_all release
 TARGET = QArchive
-INCLUDEPATH += . include
 DEFINES += QT_DEPRECATED_WARNINGS
-
-QT += core concurrent 
-LIBS += -larchive
-
-# Inputs 
-SOURCES += src/QArchive.cc
-HEADERS += include/QArchive.hpp

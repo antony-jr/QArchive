@@ -5,17 +5,17 @@
 	   "AddingQArchive"
     ],
     "Guides" : [
-	   "UsingExtractor",
-	   "UsingCompressor",
-	   "UsingReader"
+	   "SimpleExtractorGuide",
+	   "ExtractingPasswordProtectedArchiveGuide",
+	   "ReportingProgressGuide",
+	   "SimpleCompressorGuide",
+	   "CreatingEncryptedZipArchiveGuide"
     ],
     "API" : [
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",
-       "QArchiveSignalCodes",
-       "QArchiveExtractor",
-	   "QArchiveCompressor",
-	   "QArchiveReader"
+	   "QArchiveDiskExtractor",
+	   "QArchiveDiskCompressor"
     ]
   }
 }

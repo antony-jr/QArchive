@@ -5,14 +5,13 @@ sidebar_label: QArchive Compression Formats
 ---
 
 
-| Archive Code 	      | Code Format                             | Value |
-|---------------------|-----------------------------------------|-------|
-| QArchive::NO_FORMAT | Represents no format.(defaults to .tar) |   0   |
-| QArchive::BZIP      | Represents .bz format.                  |   1   |
-| QArchive::BZIP2     | Represents .bz2 format.                 |   2   |
-| QArchive::GZIP      | Represents .gz format.                  |   3   |
-| QArchive::XAR       | Represenst .xar format.                 |   4   |
-| QArchive::ZIP       | Represents .zip format.                 |   5   |
-| QArchive::SEVEN_ZIP | Represents .7z format.                  |   6   |
-
-
+| Variable Name	          | Format                                  | Value |
+|-------------------------|-----------------------------------------|-------|
+| QArchive::TarFormat     | Represents .tar format without filters. |  17   |
+| QArchive::ZipFormat     | Represents .zip format.                 |  18   |
+| QArchive::SevenZipFormat| Represents .7z format without filters.  |  19   |
+| QArchive::BZipFormat    | Represents .tar.bz format.              |  20   |
+| QArchive::BZip2Format   | Represents .tar.bz2 format.             |  21   |
+| QArchive::GZipFormat    | Represents .tar.gz format.              |  22   |
+| QArchive::XzFormat      | Represents .tar.xz format.              |  23   |
+| QArchive::XarFormat     | Represents .xar format.                 |  24   |

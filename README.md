@@ -1,67 +1,57 @@
 
 <p align="center">
-  <img src=".img/poster.png" height="200px" width=auto alt="QArchive Poster">  <br>
+  <img src="artwork/logo_final.png" height="200px" width=auto alt="QArchive Logo">  <br>
 </p>
 
-> C++ Cross-Platform library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush:. Simply extracts 7z :hamburger: , Tarballs:8ball: , RAR :briefcase:    
-> and other supported formats by libarchive. :heart:    
-> --Antony Jr.
-
-### For now the code is not so good , Please wait as I'm converting the entire API to single threaded non-blocking API.
 
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1ebae88c4a4e4e9d9a494568799a9ec8)](https://www.codacy.com/app/antony-jr/QArchive?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=antony-jr/QArchive&amp;utm_campaign=Badge_Grade) [![Travis Build status](https://travis-ci.org/antony-jr/QArchive.svg?branch=master)](https://travis-ci.org/antony-jr/QArchive) [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/a49bqd5qssojj841?svg=true)](https://ci.appveyor.com/project/antony-jr/qarchive)
 
-For a **long time** I've been searching for a easy to use archive library for **C++** with **Qt** support , I came accross    
-**libarchive** , it was super cool :heart: but it did'nt have a official **C++** binding. Some C++ Wrappers for libarchive exists    
-like **moor** but I needed something so simple as **1,2,3 and also support Qt's event loop.**    
+QArchive is a cross-platform C++ library that modernizes libarchive , This library helps you to extract and compress 
+archives supported by libarchive. The whole library itself is crafted to work perfectly well with the 
+Qt event loop and thus its a perfect fit for your Qt projects.
 
-So **QArchive** is the result of the above :dog: , it is a very small C++ Cross-Platform library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
+I personally made this project to extract .7z archives in order to create a library that can update Qt Apps installed via
+Qt Installer Framework without using the updater tool provided by Qt , because I hated using sub-process and besides
+I wanted a in-built updater for my application and thats not possible with the already provided updater from 
+Qt Installer Framework.
 
-**QArchive can be easily integrated into your project because its just a header and a source file! it is also non-blocking   
-so its best suited for your Qt Projects!**
+## Features
 
-**Witness QArchive with your own eyes!**   
+* *Single Threaded , Non-Blocking API* - Using Qt's Event Loop.(Optionally , You can use a seperate thread.)
 
-<p align="center">
-  <img src=".img/code2.png" alt="QArchive Poster 2"><br>
-</p>
+* *Easy to Use API* - Made some effort to match Qt's style.
+
+* *Cyclic API , No use of mutex* - The whole library is fully cyclic and therefore no mutex is used.(Only signals and slots.)
+
+* *Drink the Qt Kool-aid* - In a positive way.
 
 
-# Installation
-
-**Just execute this command on your project folder and everything will be done for you!**   
-This requires **requests** to be installed , so make sure you have installed **requests** for python.
-This applies for all **platforms**.
+**Witness it with your own eyes,**
 
 ```
- $ python -c "from requests import get;exec(get('https://git.io/vbbC1').content)"
+#include <QCoreApplication>
+#include <QArchive>
+
+int main(int argc, char **argv)
+{
+    using QArchive::DiskExtractor;
+    QCoreApplication app(argc, argv);
+    DiskExtractor Extractor("Test.7z");
+    
+    /* Connect Signals and Slots. */
+    QObject::connect(&Extractor , 
+                     &DiskExtractor::finished , 
+                     &app , 
+                     &QCoreApplication::quit);
+    
+    Extractor.start();
+    return app.exec();
+}
 ```
-
-**or** You can also add this project as a **git submodule**.
-
 
 # Getting Started
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive).
-
-# Insights
-
-**What can this library do ,**
-
-  * Can extract all archives which are supported by libarchive , (i.e) tar, gzip, bzip, 7z, zip, rar, xar   
-    and much more!
-  * Extract and Read encrypted archives.
-  * Give progress on the extraction.
-  * Can give file information about the files inside the archive.
-  * Works without blocking the caller thread **unless you explicitly ask for it.**
-  * Works just like any other qt library.
-  * Does not crash your application.
-
-**What can't this library do ,**
-
-  * Creating archive's with encryption and specific blocksize's may not work sometimes.
-  * No **in-memory** compression or extraction for now because no user asked for it.
-  
 
 # Contributors [![QArchive Contributors](https://img.shields.io/github/contributors/antony-jr/QArchive.svg)](https://github.com/antony-jr/QArchive/graphs/contributors)
 
@@ -110,24 +100,9 @@ I really need to thank the developers of this libraries for creating it because 
 * [Qt](https://github.com/qt)
 
 
-# Support [![Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/antonyjr/donate) [![Twitter](https://img.shields.io/twitter/url/https/github.com/antony-jr/QArchive.svg?style=social)](https://twitter.com/intent/tweet?text=Checkout%20%23QArchive%20by%20%40antonyjr0%20%20%2C%20its%20cool.%20Try%20it%20at%20https%3A%2F%2Fgithub.com%2Fantony-jr%2FQArchive)
+# Support [![Twitter](https://img.shields.io/twitter/url/https/github.com/antony-jr/QArchive.svg?style=social)](https://twitter.com/intent/tweet?text=Checkout%20%23QArchive%20by%20%40antonyjr0%20%20%2C%20its%20cool.%20Try%20it%20at%20https%3A%2F%2Fgithub.com%2Fantony-jr%2FQArchive)
 
 If you think that this project is **cool** then you can give it a :star: or :fork_and_knife: it if you want to improve it with me. I really :heart: stars though!   
-
-<p align="center">
-    <a href="https://liberapay.com/antonyjr/donate">
-       <img src="https://liberapay.com/assets/widgets/donate.svg">
-    </a>
-</p>
-
-
-If you want to do something that stands out then you can click the **donate** button at the top to make a monthly donation , So   
-I will make sure that I stay healthy and keep on to do my work. :briefcase: Supporting me means supporting all of my projects , So   
-you are like **Tony Stark** :heart: who backs **Spider-Man**! Thank you for your extra care! :dog:   
-
-You can also tweet about me on twitter , get connected with me [@antonyjr0](https://twitter.com/antonyjr0)
-
-Thank You! :smiley_cat:
 
 # License
 

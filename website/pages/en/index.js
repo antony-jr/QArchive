@@ -102,7 +102,9 @@ class Index extends React.Component {
               contents={[
                 {
                   content: 'QArchive fully supports Qt Projects by flowing with its event loop and'+
-			   ' thus you will have no problem integrating QArchive with your Qt Project.',
+			   ' thus you will have no problem integrating QArchive with your Qt Project.'+
+			   'The whole library is also single threaded and non-blocking but you can also'+
+			   ' run it in a different thread too.',
                   image: siteConfig.baseUrl + 'img/qt.png',
                   imageAlign: 'top',
                   title: 'Supports Qt\'s Event Loop.',

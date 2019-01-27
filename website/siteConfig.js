@@ -7,20 +7,7 @@
 
 /* List of projects/orgs using your project for the users page */
 
-const users = [
-  {
-    caption: 'QInstallerBridge',
-    image: '/QArchive/img/QInstallerBridge.png',
-    infoLink: 'https://antony-jr.github.io/QInstallerBridge',
-    pinned: true,
-  },
-  {	
-    caption: 'GHReleaseBridge',
-    image: '/QArchive/img/GHReleaseBridge.png',
-    infoLink: 'https://antony-jr.github.io/GHReleaseBridge',
-    pinned: true,
-  },
-];
+const users = [];
 
 const siteConfig = {
   title: 'QArchive' /* title for your website */,

@@ -10,14 +10,17 @@ before_install:
 install:
   - sudo apt-get -y install qt59base
   - source /opt/qt*/bin/qt*-env.sh
-  - sudo apt-get -y install libzip-dev liblzma-dev libarchive-dev libarchive13
+  - sudo apt-get -y install libzip-dev liblzma-dev
 
 script:
-  - mkdir build ; cd build # Check if it builds as a library.
-  - qmake .. 
+  - git clone https://github.com/libarchive/libarchive
+  - cd libarchive
+  - cmake .
   - make -j$(nproc)
-  - cd ..
-  - cd tests/
+  - sudo make install
+  - sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
+  - sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
+  - cd ../tests
   - qmake .
   - make -j$(nproc)
   - ./tests # Run Tests

@@ -1,7 +1,7 @@
 /*
  * BSD 3-Clause License
  *
- * Copyright (c) 2018, Antony jr
+ * Copyright (c) 2019, Antony jr
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,4 +33,6 @@
  *  The Traditional Proxy files used in all Qt Modules , it just points to our
  *  Original API Header.
 */
-#include "include/QArchive.hpp"
+#include "include/qarchive_enums.hpp"
+#include "include/qarchivediskextractor.hpp"
+#include "include/qarchivediskcompressor.hpp"
