@@ -7,6 +7,16 @@ sidebar_label: QArchive::DiskCompressor
 The QArchive::DiskCompressor class helps to create archives that based on disk, (i.e) The storage of 
 the computer. This compresses files in archive formats supported by **libarchive**.
 
+|	    |				               |		
+|-----------|------------------------------------------|
+|  Header:  | #include < QArchive >	               |
+|   qmake:  | include(QArchive/QArchive.pri)           |
+| Class Name| DiskCompressor                           |
+| Namespace | QArchive				       |
+| Inherits: | QObject			               |
+
+
+This class belongs to QArchive namespace , so make sure to include it.   
 **Note:** All functions in this class is **[reentrant](https://doc.qt.io/qt-5/threads-reentrancy.html)**.
 
 

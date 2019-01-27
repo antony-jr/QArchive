@@ -8,6 +8,15 @@ The QArchive::DiskExtractor class helps to extract archives that are based on th
 This class can extract all formats supported by libarchive , this can aslo be used to read the contents of the given 
 archive.
 
+|	    |				               |		
+|-----------|------------------------------------------|
+|  Header:  | #include < QArchive >	               |
+|   qmake:  | include(QArchive/QArchive.pri)           |
+| Class Name| DiskExtractor
+| Namespace | QArchive				       |
+| Inherits: | QObject			               |
+
+
 The class belongs to the QArchive namespace , so make sure to include it.   
 **Note:** All functions in this class is **[reentrant](https://doc.qt.io/qt-5/threads-reentrancy.html)**.
 
