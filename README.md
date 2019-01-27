@@ -6,11 +6,48 @@
 
 # QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1ebae88c4a4e4e9d9a494568799a9ec8)](https://www.codacy.com/app/antony-jr/QArchive?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=antony-jr/QArchive&amp;utm_campaign=Badge_Grade) [![Travis Build status](https://travis-ci.org/antony-jr/QArchive.svg?branch=master)](https://travis-ci.org/antony-jr/QArchive) [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/a49bqd5qssojj841?svg=true)](https://ci.appveyor.com/project/antony-jr/qarchive)
 
-For a **long time** I've been searching for a easy to use archive library for **C++** with **Qt** support , I came accross    
-**libarchive** , it was super cool :heart: but it did'nt have a official **C++** binding. Some C++ Wrappers for libarchive exists    
-like **moor** but I needed something so simple as **1,2,3 and also support Qt's event loop.**    
+QArchive is a cross-platform C++ library that modernizes libarchive , This library helps you to extract and compress 
+archives supported by libarchive. The whole library itself is crafted to work perfectly well with the 
+Qt event loop and thus its a perfect fit for your Qt projects.
 
-So **QArchive** is the result of the above :dog: , it is a very small C++ Cross-Platform library :ring: that Modernizes :rocket: libarchive using Qt5 :paintbrush: . Simply extracts 7z :hamburger: , Tarballs :8ball: , RAR :briefcase: and other supported formats by libarchive. :heart:.
+I personally made this project to extract .7z archives in order to create a library that can update Qt Apps installed via
+Qt Installer Framework without using the updater tool provided by Qt , because I hated using sub-process and besides
+I wanted a in-built updater for my application and thats not possible with the already provided updater from 
+Qt Installer Framework.
+
+## Features
+
+* *Single Threaded , Non-Blocking API* - Using Qt's Event Loop.(Optionally , You can use a seperate thread.)
+
+* *Easy to Use API* - Made some effort to match Qt's style.
+
+* *Cyclic API , No use of mutex* - The whole library is fully cyclic and therefore no mutex is used.(Only signals and slots.)
+
+* *Drink the Qt Kool-aid* - In a positive way.
+
+
+**Witness it with your own eyes,**
+
+```
+#include <QCoreApplication>
+#include <QArchive>
+
+int main(int argc, char **argv)
+{
+    using QArchive::DiskExtractor;
+    QCoreApplication app(argc, argv);
+    DiskExtractor Extractor("Test.7z");
+    
+    /* Connect Signals and Slots. */
+    QObject::connect(&Extractor , 
+                     &DiskExtractor::finished , 
+                     &app , 
+                     &QCoreApplication::quit);
+    
+    Extractor.start();
+    return app.exec();
+}
+```
 
 # Getting Started
 
