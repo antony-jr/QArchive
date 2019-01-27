@@ -18,12 +18,19 @@ find_package(Qt5Core)
 include_directories(.)
 include_directories(include)
 
-add_library(QArchive 
-	    src/qarchivediskextractor_p.cc
+add_library(QArchive
+	    src/qarchivediskcompressor.cc
 	    src/qarchivediskextractor.cc
-	    include/qarchivediskextractor_p.hpp
+	    src/qarchive_enums.cc
+	    src/qarchivediskcompressor_p.cc
+	    src/qarchivediskextractor_p.cc
+	    src/qarchiveutils_p.cc
+	    include/qarchivediskcompressor.hpp
 	    include/qarchivediskextractor.hpp
-	    include/qarchive_enums.hpp)
+	    include/qarchive_enums.hpp
+	    include/qarchivediskcompressor_p.hpp
+	    include/qarchivediskextractor_p.hpp
+	    include/qarchiveutils_p.hpp)
 
 target_link_libraries(QArchive PUBLIC Qt5::Core archive)
 target_include_directories(QArchive PUBLIC . include)
