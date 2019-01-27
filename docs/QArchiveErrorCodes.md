@@ -4,8 +4,8 @@ title: QArchive Error Codes
 sidebar_label: QArchive Error Codes
 ---
 
-You convert error code to a QString which is the variable name for that error
-code using the function ```errorCodeToString``` present in the QArchive namespace.
+You convert error code to a QString which is the variable name for that error 
+code using the function   ```QArchive::errorCodeToString(short)```.
 
 
 | Variable Name                       	  | Value   |

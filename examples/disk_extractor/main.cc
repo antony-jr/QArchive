@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QArchive>
+#include <QJsonObject>
 
 int main(int ac, char **av)
 {
@@ -56,6 +57,10 @@ int main(int ac, char **av)
         app.quit();
         return;
     });
+    QObject::connect(&Extractor , &DiskExtractor::info , [&](QJsonObject info){
+	qInfo() << "ARCHIVE CONTENTS:: " << info;
+	return;
+    });
 
     /* Start the Extractor. 
      * Note:
@@ -63,6 +68,8 @@ int main(int ac, char **av)
      *    to the extractor object is queued and only gets executed when the event
      *    loop starts , most likely.
     */
+    Extractor.setCalculateProgress(true);
+    Extractor.getInfo();
     Extractor.start(); 
     return app.exec();
 }
