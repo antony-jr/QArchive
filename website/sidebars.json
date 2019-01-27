@@ -5,8 +5,11 @@
 	   "AddingQArchive"
     ],
     "Guides" : [
-	   "UsingDiskExtractor",
-	   "UsingDiskCompressor"
+	   "SimpleExtractorGuide",
+	   "ExtractingPasswordProtectedArchiveGuide",
+	   "ReportingProgressGuide",
+	   "SimpleCompressorGuide",
+	   "CreatingEncryptedZipArchiveGuide"
     ],
     "API" : [
 	   "QArchiveFormats",

@@ -1,7 +1,7 @@
 ---
-id: UsingDiskCompressor
-title: Using QArchive to Compress a set of files and directories.
-sidebar_label: Compressing files with QArchive
+id: SimpleCompressorGuide
+title: Simple Compressor using QArchive
+sidebar_label: Creating Simple Compressor using QArchive
 ---
 
 Please refer the full class documentation [here](QArchiveDiskCompressor.md)
@@ -77,5 +77,5 @@ SOURCES += main.cpp
  $ # Make sure you have files for the new archive!
 ```
 
-The Program is created in the examples tree on the official repo.
+This Program is created in the examples tree on the official repo.
 
