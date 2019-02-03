@@ -2,8 +2,9 @@
 
 QArchive is a small library that modernizes **libarhive** using C++ and Qt5 , So you need to go through libarchive's   
 **[documentaion](https://github.com/libarchive/libarchive/wiki)** and **[Qt Docs](https://doc.qt.io/qt-5/)**.   
-You **don't need to be an expert** in any of these because everyone is learning and I specifically want this project to welcome   
-new contributors and let them know how a open source project works. All contributors and those who wish to contribute must follow the **[code of conduct](CODE_OF_CONDUCT.md)**. Thats the **basics** that you need to know to **get started!**.
+You **don't need to be an expert** in any of these because everyone is learning and I specifically want this project to   
+welcome new contributors and let them know how a open source project works. All contributors and those who wish to   
+contribute must follow the **[code of conduct](CODE_OF_CONDUCT.md)**. Thats the **basics** that you need to know to **get started!**.
 
 
 ### Reporting Issues
@@ -29,8 +30,8 @@ describe the cause why we need to improve the code after that **open a pull requ
    extension and for **header file(s)** you must use **.hpp**.
  * Use comments only to write why we need a **class** or a **function** and not **what**.
  * If you create a new method then you **must** be consistent as other methods.
- * You **can** do whatever with **private slots** and can return any return type if you desire , but make sure it is efficient.
- * **Update the docs** if you add any new method to a **class**.
+ * You **can** do whatever with **private slots** and can return any type if you desire , but make sure it is efficient.
+ * **Update the docs** if you add any new method to a public **class**.
  * **Do not** add **unwanted file(s)** and doing so will make your **pull request invalid**.
  
 After making changes to the source file(s) , open a pull request and give a **good title** and **mention** the **issue you opened before**. Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
