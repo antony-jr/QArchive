@@ -516,7 +516,7 @@ short DiskCompressorPrivate::compress()
          * not very robust and thus needs a good implementation.
         */
         int r;
-        ssize_t len;
+        std::size_t len;
         char buff[16384]; /* Default buffer size */
 
         auto disk = QSharedPointer<struct archive>(archive_read_disk_new(), ArchiveReadDestructor);
