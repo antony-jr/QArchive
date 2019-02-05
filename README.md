@@ -86,6 +86,15 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=alberthdev">💻</a>
         </td>
+      <td>
+            <img src="https://avatars3.githubusercontent.com/u/11664992?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/HadesD">Ichiro</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=HadesD">💻</a>
+        </td>
     </tr>
 </table>
 
