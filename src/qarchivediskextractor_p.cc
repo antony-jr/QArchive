@@ -32,16 +32,6 @@ extern "C" {
 #endif
 
 /*
- * Small patch to fix errors on MSC ,
- * fixed by https://github.com/hcaihao
-*/
-#if defined(_MSC_VER)
-#include <BaseTsd.h>
-#include <io.h>
-typedef SSIZE_T ssize_t;
-#endif
-
-/*
  * Helpful macros to check if an archive error is caused due to
  * faulty passwords.
  * Expects a pointer to a struct archive , returns 1 if password

@@ -64,7 +64,7 @@ private:
     short m_ArchiveFormat = 0; /* Defaults to ZIP. */
     int n_BlockSize = 10240,
         n_TotalEntries = 0;
-    QSharedPointer<struct archive> m_ArchiveWrite = nullptr;
+    QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QSaveFile> m_TemporaryFile;
     QScopedPointer<QLinkedList<QPair<QString, QString>>> m_ConfirmedFiles;
     QScopedPointer<QLinkedList<QPair<QString, QString>>> m_StaggedFiles;
