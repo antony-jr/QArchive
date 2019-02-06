@@ -273,6 +273,7 @@ void DiskExtractorPrivate::start()
     if(errorCode == NoError) {
         b_Started = false;
         b_Finished = true;
+	m_Archive->close();
         emit finished();
     } 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -322,6 +323,7 @@ void DiskExtractorPrivate::resume()
     if(ret == NoError) {
         b_Started = false;
         b_Finished = true;
+	m_Archive->close();
         emit finished();
     } 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
