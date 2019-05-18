@@ -1,6 +1,6 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
-#include <QFile>
+#include <QIODevice>
 #include <QObject>
 #include <QString>
 #include <QEventLoop>
@@ -19,7 +19,7 @@ public:
     DiskExtractorPrivate();
     ~DiskExtractorPrivate();
 public Q_SLOTS:
-    void setArchive(QFile*);
+    void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setBlockSize(int);
     void setCalculateProgress(bool);
@@ -73,7 +73,7 @@ private:
     QString m_OutputDirectory,
 	    m_Password,
             m_ArchivePath;
-    QFile *m_Archive = nullptr;
+    QIODevice *m_Archive = nullptr;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QJsonObject> m_Info;

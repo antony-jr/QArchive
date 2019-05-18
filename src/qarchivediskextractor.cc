@@ -12,15 +12,13 @@ static QMetaMethod getMethod(QScopedPointer<DiskExtractorPrivate> &object, const
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
 
-DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded )
+DiskExtractor::DiskExtractor(QObject *parent)
     : QObject(parent)
 {
     m_Extractor.reset(new DiskExtractorPrivate);
-    if(!singleThreaded) {
-        m_Thread.reset(new QThread);
-        m_Thread->start();
-        m_Extractor->moveToThread(m_Thread.data());
-    }
+    m_Thread.reset(new QThread);
+    m_Thread->start();
+    m_Extractor->moveToThread(m_Thread.data());
     connect(m_Extractor.data(), &DiskExtractorPrivate::started,
             this, &DiskExtractor::started, Qt::DirectConnection);
     connect(m_Extractor.data(), &DiskExtractorPrivate::canceled,
@@ -43,20 +41,20 @@ DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded )
             this, &DiskExtractor::info, Qt::DirectConnection);
 }
 
-DiskExtractor::DiskExtractor(QFile *archive, QObject *parent, bool singleThreaded)
-    : DiskExtractor(parent, singleThreaded)
+DiskExtractor::DiskExtractor(QIODevice *archive, QObject *parent)
+    : DiskExtractor(parent)
 {
     setArchive(archive);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, QObject *parent, bool singleThreaded)
-    : DiskExtractor(parent, singleThreaded)
+DiskExtractor::DiskExtractor(const QString &archivePath, QObject *parent)
+    : DiskExtractor(parent)
 {
     setArchive(archivePath);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDirectory, QObject *parent, bool singleThreaded)
-    : DiskExtractor(parent, singleThreaded)
+DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDirectory, QObject *parent)
+    : DiskExtractor(parent)
 {
     setArchive(archivePath);
     setOutputDirectory(outputDirectory);
@@ -65,19 +63,17 @@ DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDi
 
 DiskExtractor::~DiskExtractor()
 {
-    if(!m_Thread.isNull()){
-	    m_Thread->quit();
-	    m_Thread->wait();
-    }
+    m_Thread->quit();
+    m_Thread->wait();
     return;
 }
 
-void DiskExtractor::setArchive(QFile *archive)
+void DiskExtractor::setArchive(QIODevice *archive)
 {
     getMethod(m_Extractor,
-              "setArchive(QFile*)").invoke(m_Extractor.data(),
+              "setArchive(QIODevice*)").invoke(m_Extractor.data(),
                                            Qt::QueuedConnection,
-                                           Q_ARG(QFile*, archive));
+                                           Q_ARG(QIODevice*, archive));
     return;
 }
 

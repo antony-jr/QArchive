@@ -68,8 +68,8 @@ int main(int ac, char **av)
      *    to the extractor object is queued and only gets executed when the event
      *    loop starts , most likely.
     */
-    Extractor.setCalculateProgress(true);
-    Extractor.getInfo();
+    /*Extractor.setCalculateProgress(true);*/
+//    Extractor.getInfo();
     Extractor.start(); 
     return app.exec();
 }

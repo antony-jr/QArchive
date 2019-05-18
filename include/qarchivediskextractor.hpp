@@ -1,7 +1,7 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
 #include <QScopedPointer>
-#include <QFile>
+#include <QIODevice>
 #include <QString>
 #include <QObject>
 #include <QThread>
@@ -14,13 +14,13 @@ class DiskExtractor : public QObject
 {
     Q_OBJECT
 public:
-    DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);
-    DiskExtractor(QFile*, QObject *parent = nullptr, bool singleThreaded = true);
-    DiskExtractor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
-    DiskExtractor(const QString&, const QString&, QObject *parent = nullptr, bool singleThreaded = true );
+    DiskExtractor(QObject *parent = nullptr);
+    DiskExtractor(QIODevice*, QObject *parent = nullptr);
+    DiskExtractor(const QString&, QObject *parent = nullptr);
+    DiskExtractor(const QString&, const QString&, QObject *parent = nullptr);
     ~DiskExtractor();
 public Q_SLOTS:
-    void setArchive(QFile*);
+    void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setArchive(const QString&, const QString&);
     void setBlockSize(int);

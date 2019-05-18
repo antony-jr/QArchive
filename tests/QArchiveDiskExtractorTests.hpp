@@ -150,24 +150,6 @@ private slots:
         QVERIFY(spyInfo.wait() || spyInfo.count());
     }
 
-    void runningExtractorNonSingleThreaded()
-    {
-        QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir,
-                                  /*parent=*/nullptr, /*singleThread=*/false);
-        QObject::connect(&e, &QArchive::DiskExtractor::error,
-                         this, &QArchiveDiskExtractorTests::defaultErrorHandler);
-        QSignalSpy spyInfo(&e, SIGNAL(finished()));
-        e.start();
-
-        /*  Must emit exactly one signal. */
-        QVERIFY(spyInfo.wait() || spyInfo.count());
-
-        /* Test the output file and also the contents. */
-        QFile TestOutput(Test1OutputFile);
-        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
-        QVERIFY(Test1OutputContents == QString(TestOutput.readAll()));
-    }
-
     void testInvalidArchivePath()
     {
         QArchive::DiskExtractor e("THISDOESNOTEXISTS", TestOutputDir);
