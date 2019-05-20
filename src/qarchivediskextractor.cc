@@ -6,19 +6,20 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(QScopedPointer<DiskExtractorPrivate> &object, const char *function)
-{
+static QMetaMethod getMethod(QScopedPointer<DiskExtractorPrivate> &object, const char *function) {
     auto metaObject = object->metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
 
-DiskExtractor::DiskExtractor(QObject *parent)
-    : QObject(parent)
-{
+DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded)
+    : QObject(parent) {
     m_Extractor.reset(new DiskExtractorPrivate);
-    m_Thread.reset(new QThread);
-    m_Thread->start();
-    m_Extractor->moveToThread(m_Thread.data());
+
+    if(!singleThreaded) {
+        m_Thread.reset(new QThread);
+        m_Thread->start();
+        m_Extractor->moveToThread(m_Thread.data());
+    }
     connect(m_Extractor.data(), &DiskExtractorPrivate::started,
             this, &DiskExtractor::started, Qt::DirectConnection);
     connect(m_Extractor.data(), &DiskExtractorPrivate::canceled,
@@ -41,44 +42,40 @@ DiskExtractor::DiskExtractor(QObject *parent)
             this, &DiskExtractor::info, Qt::DirectConnection);
 }
 
-DiskExtractor::DiskExtractor(QIODevice *archive, QObject *parent)
-    : DiskExtractor(parent)
-{
+DiskExtractor::DiskExtractor(QIODevice *archive, QObject *parent, bool singleThreaded)
+    : DiskExtractor(parent, singleThreaded) {
     setArchive(archive);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, QObject *parent)
-    : DiskExtractor(parent)
-{
+DiskExtractor::DiskExtractor(const QString &archivePath, QObject *parent, bool singleThreaded)
+    : DiskExtractor(parent, singleThreaded) {
     setArchive(archivePath);
 }
 
-DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDirectory, QObject *parent)
-    : DiskExtractor(parent)
-{
+DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDirectory, QObject *parent, bool singleThreaded)
+    : DiskExtractor(parent, singleThreaded) {
     setArchive(archivePath);
     setOutputDirectory(outputDirectory);
 }
 
 
-DiskExtractor::~DiskExtractor()
-{
-    m_Thread->quit();
-    m_Thread->wait();
+DiskExtractor::~DiskExtractor() {
+    if(!m_Thread.isNull()) {
+        m_Thread->quit();
+        m_Thread->wait();
+    }
     return;
 }
 
-void DiskExtractor::setArchive(QIODevice *archive)
-{
+void DiskExtractor::setArchive(QIODevice *archive) {
     getMethod(m_Extractor,
               "setArchive(QIODevice*)").invoke(m_Extractor.data(),
-                                           Qt::QueuedConnection,
-                                           Q_ARG(QIODevice*, archive));
+                      Qt::QueuedConnection,
+                      Q_ARG(QIODevice*, archive));
     return;
 }
 
-void DiskExtractor::setArchive(const QString &archivePath)
-{
+void DiskExtractor::setArchive(const QString &archivePath) {
     getMethod(m_Extractor,
               "setArchive(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -86,14 +83,12 @@ void DiskExtractor::setArchive(const QString &archivePath)
     return;
 }
 
-void DiskExtractor::setArchive(const QString &archivePath, const QString &outputDirectory)
-{
+void DiskExtractor::setArchive(const QString &archivePath, const QString &outputDirectory) {
     setArchive(archivePath);
     setOutputDirectory(outputDirectory);
 }
 
-void DiskExtractor::setBlockSize(int n)
-{
+void DiskExtractor::setBlockSize(int n) {
     getMethod(m_Extractor,
               "setBlockSize(int)").invoke(m_Extractor.data(),
                                           Qt::QueuedConnection,
@@ -101,8 +96,7 @@ void DiskExtractor::setBlockSize(int n)
     return;
 }
 
-void DiskExtractor::setCalculateProgress(bool choice)
-{
+void DiskExtractor::setCalculateProgress(bool choice) {
     getMethod(m_Extractor,
               "setCalculateProgress(bool)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -110,8 +104,7 @@ void DiskExtractor::setCalculateProgress(bool choice)
     return;
 }
 
-void DiskExtractor::setOutputDirectory(const QString &dir)
-{
+void DiskExtractor::setOutputDirectory(const QString &dir) {
     getMethod(m_Extractor,
               "setOutputDirectory(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -119,8 +112,7 @@ void DiskExtractor::setOutputDirectory(const QString &dir)
     return;
 }
 
-void DiskExtractor::setPassword(const QString &passwd)
-{
+void DiskExtractor::setPassword(const QString &passwd) {
     getMethod(m_Extractor,
               "setPassword(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -128,8 +120,7 @@ void DiskExtractor::setPassword(const QString &passwd)
     return;
 }
 
-void DiskExtractor::addFilter(const QString &filter)
-{
+void DiskExtractor::addFilter(const QString &filter) {
     getMethod(m_Extractor,
               "addFilter(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -137,8 +128,7 @@ void DiskExtractor::addFilter(const QString &filter)
     return;
 }
 
-void DiskExtractor::addFilter(const QStringList &filters)
-{
+void DiskExtractor::addFilter(const QStringList &filters) {
     getMethod(m_Extractor,
               "addFilter(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
@@ -146,38 +136,32 @@ void DiskExtractor::addFilter(const QStringList &filters)
     return;
 }
 
-void DiskExtractor::clear()
-{
+void DiskExtractor::clear() {
     getMethod(m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
 
-void DiskExtractor::getInfo()
-{
+void DiskExtractor::getInfo() {
     getMethod(m_Extractor, "getInfo()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
 
-void DiskExtractor::start()
-{
+void DiskExtractor::start() {
     getMethod(m_Extractor, "start()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
 
-void DiskExtractor::cancel()
-{
+void DiskExtractor::cancel() {
     getMethod(m_Extractor, "cancel()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
 
-void DiskExtractor::pause()
-{
+void DiskExtractor::pause() {
     getMethod(m_Extractor, "pause()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }
 
-void DiskExtractor::resume()
-{
+void DiskExtractor::resume() {
     getMethod(m_Extractor, "resume()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
 }

@@ -18,11 +18,11 @@ sure you follow the **issue template** which will not be that hard. Be specific 
 If you wish to develop some **code** for the project then you are much **welcomed** but make sure you **open an issue first** to   
 describe the cause why we need to improve the code after that **open a pull request** and also make sure to **follow the pull request template**.    And you need to follow the following **rules when updating the source files**.
 
- * You **must** follow the **[linux kernel coding style](https://www.kernel.org/doc/html/v4.10/process/coding-style.html)**.
+ * You **must** follow the **[google coding style](https://google.github.io/styleguide/cppguide.html)**.
  * You **can** use **[Artistic Styles](http://astyle.sourceforge.net/)** to automatically format your code to follow the
-   **linux kernel coding style**.   
+   **google coding style**.   
    ```
-    $ astyle --style=linux src/*cc include/*hpp
+    $ astyle --style=google src/*cc include/*hpp
     $ rm src/*orig include/*orig # remove old files.
    ```
    
@@ -39,6 +39,6 @@ After making changes to the source file(s) , open a pull request and give a **go
 ### Reference
 
 libarchive - https://github.com/libarchive/libarchive   
-linux kernel coding style - https://www.kernel.org/doc/html/v4.10/process/coding-style.html   
+google coding style - https://google.github.io/styleguide/cppguide.html  
 astyle - http://astyle.sourceforge.net/   
 Qt Documentation - https://doc.qt.io/qt-5/

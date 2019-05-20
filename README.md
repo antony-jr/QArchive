@@ -17,7 +17,7 @@ Qt Installer Framework.
 
 ## Features
 
-* *Non-Blocking API* - Using Qt's Event Loop.(**you cannot run this in a single thread**)
+* *Single threaded and Non-Blocking API* - Using Qt's Event Loop. (**you can optionally run in a different thread**)
 
 * *Easy to Use API* - Made some effort to match Qt's style.
 

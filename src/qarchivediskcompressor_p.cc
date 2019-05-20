@@ -30,15 +30,13 @@ using namespace QArchive;
  * ZIP Format is currently supported for encrypting archives with a user given.
 */
 DiskCompressorPrivate::DiskCompressorPrivate()
-    : QObject()
-{
+    : QObject() {
     m_TemporaryFile.reset(new QSaveFile);
     m_StaggedFiles.reset(new QLinkedList<QPair<QString, QString>>);
     m_ConfirmedFiles.reset(new QLinkedList<QPair<QString, QString>>);
 }
 
-DiskCompressorPrivate::~DiskCompressorPrivate()
-{
+DiskCompressorPrivate::~DiskCompressorPrivate() {
     m_ArchiveWrite.clear();
 }
 
@@ -47,8 +45,7 @@ DiskCompressorPrivate::~DiskCompressorPrivate()
  * be relative or absolute as long it is not existing already or does
  * not have the permission to write.
 */
-void DiskCompressorPrivate::setFileName(const QString &fileName)
-{
+void DiskCompressorPrivate::setFileName(const QString &fileName) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -61,8 +58,7 @@ void DiskCompressorPrivate::setFileName(const QString &fileName)
  * then even if the filename corresponds to some other format , the compressor will
  * only compress the data in the given archive format.
 */
-void DiskCompressorPrivate::setArchiveFormat(short format)
-{
+void DiskCompressorPrivate::setArchiveFormat(short format) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -71,9 +67,8 @@ void DiskCompressorPrivate::setArchiveFormat(short format)
 }
 
 /* Only used for ZIP Archives , other formats are ignored. */
-void DiskCompressorPrivate::setPassword(const QString &passwd)
-{
-#if ARCHIVE_VERSION_NUMBER >= 3003003 
+void DiskCompressorPrivate::setPassword(const QString &passwd) {
+#if ARCHIVE_VERSION_NUMBER >= 3003003
     if(b_Started || b_Paused) {
         return;
     }
@@ -85,8 +80,7 @@ void DiskCompressorPrivate::setPassword(const QString &passwd)
 }
 
 /* Custom BlockSize for the archive. */
-void DiskCompressorPrivate::setBlockSize(int size)
-{
+void DiskCompressorPrivate::setBlockSize(int size) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -95,8 +89,7 @@ void DiskCompressorPrivate::setBlockSize(int size)
 }
 
 /* Adds a single file to the archive. */
-void DiskCompressorPrivate::addFiles(const QString &file)
-{
+void DiskCompressorPrivate::addFiles(const QString &file) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -106,8 +99,7 @@ void DiskCompressorPrivate::addFiles(const QString &file)
 }
 
 /* Adds multiple files to the archive with respect to the given QStringList. */
-void DiskCompressorPrivate::addFiles(const QStringList &files)
-{
+void DiskCompressorPrivate::addFiles(const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -122,8 +114,7 @@ void DiskCompressorPrivate::addFiles(const QStringList &files)
 }
 
 /* Adds a single file and uses a custom entry name with respect to the given data.*/
-void DiskCompressorPrivate::addFiles(const QString &entryName, const QString &file)
-{
+void DiskCompressorPrivate::addFiles(const QString &entryName, const QString &file) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -138,8 +129,7 @@ void DiskCompressorPrivate::addFiles(const QString &entryName, const QString &fi
 /* Adds multiple files and uses a corresponding list of entry names with respect to
  * the given data.
 */
-void DiskCompressorPrivate::addFiles(const QStringList &entryNames, const QStringList &files)
-{
+void DiskCompressorPrivate::addFiles(const QStringList &entryNames, const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -157,8 +147,7 @@ void DiskCompressorPrivate::addFiles(const QStringList &entryNames, const QStrin
 }
 
 /* Removes a single file from the archive. */
-void DiskCompressorPrivate::removeFiles(const QString &file)
-{
+void DiskCompressorPrivate::removeFiles(const QString &file) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -168,8 +157,7 @@ void DiskCompressorPrivate::removeFiles(const QString &file)
 }
 
 /* Removes multiple files from the archive with respect to the given QStringList. */
-void DiskCompressorPrivate::removeFiles(const QStringList &files)
-{
+void DiskCompressorPrivate::removeFiles(const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -181,8 +169,7 @@ void DiskCompressorPrivate::removeFiles(const QStringList &files)
 }
 
 /* Removes a single file from the archive which corresponds to the given custom entry name. */
-void DiskCompressorPrivate::removeFiles(const QString &entryName, const QString &file)
-{
+void DiskCompressorPrivate::removeFiles(const QString &entryName, const QString &file) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -192,8 +179,7 @@ void DiskCompressorPrivate::removeFiles(const QString &entryName, const QString 
 }
 
 /* Removes multiple files from the archive which corresponds to the given list of entry names. */
-void DiskCompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &files)
-{
+void DiskCompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -209,8 +195,7 @@ void DiskCompressorPrivate::removeFiles(const QStringList &entryNames, const QSt
 }
 
 /* clears internal cache. */
-void DiskCompressorPrivate::clear()
-{
+void DiskCompressorPrivate::clear() {
     if(b_Started) {
         return;
     }
@@ -229,8 +214,7 @@ void DiskCompressorPrivate::clear()
 }
 
 /* Starts the compression. */
-void DiskCompressorPrivate::start()
-{
+void DiskCompressorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
     } else if(m_TemporaryFile->fileName().isEmpty()) {
@@ -277,8 +261,7 @@ void DiskCompressorPrivate::start()
 }
 
 /* Resumes the compressor if paused. */
-void DiskCompressorPrivate::resume()
-{
+void DiskCompressorPrivate::resume() {
     if(!b_Paused || b_Finished) {
         return;
     }
@@ -304,8 +287,7 @@ void DiskCompressorPrivate::resume()
 }
 
 /* Pauses the compressor. */
-void DiskCompressorPrivate::pause()
-{
+void DiskCompressorPrivate::pause() {
     if(!b_Started || b_Finished || b_Paused) {
         return;
     }
@@ -315,8 +297,7 @@ void DiskCompressorPrivate::pause()
 
 /* Cancels the current compression process , if the compression process is
  * paused then the compression cannot be canceled. */
-void DiskCompressorPrivate::cancel()
-{
+void DiskCompressorPrivate::cancel() {
     if(!b_Started || b_Finished || b_Paused) {
         return;
     }
@@ -328,8 +309,7 @@ void DiskCompressorPrivate::cancel()
  * Guesses the archive format from the given archive filename , on success
  * this returns true or vice-versa.
 */
-bool DiskCompressorPrivate::guessArchiveFormat()
-{
+bool DiskCompressorPrivate::guessArchiveFormat() {
     if(m_TemporaryFile->fileName().isEmpty()) {
         return false;
     }
@@ -342,9 +322,9 @@ bool DiskCompressorPrivate::guessArchiveFormat()
     } else if(ext == "gz") {
         m_ArchiveFormat = GZipFormat;
     } else if(ext == "xz") {
-        m_ArchiveFormat = XzFormat; 
-    } else if(ext == "tar"){
-	m_ArchiveFormat = TarFormat;
+        m_ArchiveFormat = XzFormat;
+    } else if(ext == "tar") {
+        m_ArchiveFormat = TarFormat;
     } else if(ext == "xar") {
         m_ArchiveFormat = XarFormat;
     } else if(ext == "zip") {
@@ -365,8 +345,7 @@ bool DiskCompressorPrivate::guessArchiveFormat()
  * This populates m_ConfirmedFiles linked list with all the files added ,
  * Directory's files will be recursively added.
 */
-bool DiskCompressorPrivate::confirmFiles()
-{
+bool DiskCompressorPrivate::confirmFiles() {
     m_ConfirmedFiles->clear();
     for(auto iter = m_StaggedFiles->begin() ; iter != m_StaggedFiles->end() ; ++iter) {
         auto node = *iter;
@@ -425,8 +404,7 @@ bool DiskCompressorPrivate::confirmFiles()
 }
 
 /* Does the compression and also resumes it if called twice. */
-short DiskCompressorPrivate::compress()
-{
+short DiskCompressorPrivate::compress() {
     if(m_ArchiveWrite.isNull()) {
         /* Open Temporary file for write. */
         if(!m_TemporaryFile->open(QIODevice::WriteOnly)) {
@@ -456,10 +434,10 @@ short DiskCompressorPrivate::compress()
             archive_write_add_filter_xz(m_ArchiveWrite.data());
             archive_write_set_format_ustar(m_ArchiveWrite.data());
             break;
-	case TarFormat:
-	    archive_write_add_filter_none(m_ArchiveWrite.data());
-	    archive_write_set_format_ustar(m_ArchiveWrite.data());
-	    break;
+        case TarFormat:
+            archive_write_add_filter_none(m_ArchiveWrite.data());
+            archive_write_set_format_ustar(m_ArchiveWrite.data());
+            break;
         case XarFormat:
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_xar(m_ArchiveWrite.data());
@@ -483,7 +461,7 @@ short DiskCompressorPrivate::compress()
          * password even if given is ignored.
         */
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-	if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
+        if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
             archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());
             archive_write_set_options(m_ArchiveWrite.data(), "zip:encryption=traditional");
         }

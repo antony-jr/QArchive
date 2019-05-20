@@ -11,15 +11,13 @@
 #include <QSharedPointer>
 #include <qarchiveutils_p.hpp>
 
-namespace QArchive
-{
-class DiskCompressorPrivate : public QObject
-{
+namespace QArchive {
+class DiskCompressorPrivate : public QObject {
     Q_OBJECT
-public:
+  public:
     DiskCompressorPrivate();
     ~DiskCompressorPrivate();
-public Q_SLOTS:
+  public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
     void setPassword(const QString&);
@@ -39,12 +37,12 @@ public Q_SLOTS:
     void pause();
     void resume();
 
-private Q_SLOTS:
+  private Q_SLOTS:
     bool guessArchiveFormat();
     bool confirmFiles();
     short compress();
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void progress(QString, int, int, int);
     void error(short, QString);
     void started();
@@ -53,7 +51,7 @@ Q_SIGNALS:
     void resumed();
     void finished();
 
-private:
+  private:
     bool b_PauseRequested = false,
          b_CancelRequested = false,
          b_Paused = false,

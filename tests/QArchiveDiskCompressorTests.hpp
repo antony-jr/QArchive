@@ -8,23 +8,19 @@
 #include <QTemporaryDir>
 #include <QArchiveTestCases.hpp>
 
-class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases
-{
+class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
-public:
+  public:
     QArchiveDiskCompressorTests(QTemporaryDir *dir)
         : QObject(),
-          QArchiveTestCases(dir)
-    {
+          QArchiveTestCases(dir) {
     }
 
-    ~QArchiveDiskCompressorTests()
-    {
+    ~QArchiveDiskCompressorTests() {
     }
 
-private slots:
-    void initTestCase(void)
-    {
+  private slots:
+    void initTestCase(void) {
         if(TestCasesDir.isEmpty()) {
             QFAIL("Temporary directory failed to construct.");
         }
@@ -34,11 +30,11 @@ private slots:
         dir.mkpath(TestCase3OutputDir);
         dir.mkpath(TestCase4OutputDir);
         dir.mkpath(TestCase5OutputDir);
+        dir.mkpath(TestCase6OutputDir);
         return;
     }
 
-    void simpleCompression(void)
-    {
+    void simpleCompression(void) {
         QArchive::DiskCompressor e(TestCase1ArchivePath);
 
         /* Write the file to compress and add it. */
@@ -47,7 +43,7 @@ private slots:
         TestOutput.write(Test1OutputContents.toLatin1());
         TestOutput.close();
 
-        e.addFiles(/*entry name(optional)=*/QFileInfo(Test1OutputFile).fileName() , TemporaryFilePath);
+        e.addFiles(/*entry name(optional)=*/QFileInfo(Test1OutputFile).fileName(), TemporaryFilePath);
 
         QObject::connect(&e, &QArchive::DiskCompressor::error,
                          this, &QArchiveDiskCompressorTests::defaultErrorHandler);
@@ -68,16 +64,15 @@ private slots:
         */
     }
 
-    void usingPauseResume(void)
-    {
+    void usingPauseResume(void) {
         QArchive::DiskCompressor e(TestCase2ArchivePath);
 
         QFile TestOutput(TemporaryFilePath);
         QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
-	TestOutput.write(Test2OutputContents.toLatin1());	
-	TestOutput.close();
+        TestOutput.write(Test2OutputContents.toLatin1());
+        TestOutput.close();
 
-	e.addFiles(QFileInfo(Test2OutputFile).fileName() , TemporaryFilePath);
+        e.addFiles(QFileInfo(Test2OutputFile).fileName(), TemporaryFilePath);
 
         bool startedEmitted = false,
              pausedEmitted = false,
@@ -108,29 +103,28 @@ private slots:
         QVERIFY(pausedEmitted);
         QVERIFY(resumedEmitted);
 
-	QVERIFY(QFileInfo::exists(TestCase2ArchivePath));
+        QVERIFY(QFileInfo::exists(TestCase2ArchivePath));
     }
 
-    void compressingMultipleFiles()
-    {
-	QArchive::DiskCompressor e(TestCase3ArchivePath);
+    void compressingMultipleFiles() {
+        QArchive::DiskCompressor e(TestCase3ArchivePath);
 
         QFile TestOutput(TemporaryFilePath);
         QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
-	TestOutput.write(Test3Output1Contents.toLatin1());	
-	TestOutput.close();
-	
-	TestOutput.setFileName(TemporaryFilePath + ".v2");
-	QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
-	TestOutput.write(Test3Output2Contents.toLatin1());
-	TestOutput.close();
+        TestOutput.write(Test3Output1Contents.toLatin1());
+        TestOutput.close();
+
+        TestOutput.setFileName(TemporaryFilePath + ".v2");
+        QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
+        TestOutput.write(Test3Output2Contents.toLatin1());
+        TestOutput.close();
 
 
-	e.addFiles(QStringList() << QFileInfo(Test3OutputFile1).fileName()
-		                 << QFileInfo(Test3OutputFile2).fileName()
-		   ,
-		   QStringList() << TemporaryFilePath
-		   		 << (TemporaryFilePath + ".v2"));
+        e.addFiles(QStringList() << QFileInfo(Test3OutputFile1).fileName()
+                   << QFileInfo(Test3OutputFile2).fileName()
+                   ,
+                   QStringList() << TemporaryFilePath
+                   << (TemporaryFilePath + ".v2"));
 
         QObject::connect(&e, &QArchive::DiskCompressor::error,
                          this, &QArchiveDiskCompressorTests::defaultErrorHandler);
@@ -141,36 +135,34 @@ private slots:
         QVERIFY(QFileInfo::exists(TestCase3ArchivePath));
     }
 
-    void encryptingZipArchive()
-    {
-	QArchive::DiskCompressor e(TestCase4ArchivePath);
+    void encryptingZipArchive() {
+        QArchive::DiskCompressor e(TestCase4ArchivePath);
         QFile TestOutput(TemporaryFilePath);
         QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
         TestOutput.write(Test4OutputContents.toLatin1());
         TestOutput.close();
 
-        e.addFiles(QFileInfo(Test4OutputFile).fileName() , TemporaryFilePath);
+        e.addFiles(QFileInfo(Test4OutputFile).fileName(), TemporaryFilePath);
 
         QObject::connect(&e, &QArchive::DiskCompressor::error,
                          this, &QArchiveDiskCompressorTests::defaultErrorHandler);
         QSignalSpy spyInfo(&e, SIGNAL(finished()));
 
-	e.setPassword(Test4Password); /* Set password (Only works for Zip Format). */
+        e.setPassword(Test4Password); /* Set password (Only works for Zip Format). */
         e.start();
 
         QVERIFY(spyInfo.wait() || spyInfo.count());
         QVERIFY(QFileInfo::exists(TestCase4ArchivePath));
     }
 
-    void runningCompressorNonSingleThreaded()
-    {
-        QArchive::DiskCompressor e(TestCase5ArchivePath , /*parent=*/ nullptr , /*singleThreaded=*/ false);
+    void runningCompressorNonSingleThreaded() {
+        QArchive::DiskCompressor e(TestCase5ArchivePath, /*parent=*/ nullptr, /*singleThreaded=*/ false);
         QFile TestOutput(TemporaryFilePath);
         QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
         TestOutput.write(Test5OutputContents.toLatin1());
         TestOutput.close();
 
-        e.addFiles(QFileInfo(Test5OutputFile).fileName() , TemporaryFilePath);
+        e.addFiles(QFileInfo(Test5OutputFile).fileName(), TemporaryFilePath);
 
         QObject::connect(&e, &QArchive::DiskCompressor::error,
                          this, &QArchiveDiskCompressorTests::defaultErrorHandler);
@@ -183,9 +175,32 @@ private slots:
         /* The archive should also exists. */
         QVERIFY(QFileInfo::exists(TestCase5ArchivePath));
     }
-protected slots:
-    void defaultErrorHandler(short code, QString file)
-    {
+
+    void compressingTarArchiveWithoutFilters() {
+        QArchive::DiskCompressor e(TestCase6ArchivePath);
+
+        /* Write the file to compress and add it. */
+        QFile TestOutput(TemporaryFilePath);
+        QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
+        TestOutput.write(Test6OutputContents.toLatin1());
+        TestOutput.close();
+
+        e.addFiles(/*entry name(optional)=*/QFileInfo(Test6OutputFile).fileName(), TemporaryFilePath);
+
+        QObject::connect(&e, &QArchive::DiskCompressor::error,
+                         this, &QArchiveDiskCompressorTests::defaultErrorHandler);
+        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+        e.start();
+
+        /*  Must emit exactly one signal. */
+        QVERIFY(spyInfo.wait() || spyInfo.count());
+
+        /* The archive should also exists. */
+        QVERIFY(QFileInfo::exists(TestCase6ArchivePath));
+    }
+
+  protected slots:
+    void defaultErrorHandler(short code, QString file) {
         auto scode = QString::number(code);
         scode.prepend(("error::" + file) + ":: ");
         QFAIL(QTest::toString(scode));

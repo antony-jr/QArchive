@@ -6,19 +6,17 @@
 #include <QScopedPointer>
 #include <QThread>
 
-namespace QArchive
-{
+namespace QArchive {
 
 class DiskCompressorPrivate;
-class DiskCompressor : public QObject
-{
+class DiskCompressor : public QObject {
     Q_OBJECT
-public:
+  public:
     DiskCompressor(QObject *parent = nullptr, bool singleThreaded = true);
     DiskCompressor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
     DiskCompressor(const QString&, short, QObject *parent = nullptr, bool singleThreaded = true);
     ~DiskCompressor();
-public Q_SLOTS:
+  public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
     void setPassword(const QString&);
@@ -38,7 +36,7 @@ public Q_SLOTS:
     void pause();
     void resume();
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void progress(QString, int, int, int);
     void error(short, QString);
     void started();
@@ -47,7 +45,7 @@ Q_SIGNALS:
     void resumed();
     void finished();
 
-private:
+  private:
     QScopedPointer<DiskCompressorPrivate> m_Compressor;
     QScopedPointer<QThread> m_Thread;
 };

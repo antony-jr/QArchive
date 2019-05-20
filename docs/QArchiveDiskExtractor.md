@@ -6,7 +6,9 @@ sidebar_label: QArchive::DiskExtractor
 
 The QArchive::DiskExtractor class helps to extract archives that are based on the disk, (i.e) The storage of the computer.
 This class can extract all formats supported by libarchive , this can aslo be used to read the contents of the given 
-archive.
+archive. However you can also pass a QIODevice which contains a supported archive in memory. **The QIODevice must not 
+be sequential**.
+
 
 |	    |				               |		
 |-----------|------------------------------------------|
@@ -39,7 +41,7 @@ The class belongs to the QArchive namespace , so make sure to include it.
 |-----------|------------------------------------------------------------------------------------------------|
 | **void**  | [setArchive](#void-setarchiveconst-qstring-archive)(const QString &Archive)                    |
 | **void**  | [setArchive](#void-setarchiveconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
-| **void**  | [setArchive](#void-setarchiveqfile-archvie)(QFile ```*```)                                     | 
+| **void**  | [setArchive](#void-setarchiveqfile-archvie)(QIODevice ```*```)                                     | 
 | **void**  | [setCalculateProgress](#void-setcalculateprogressbool-choice)(bool)                            |
 | **void**  | [setOutputDirectory](#void-setoutputdirectoryconst-qstring-dir)(const QString&)                |
 | **void**  | [addFilter](#void-addfilterconst-qstring-filter)(const QString&)				     |
@@ -67,7 +69,7 @@ The class belongs to the QArchive namespace , so make sure to include it.
 | **void**            | [paused](#void-pausedvoid)(void)                                                |
 | **void**            | [resumed](#void-resumedvoid)(void)                                              |
 | **void**            | [canceled](#void-canceledvoid)(void)                                            |
-| **void**  	      | [error](#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml-const-qstring-file)(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)|
+| **void**  	      | [error](#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml)(short **[errorCode](QArchiveErrorCodes.md)**)|
 
 
 ## Member Functions Documentation
@@ -176,19 +178,19 @@ The first QString is assumed be the path and the second is assumed to be the out
  Extractor.setArchive("Test.7z" , "MyArchives/Extracted");
 ```
 
-### void setArchive(QFile *archvie)
+### void setArchive(QIODevice *archvie)
 <p align="right"><b>[SLOT]</b></p>
 
-Sets the given QFile pointer as the archive stagged for extraction. This QFile will not 
+Sets the given QIODevice pointer as the archive stagged for extraction. This QIODevice will not 
 be deleted by the extractor and the user is responsible of deleting the given pointer.
-The given QFile has to be opened and readable in order for the extractor to work without
+The given QIODevice has to be opened and readable in order for the extractor to work without
 any errors.
 
 ```
  QFile *file("Archive.zip");
  file->open(QIODevice::ReadOnly):
  QArchive::DiskExtractor Extractor;
- Extractor.setArchive(file);
+ Extractor.setArchive(file); /* QFile is inherited from QIODevice */
  QObject::connect(&Extractor , &QArchive::DiskExtractor::finished,
  [&](){
     file->close();
@@ -254,7 +256,7 @@ given archive requires password , however the same procedure has to be followed.
  Extractor.start();
  });
  QObject::connect(&Extractor , &DiskExtractor::error ,
- [&](short errorCode , QString archivePath){
+ [&](short errorCode){
  if(errorCode == QArchive::ArchivePasswordNeeded){
  return; // You can ignore this error.
  }
@@ -395,9 +397,9 @@ Emitted when the extraction is resumed successfully.
 Emitted when the extraction is canceled successfully.
 
 
-### error(short **[errorCode](QArchiveErrorCodes.md)** , const QString& file)
+### error(short **[errorCode](QArchiveErrorCodes.md)**)
 <p align="right"><b>[SIGNAL]</b></p>
 
-Emitted when something goes wrong with an archive. refer the [error codes](QArchiveErrorCodes.md).
+Emitted when something goes wrong with the given archive. refer the [error codes](QArchiveErrorCodes.md).
 
 

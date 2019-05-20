@@ -5,13 +5,12 @@
 #include <QArchive>
 #include <QJsonObject>
 
-int main(int ac, char **av)
-{
+int main(int ac, char **av) {
     if(ac < 2) {
         qDebug() << "Usage: " << av[0] << " [ARCHIVE PATH] [DESTINATION PATH]";
         return 0;
     }
-    
+
     using QArchive::DiskExtractor;
     using std::cout;
     using std::cin;
@@ -20,56 +19,60 @@ int main(int ac, char **av)
     QCoreApplication app(ac, av);
 
     /* Get Archive Destination Information. */
-    QString ArchivePath = QString(av[1]); 
+    QString ArchivePath = QString(av[1]);
     QString DestinationPath = QString(av[2]);
 
     /* Construct DiskExtractor Object. */
-    DiskExtractor Extractor(ArchivePath , DestinationPath);
+    DiskExtractor Extractor(ArchivePath, DestinationPath);
     /* Connect Signals with Slots (in this case lambda functions). */
-    QObject::connect(&Extractor , &DiskExtractor::extractionRequirePassword , [&](int tries){
-	string passwd;
-	cout << "[*] Please Enter Archive Password(Tries = " << tries << "):: ";
-	cin >> passwd;
-	cout << "\n";
+    QObject::connect(&Extractor, &DiskExtractor::extractionRequirePassword, [&](int tries) {
+        string passwd;
+        cout << "[*] Please Enter Archive Password(Tries = " << tries << "):: ";
+        cin >> passwd;
+        cout << "\n";
 
-	/* Set the password. */
-	Extractor.setPassword(QString::fromStdString(passwd));
+        /* Set the password. */
+        Extractor.setPassword(QString::fromStdString(passwd));
 
-	/* Again start the extractor. */
-	Extractor.start();	
+        /* Again start the extractor. */
+        Extractor.start();
     });
 
-    QObject::connect(&Extractor , &DiskExtractor::started , [&](){
+    QObject::connect(&Extractor, &DiskExtractor::started, [&]() {
         qInfo() << "[+] Starting Extractor... ";
     });
-    QObject::connect(&Extractor , &DiskExtractor::finished , [&](){
+    QObject::connect(&Extractor, &DiskExtractor::finished, [&]() {
         qInfo() << "[+] Extracted File(s) Successfully!";
         app.quit();
         return;
     });
-    QObject::connect(&Extractor , &DiskExtractor::error , [&](short code , QString archive){
-        if(code == QArchive::ArchivePasswordNeeded || 
-	   code == QArchive::ArchivePasswordIncorrect){
-		(void)archive;
-		return;
-	}	
-	qInfo() << "[-] An error has occured :: " << QArchive::errorCodeToString(code) << "::" << archive ;
+    QObject::connect(&Extractor, &DiskExtractor::error, [&](short code) {
+        if(code == QArchive::ArchivePasswordNeeded ||
+                code == QArchive::ArchivePasswordIncorrect) {
+            return;
+        }
+        qInfo() << "[-] An error has occured :: " << QArchive::errorCodeToString(code) ;
         app.quit();
         return;
     });
-    QObject::connect(&Extractor , &DiskExtractor::info , [&](QJsonObject info){
-	qInfo() << "ARCHIVE CONTENTS:: " << info;
-	return;
+    QObject::connect(&Extractor, &DiskExtractor::info, [&](QJsonObject info) {
+        qInfo() << "ARCHIVE CONTENTS:: " << info;
+        return;
     });
 
-    /* Start the Extractor. 
+    QObject::connect(&Extractor, &DiskExtractor::progress, [&](QString file, int proc, int total, int percent) {
+        qInfo() << "Progress("<< proc << "/" << total << "): "
+                << file << " : " << percent << "% done.";
+    });
+
+    /* Start the Extractor.
      * Note:
-     *    You don't really have to worry about the event loop since all method calls 
+     *    You don't really have to worry about the event loop since all method calls
      *    to the extractor object is queued and only gets executed when the event
      *    loop starts , most likely.
     */
     Extractor.setCalculateProgress(true);
     Extractor.getInfo();
-    Extractor.start(); 
+    Extractor.start();
     return app.exec();
 }

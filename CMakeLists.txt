@@ -25,12 +25,15 @@ add_library(QArchive
 	    src/qarchivediskcompressor_p.cc
 	    src/qarchivediskextractor_p.cc
 	    src/qarchiveutils_p.cc
+	    src/qarchiveioreader_p.cc
 	    include/qarchivediskcompressor.hpp
 	    include/qarchivediskextractor.hpp
 	    include/qarchive_enums.hpp
 	    include/qarchivediskcompressor_p.hpp
 	    include/qarchivediskextractor_p.hpp
-	    include/qarchiveutils_p.hpp)
+	    include/qarchiveutils_p.hpp
+	    include/qarchiveioreader_p.hpp
+	    )
 
 target_link_libraries(QArchive PUBLIC Qt5::Core archive)
 target_include_directories(QArchive PUBLIC . include)

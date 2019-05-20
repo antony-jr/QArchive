@@ -8,19 +8,18 @@
 #include <QArchiveDiskExtractorTests.hpp>
 #include <QArchiveDiskCompressorTests.hpp>
 
-class TestRunner : public QObject
-{
+class TestRunner : public QObject {
     Q_OBJECT
-public:
+  public:
     TestRunner();
     ~TestRunner();
-public Q_SLOTS:
+  public Q_SLOTS:
     void start();
-private Q_SLOTS:
+  private Q_SLOTS:
     void runTests();
-Q_SIGNALS:
+  Q_SIGNALS:
     void finished();
-private:
+  private:
     QScopedPointer<QTemporaryDir> m_TempDir;
     QScopedPointer<QFuture<void>> m_Future;
     QScopedPointer<QFutureWatcher<void>> m_FutureWatcher;

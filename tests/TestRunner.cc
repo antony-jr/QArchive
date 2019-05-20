@@ -5,8 +5,7 @@
 #include <QTest>
 
 TestRunner::TestRunner()
-    : QObject()
-{
+    : QObject() {
     m_TempDir.reset(new QTemporaryDir);
     m_Future.reset(new QFuture<void>);
     m_FutureWatcher.reset(new QFutureWatcher<void>);
@@ -17,12 +16,10 @@ TestRunner::TestRunner()
             this, &TestRunner::finished, Qt::DirectConnection);
 }
 
-TestRunner::~TestRunner()
-{
+TestRunner::~TestRunner() {
 }
 
-void TestRunner::start()
-{
+void TestRunner::start() {
     *(m_Future.data()) = QtConcurrent::run([&]() {
         runTests();
         return;
@@ -31,8 +28,7 @@ void TestRunner::start()
 
 }
 
-void TestRunner::runTests()
-{
+void TestRunner::runTests() {
     /* Run the compressor tests which should generate the
      * desired archives to test it with the extractor.
     */

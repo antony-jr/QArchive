@@ -10,15 +10,13 @@
 #include <QJsonObject>
 #include <qarchiveutils_p.hpp>
 
-namespace QArchive
-{
-class DiskExtractorPrivate : public QObject
-{
+namespace QArchive {
+class DiskExtractorPrivate : public QObject {
     Q_OBJECT
-public:
+  public:
     DiskExtractorPrivate();
     ~DiskExtractorPrivate();
-public Q_SLOTS:
+  public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setBlockSize(int);
@@ -36,32 +34,31 @@ public Q_SLOTS:
     void pause();
     void resume();
 
-private Q_SLOTS:
+  private Q_SLOTS:
     short openArchive();
     short checkOutputDirectory();
     short getTotalEntriesCount();
     short processArchiveInformation();
     short writeData(struct archive_entry*);
     short extract();
-Q_SIGNALS:
+  Q_SIGNALS:
     void started();
     void canceled();
     void paused();
     void resumed();
     void finished();
-    void error(short , QString);
+    void error(short);
+    void info(QJsonObject);
     void progress(QString, int, int, int);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
-    void info(QJsonObject);
-
-private:
+  private:
     bool b_PauseRequested = false,
          b_CancelRequested = false,
          b_Paused = false,
          b_Started = false,
          b_Finished = false,
-         b_NoProgress = false,
+         b_NoProgress = true,
          b_ArchiveOpened = false;
     int n_PasswordTriedCountGetInfo = 0,
         n_PasswordTriedCountExtract = 0,
@@ -71,13 +68,13 @@ private:
         n_Flags = 0;
 
     QString m_OutputDirectory,
-	    m_Password,
+            m_Password,
             m_ArchivePath;
     QIODevice *m_Archive = nullptr;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
-    QScopedPointer<QJsonObject> m_Info;
     QScopedPointer<QStringList> m_ExtractFilters;
+    QScopedPointer<QJsonObject> m_Info;
 };
 }
 #endif // QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED

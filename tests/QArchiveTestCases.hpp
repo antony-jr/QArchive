@@ -6,15 +6,13 @@
 /*
  * Abstract class to hold the test case information.
 */
-class QArchiveTestCases
-{
-public:
+class QArchiveTestCases {
+  public:
     /*
       * Test Input file paths and other
       * static informations required for the unit test.
      */
-    QArchiveTestCases(QTemporaryDir *dir)
-    {
+    QArchiveTestCases(QTemporaryDir *dir) {
         if(!dir) {
             return;
         } else {
@@ -46,10 +44,13 @@ public:
         TestCase5ArchivePath = QString(TestCasesDir + "Test5.tar.gz");
         TestCase5OutputDir = QString(TestOutputDir + "Test5");
         Test5OutputFile = QString(TestCase5OutputDir + "/Output.txt");
+
+        TestCase6ArchivePath = QString(TestCasesDir + "Test6.tar");
+        TestCase6OutputDir = QString(TestOutputDir + "Test6");
+        Test6OutputFile = QString(TestCase6OutputDir + "/Output.txt");
     }
 
-    ~QArchiveTestCases()
-    {
+    ~QArchiveTestCases() {
     }
 
     QString TestCasesDir,
@@ -70,6 +71,9 @@ public:
             TestCase5ArchivePath,
             TestCase5OutputDir,
             Test5OutputFile,
+            TestCase6ArchivePath,
+            TestCase6OutputDir,
+            Test6OutputFile,
             TemporaryFilePath;
     const QString Test1OutputContents = QString("TEST1SUCCESS!");
     const QString Test2OutputContents = QString("TEST2SUCCESS!");
@@ -78,6 +82,7 @@ public:
     const QString Test4Password = QString("Test4");
     const QString Test4OutputContents = QString("TEST4SUCCESS!");
     const QString Test5OutputContents = QString("TEST5SUCCESS!");
+    const QString Test6OutputContents = QString("TEST6SUCCESS!");
 };
 
 #endif // QARCHIVE_TEST_CASES_HPP_INCLUDED

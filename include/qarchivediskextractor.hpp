@@ -7,19 +7,17 @@
 #include <QThread>
 #include <QJsonObject>
 
-namespace QArchive
-{
+namespace QArchive {
 class DiskExtractorPrivate;
-class DiskExtractor : public QObject
-{
+class DiskExtractor : public QObject {
     Q_OBJECT
-public:
-    DiskExtractor(QObject *parent = nullptr);
-    DiskExtractor(QIODevice*, QObject *parent = nullptr);
-    DiskExtractor(const QString&, QObject *parent = nullptr);
-    DiskExtractor(const QString&, const QString&, QObject *parent = nullptr);
+  public:
+    DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(QIODevice*, QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(const QString&, QObject *parent = nullptr, bool singleThreaded = true);
+    DiskExtractor(const QString&, const QString&, QObject *parent = nullptr, bool singleThreaded = true);
     ~DiskExtractor();
-public Q_SLOTS:
+  public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setArchive(const QString&, const QString&);
@@ -38,19 +36,19 @@ public Q_SLOTS:
     void pause();
     void resume();
 
-Q_SIGNALS:
+  Q_SIGNALS:
     void started();
     void canceled();
     void paused();
     void resumed();
     void finished();
-    void error(short , QString);
+    void error(short);
     void progress(QString, int, int, int);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
     void info(QJsonObject);
 
-private:
+  private:
     QScopedPointer<DiskExtractorPrivate> m_Extractor;
     QScopedPointer<QThread> m_Thread;
 };
