@@ -28,10 +28,10 @@ The class belongs to the QArchive namespace , so make sure to include it.
 
 |                                                                                                                  |
 |------------------------------------------------------------------------------------------------------------------|
-| [DiskExtractor](#diskextractorqobject-parent-nullptr-bool-singlethreaded-true)(QObject ``` *```parent = nullptr , bool singleThreaded = true )|
-| [DiskExtractor](#diskextractorqfile-archive-qobject-parent-nullptr-bool-singlethreaded-true)(QFile ``` *``` , QObject ```*```parent = nullptr , bool singleThreaded = true )|
-| [DiskExtractor](#diskextractorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, QObject ```*```parent = nullptr,  bool singleThreaded = true )|
-| [DiskExtractor](#diskextractorconst-qstring-archivepath-const-qstring-dest-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, const QString&, QObject ```*```parent = nullptr, bool singleThreaded = true )|
+| [DiskExtractor](#diskextractorqobject-parent-nullptr-bool-singlethreaded-true)(QObject \*parent = nullptr , bool singleThreaded = true )|
+| [DiskExtractor](#diskextractorqiodevice-archive-qobject-parent-nullptr-bool-singlethreaded-true)(QIODevice \*, QObject \*parent = nullptr , bool singleThreaded = true )|
+| [DiskExtractor](#diskextractorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, QObject \*parent = nullptr,  bool singleThreaded = true )|
+| [DiskExtractor](#diskextractorconst-qstring-archivepath-const-qstring-dest-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, const QString&, QObject \*parent = nullptr, bool singleThreaded = true )|
  
 
 ### Slots
@@ -41,7 +41,7 @@ The class belongs to the QArchive namespace , so make sure to include it.
 |-----------|------------------------------------------------------------------------------------------------|
 | **void**  | [setArchive](#void-setarchiveconst-qstring-archive)(const QString &Archive)                    |
 | **void**  | [setArchive](#void-setarchiveconst-qstring-archive-const-qstring-destination)(const QString &Archive , const QString &Destination)|
-| **void**  | [setArchive](#void-setarchiveqfile-archvie)(QIODevice ```*```)                                     | 
+| **void**  | [setArchive](#void-setarchiveqfile-archvie)(QIODevice\*)                                     | 
 | **void**  | [setCalculateProgress](#void-setcalculateprogressbool-choice)(bool)                            |
 | **void**  | [setOutputDirectory](#void-setoutputdirectoryconst-qstring-dir)(const QString&)                |
 | **void**  | [addFilter](#void-addfilterconst-qstring-filter)(const QString&)				     |
@@ -74,7 +74,7 @@ The class belongs to the QArchive namespace , so make sure to include it.
 
 ## Member Functions Documentation
 
-### DiskExtractor(QObject *parent = nullptr , bool singleThreaded = true)
+### DiskExtractor(QObject \*parent = nullptr , bool singleThreaded = true)
 
 Constructs **DiskExtractor** and sets the given QObject as the parent.
 By default the **DiskExtractor** is constructed without any parent and runs in a single thread.
@@ -94,9 +94,9 @@ to false.
  auto PDExtractor = new QArchive::DiskExtractor(&app , false);
 ```
 
-### DiskExtractor(QFile *archive , QObject *parent = nullptr , bool singleThreaded = true)
+### DiskExtractor(QIODevice \*archive , QObject \*parent = nullptr , bool singleThreaded = true)
 
-This is an overloaded constructor. This expects a pointer to a **QFile** which will be assumed as 
+This is an overloaded constructor. This expects a pointer to a **QIODevice** which will be assumed as 
 the archive stagged for extraction.
 
 ```
@@ -116,7 +116,7 @@ the archive stagged for extraction.
  auto PDExtractor = new QArchive::DiskExtractor(&archive , &app , false);
 ```
 
-### DiskExtractor(const QString &archivePath , QObject *parent = nullptr , bool singleThreaded = true)
+### DiskExtractor(const QString &archivePath , QObject \*parent = nullptr , bool singleThreaded = true)
 
 This is an overloaded constructor. This expects a QString which is assumed to be the file path of
 the archive stagged for extraction.
@@ -136,7 +136,7 @@ the archive stagged for extraction.
 
 ```
 
-### DiskExtractor(const QString &archivePath , const QString &dest , QObject *parent = nullptr , bool singleThreaded = true)
+### DiskExtractor(const QString &archivePath , const QString &dest , QObject \*parent = nullptr , bool singleThreaded = true)
 
 This is an overloaded constructor. This expects two QString's , first one is assumed to be the file path of
 the archive stagged for extraction and the second one is assumed to be the destination where the stagged 
@@ -178,7 +178,7 @@ The first QString is assumed be the path and the second is assumed to be the out
  Extractor.setArchive("Test.7z" , "MyArchives/Extracted");
 ```
 
-### void setArchive(QIODevice *archvie)
+### void setArchive(QIODevice \*archvie)
 <p align="right"><b>[SLOT]</b></p>
 
 Sets the given QIODevice pointer as the archive stagged for extraction. This QIODevice will not 

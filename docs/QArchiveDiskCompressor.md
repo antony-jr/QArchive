@@ -24,9 +24,9 @@ This class belongs to QArchive namespace , so make sure to include it.
 
 |                                                                                                        |
 |--------------------------------------------------------------------------------------------------------|
-| [DiskCompressor](#diskcompressorqobject-parent-nullptr-bool-singlethreaded-true)(QObject ```*```parent = nullptr, bool singleThreaded = true)| 
-| [DiskCompressor](#diskcompressorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, QObject ```*```parent = nullptr,  bool singleThreaded = true)|
-| [DiskCompressor](#diskcompressorconst-qstring-archivepath-short-archiveformat-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, short, QObject ```*```parent = nullptr, bool singleThreaded = true)|
+| [DiskCompressor](#diskcompressorqobject-parent-nullptr-bool-singlethreaded-true)(QObject \*parent = nullptr, bool singleThreaded = true)| 
+| [DiskCompressor](#diskcompressorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, QObject \*parent = nullptr,  bool singleThreaded = true)|
+| [DiskCompressor](#diskcompressorconst-qstring-archivepath-short-archiveformat-qobject-parent-nullptr-bool-singlethreaded-true)(const QString&, short, QObject \*parent = nullptr, bool singleThreaded = true)|
 
 
 ### Slots
@@ -71,7 +71,7 @@ This class belongs to QArchive namespace , so make sure to include it.
 ## Member Functions Documentation
 
 
-### DiskCompressor(QObject *parent = nullptr , bool singleThreaded = true)
+### DiskCompressor(QObject \*parent = nullptr , bool singleThreaded = true)
 
 Constructs **DiskCompressor** and sets the given QObject as the parent.
 By default the **DiskCompressor** is constructed without any parent and runs in a single thread.
@@ -91,7 +91,7 @@ to false.
  auto PDCompressor = new QArchive::DiskCompressor(&app , false);
 ```
 
-### DiskCompressor(const QString &archivePath , QObject *parent = nullptr , bool singleThreaded = true)
+### DiskCompressor(const QString &archivePath , QObject \*parent = nullptr , bool singleThreaded = true)
 
 This is an overloaded constructor. This expects a QString which is assumed to be the file path of
 the archive which is to be written. In this case , The format is guessed using the given archive path.
@@ -112,7 +112,7 @@ One can also explicitly set the format later using **setArchiveFormat** method.
 
 ```
 
-### DiskCompressor(const QString &archivePath , short archiveFormat , QObject *parent = nullptr , bool singleThreaded = true)
+### DiskCompressor(const QString &archivePath , short archiveFormat , QObject \*parent = nullptr , bool singleThreaded = true)
 
 This is an overloaded constructor. This expects a QString which is assumed to be the file path of
 the archive which is to be written and a short integer which is assumed to be the format of the 
