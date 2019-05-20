@@ -83,11 +83,9 @@ int main(int ac, char **av)
         return<span class="hljs-comment">;</span>
     })<span class="hljs-comment">;</span>
 <span class="hljs-symbol">    QObject:</span>:connect(&amp;<span class="hljs-keyword">Extractor </span>, &amp;<span class="hljs-keyword">DiskExtractor::error </span>,
-    [&amp;](<span class="hljs-keyword">short </span>code , QString archive){
+    [&amp;](<span class="hljs-keyword">short </span>code){
         qInfo() &lt;&lt; <span class="hljs-string">"An error has occured ::"</span>
-                &lt;&lt; QArchive::errorCodeToString(code) 
-                &lt;&lt; <span class="hljs-string">"::"</span> 
-                &lt;&lt; archive <span class="hljs-comment">;</span>
+                &lt;&lt; QArchive::errorCodeToString(code)<span class="hljs-comment">;</span>
         app.quit()<span class="hljs-comment">;</span>
         return<span class="hljs-comment">;</span>
     })<span class="hljs-comment">;</span>

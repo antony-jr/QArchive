@@ -52,7 +52,8 @@
             });
         </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Class QArchive::DiskExtractor</h1></header><article><div><span><p>The QArchive::DiskExtractor class helps to extract archives that are based on the disk, (i.e) The storage of the computer.
 This class can extract all formats supported by libarchive , this can aslo be used to read the contents of the given
-archive.</p>
+archive. However you can also pass a QIODevice which contains a supported archive in memory. <strong>The QIODevice must not
+be sequential</strong>.</p>
 <table>
 <thead>
 <tr><th></th><th></th></tr>
@@ -73,10 +74,10 @@ archive.</p>
 <tr><th></th></tr>
 </thead>
 <tbody>
-<tr><td><a href="#diskextractorqobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(QObject <code>*</code>parent = nullptr , bool singleThreaded = true )</td></tr>
-<tr><td><a href="#diskextractorqfile-archive-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(QFile <code>*</code> , QObject <code>*</code>parent = nullptr , bool singleThreaded = true )</td></tr>
-<tr><td><a href="#diskextractorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(const QString&amp;, QObject <code>*</code>parent = nullptr,  bool singleThreaded = true )</td></tr>
-<tr><td><a href="#diskextractorconst-qstring-archivepath-const-qstring-dest-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(const QString&amp;, const QString&amp;, QObject <code>*</code>parent = nullptr, bool singleThreaded = true )</td></tr>
+<tr><td><a href="#diskextractorqobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(QObject *parent = nullptr , bool singleThreaded = true )</td></tr>
+<tr><td><a href="#diskextractorqiodevice-archive-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(QIODevice *, QObject *parent = nullptr , bool singleThreaded = true )</td></tr>
+<tr><td><a href="#diskextractorconst-qstring-archivepath-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(const QString&amp;, QObject *parent = nullptr,  bool singleThreaded = true )</td></tr>
+<tr><td><a href="#diskextractorconst-qstring-archivepath-const-qstring-dest-qobject-parent-nullptr-bool-singlethreaded-true">DiskExtractor</a>(const QString&amp;, const QString&amp;, QObject *parent = nullptr, bool singleThreaded = true )</td></tr>
 </tbody>
 </table>
 <h3><a class="anchor" aria-hidden="true" id="slots"></a><a href="#slots" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Slots</h3>
@@ -87,7 +88,7 @@ archive.</p>
 <tbody>
 <tr><td><strong>void</strong></td><td><a href="#void-setarchiveconst-qstring-archive">setArchive</a>(const QString &amp;Archive)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-setarchiveconst-qstring-archive-const-qstring-destination">setArchive</a>(const QString &amp;Archive , const QString &amp;Destination)</td></tr>
-<tr><td><strong>void</strong></td><td><a href="#void-setarchiveqfile-archvie">setArchive</a>(QFile <code>*</code>)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#void-setarchiveqfile-archvie">setArchive</a>(QIODevice*)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-setcalculateprogressbool-choice">setCalculateProgress</a>(bool)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-setoutputdirectoryconst-qstring-dir">setOutputDirectory</a>(const QString&amp;)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-addfilterconst-qstring-filter">addFilter</a>(const QString&amp;)</td></tr>
@@ -117,7 +118,7 @@ archive.</p>
 <tr><td><strong>void</strong></td><td><a href="#void-pausedvoid">paused</a>(void)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-resumedvoid">resumed</a>(void)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-canceledvoid">canceled</a>(void)</td></tr>
-<tr><td><strong>void</strong></td><td><a href="#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml-const-qstring-file">error</a>(short <strong><a href="/QArchive/docs/QArchiveErrorCodes.html">errorCode</a></strong> , const QString&amp; file)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml">error</a>(short <strong><a href="/QArchive/docs/QArchiveErrorCodes.html">errorCode</a></strong>)</td></tr>
 </tbody>
 </table>
 <h2><a class="anchor" aria-hidden="true" id="member-functions-documentation"></a><a href="#member-functions-documentation" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Member Functions Documentation</h2>
@@ -137,8 +138,8 @@ to false.</p>
  // <span class="hljs-keyword">With</span> <span class="hljs-keyword">parent</span> <span class="hljs-keyword">and</span> non-single threaded
  <span class="hljs-keyword">auto</span> PDExtractor = <span class="hljs-keyword">new</span> QArchive::DiskExtractor(&amp;app , <span class="hljs-literal">false</span>);
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="diskextractorqfile-archive-qobject-parent-nullptr-bool-singlethreaded-true"></a><a href="#diskextractorqfile-archive-qobject-parent-nullptr-bool-singlethreaded-true" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>DiskExtractor(QFile *archive , QObject *parent = nullptr , bool singleThreaded = true)</h3>
-<p>This is an overloaded constructor. This expects a pointer to a <strong>QFile</strong> which will be assumed as
+<h3><a class="anchor" aria-hidden="true" id="diskextractorqiodevice-archive-qobject-parent-nullptr-bool-singlethreaded-true"></a><a href="#diskextractorqiodevice-archive-qobject-parent-nullptr-bool-singlethreaded-true" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>DiskExtractor(QIODevice *archive , QObject *parent = nullptr , bool singleThreaded = true)</h3>
+<p>This is an overloaded constructor. This expects a pointer to a <strong>QIODevice</strong> which will be assumed as
 the archive stagged for extraction.</p>
 <pre><code class="hljs"> QCoreApplication app(argc , argv);
  QFile archive(<span class="hljs-string">"SomeArchive.zip"</span>);
@@ -201,16 +202,16 @@ The first QString is assumed be the path and the second is assumed to be the out
 <pre><code class="hljs"><span class="hljs-symbol"> QArchive:</span>:<span class="hljs-keyword">DiskExtractor </span><span class="hljs-keyword">Extractor;
 </span> <span class="hljs-keyword">Extractor.setArchive("Test.7z" </span>, <span class="hljs-string">"MyArchives/Extracted"</span>)<span class="hljs-comment">;</span>
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="void-setarchiveqfile-archvie"></a><a href="#void-setarchiveqfile-archvie" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void setArchive(QFile *archvie)</h3>
+<h3><a class="anchor" aria-hidden="true" id="void-setarchiveqiodevice-archvie"></a><a href="#void-setarchiveqiodevice-archvie" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void setArchive(QIODevice *archvie)</h3>
 <p align="right"><b>[SLOT]</b></p>
-<p>Sets the given QFile pointer as the archive stagged for extraction. This QFile will not
+<p>Sets the given QIODevice pointer as the archive stagged for extraction. This QIODevice will not
 be deleted by the extractor and the user is responsible of deleting the given pointer.
-The given QFile has to be opened and readable in order for the extractor to work without
+The given QIODevice has to be opened and readable in order for the extractor to work without
 any errors.</p>
 <pre><code class="hljs"> <span class="hljs-selector-tag">QFile</span> *<span class="hljs-selector-tag">file</span>(<span class="hljs-string">"Archive.zip"</span>);
  <span class="hljs-selector-tag">file-</span>&gt;<span class="hljs-selector-tag">open</span>(<span class="hljs-attribute">QIODevice</span>::ReadOnly):
  <span class="hljs-selector-tag">QArchive</span><span class="hljs-selector-pseudo">::DiskExtractor</span> <span class="hljs-selector-tag">Extractor</span>;
- <span class="hljs-selector-tag">Extractor</span><span class="hljs-selector-class">.setArchive</span>(file);
+ <span class="hljs-selector-tag">Extractor</span><span class="hljs-selector-class">.setArchive</span>(file); <span class="hljs-comment">/* QFile is inherited from QIODevice */</span>
  <span class="hljs-selector-tag">QObject</span><span class="hljs-selector-pseudo">::connect(</span><span class="hljs-selector-tag">&amp;</span><span class="hljs-selector-tag">Extractor</span> , <span class="hljs-selector-tag">&amp;</span><span class="hljs-selector-tag">QArchive</span><span class="hljs-selector-pseudo">::DiskExtractor</span><span class="hljs-selector-pseudo">::finished</span>,
  <span class="hljs-selector-attr">[&amp;]</span>(){
     <span class="hljs-selector-tag">file-</span>&gt;<span class="hljs-selector-tag">close</span>();
@@ -257,7 +258,7 @@ given archive requires password , however the same procedure has to be followed.
  Extractor.start();
  });
  QObject::connect(&amp;Extractor , &amp;DiskExtractor::error ,
- [<span class="hljs-string">&amp;</span>](<span class="hljs-link">short errorCode , QString archivePath</span>){
+ [<span class="hljs-string">&amp;</span>](<span class="hljs-link">short errorCode</span>){
  if(errorCode == QArchive::ArchivePasswordNeeded){
  return; // You can ignore this error.
  }
@@ -356,7 +357,7 @@ type of signals are emitted or , One can also just exit with password errors.</p
 <h3><a class="anchor" aria-hidden="true" id="void-canceledvoid"></a><a href="#void-canceledvoid" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void canceled(void)</h3>
 <p align="right"><b>[SIGNAL]</b></p>
 <p>Emitted when the extraction is canceled successfully.</p>
-<h3><a class="anchor" aria-hidden="true" id="errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml-const-qstring-file"></a><a href="#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml-const-qstring-file" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>error(short <strong><a href="/QArchive/docs/QArchiveErrorCodes.html">errorCode</a></strong> , const QString&amp; file)</h3>
+<h3><a class="anchor" aria-hidden="true" id="errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml"></a><a href="#errorshort-errorcode-qarchive-docs-qarchiveerrorcodeshtml" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>error(short <strong><a href="/QArchive/docs/QArchiveErrorCodes.html">errorCode</a></strong>)</h3>
 <p align="right"><b>[SIGNAL]</b></p>
-<p>Emitted when something goes wrong with an archive. refer the <a href="/QArchive/docs/QArchiveErrorCodes.html">error codes</a>.</p>
+<p>Emitted when something goes wrong with the given archive. refer the <a href="/QArchive/docs/QArchiveErrorCodes.html">error codes</a>.</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/QArchive/docs/QArchiveErrorCodes.html"><span class="arrow-prev">← </span><span>QArchive Error Codes</span></a><a class="docs-next button" href="/QArchive/docs/QArchiveDiskCompressor.html"><span class="function-name-prevnext">QArchive::DiskCompressor</span><span class="arrow-next"> →</span></a></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/QArchive/" class="nav-home"><img src="/QArchive/img/QArchive.png" alt="QArchive" width="66" height="58"/></a><div><h5>Docs</h5><a href="/QArchive/docs/Installation.html">Getting Started</a><a href="/QArchive/docs/SimpleExtractorGuide.html">Guides</a><a href="/QArchive/docs/QArchiveFormats.html">API Reference</a></div><div><h5>Community</h5><a href="/QArchive/en/users.html">User Showcase</a><a href="http://stackoverflow.com/questions/tagged/Qt/" target="_blank">Stack Overflow</a><a href="https://discordapp.com/">Project Chat</a><a href="https://twitter.com/antonyjr0" target="_blank">Twitter</a></div><div><h5>More</h5><a href="/QArchive/blog">Blog</a><a href="https://github.com/antony-jr/QArchive">GitHub</a><a class="github-button" href="https://github.com/antony-jr/QArchive" data-icon="octicon-star" data-count-href="/antony-jr/QArchive/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Antony Jr.</section></footer></div></body></html>
