@@ -43,7 +43,7 @@ class DiskCompressorPrivate : public QObject {
     short compress();
 
   Q_SIGNALS:
-    void progress(QString, int, int, int);
+    void progress(QString, int, int, qint64, qint64);
     void error(short, QString);
     void started();
     void canceled();
@@ -62,6 +62,8 @@ class DiskCompressorPrivate : public QObject {
     short m_ArchiveFormat = 0; /* Defaults to ZIP. */
     int n_BlockSize = 10240,
         n_TotalEntries = 0;
+    qint64 n_BytesProcessed = 0,
+           n_BytesTotal = 0;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QSaveFile> m_TemporaryFile;
     QScopedPointer<QLinkedList<QPair<QString, QString>>> m_ConfirmedFiles;
