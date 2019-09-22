@@ -322,7 +322,7 @@ Emits the progress of the compression.
 
 The signal emits a total of **5 parameters** in which the **first one** is the file that has been compressed ,
 the **second** is the number of files **that are compressed** , the **third** is the number of **total files** that is
-stagged for compression, the **forth** is the number of bytes processed and the **last one** is the total number of bytes
+stagged for compression, the **fourth** is the number of bytes processed and the **last one** is the total number of bytes
 required for this compression.
 
 
