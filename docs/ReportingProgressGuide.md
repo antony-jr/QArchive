@@ -43,15 +43,15 @@ int main(int ac, char **av)
     });
     
     QObject::connect(&Extractor , &DiskExtractor::progress ,
-    [&](QString file , int proc , int total , int percent){
+    [&](QString file , int entriesProcessed , int entriesTotal , qint64 bytesProcessed, qint64 bytesTotal){
 	qInfo() << "Progress::" 
                 << file 
-                << ":: Done ( " 
-                << proc 
+                << ":: Entry ( " 
+                << entriesProcessed 
                 << " / " 
-                << total 
+                << entriesTotal 
                 << ") " 
-                << percent 
+                << float(bytesProcessed) * 100 / float(bytesTotal)
                 << "%.";
 	return;
     });

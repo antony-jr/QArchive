@@ -61,7 +61,7 @@ The class belongs to the QArchive namespace , so make sure to include it.
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
 | **void**            | [info](#void-infoqjsonobject-information)(QJsonObject)                          |
-| **void**            | [progress](#void-progressqstring-file-int-processedentries-int-totalentries-int-percentagedone)(QString, int, int, int)|
+| **void**            | [progress](#void-progressqstring-file-int-processedentries-int-totalentries-int-percentagedone)(QString, int, int, qint64, qint64)|
 | **void**            | [getInfoRequirePassword](#void-getinforequirepasswordint-numberoftries)(int)    |
 | **void**            | [extractionRequirePassword](#void-extractionrequirepasswordint-numberoftries)(int)|
 | **void**	      | [started](#void-startedvoid)(void)                                              |
@@ -336,7 +336,7 @@ The information is typically formated in the down below format with respect to J
    
    
 
-### void progress(QString file , int processedEntries , int totalEntries , int percentageDone)
+### void progress(QString file , int processedEntries , int totalEntries , qint64 bytesProcessed, qint64 bytesTotal)
 <p align="right"><b>[SIGNAL]</b></p>
 
 Emits the progress of the extraction , even if **setCalculateProgress** is set to **false** this signal
@@ -347,7 +347,8 @@ emitted integers.
 
 The signal emits a total of **4 parameters** in which the **first one** is the file that has been extracted ,
 the **second** is the number of files **that are extracted** , the **third** is the number of **total files** in the
-archive , and the **last one** is the **percentage** of extraction done.
+archive, the **fourth** is the number of bytes processed and the **last one** is the total number of bytes
+required for this extraction.
 
 ### void getInfoRequirePassword(int NumberOfTries)
 <p align="right"><b>[SIGNAL]</b></p>
