@@ -128,11 +128,26 @@ class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
 
         QObject::connect(&e, &QArchive::DiskCompressor::error,
                          this, &QArchiveDiskCompressorTests::defaultErrorHandler);
-        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+        QSignalSpy finishedSpyInfo(&e, SIGNAL(finished()));
+        QSignalSpy progressSpyInfo(&e, SIGNAL(progress(QString, int, int, qint64, qint64)));
         e.start();
 
-        QVERIFY(spyInfo.wait() || spyInfo.count());
+        QVERIFY(finishedSpyInfo.wait() || finishedSpyInfo.count());
         QVERIFY(QFileInfo::exists(TestCase3ArchivePath));
+
+        QCOMPARE(progressSpyInfo.count(), 2);
+
+        QList<QVariant> progress1 = progressSpyInfo.takeFirst();
+        QVERIFY(progress1.at(1).toInt() == 1);
+        QVERIFY(progress1.at(2).toInt() == 2);
+        QVERIFY(progress1.at(3).toInt() == 14);
+        QVERIFY(progress1.at(4).toInt() == 28);
+
+        QList<QVariant> progress2 = progressSpyInfo.takeLast();
+        QVERIFY(progress2.at(1).toInt() == 2);
+        QVERIFY(progress2.at(2).toInt() == 2);
+        QVERIFY(progress2.at(3).toInt() == 28);
+        QVERIFY(progress2.at(4).toInt() == 28);
     }
 
     void encryptingZipArchive() {

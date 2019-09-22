@@ -240,6 +240,7 @@ void DiskCompressorPrivate::start() {
         }
 
         /* Confirm files. */
+        n_BytesTotal = 0;
         if(!confirmFiles()) {
             return;
         }
@@ -249,7 +250,6 @@ void DiskCompressorPrivate::start() {
     emit started();
 
     n_BytesProcessed = 0;
-    n_BytesTotal = 0;
 
     short ret = compress();
     if(ret == NoError) {
