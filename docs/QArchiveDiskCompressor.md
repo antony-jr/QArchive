@@ -315,14 +315,15 @@ Cancels the compression of the archive. This slot is **async** and thus you need
 **canceled** signal , Which confirms that the cancel call was successfull.
 
 
-### void progress(QString file , int processedEntries , int totalEntries , int percentageDone)
+### void progress(QString file , int processedEntries , int totalEntries , qint64 bytesProcessed, qint64 bytesTotal)
 <p align="right"><b>[SIGNAL]</b></p>
 
 Emits the progress of the compression.
 
-The signal emits a total of **4 parameters** in which the **first one** is the file that has been compressed ,
+The signal emits a total of **5 parameters** in which the **first one** is the file that has been compressed ,
 the **second** is the number of files **that are compressed** , the **third** is the number of **total files** that is
-stagged for compression, and the **last one** is the **percentage** of compression done.
+stagged for compression, the **forth** is the number of bytes processed and the **last one** is the total number of bytes
+required for this compression.
 
 
 ### void started(void)
