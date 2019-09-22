@@ -49,7 +49,7 @@ class DiskExtractorPrivate : public QObject {
     void finished();
     void error(short);
     void info(QJsonObject);
-    void progress(QString, int, int, int);
+    void progress(QString, int, int, qint64, qint64);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
   private:
@@ -66,6 +66,8 @@ class DiskExtractorPrivate : public QObject {
         n_TotalEntries = -1,
         n_BlockSize = 10240,
         n_Flags = 0;
+    qint64 n_BytesProcessed = 0,
+           n_BytesTotal = 0;
 
     QString m_OutputDirectory,
             m_Password,

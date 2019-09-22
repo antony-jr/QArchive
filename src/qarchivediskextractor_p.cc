@@ -257,6 +257,10 @@ void DiskExtractorPrivate::clear() {
     n_TotalEntries = -1;
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;
 
+    // TODO: do we need to reset n_BytesTotal here?
+    n_BytesProcessed = 0;
+    n_BytesTotal = 0;
+
     m_ArchivePath.clear();
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     m_Password.clear();
@@ -351,6 +355,8 @@ void DiskExtractorPrivate::start() {
             return;
         }
     }
+
+    n_BytesProcessed = 0;
 
     errorCode = extract();
     if(errorCode == NoError) {
@@ -581,9 +587,9 @@ short DiskExtractorPrivate::extract() {
                 emit progress(QString(archive_entry_pathname(entry)),
                               n_ProcessedEntries,
                               n_TotalEntries,
-                              (n_ProcessedEntries*100)/n_TotalEntries);
+                              n_BytesProcessed, n_BytesTotal);
             } else {
-                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0);
+                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0, 0);
             }
 
             QCoreApplication::processEvents();
@@ -628,9 +634,9 @@ short DiskExtractorPrivate::extract() {
                 emit progress(QString(archive_entry_pathname(entry)),
                               n_ProcessedEntries,
                               n_TotalEntries,
-                              (n_ProcessedEntries*100)/n_TotalEntries);
+                              n_BytesProcessed, n_BytesTotal);
             } else {
-                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0);
+                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0, 0);
             }
 
             /*
@@ -701,6 +707,7 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
                 if (ret != ARCHIVE_OK) {
                     return ArchiveWriteError;
                 }
+                n_BytesProcessed += size;
             }
             QCoreApplication::processEvents();
         }
@@ -720,6 +727,7 @@ short DiskExtractorPrivate::getTotalEntriesCount() {
         return ArchiveNotGiven;
     }
 
+    n_BytesTotal = 0;
     int ret = 0;
     int count = 0;
     archive_entry *entry = nullptr;
@@ -758,6 +766,7 @@ short DiskExtractorPrivate::getTotalEntriesCount() {
             return err;
         }
         count += 1;
+        n_BytesTotal += archive_entry_size(entry);
         QCoreApplication::processEvents();
     }
 
