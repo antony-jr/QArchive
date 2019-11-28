@@ -888,7 +888,8 @@ short DiskExtractorPrivate::processArchiveInformation() {
             CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
         }
         m_Info->insert(CurrentFile, CurrentEntry);
-        QCoreApplication::processEvents();
+        n_BytesTotal += archive_entry_size(entry);
+	QCoreApplication::processEvents();
     }
 
     // set total number of entries.

@@ -60,9 +60,13 @@ int main(int ac, char **av) {
         return;
     });
 
-    QObject::connect(&Extractor, &DiskExtractor::progress, [&](QString file, int proc, int total, int percent) {
+    QObject::connect(&Extractor, &DiskExtractor::progress, 
+    [&](QString file, int proc, int total, qint64 br, qint64 bt) {
+    	if(!bt){ // To avoid zero division error.
+		return;
+	}
         qInfo() << "Progress("<< proc << "/" << total << "): "
-                << file << " : " << percent << "% done.";
+                << file << " : " << (br*100/bt) << "% done.";
     });
 
     /* Start the Extractor.
