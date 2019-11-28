@@ -95,6 +95,15 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=HadesD">💻</a>
         </td>
+      <td>
+            <img src="https://avatars1.githubusercontent.com/u/187720?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/longseespace">Long Nguyen</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=longseespace">💻</a>
+        </td>
     </tr>
 </table>
 
