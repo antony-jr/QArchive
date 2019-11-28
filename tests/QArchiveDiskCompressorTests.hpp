@@ -135,7 +135,7 @@ class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
         QVERIFY(finishedSpyInfo.wait() || finishedSpyInfo.count());
         QVERIFY(QFileInfo::exists(TestCase3ArchivePath));
 
-        QCOMPARE(progressSpyInfo.count(), 2);
+        QCOMPARE(progressSpyInfo.count(), 4);
 
         QList<QVariant> progress1 = progressSpyInfo.takeFirst();
         QVERIFY(progress1.at(1).toInt() == 1);

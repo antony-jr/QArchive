@@ -32,37 +32,32 @@ extern "C" {
 #define st_mtim st_mtim.tv_sec
 #endif
 
-/*
- * Helpful macros to check if an archive error is caused due to
- * faulty passwords.
- * Expects a pointer to a struct archive , returns 1 if password
- * is needed or incorrect.
-*/
-#define PASSWORD_NEEDED(a) !strcmp(archive_error_string(a) , "Passphrase required for this entry")
-#define PASSWORD_INCORRECT(a) !strcmp(archive_error_string(a) , "Incorrect passphrase")
+// Helpful macros to check if an archive error is caused due to
+// faulty passwords.
+// Expects a pointer to a struct archive , returns 1 if password
+// is needed or incorrect.
+#define PASSWORD_NEEDED(a) !qstrcmp(archive_error_string(a) ,"Passphrase required for this entry")
+#define PASSWORD_INCORRECT(a) !qstrcmp(archive_error_string(a) , "Incorrect passphrase")
 
 
-/* Private data structure which holds a QIODevice along with its buffer size
- * to read at a time.
- * This structure will be used as the client data for the archive callbacks.
-*/
-
+// Private data structure which holds a QIODevice along with its buffer size
+// to read at a time.
+// This structure will be used as the client data for the archive callbacks.
 struct ClientData_t {
     char *storage = nullptr;
     QArchive::IOReaderPrivate *io = nullptr;
 };
 
 
-/* This callback will be called on archive open.
- * This callback is simply used to avoid segmentation fault when
- * the programmer mistakenly gives a QIODevice that has not opened.
-*/
+// This callback will be called on archive open.
+// This callback is simply used to avoid segmentation fault when
+// the programmer mistakenly gives a QIODevice that has not opened.
 static int archive_open_cb(struct archive *archive, void *data) {
     Q_UNUSED(archive);
     ClientData_t *p = (ClientData_t*)data;
     if(!p) {
-        /* We surely need the reader handle to continue
-         * any further. */
+        // We surely need the reader handle to continue
+        // any further.
         return ARCHIVE_FATAL;
     }
     if(!p->io->isOpen() ||
@@ -75,24 +70,23 @@ static int archive_open_cb(struct archive *archive, void *data) {
 }
 
 static int archive_close_cb(struct archive *archive, void *data) {
-    /* Should not do anything to QIODevice pointer since
-     * its a private object inside our class.
-     * It will be managed automatically later.
-    */
+    // Should not do anything to QIODevice pointer since
+    // its a private object inside our class.
+    // It will be managed automatically later.
     Q_UNUSED(archive);
     ClientData_t *p = (ClientData_t*)data;
-    if(p->storage) { /* free any data that has been allocated. */
+    if(p->storage) { // free any data that has been allocated.
         free(p->storage);
     }
-    delete (p->io); /* Delete IOReaderPrivate. */
-    free(p); /* free the client data allocated on creation. */
+    delete (p->io); //  Delete IOReaderPrivate.
+    free(p); // free the client data allocated on creation.
     return ARCHIVE_OK;
 }
 
 
-/*
- * This read callback is called whenever libarchive needs more data to crunch ,
- * this is very important since we have to read the data from QIODevice. */
+// This read callback is called whenever libarchive needs 
+// more data to crunch , this is very important since we have 
+// to read the data from QIODevice.
 static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
     Q_UNUSED(archive);
     ClientData_t *p = (ClientData_t*)data;
@@ -100,27 +94,24 @@ static la_ssize_t archive_read_cb(struct archive *archive, void *data, const voi
     return p->io->read(p->storage);
 }
 
-/*
- * This is the most important callback function required for libarchive to work with
- * QIODevice , this can't be set with the provided libarchive public functions.
- * We will be using a private function to set this callback.
- * This callback seeks the QIODevice with respect to whence which is the same as
- * given in fseek and lseek.
- *
- * Without this function you cannot extract 7zip archives.
-*/
+// This is the most important callback function required for libarchive to work with
+// QIODevice , this can't be set with the provided libarchive public functions.
+// We will be using a private function to set this callback.
+// This callback seeks the QIODevice with respect to whence which is the same as
+// given in fseek and lseek.
+//
+// Without this function you cannot extract 7zip archives.
 static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {
     Q_UNUSED(archive);
     ClientData_t *p = (ClientData_t*)data;
     return static_cast<int64_t>(p->io->seek(request, whence));
 }
 
-/*
- * This is a custom functions which sets up the callbacks and other
- * stuff for a libarchive struct. */
+// This is a custom functions which sets up the callbacks and other
+// stuff for a libarchive struct.
 static int archive_read_open_QIODevice(struct archive *archive, int blocksize, QIODevice *device) {
-    /* This client data will be freed on close ,
-     *  we don't need to worry about this. */
+    // This client data will be freed on close ,
+    // we don't need to worry about this.
     ClientData_t *p = (ClientData_t*)calloc(1, sizeof *p);
     p->io = new QArchive::IOReaderPrivate;
     p->io->setIODevice(device);
@@ -138,14 +129,12 @@ static int archive_read_open_QIODevice(struct archive *archive, int blocksize, Q
 
 using namespace QArchive;
 
-/*
- * DiskExtractorPrivate constructor constructs the object which is the private class
- * implementation to the DiskExtractor.
- * This class is responsible for extraction and information retrival of the data
- * inside an archive.
- * This class only extracts the data to the disk and hence the name DiskExtractor.
- * This class will not be able to extract or work in-memory.
-*/
+// DiskExtractorPrivate constructor constructs the object which is the private class
+// implementation to the DiskExtractor.
+// This class is responsible for extraction and information retrival of the data
+// inside an archive.
+// This class only extracts the data to the disk and hence the name DiskExtractor.
+// This class will not be able to extract or work in-memory.
 DiskExtractorPrivate::DiskExtractorPrivate()
     : QObject(),
       n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
@@ -157,9 +146,7 @@ DiskExtractorPrivate::~DiskExtractorPrivate() {
 }
 
 
-/*
- * Sets the given pointer to QIODevice as the Archive file itself.
- */
+// Sets the given pointer to QIODevice as the Archive file itself.
 void DiskExtractorPrivate::setArchive(QIODevice *archive) {
     if(b_Started || b_Paused) {
         return;
@@ -169,10 +156,8 @@ void DiskExtractorPrivate::setArchive(QIODevice *archive) {
     return;
 }
 
-/*
- * Sets the archive path as the given QString which will be later
- * opened to be used as the Archive file.
-*/
+// Sets the archive path as the given QString which will be later
+// opened to be used as the Archive file.
 void DiskExtractorPrivate::setArchive(const QString &archivePath) {
     if(b_Started || b_Paused || archivePath.isEmpty()) {
         return;
@@ -182,7 +167,7 @@ void DiskExtractorPrivate::setArchive(const QString &archivePath) {
     return;
 }
 
-/* Blocksize to be used when extracting the given archive. */
+// Blocksize to be used when extracting the given archive.
 void DiskExtractorPrivate::setBlockSize(int n) {
     if(b_Started || b_Paused) {
         return;
@@ -191,7 +176,7 @@ void DiskExtractorPrivate::setBlockSize(int n) {
     return;
 }
 
-/* Sets the directory where the extraction data to be extracted.*/
+// Sets the directory where the extraction data to be extracted.
 void DiskExtractorPrivate::setOutputDirectory(const QString &destination) {
     if(b_Started || b_Paused || destination.isEmpty()) {
         return;
@@ -200,17 +185,16 @@ void DiskExtractorPrivate::setOutputDirectory(const QString &destination) {
     return;
 }
 
-/* Enables/Disables the progress of the extraction with respect to the
- * given bool. */
+// Enables/Disables the progress of the extraction with respect to the
+// given bool. 
 void DiskExtractorPrivate::setCalculateProgress(bool c) {
     b_NoProgress = !c;
     return;
 }
 
-/*
- * Sets the password for the archive when extracting the data.
- * This method should be accessible even if the extractor is started
- * since the user may set password anytime. */
+// Sets the password for the archive when extracting the data.
+// This method should be accessible even if the extractor is started
+// since the user may set password anytime. 
 void DiskExtractorPrivate::setPassword(const QString &passwd) {
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     if(passwd.isEmpty()) {
@@ -223,11 +207,9 @@ void DiskExtractorPrivate::setPassword(const QString &passwd) {
     return;
 }
 
-/*
- * Adds extract filters , if set , only the files in the filter
- * will be extracted , the filter has to correspond to the exact
- * path given in the archive.
-*/
+// Adds extract filters , if set , only the files in the filter
+// will be extracted , the filter has to correspond to the exact
+// path given in the archive.
 void DiskExtractorPrivate::addFilter(const QString &filter) {
     if(b_Started || b_Paused || filter.isEmpty()) {
         return;
@@ -236,8 +218,7 @@ void DiskExtractorPrivate::addFilter(const QString &filter) {
     return;
 }
 
-/*
- * Overload of addFilter to accept list of QStrings. */
+// Overload of addFilter to accept list of QStrings.
 void DiskExtractorPrivate::addFilter(const QStringList &filters) {
     if(b_Started || b_Paused || filters.isEmpty()) {
         return;
@@ -246,8 +227,7 @@ void DiskExtractorPrivate::addFilter(const QStringList &filters) {
     return;
 }
 
-/*
- * Clears all internal data and sets it back to default. */
+// Clears all internal data and sets it back to default.
 void DiskExtractorPrivate::clear() {
     if(b_Started) {
         return;
@@ -271,16 +251,14 @@ void DiskExtractorPrivate::clear() {
     m_Info.reset(new QJsonObject);
     m_ExtractFilters->clear();
 
-    /* if m_Archive is allocated by DiskExtractor then  parent to child deallocation
-     * should take care of the deallocation else if it is given by the user then it is
-     * kept untouched and the ownership is dropped.
-    */
+    // if m_Archive is allocated by DiskExtractor then  parent to child deallocation
+    // should take care of the deallocation else if it is given by the user then it is
+    // kept untouched and the ownership is dropped.
     m_Archive = nullptr;
     return;
 }
 
-/*
- * Returns the information of the archive through info signal. */
+// Returns the information of the archive through info signal.
 void DiskExtractorPrivate::getInfo() {
     if(!m_Info->isEmpty()) {
         emit info(*(m_Info.data()));
@@ -288,7 +266,7 @@ void DiskExtractorPrivate::getInfo() {
     }
     short errorCode = NoError;
 
-    /* Open the Archive. */
+    // Open the Archive.
     if((errorCode = openArchive()) != NoError) {
         emit error(errorCode);
         return;
@@ -305,26 +283,24 @@ void DiskExtractorPrivate::getInfo() {
     }
 #endif
     else {
-        emit error(errorCode );
+        emit error(errorCode);
     }
     return;
 }
 
-/*
- * Starts the extractor. */
 void DiskExtractorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
     }
     short errorCode = NoError;
 
-    /* Open the Archive. */
+    // Open the Archive.
     if((errorCode = openArchive()) != NoError) {
         emit error(errorCode);
         return;
     }
 
-    /* Check and Set Output Directory. */
+    // Check and Set Output Directory.
     if(!m_OutputDirectory.isEmpty()) {
         if((errorCode = checkOutputDirectory()) != NoError) {
             emit error(errorCode );
@@ -333,17 +309,17 @@ void DiskExtractorPrivate::start() {
     }
 
 
-    /* All Okay then start the extraction. */
+    // All Okay then start the extraction.
     b_Started = true;
     emit started();
 
-    /* Get basic information about the archive if the user wants progress on the
-     * extraction. */
+    // Get basic information about the archive if the user wants progress on the
+    // extraction. 
     if(n_TotalEntries == -1 && !b_NoProgress) {
         errorCode = getTotalEntriesCount();
         if(n_TotalEntries == -1) {
-            /* If the total entries is unchanged then there must be an
-            * error. */
+            // If the total entries is unchanged then there must be an
+            // error.
 #if ARCHIVE_VERSION_NUMBER >= 3003003
             b_Started = false;
             if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
@@ -385,9 +361,8 @@ void DiskExtractorPrivate::start() {
     }
     return;
 }
-
-/*
- * Pauses the extractor. */
+ 
+// Pauses the extractor.
 void DiskExtractorPrivate::pause() {
     if(b_Started && !b_Paused) {
         b_PauseRequested = true;
@@ -395,8 +370,7 @@ void DiskExtractorPrivate::pause() {
     return;
 }
 
-/*
- * Resumes the extractor. */
+// Resumes the extractor.
 void DiskExtractorPrivate::resume() {
     if(!b_Paused) {
         return;
@@ -434,8 +408,7 @@ void DiskExtractorPrivate::resume() {
     return;
 }
 
-/*
- * Cancels the extraction. */
+// Cancels the extraction.
 void DiskExtractorPrivate::cancel() {
     if(b_Started && !b_Paused && !b_Finished) {
         b_CancelRequested = true;
@@ -450,23 +423,22 @@ short DiskExtractorPrivate::openArchive() {
     } else if(b_ArchiveOpened) {
         return NoError;
     }
-    /* Check and Open the given archive.
-     *
-     * Note:
-     * At this point of code either m_ArchivePath or m_Archive has to be
-     * set or else the function should have exited with an error signal.
-    */
+    // Check and Open the given archive.
+    //
+    // Note:
+    // At this point of code either m_ArchivePath or m_Archive has to be
+    // set or else the function should have exited with an error signal.
     if(!m_ArchivePath.isEmpty()) {
 
         QFileInfo info(m_ArchivePath);
-        /* Check if the file exists. */
+        // Check if the file exists.
         if(!info.exists()) {
             return ArchiveDoesNotExists;
-        } else if(!info.isFile()) { /* Check if its really a file. */
+        } else if(!info.isFile()) { // Check if its really a file.
             return InvalidArchiveFile;
         }
 
-        /* Check if we have the permission to read it. */
+        // Check if we have the permission to read it.
         auto perm = info.permissions();
         if(
             !(perm & QFileDevice::ReadUser) &&
@@ -481,12 +453,12 @@ short DiskExtractorPrivate::openArchive() {
         try {
             file = new QFile(this);
         } catch ( ... ) {
-            m_Archive = nullptr; /* Just a precaution. */
+            m_Archive = nullptr; // Just a precaution.
             return NotEnoughMemory;
         }
         file->setFileName(m_ArchivePath);
 
-        /* Finally open the file. */
+        // Finally open the file.
         if(!file->open(QIODevice::ReadOnly)) {
             file->deleteLater();
             return CannotOpenArchive;
@@ -495,9 +467,9 @@ short DiskExtractorPrivate::openArchive() {
         m_Archive = (QIODevice*)file;
     } else {
 
-        if(!m_Archive->isOpen()) { /* Check if it is opened. */
+        if(!m_Archive->isOpen()) { // Check if it is opened.
             return ArchiveIsNotOpened;
-        } else if(!m_Archive->isReadable()) { /* Check if it is readable. */
+        } else if(!m_Archive->isReadable()) { // Check if it is readable. 
             return ArchiveIsNotReadable;
         }
     }
@@ -507,12 +479,12 @@ short DiskExtractorPrivate::openArchive() {
 
 short DiskExtractorPrivate::checkOutputDirectory() {
     QFileInfo info(m_OutputDirectory + "/");
-    /* Check if its a directory and not a file , Also check if it exists. */
+    // Check if its a directory and not a file , Also check if it exists. 
     if(!info.exists() || !info.isDir()) {
         return InvalidOutputDirectory;
     }
 
-    /* Check if we have the permission to read and write. */
+    // Check if we have the permission to read and write.
     if(!info.isWritable() || !info.isReadable()) {
         return NoPermissionToWrite;
     }
@@ -639,10 +611,8 @@ short DiskExtractorPrivate::extract() {
                 emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0, 0);
             }
 
-            /*
-             * Process events to know if the user canceled
-             * or paused the extraction
-            */
+            // Process events to know if the user canceled
+            // or paused the extraction
             QCoreApplication::processEvents();
             if(b_PauseRequested) {
                 b_PauseRequested = false;
@@ -770,10 +740,10 @@ short DiskExtractorPrivate::getTotalEntriesCount() {
         QCoreApplication::processEvents();
     }
 
-    /* set total number of entries. */
+    // set total number of entries.
     n_TotalEntries = count;
 
-    /* free memory. */
+    // free memory.
     archive_read_close(inArchive);
     archive_read_free(inArchive);
     return NoError;
@@ -897,19 +867,23 @@ short DiskExtractorPrivate::processArchiveInformation() {
         CurrentEntry.insert("BlockSizeUnit", "Bytes");
         CurrentEntry.insert("Blocks", QJsonValue(blocks));
         if(lastAccessT) {
-            CurrentEntry.insert("LastAccessedTime", QJsonValue((QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
+            CurrentEntry.insert("LastAccessedTime",
+			    QJsonValue(
+				   (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
         } else {
             CurrentEntry.insert("LastAccessedTime", "Unknown");
         }
 
         if(lastModT) {
-            CurrentEntry.insert("LastModifiedTime", QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
+            CurrentEntry.insert("LastModifiedTime",
+			    QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
         } else {
             CurrentEntry.insert("LastModifiedTime", "Unknown");
         }
 
         if(lastStatusModT) {
-            CurrentEntry.insert("LastStatusModifiedTime", QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
+            CurrentEntry.insert("LastStatusModifiedTime",
+		QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
         } else {
             CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
         }
@@ -917,10 +891,10 @@ short DiskExtractorPrivate::processArchiveInformation() {
         QCoreApplication::processEvents();
     }
 
-    /* set total number of entries. */
+    // set total number of entries.
     n_TotalEntries = m_Info->size();
 
-    /* free memory. */
+    // free memory.
     archive_read_close(inArchive);
     archive_read_free(inArchive);
     return NoError;

@@ -23,13 +23,11 @@ extern "C" {
 
 using namespace QArchive;
 
-/*
- * DiskCompressorPrivate is the private class which handles the
- * compression of data to disk.
- * It can compress data in all formats of archive supported by libarchive.
- * However there is a method to set password for archives , Only
- * ZIP Format is currently supported for encrypting archives with a user given.
-*/
+// DiskCompressorPrivate is the private class which handles the
+// compression of data to disk.
+// It can compress data in all formats of archive supported by libarchive.
+// However there is a method to set password for archives , Only
+// ZIP Format is currently supported for encrypting archives with a user given.
 DiskCompressorPrivate::DiskCompressorPrivate()
     : QObject() {
     m_TemporaryFile.reset(new QSaveFile);
@@ -41,11 +39,9 @@ DiskCompressorPrivate::~DiskCompressorPrivate() {
     m_ArchiveWrite.clear();
 }
 
-/*
- * Set the filename for the archive to written on disk , the filename can
- * be relative or absolute as long it is not existing already or does
- * not have the permission to write.
-*/
+// Set the filename for the archive to written on disk , the filename can
+// be relative or absolute as long it is not existing already or does
+// not have the permission to write.
 void DiskCompressorPrivate::setFileName(const QString &fileName) {
     if(b_Started || b_Paused) {
         return;
@@ -54,11 +50,9 @@ void DiskCompressorPrivate::setFileName(const QString &fileName) {
     return;
 }
 
-/*
- * Explicitly set the format of the archive , when the format is explicitly set
- * then even if the filename corresponds to some other format , the compressor will
- * only compress the data in the given archive format.
-*/
+// Explicitly set the format of the archive , when the format is explicitly set
+// then even if the filename corresponds to some other format , the compressor will
+// only compress the data in the given archive format.
 void DiskCompressorPrivate::setArchiveFormat(short format) {
     if(b_Started || b_Paused) {
         return;
@@ -67,7 +61,7 @@ void DiskCompressorPrivate::setArchiveFormat(short format) {
     return;
 }
 
-/* Only used for ZIP Archives , other formats are ignored. */
+// Only used for ZIP Archives , other formats are ignored.
 void DiskCompressorPrivate::setPassword(const QString &passwd) {
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     if(b_Started || b_Paused) {
@@ -80,7 +74,6 @@ void DiskCompressorPrivate::setPassword(const QString &passwd) {
     return;
 }
 
-/* Custom BlockSize for the archive. */
 void DiskCompressorPrivate::setBlockSize(int size) {
     if(b_Started || b_Paused) {
         return;
@@ -89,7 +82,6 @@ void DiskCompressorPrivate::setBlockSize(int size) {
     return;
 }
 
-/* Adds a single file to the archive. */
 void DiskCompressorPrivate::addFiles(const QString &file) {
     if(b_Started || b_Paused) {
         return;
@@ -99,7 +91,6 @@ void DiskCompressorPrivate::addFiles(const QString &file) {
     return;
 }
 
-/* Adds multiple files to the archive with respect to the given QStringList. */
 void DiskCompressorPrivate::addFiles(const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
@@ -114,7 +105,8 @@ void DiskCompressorPrivate::addFiles(const QStringList &files) {
     return;
 }
 
-/* Adds a single file and uses a custom entry name with respect to the given data.*/
+// Adds a single file and uses a custom entry name with 
+// respect to the given data.
 void DiskCompressorPrivate::addFiles(const QString &entryName, const QString &file) {
     if(b_Started || b_Paused) {
         return;
@@ -127,9 +119,8 @@ void DiskCompressorPrivate::addFiles(const QString &entryName, const QString &fi
     return;
 }
 
-/* Adds multiple files and uses a corresponding list of entry names with respect to
- * the given data.
-*/
+// Adds multiple files and uses a corresponding list of 
+// entry names with respect to the given data.
 void DiskCompressorPrivate::addFiles(const QStringList &entryNames, const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
@@ -147,7 +138,6 @@ void DiskCompressorPrivate::addFiles(const QStringList &entryNames, const QStrin
     return;
 }
 
-/* Removes a single file from the archive. */
 void DiskCompressorPrivate::removeFiles(const QString &file) {
     if(b_Started || b_Paused) {
         return;
@@ -157,7 +147,6 @@ void DiskCompressorPrivate::removeFiles(const QString &file) {
     return;
 }
 
-/* Removes multiple files from the archive with respect to the given QStringList. */
 void DiskCompressorPrivate::removeFiles(const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
@@ -169,7 +158,6 @@ void DiskCompressorPrivate::removeFiles(const QStringList &files) {
     return;
 }
 
-/* Removes a single file from the archive which corresponds to the given custom entry name. */
 void DiskCompressorPrivate::removeFiles(const QString &entryName, const QString &file) {
     if(b_Started || b_Paused) {
         return;
@@ -179,7 +167,6 @@ void DiskCompressorPrivate::removeFiles(const QString &entryName, const QString 
     return;
 }
 
-/* Removes multiple files from the archive which corresponds to the given list of entry names. */
 void DiskCompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
@@ -218,7 +205,7 @@ void DiskCompressorPrivate::clear() {
     m_TemporaryFile.reset(new QSaveFile);
 }
 
-/* Starts the compression. */
+// Starts the compression.
 void DiskCompressorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
@@ -232,14 +219,14 @@ void DiskCompressorPrivate::start() {
         emit error(NoFilesToCompress, m_TemporaryFile->fileName());
         return;
     } else {
-        /* Guess Archive Format if not given. */
-        if(!m_ArchiveFormat) { /* if ArchiveFormat == 0 then no format is set. */
+        // Guess Archive Format if not given.
+        if(!m_ArchiveFormat) { // if ArchiveFormat == 0 then no format is set.
             if(!guessArchiveFormat()) {
-                m_ArchiveFormat = ZipFormat; /* Default format. */
+                m_ArchiveFormat = ZipFormat; // Default format.
             }
         }
 
-        /* Confirm files. */
+        /// Confirm files.
         n_BytesTotal = 0;
         if(!confirmFiles()) {
             return;
@@ -268,7 +255,6 @@ void DiskCompressorPrivate::start() {
     return;
 }
 
-/* Resumes the compressor if paused. */
 void DiskCompressorPrivate::resume() {
     if(!b_Paused || b_Finished) {
         return;
@@ -294,7 +280,6 @@ void DiskCompressorPrivate::resume() {
     return;
 }
 
-/* Pauses the compressor. */
 void DiskCompressorPrivate::pause() {
     if(!b_Started || b_Finished || b_Paused) {
         return;
@@ -303,8 +288,8 @@ void DiskCompressorPrivate::pause() {
     return;
 }
 
-/* Cancels the current compression process , if the compression process is
- * paused then the compression cannot be canceled. */
+// Cancels the current compression process, if the compression process is
+// paused then the compression cannot be canceled.
 void DiskCompressorPrivate::cancel() {
     if(!b_Started || b_Finished || b_Paused) {
         return;
@@ -313,10 +298,8 @@ void DiskCompressorPrivate::cancel() {
     return;
 }
 
-/*
- * Guesses the archive format from the given archive filename , on success
- * this returns true or vice-versa.
-*/
+// Guesses the archive format from the given archive filename , on success
+// this returns true or vice-versa.
 bool DiskCompressorPrivate::guessArchiveFormat() {
     if(m_TemporaryFile->fileName().isEmpty()) {
         return false;
@@ -347,35 +330,32 @@ bool DiskCompressorPrivate::guessArchiveFormat() {
     return true;
 }
 
-/*
- * Confirms all the files that are stagged for compression , Returns true
- * on success and vice-versa.
- * This populates m_ConfirmedFiles linked list with all the files added ,
- * Directory's files will be recursively added.
-*/
+// Confirms all the files that are stagged for compression , Returns true
+// on success and vice-versa.
+// This populates m_ConfirmedFiles linked list with all the files added ,
+// Directory's files will be recursively added.
 bool DiskCompressorPrivate::confirmFiles() {
     m_ConfirmedFiles->clear();
     for(auto iter = m_StaggedFiles->begin() ; iter != m_StaggedFiles->end() ; ++iter) {
         auto node = *iter;
         QFileInfo info(/* file path given by the user = */node.second);
 
-        /* Check if the file exists. */
+        // Check if the file exists.
         if(!info.exists()) {
             emit error(FileDoesNotExist, info.filePath());
             return false;
         }
 
-        /* Check permission to read. */
+        // Check permission to read.
         if(!info.isReadable()) {
             emit error(NoPermissionToReadFile, info.filePath());
             return false;
         }
 
 
-        /* Check if it is file or a directory ,
-         * if directory then add files in directory
-         * recursively.
-        */
+        // Check if it is file or a directory ,
+        // if directory then add files in directory
+        // recursively.
         if(info.isDir()) {
             QVector<QString> dirList;
             dirList.append(info.filePath());
@@ -403,7 +383,7 @@ bool DiskCompressorPrivate::confirmFiles() {
                     n_BytesTotal += info.size();
                 }
             }
-        } else { /* Add it to the confirmed list. */
+        } else { // Add it to the confirmed list.
             if(node.first == node.second) {
                 node.first = info.filePath();
             }
@@ -415,23 +395,22 @@ bool DiskCompressorPrivate::confirmFiles() {
     return true;
 }
 
-/* Does the compression and also resumes it if called twice. */
+// Does the compression and also resumes it if called twice.
 short DiskCompressorPrivate::compress() {
     if(m_ArchiveWrite.isNull()) {
-        /* Open Temporary file for write. */
+        /// Open Temporary file for write.
         if(!m_TemporaryFile->open(QIODevice::WriteOnly)) {
             emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
             return ArchiveWriteOpenError;
         }
 
-        /* Allocate Archive Write. */
-        m_ArchiveWrite = QSharedPointer<struct archive>(archive_write_new(), ArchiveWriteDestructor);
+        m_ArchiveWrite = QSharedPointer<struct archive>(
+				archive_write_new(), ArchiveWriteDestructor);
         if(m_ArchiveWrite.isNull()) {
             emit error(NotEnoughMemory, m_TemporaryFile->fileName());
             return NotEnoughMemory;
         }
 
-        /* Set format for the archive. */
         switch (m_ArchiveFormat) {
         case BZipFormat:
         case BZip2Format:
@@ -465,13 +444,12 @@ short DiskCompressorPrivate::compress() {
             break;
         }
 
-        /* Set Password if the format is Zip and a password is given by the user.
-         *
-         * Note:
-         * Currently only Zip format is officially supported by libarchive for the
-         * ability to use passwords and thus until the user uses Zip format , the
-         * password even if given is ignored.
-        */
+        // Set Password if the format is Zip and a password is given by the user.
+        //
+        // Note:
+        // Currently only Zip format is officially supported by libarchive for the
+        // ability to use passwords and thus until the user uses Zip format , the
+        // password even if given is ignored.
 #if ARCHIVE_VERSION_NUMBER >= 3003003
         if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
             archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());
@@ -479,47 +457,48 @@ short DiskCompressorPrivate::compress() {
         }
 #endif
 
-        /* Set explicit blocksize if the user gives one. */
         if(n_BlockSize) {
             archive_write_set_bytes_per_block(m_ArchiveWrite.data(), n_BlockSize);
         }
 
-        /* Finally open the write archive using the handle of the Temporary file. */
-        if(archive_write_open_fd(m_ArchiveWrite.data(), m_TemporaryFile->handle()) != ARCHIVE_OK) {
+        // Finally open the write archive using the handle of the Temporary file.
+        if(archive_write_open_fd(m_ArchiveWrite.data(),
+				m_TemporaryFile->handle()) != ARCHIVE_OK) {
             m_ArchiveWrite.clear();
             emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
             return ArchiveWriteOpenError;
         }
 
-        n_TotalEntries = m_ConfirmedFiles->size(); /* for reporting progress. */
+        n_TotalEntries = m_ConfirmedFiles->size(); // for reporting progress.
     }
 
-    /* Start compressing files. */
+    // Start compressing files.
     while(!m_ConfirmedFiles->isEmpty()) {
         auto node = m_ConfirmedFiles->takeFirst();
-        /*
-         * TODO:
-         * 	Implement a failsafe copy mechanism.
-         *
-         * Note:
-         * Down below implementation is nearly good but
-         * not very robust and thus needs a good implementation.
-        */
+        // TODO:
+        //	Implement a failsafe copy mechanism.
+        //
+        // Note:
+        // Down below implementation is nearly good but
+        // not very robust and thus needs a good implementation.
         int r;
         std::size_t len;
         char buff[16384]; /* Default buffer size */
 
-        auto disk = QSharedPointer<struct archive>(archive_read_disk_new(), ArchiveReadDestructor);
+        auto disk = QSharedPointer<struct archive>(
+			archive_read_disk_new(), ArchiveReadDestructor);
         archive_read_disk_set_standard_lookup(disk.data());
 
-        r = archive_read_disk_open(disk.data(), QFile::encodeName(/*file path = */node.second).constData());
+        r = archive_read_disk_open(disk.data(),
+			QFile::encodeName(/*file path = */node.second).constData());
         if(r != ARCHIVE_OK) {
             emit error(DiskOpenError, node.second);
             return DiskOpenError;
         }
 
         for (;;) {
-            auto entry = QSharedPointer<struct archive_entry>(archive_entry_new(), ArchiveEntryDestructor);
+            auto entry = QSharedPointer<struct archive_entry>(
+			    archive_entry_new(), ArchiveEntryDestructor);
             r = archive_read_next_header2(disk.data(), entry.data());
             if (r == ARCHIVE_EOF) {
                 break;
@@ -543,24 +522,28 @@ short DiskCompressorPrivate::compress() {
                     emit error(DiskOpenError, node.second);
                     return DiskOpenError;
                 }
-                QElapsedTimer timer;
-                timer.start();
                 len = file->read(buff, sizeof(buff));
                 while (len > 0) {
                     archive_write_data(m_ArchiveWrite.data(), buff, len);
                     n_BytesProcessed += len;
                     len = file->read(buff, sizeof(buff));
 
-                    if (timer.hasExpired(100)) {
-                        emit progress(QString(node.second),
-                                      (n_TotalEntries - m_ConfirmedFiles->size()),
-                                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);
-
-                        timer.restart();
-                    }
-                }
+		    // The original PR author create a timer to emit this 
+		    // signal every 100 ms but I think it's really not 
+		    // needed.
+		    // I think his program lagged because we fail to call
+		    // processEvents in this loop. So if the file is large
+		    // enough it can easily block the main thread.
+                    emit progress(QString(node.second),
+                                  (n_TotalEntries - m_ConfirmedFiles->size()),
+                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+		    
+		    QCoreApplication::processEvents();
+		}
                 file->close();
             }
+
+	    QCoreApplication::processEvents();
         }
 
         emit progress(QString(node.second),
