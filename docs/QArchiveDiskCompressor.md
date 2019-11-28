@@ -57,7 +57,7 @@ This class belongs to QArchive namespace , so make sure to include it.
 
 |                     |                                                                                 |
 |---------------------|---------------------------------------------------------------------------------|
-| **void**            | [progress](#void-progressqstring-file-int-processedentries-int-totalentries-int-percentagedone)(QString, int, int, qint64, qint64)|
+| **void**            | [progress](#void-progressqstring-file--int-processedentries--int-totalentries--qint64-bytesprocessed-qint64-bytestotal)(QString, int, int, qint64, qint64)|
 | **void**	      | [started](#void-startedvoid)(void)                                              |
 | **void**            | [finished](#void-finishedvoid)(void)                        	                |
 | **void**            | [paused](#void-pausedvoid)(void)                                                |
