@@ -220,6 +220,36 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
         QVERIFY(Test4OutputContents == QString(TestOutput.readAll()));
     }
 
+    void testProgress() {
+        QArchive::DiskExtractor e(TestCase3ArchivePath, TestCase3OutputDir);
+        e.setCalculateProgress(true);
+        e.setBlockSize(4);
+
+        QObject::connect(&e, &QArchive::DiskExtractor::error,
+                         this, &QArchiveDiskExtractorTests::defaultErrorHandler);
+        QSignalSpy finishedSpyInfo(&e, SIGNAL(finished()));
+        QSignalSpy progressSpyInfo(&e, SIGNAL(progress(QString, int, int, qint64, qint64)));
+
+        e.start();
+
+        /*  Must emit exactly one signal. */
+        QVERIFY(finishedSpyInfo.wait() || finishedSpyInfo.count());
+
+        QCOMPARE(progressSpyInfo.count(), 2);
+
+        QList<QVariant> progress1 = progressSpyInfo.takeFirst();
+        QVERIFY(progress1.at(1).toInt() == 1);
+        QVERIFY(progress1.at(2).toInt() == 2);
+        QVERIFY(progress1.at(3).toInt() == 14);
+        QVERIFY(progress1.at(4).toInt() == 68);
+
+        QList<QVariant> progress2 = progressSpyInfo.takeLast();
+        QVERIFY(progress2.at(1).toInt() == 2);
+        QVERIFY(progress2.at(2).toInt() == 2);
+        QVERIFY(progress2.at(3).toInt() == 68);
+        QVERIFY(progress2.at(4).toInt() == 68);
+    }
+
     void cleanupTestCase() {
         QDir dir(TestOutputDir);
         dir.removeRecursively();

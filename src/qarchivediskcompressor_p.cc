@@ -8,6 +8,7 @@
 #include <qarchivediskcompressor_p.hpp>
 #include <qarchiveutils_p.hpp>
 #include <qarchive_enums.hpp>
+#include <QElapsedTimer>
 
 extern "C" {
 #include <archive.h>
@@ -207,6 +208,10 @@ void DiskCompressorPrivate::clear() {
     m_ArchiveFormat = 0;
     n_BlockSize = 10240;
 
+    // TODO: do we need to reset n_BytesTotal here?
+    n_BytesProcessed = 0;
+    n_BytesTotal = 0;
+
     m_ConfirmedFiles->clear();
     m_StaggedFiles->clear();
 
@@ -235,6 +240,7 @@ void DiskCompressorPrivate::start() {
         }
 
         /* Confirm files. */
+        n_BytesTotal = 0;
         if(!confirmFiles()) {
             return;
         }
@@ -242,6 +248,8 @@ void DiskCompressorPrivate::start() {
 
     b_Started = true;
     emit started();
+
+    n_BytesProcessed = 0;
 
     short ret = compress();
     if(ret == NoError) {
@@ -390,6 +398,9 @@ bool DiskCompressorPrivate::confirmFiles() {
                     }
                     fileNode.second = file;
                     m_ConfirmedFiles->append(fileNode);
+
+                    QFileInfo info(file);
+                    n_BytesTotal += info.size();
                 }
             }
         } else { /* Add it to the confirmed list. */
@@ -398,6 +409,7 @@ bool DiskCompressorPrivate::confirmFiles() {
             }
             node.second = info.filePath();
             m_ConfirmedFiles->append(node);
+            n_BytesTotal += info.size();
         }
     }
     return true;
@@ -531,10 +543,21 @@ short DiskCompressorPrivate::compress() {
                     emit error(DiskOpenError, node.second);
                     return DiskOpenError;
                 }
+                QElapsedTimer timer;
+                timer.start();
                 len = file->read(buff, sizeof(buff));
                 while (len > 0) {
                     archive_write_data(m_ArchiveWrite.data(), buff, len);
+                    n_BytesProcessed += len;
                     len = file->read(buff, sizeof(buff));
+
+                    if (timer.hasExpired(100)) {
+                        emit progress(QString(node.second),
+                                      (n_TotalEntries - m_ConfirmedFiles->size()),
+                                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+
+                        timer.restart();
+                    }
                 }
                 file->close();
             }
@@ -542,8 +565,7 @@ short DiskCompressorPrivate::compress() {
 
         emit progress(QString(node.second),
                       (n_TotalEntries - m_ConfirmedFiles->size()),
-                      n_TotalEntries,
-                      ((n_TotalEntries - m_ConfirmedFiles->size())*100)/n_TotalEntries);
+                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
 
         QCoreApplication::processEvents();

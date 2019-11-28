@@ -37,7 +37,7 @@ class DiskCompressor : public QObject {
     void resume();
 
   Q_SIGNALS:
-    void progress(QString, int, int, int);
+    void progress(QString, int, int, qint64, qint64);
     void error(short, QString);
     void started();
     void canceled();

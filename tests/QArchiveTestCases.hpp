@@ -78,7 +78,7 @@ class QArchiveTestCases {
     const QString Test1OutputContents = QString("TEST1SUCCESS!");
     const QString Test2OutputContents = QString("TEST2SUCCESS!");
     const QString Test3Output1Contents = QString("TEST3SUCCESS1!");
-    const QString Test3Output2Contents = QString("TEST3SUCCESS2!");
+    const QString Test3Output2Contents = QString("TEST3SUCCESS2!_SOME_MORE_CONTENT_TO_CALCULATE_PROGRESS");
     const QString Test4Password = QString("Test4");
     const QString Test4OutputContents = QString("TEST4SUCCESS!");
     const QString Test5OutputContents = QString("TEST5SUCCESS!");

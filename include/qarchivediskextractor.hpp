@@ -43,7 +43,7 @@ class DiskExtractor : public QObject {
     void resumed();
     void finished();
     void error(short);
-    void progress(QString, int, int, int);
+    void progress(QString, int, int, qint64, qint64);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
     void info(QJsonObject);
