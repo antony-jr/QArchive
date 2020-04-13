@@ -143,6 +143,7 @@ DiskExtractorPrivate::DiskExtractorPrivate()
 }
 
 DiskExtractorPrivate::~DiskExtractorPrivate() {
+	clear();
 }
 
 
@@ -251,10 +252,13 @@ void DiskExtractorPrivate::clear() {
     m_Info.reset(new QJsonObject);
     m_ExtractFilters->clear();
 
-    // if m_Archive is allocated by DiskExtractor then  parent to child deallocation
-    // should take care of the deallocation else if it is given by the user then it is
-    // kept untouched and the ownership is dropped.
-    m_Archive = nullptr;
+    if(b_QIODeviceOwned){
+	    m_Archive->close();
+	    m_Archive->deleteLater();
+    }else{
+    	m_Archive = nullptr;
+    }
+    b_QIODeviceOwned = false;
     return;
 }
 
@@ -452,7 +456,7 @@ short DiskExtractorPrivate::openArchive() {
         QFile *file;
         try {
             file = new QFile(this);
-        } catch ( ... ) {
+	} catch ( ... ) {
             m_Archive = nullptr; // Just a precaution.
             return NotEnoughMemory;
         }
@@ -464,6 +468,7 @@ short DiskExtractorPrivate::openArchive() {
             return CannotOpenArchive;
         }
 
+	b_QIODeviceOwned = true;
         m_Archive = (QIODevice*)file;
     } else {
 
@@ -554,16 +559,19 @@ short DiskExtractorPrivate::extract() {
                 return err;
             }
 
-            if(n_TotalEntries > 0) {
-                ++n_ProcessedEntries;
-                emit progress(QString(archive_entry_pathname(entry)),
+            ++n_ProcessedEntries;
+            if(n_BytesTotal > 0 && n_TotalEntries > 0){
+	    emit progress(QString(archive_entry_pathname(entry)),
                               n_ProcessedEntries,
                               n_TotalEntries,
                               n_BytesProcessed, n_BytesTotal);
-            } else {
-                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0, 0);
-            }
-
+	    }else{
+	    emit progress(QString(archive_entry_pathname(entry)),
+			    1,
+			    1,
+			    1,
+			    1);
+	    }
             QCoreApplication::processEvents();
             if(b_PauseRequested) {
                 b_PauseRequested = false;
@@ -601,17 +609,21 @@ short DiskExtractorPrivate::extract() {
                 return err;
             }
 
-            if(n_TotalEntries > 0) {
-                ++n_ProcessedEntries;
-                emit progress(QString(archive_entry_pathname(entry)),
+            ++n_ProcessedEntries;
+            if(n_BytesTotal > 0 && n_TotalEntries > 0){
+	    emit progress(QString(archive_entry_pathname(entry)),
                               n_ProcessedEntries,
                               n_TotalEntries,
                               n_BytesProcessed, n_BytesTotal);
-            } else {
-                emit progress(QString(archive_entry_pathname(entry)), 0, 0, 0, 0);
-            }
+	    }else{
+	    emit progress(QString(archive_entry_pathname(entry)),
+			    1,
+			    1,
+			    1,
+			    1);
+	    }
 
-            // Process events to know if the user canceled
+	    // Process events to know if the user canceled
             // or paused the extraction
             QCoreApplication::processEvents();
             if(b_PauseRequested) {
@@ -632,6 +644,9 @@ short DiskExtractorPrivate::extract() {
     /* free memory. */
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
+    
+    // Close Archive
+    m_Archive->close();
     return NoError;
 }
 
@@ -678,7 +693,14 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
                     return ArchiveWriteError;
                 }
                 n_BytesProcessed += size;
-            }
+		if(n_BytesTotal > 0 && n_TotalEntries > 0){
+	    		emit progress(QString(archive_entry_pathname(entry)),
+                              n_ProcessedEntries,
+                              n_TotalEntries,
+                              n_BytesProcessed, n_BytesTotal);
+		}
+
+	    }
             QCoreApplication::processEvents();
         }
     } else {

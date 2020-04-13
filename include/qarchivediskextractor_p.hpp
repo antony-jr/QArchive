@@ -59,7 +59,8 @@ class DiskExtractorPrivate : public QObject {
          b_Started = false,
          b_Finished = false,
          b_NoProgress = true,
-         b_ArchiveOpened = false;
+         b_ArchiveOpened = false,
+	 b_QIODeviceOwned = false; // If set, free m_Archive on clear()
     int n_PasswordTriedCountGetInfo = 0,
         n_PasswordTriedCountExtract = 0,
         n_ProcessedEntries = 0,

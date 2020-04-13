@@ -235,10 +235,10 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
         /*  Must emit exactly one signal. */
         QVERIFY(finishedSpyInfo.wait() || finishedSpyInfo.count());
 
-        QCOMPARE(progressSpyInfo.count(), 2);
+        QCOMPARE(progressSpyInfo.count(), 4);
 
         QList<QVariant> progress1 = progressSpyInfo.takeFirst();
-        QVERIFY(progress1.at(1).toInt() == 1);
+	QVERIFY(progress1.at(1).toInt() == 0);
         QVERIFY(progress1.at(2).toInt() == 2);
         QVERIFY(progress1.at(3).toInt() == 14);
         QVERIFY(progress1.at(4).toInt() == 68);
@@ -248,6 +248,24 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
         QVERIFY(progress2.at(2).toInt() == 2);
         QVERIFY(progress2.at(3).toInt() == 68);
         QVERIFY(progress2.at(4).toInt() == 68);
+    }
+
+    void canDeleteSourceAfterUse(){
+	QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
+        QObject::connect(&e, &QArchive::DiskExtractor::error,
+                         this, &QArchiveDiskExtractorTests::defaultErrorHandler);
+
+        QFile TestOutput;
+        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+        e.start();
+
+        QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
+        TestOutput.setFileName(Test5OutputFile);
+        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+        QVERIFY(Test5OutputContents == QString(TestOutput.readAll()));
+        TestOutput.close();
+
+	QVERIFY(QFile(TestCase5ArchivePath).remove());
     }
 
     void cleanupTestCase() {

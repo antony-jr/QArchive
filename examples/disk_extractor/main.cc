@@ -43,7 +43,7 @@ int main(int ac, char **av) {
     });
     QObject::connect(&Extractor, &DiskExtractor::finished, [&]() {
         qInfo() << "[+] Extracted File(s) Successfully!";
-        app.quit();
+	app.quit();
         return;
     });
     QObject::connect(&Extractor, &DiskExtractor::error, [&](short code) {
@@ -62,9 +62,6 @@ int main(int ac, char **av) {
 
     QObject::connect(&Extractor, &DiskExtractor::progress, 
     [&](QString file, int proc, int total, qint64 br, qint64 bt) {
-    	if(!bt){ // To avoid zero division error.
-		return;
-	}
         qInfo() << "Progress("<< proc << "/" << total << "): "
                 << file << " : " << (br*100/bt) << "% done.";
     });
