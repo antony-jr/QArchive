@@ -342,7 +342,8 @@ void DiskExtractorPrivate::start() {
     if(errorCode == NoError) {
         b_Started = false;
         b_Finished = true;
-        emit finished();
+        m_Archive->close();
+	emit finished();
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
@@ -536,7 +537,8 @@ short DiskExtractorPrivate::extract() {
             return ArchiveWriteError;
         }
 
-        for (;;) {
+    }
+    for (;;) {
             ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
@@ -553,100 +555,24 @@ short DiskExtractorPrivate::extract() {
                 return err;
             }
 
-            if((err = writeData(entry))) {
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return err;
-            }
-
-            ++n_ProcessedEntries;
-            if(n_BytesTotal > 0 && n_TotalEntries > 0){
-	    emit progress(QString(archive_entry_pathname(entry)),
-                              n_ProcessedEntries,
-                              n_TotalEntries,
-                              n_BytesProcessed, n_BytesTotal);
+	    err = writeData(entry);
+	    if(err == OperationPaused){
+		    return err;
+	    }else if(err == OperationCanceled){
+		    m_ArchiveRead.clear();
+		    m_ArchiveWrite.clear(); 
+		    return err;
 	    }else{
-	    emit progress(QString(archive_entry_pathname(entry)),
-			    1,
-			    1,
-			    1,
-			    1);
+		    // Handle error.
 	    }
-            QCoreApplication::processEvents();
-            if(b_PauseRequested) {
-                b_PauseRequested = false;
-                return OperationPaused;
-            }
-
-            if(b_CancelRequested) {
-                b_CancelRequested = false;
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return OperationCanceled;
-            }
-        }
-    } else {
-        for (;;) {
-            ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
-            if (ret == ARCHIVE_EOF) {
-                break;
-            }
-            if (ret != ARCHIVE_OK) {
-                err = ArchiveCorrupted;
-                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
-                    err = ArchivePasswordNeeded;
-                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {
-                    err = ArchivePasswordIncorrect;
-                }
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return err;
-            }
-
-            if((err = writeData(entry))) {
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return err;
-            }
-
-            ++n_ProcessedEntries;
-            if(n_BytesTotal > 0 && n_TotalEntries > 0){
-	    emit progress(QString(archive_entry_pathname(entry)),
-                              n_ProcessedEntries,
-                              n_TotalEntries,
-                              n_BytesProcessed, n_BytesTotal);
-	    }else{
-	    emit progress(QString(archive_entry_pathname(entry)),
-			    1,
-			    1,
-			    1,
-			    1);
-	    }
-
-	    // Process events to know if the user canceled
-            // or paused the extraction
-            QCoreApplication::processEvents();
-            if(b_PauseRequested) {
-                b_PauseRequested = false;
-                return OperationPaused;
-            }
-
-            if(b_CancelRequested) {
-                b_CancelRequested = false;
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return OperationCanceled;
-            }
+	    ++n_ProcessedEntries;
 
         }
     }
 
     /* free memory. */
     m_ArchiveRead.clear();
-    m_ArchiveWrite.clear();
-    
-    // Close Archive
-    m_Archive->close();
+    m_ArchiveWrite.clear(); 
     return NoError;
 }
 
@@ -698,10 +624,29 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
                               n_ProcessedEntries,
                               n_TotalEntries,
                               n_BytesProcessed, n_BytesTotal);
+		}else{
+			emit progress(QString(archive_entry_pathname(entry)),
+			    1,
+			    1,
+			    1,
+			    1);
+
 		}
 
 	    }
+
+	    // Allow the execution of the event loop
             QCoreApplication::processEvents();
+
+	    // Check for pause and cancel requests.
+	    if(b_PauseRequested) {
+                b_PauseRequested = false;
+                return OperationPaused;
+            }else if(b_CancelRequested) {
+                b_CancelRequested = false;
+                return OperationCanceled;
+            }
+
         }
     } else {
         return ArchiveHeaderWriteError;
