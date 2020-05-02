@@ -558,16 +558,28 @@ short DiskExtractorPrivate::extract() {
 	    err = writeData(entry);
 	    if(err == OperationPaused){
 		    return err;
-	    }else if(err == OperationCanceled){
+	    }else if(err){ // NoError = 0
 		    m_ArchiveRead.clear();
 		    m_ArchiveWrite.clear(); 
 		    return err;
-	    }else{
-		    // Handle error.
 	    }
 	    ++n_ProcessedEntries;
+	
+	    // Report final progress signal after extracting the file fully.
+	    if(n_BytesTotal > 0 && n_TotalEntries > 0){
+	    		emit progress(QString(archive_entry_pathname(entry)),
+                              n_ProcessedEntries,
+                              n_TotalEntries,
+                              n_BytesProcessed, n_BytesTotal);
+	     }else{
+			emit progress(QString(archive_entry_pathname(entry)),
+			    1,
+			    1,
+			    1,
+			    1);
 
-        }
+	     }
+	     QCoreApplication::processEvents(); // call event loop for the signal to take effect.
     }
 
     /* free memory. */
@@ -624,13 +636,6 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
                               n_ProcessedEntries,
                               n_TotalEntries,
                               n_BytesProcessed, n_BytesTotal);
-		}else{
-			emit progress(QString(archive_entry_pathname(entry)),
-			    1,
-			    1,
-			    1,
-			    1);
-
 		}
 
 	    }
