@@ -519,7 +519,7 @@ short DiskExtractorPrivate::extract() {
 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
         if(!m_Password.isEmpty()) {
-            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toLatin1().constData());
+            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toUtf8().constData());
         }
 #endif
         archive_read_support_format_all(m_ArchiveRead.data());
@@ -599,7 +599,7 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
     }
 
     if(!m_OutputDirectory.isEmpty()) {
-        char *new_entry = concat(m_OutputDirectory.toLatin1().constData(), archive_entry_pathname(entry));
+        char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));
         archive_entry_set_pathname(entry, new_entry);
         free(new_entry);
     }
@@ -680,7 +680,7 @@ short DiskExtractorPrivate::getTotalEntriesCount() {
 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     if(!m_Password.isEmpty()) {
-        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
+        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());
     }
 #endif
 
@@ -734,7 +734,7 @@ short DiskExtractorPrivate::processArchiveInformation() {
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     if(!m_Password.isEmpty()) {
-        archive_read_add_passphrase(inArchive, m_Password.toLatin1().constData());
+        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());
     }
 #endif
     archive_read_support_format_all(inArchive);
