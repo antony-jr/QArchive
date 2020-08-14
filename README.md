@@ -104,7 +104,16 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=longseespace">💻</a>
         </td>
-    </tr>
+      <td>
+            <img src="https://avatars2.githubusercontent.com/u/50304471?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/g-fb">g-fb</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=g-fb">💻</a>
+        </td>
+  </tr>
 </table>
 
 You can also **become one of them by contributing to this project** , to know more read **[CONTRIBUTING.md](.github/CONTRIBUTING.md)**.
