@@ -167,6 +167,28 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
         QVERIFY(Test1OutputContents == QString(TestOutput.readAll()));
     }
 
+    void extractArchiveFromQIODevice() {
+	QFile file(TestCase1ArchivePath);
+	QVERIFY(file.open(QIODevice::ReadOnly) == true);
+
+	QArchive::DiskExtractor e(&file);
+	e.setOutputDirectory(TestCase1OutputDir);
+
+        QObject::connect(&e, &QArchive::DiskExtractor::error,
+                         this, &QArchiveDiskExtractorTests::defaultErrorHandler);
+        QSignalSpy spyInfo(&e, SIGNAL(finished()));
+        e.start();
+
+        /*  Must emit exactly one signal. */
+        QVERIFY(spyInfo.wait() || spyInfo.count());
+
+        /* Test the output file and also the contents. */
+        QFile TestOutput(Test1OutputFile);
+        QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+        QVERIFY(Test1OutputContents == QString(TestOutput.readAll()));
+   
+    }
+
     /* Sometimes , if the skip callback is not proper , the getInfo will not
      * work for tar archives so we need to test it everytime. */
     void getInfoFromTarArchiveWithNoFilters() {

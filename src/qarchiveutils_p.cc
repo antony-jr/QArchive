@@ -1,5 +1,7 @@
 #include <qarchiveutils_p.hpp>
+#include <qarchiveioreader_p.hpp>
 #include <QString>
+#include <QIODevice>
 
 extern "C" {
 #include <archive.h>
@@ -42,6 +44,98 @@ void ArchiveEntryDestructor(struct archive_entry *e) {
     }
     return;
 }
+
+/*
+ * Custom libarchive callbacks to handle QIODevice as the archive
+ * input. */
+
+// Private data structure which holds a QIODevice along with its buffer size
+// to read at a time.
+// This structure will be used as the client data for the archive callbacks.
+struct ClientData_t {
+    char *storage = nullptr;
+    QArchive::IOReaderPrivate *io = nullptr;
+};
+
+
+// This callback will be called on archive open.
+// This callback is simply used to avoid segmentation fault when
+// the programmer mistakenly gives a QIODevice that has not opened.
+static int archive_open_cb(struct archive *archive, void *data) {
+    Q_UNUSED(archive);
+    ClientData_t *p = (ClientData_t*)data;
+    if(!p) {
+        // We surely need the reader handle to continue
+        // any further.
+        return ARCHIVE_FATAL;
+    }
+    if(!p->io->isOpen() ||
+            !p->io->isReadable() ||
+            !(p->storage) ||
+            p->io->isSequential()) {
+        return ARCHIVE_FATAL;
+    }
+    return ARCHIVE_OK;
+}
+
+static int archive_close_cb(struct archive *archive, void *data) {
+    // Should not do anything to archive pointer since
+    // its a private object inside some other class.
+    // It will be managed automatically later.
+    Q_UNUSED(archive);
+    ClientData_t *p = (ClientData_t*)data;
+    if(p->storage) { // free any data that has been allocated.
+        free(p->storage);
+    }
+    delete (p->io); //  Delete IOReaderPrivate.
+    free(p); // free the client data allocated on creation.
+    return ARCHIVE_OK;
+}
+
+// This read callback is called whenever libarchive needs 
+// more data to crunch , this is very important since we have 
+// to read the data from QIODevice.
+static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
+    Q_UNUSED(archive);
+    ClientData_t *p = (ClientData_t*)data;
+    *buffer = (void*)p->storage;
+    return p->io->read(p->storage);
+}
+
+// This is the most important callback function required for libarchive to work with
+// QIODevice , this can't be set with the provided libarchive public functions.
+// We will be using a private function to set this callback.
+// This callback seeks the QIODevice with respect to whence which is the same as
+// given in fseek and lseek.
+//
+// Without this function you cannot extract 7zip archives.
+static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {
+    Q_UNUSED(archive);
+    ClientData_t *p = (ClientData_t*)data;
+    return static_cast<int64_t>(p->io->seek(request, whence));
+}
+
+// This is a custom functions which sets up the callbacks and other
+// stuff for a libarchive struct.
+int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device) {
+    // This client data will be freed on close ,
+    // we don't need to worry about this.
+    ClientData_t *p = (ClientData_t*)calloc(1, sizeof *p);
+    p->io = new QArchive::IOReaderPrivate;
+    p->io->setIODevice(device);
+    p->io->setBlockSize(blocksize);
+    p->storage = (char*)calloc(1, (blocksize < 1024) ?
+                               sizeof(*(p->storage)) * 10204 :
+                               sizeof(*(p->storage)) * blocksize);
+    archive_read_set_open_callback(archive, archive_open_cb);
+    archive_read_set_read_callback(archive, archive_read_cb);
+    archive_read_set_seek_callback(archive, archive_seek_cb);
+    archive_read_set_close_callback(archive, archive_close_cb);
+    archive_read_set_callback_data(archive, (void*)p);
+    return archive_read_open1(archive);
+}
+/* ---- */
+
 
 /*
  * This function returns an allocated c string which is the combination

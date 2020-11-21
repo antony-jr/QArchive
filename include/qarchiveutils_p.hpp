@@ -12,11 +12,15 @@
 struct archive;
 struct archive_entry;
 class QString;
+class QIODevice;
 
 /* Smart pointer destructors. */
 void ArchiveReadDestructor(archive*);
 void ArchiveWriteDestructor(archive*);
 void ArchiveEntryDestructor(archive_entry*);
+
+/* Open Archive from QIODevice. (non-sequential) */
+int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device);
 
 /* Basic string manupilators.  */
 char *concat(const char*, const char*);
