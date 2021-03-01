@@ -58,10 +58,10 @@ class HomeSplash extends React.Component {
                     <Button
                       href={
                         siteConfig.baseUrl +
-                        'docs/' +
-                        'QArchiveFormats.html'
+                        'PVSStudioAnalysis/' +
+                        'index.html'
                       }>
-                      API Reference
+                      PVS Studio Report
                     </Button>
 	            <Button href={'https://github.com/antony-jr/QArchive'}>
 	    	      View on Github
@@ -110,7 +110,7 @@ class Index extends React.Component {
                   title: 'Supports Qt\'s Event Loop.',
                 },
                 {
-                  content: 'Whatever archive you throw at QArchive , it will never fail you Because its' +
+                  content: 'Whatever archive you throw at QArchive, it will never fail you Because its' +
 			   ' backed by a very stable project ( libarchive ) and so giving you a lot of options '+
 			   'with a clean C++ API.',
                   image: siteConfig.baseUrl + 'img/extract.png',
@@ -119,7 +119,7 @@ class Index extends React.Component {
                 },
 		{
                   content: 'QArchive does not like leaving heavy traces for the users and thus '+
-                           'it is packed with all its amazing features in a very small C++ library , this ' +
+                           'it is packed with all its amazing features in a very small C++ library, this ' +
                            'makes QArchive easier to integrate with your project.',
                   image: siteConfig.baseUrl + 'img/light.png',
                   imageAlign: 'top',
@@ -127,7 +127,7 @@ class Index extends React.Component {
                 },
 		{
                   content: 'This project is rated by <b>Codacy</b> with a <b>A Project Certification</b>' +
-                           ' and thus integrating this header will not affect your source , So this project is also'+
+                           ' and thus integrating this header will not affect your source, So this project is also'+
                            ' best suited for those who care about code taste.',
                   image: siteConfig.baseUrl + 'img/clean_code.png',
                   imageAlign: 'top',
@@ -136,24 +136,6 @@ class Index extends React.Component {
 
               ]}
               layout="fourColumn"
-            />
-          </Container>
-
-          <Container padding={['bottom', 'top']} background="dark">
-            <GridBlock
-              contents={[
-                {
-                  content:
-                    'For a long time I\'ve been searching for a easy to use archive library for C++ with Qt support' +
-		    ', I came accross libarchive , it was super cool ? but it did\'nt have a official C++ binding. ' +
-		    'Some C++ Wrappers for libarchive exists like moor but I needed something so simple as 1,2,3 and'+
-		    ' also support Qt\'s event loop.'+
-		    ''+
-		    'So QArchive is the result of the above , it is a very small C++ Cross-Platform library that Modernizes libarchive '+
-		    'using Qt5. Simply extracts 7z , Tarballs , RAR and other supported formats by libarchive. ',
-                  title: 'Why Create QArchive ?',
-                },
-              ]}
             />
           </Container>
 

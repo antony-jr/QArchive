@@ -1,0 +1,110 @@
+name: "Test and Deploy"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  Test-and-Deploy:
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v2
+      - uses: lukka/get-cmake@latest
+
+
+      - name: Install PVS Studio
+        run: |
+          wget -q -O - https://files.viva64.com/etc/pubkey.txt | sudo apt-key add -
+          sudo wget -O /etc/apt/sources.list.d/viva64.list https://files.viva64.com/etc/viva64.list
+          sudo apt-get update -qq
+          sudo apt-get -y install pvs-studio
+
+      - name: Install Qt
+        run: |
+          sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-bionic -y
+          sudo apt-get update -qq
+          sudo apt-get -y install build-essential libgl1-mesa-dev xvfb qt511base \
+                libssl-dev 
+          source /opt/qt*/bin/qt*-env.sh || true
+
+      - name: Install LibArchive
+        run: |
+          cd ..
+          mkdir build
+          cd build
+          git clone https://github.com/libarchive/libarchive
+          cd libarchive
+          git checkout "v3.5.1"
+          cmake .
+          make -j$(nproc)
+          sudo make install -j$(nproc)
+          cd ..
+          rm -rf libarchive
+          cd ..
+          cd website
+          sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
+          sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
+
+      - name: Run Unit Tests
+        run: |
+          Xvfb :100 -ac &
+          export DISPLAY=:100.0
+          cd ..
+          cd tests
+          source /opt/qt*/bin/qt*-env.sh || true
+          qmake . 
+          make -j$(nproc)
+          ./tests
+          cd ..
+          cd website
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+
+      - name: Get yarn cache
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-website-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-website-
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
+
+      - name: Run PVS Analysis
+        env:
+          PVS_LIC_NAME: ${{secrets.PVS_LICENSE_NAME}}
+          PVS_LIC_KEY: ${{secrets.PVS_LICENSE_KEY}}
+        run: |
+          cd ..
+          cd build
+          source /opt/qt*/bin/qt*-env.sh || true
+          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On  ..
+          make -j$(nproc)
+          pvs-studio-analyzer credentials "$PVS_LIC_NAME" "$PVS_LIC_KEY" -o pvs.lic
+          pvs-studio-analyzer analyze -l pvs.lic \
+              -e "/opt/qt511/*" \
+              -e "*moc_*" \
+              -o project.log -j$(nproc) 
+          plog-converter -a GA:1,2 -t fullhtml \
+              -o ../website/build/QArchive/PVSStudioAnalysis project.log
+          cd ..
+          rm -rf build
+          cd website
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/build/QArchive
