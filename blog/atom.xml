@@ -2,18 +2,17 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://antony-jr.github.io/QArchive/blog</id>
     <title>QArchive Blog</title>
-    <updated>2017-12-28T06:00:00Z</updated>
-    <generator>Feed for Node.js</generator>
+    <updated>2017-12-28T06:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://antony-jr.github.io/QArchive/blog"/>
     <subtitle>The best place to stay up-to-date with the latest QArchive news and events.</subtitle>
     <logo>https://antony-jr.github.io/QArchive/img/QArchive.png</logo>
-    <rights>Copyright © 2019 Antony Jr.</rights>
+    <rights>Copyright © 2021 Antony Jr.</rights>
     <entry>
         <title type="html"><![CDATA[Excited about the new cool documentation!]]></title>
         <id>https://antony-jr.github.io/QArchive/blog/2017/12/28/excited-with-the-new-documentation.html</id>
-        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/28/excited-with-the-new-documentation.html">
-        </link>
-        <updated>2017-12-28T06:00:00Z</updated>
+        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/28/excited-with-the-new-documentation.html"/>
+        <updated>2017-12-28T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Hey folks , The good news is , QArchive's Documentation is up and running with no errors<br> and the <strong>best</strong> part is , The documentation is <strong>freakin</strong> sexy and thus I've decided to<br> use docusarus for all my <strong>project</strong> documentations.</p> <p>I really recommend you folks t...</p>]]></summary>
         <author>
             <name>Antony Jr.</name>
@@ -23,9 +22,8 @@
     <entry>
         <title type="html"><![CDATA[Writing Documentation for software is the hardest part!]]></title>
         <id>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-documentation-is-hard.html</id>
-        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-documentation-is-hard.html">
-        </link>
-        <updated>2017-12-27T06:00:00Z</updated>
+        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-documentation-is-hard.html"/>
+        <updated>2017-12-27T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Hey everyone , I don't know if you know this but developing a software is easier compared<br> to writing a documentation for the users. I've started writing documentations for my<br> libraries and its kinda of boring. Will get back to you when I finish all m...</p>]]></summary>
         <author>
             <name>Antony Jr.</name>
@@ -35,9 +33,8 @@
     <entry>
         <title type="html"><![CDATA[I will be writing the documentation in Qt Style!]]></title>
         <id>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-docs-like-qt.html</id>
-        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-docs-like-qt.html">
-        </link>
-        <updated>2017-12-27T06:00:00Z</updated>
+        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-docs-like-qt.html"/>
+        <updated>2017-12-27T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Hey folks , I learned a lot just by looking at Qt Docs. Its really a good style they follow<br> and I decided to follow the exact style with some of my imaginations , afterall this is a simple header for Qt Projects , right ?...</p> <p><strong>See ya!</strong>.</p> ]]></summary>
         <author>
             <name>Antony Jr.</name>
@@ -47,9 +44,8 @@
     <entry>
         <title type="html"><![CDATA[Publishing the official documentation!]]></title>
         <id>https://antony-jr.github.io/QArchive/blog/2017/12/27/publishing-the-official-documentation.html</id>
-        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/publishing-the-official-documentation.html">
-        </link>
-        <updated>2017-12-27T06:00:00Z</updated>
+        <link href="https://antony-jr.github.io/QArchive/blog/2017/12/27/publishing-the-official-documentation.html"/>
+        <updated>2017-12-27T06:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>Hello everyone , I know that I already published a Wiki for QArchive at github but I thought it<br> would be good if the documentation and other guides are published with some awesome styles<br> and illustrations. So I am recreating the Wiki in <strong>Docusaurus</strong> , ...</p>]]></summary>
         <author>
             <name>Antony Jr.</name>

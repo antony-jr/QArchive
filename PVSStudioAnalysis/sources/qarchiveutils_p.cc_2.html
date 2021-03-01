@@ -1,0 +1,209 @@
+
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII" />
+  <title>qarchiveutils_p.cc</title>
+
+  <link rel="stylesheet" href="../style.css"/>
+  <script src="../jquery-3.5.1.min.js"></script>
+</head>
+<body>
+
+<pre><code class = "cpp">
+<a name="ln1">#include &lt;qarchiveutils_p.hpp&gt;</a>
+<a name="ln2">#include &lt;qarchiveioreader_p.hpp&gt;</a>
+<a name="ln3">#include &lt;QString&gt;</a>
+<a name="ln4">#include &lt;QIODevice&gt;</a>
+<a name="ln5"> </a>
+<a name="ln6">extern &quot;C&quot; {</a>
+<a name="ln7">#include &lt;archive.h&gt;</a>
+<a name="ln8">#include &lt;archive_entry.h&gt;</a>
+<a name="ln9">#include &lt;fcntl.h&gt;</a>
+<a name="ln10">#include &lt;stdio.h&gt;</a>
+<a name="ln11">#include &lt;stdlib.h&gt;</a>
+<a name="ln12">#include &lt;string.h&gt;</a>
+<a name="ln13">#include &lt;sys/types.h&gt;</a>
+<a name="ln14">#include &lt;sys/stat.h&gt;</a>
+<a name="ln15">}</a>
+<a name="ln16"> </a>
+<a name="ln17">/*</a>
+<a name="ln18"> * This function destructs struct archive which is set</a>
+<a name="ln19"> * in the read mode via Qt Smart Pointer.</a>
+<a name="ln20">*/</a>
+<a name="ln21">void ArchiveReadDestructor(struct archive *ar) {</a>
+<a name="ln22">    if(ar) {</a>
+<a name="ln23">        archive_read_close(ar);</a>
+<a name="ln24">        archive_read_free(ar);</a>
+<a name="ln25">    }</a>
+<a name="ln26">    return;</a>
+<a name="ln27">}</a>
+<a name="ln28"> </a>
+<a name="ln29">/*</a>
+<a name="ln30"> * This function destructs struct archive which is set in the</a>
+<a name="ln31"> * write mode via Qt Smart Pointer.</a>
+<a name="ln32">*/</a>
+<a name="ln33">void ArchiveWriteDestructor(struct archive *aw) {</a>
+<a name="ln34">    if(aw) {</a>
+<a name="ln35">        archive_write_close(aw);</a>
+<a name="ln36">        archive_write_free(aw);</a>
+<a name="ln37">    }</a>
+<a name="ln38">    return;</a>
+<a name="ln39">}</a>
+<a name="ln40"> </a>
+<a name="ln41">void ArchiveEntryDestructor(struct archive_entry *e) {</a>
+<a name="ln42">    if(e) {</a>
+<a name="ln43">        archive_entry_free(e);</a>
+<a name="ln44">    }</a>
+<a name="ln45">    return;</a>
+<a name="ln46">}</a>
+<a name="ln47"> </a>
+<a name="ln48">/*</a>
+<a name="ln49"> * Custom libarchive callbacks to handle QIODevice as the archive</a>
+<a name="ln50"> * input. */</a>
+<a name="ln51"> </a>
+<a name="ln52">// Private data structure which holds a QIODevice along with its buffer size</a>
+<a name="ln53">// to read at a time.</a>
+<a name="ln54">// This structure will be used as the client data for the archive callbacks.</a>
+<a name="ln55">struct ClientData_t {</a>
+<a name="ln56">    char *storage = nullptr;</a>
+<a name="ln57">    QArchive::IOReaderPrivate *io = nullptr;</a>
+<a name="ln58">};</a>
+<a name="ln59"> </a>
+<a name="ln60"> </a>
+<a name="ln61">// This callback will be called on archive open.</a>
+<a name="ln62">// This callback is simply used to avoid segmentation fault when</a>
+<a name="ln63">// the programmer mistakenly gives a QIODevice that has not opened.</a>
+<a name="ln64">static int archive_open_cb(struct archive *archive, void *data) {</a>
+<a name="ln65">    Q_UNUSED(archive);</a>
+<a name="ln66">    ClientData_t *p = (ClientData_t*)data;</a>
+<a name="ln67">    if(!p) {</a>
+<a name="ln68">        // We surely need the reader handle to continue</a>
+<a name="ln69">        // any further.</a>
+<a name="ln70">        return ARCHIVE_FATAL;</a>
+<a name="ln71">    }</a>
+<a name="ln72">    if(!p-&gt;io-&gt;isOpen() ||</a>
+<a name="ln73">            !p-&gt;io-&gt;isReadable() ||</a>
+<a name="ln74">            !(p-&gt;storage) ||</a>
+<a name="ln75">            p-&gt;io-&gt;isSequential()) {</a>
+<a name="ln76">        return ARCHIVE_FATAL;</a>
+<a name="ln77">    }</a>
+<a name="ln78">    return ARCHIVE_OK;</a>
+<a name="ln79">}</a>
+<a name="ln80"> </a>
+<a name="ln81">static int archive_close_cb(struct archive *archive, void *data) {</a>
+<a name="ln82">    // Should not do anything to archive pointer since</a>
+<a name="ln83">    // its a private object inside some other class.</a>
+<a name="ln84">    // It will be managed automatically later.</a>
+<a name="ln85">    Q_UNUSED(archive);</a>
+<a name="ln86">    ClientData_t *p = (ClientData_t*)data;</a>
+<a name="ln87">    if(p-&gt;storage) { // free any data that has been allocated.</a>
+<a name="ln88">        free(p-&gt;storage);</a>
+<a name="ln89">    }</a>
+<a name="ln90">    delete (p-&gt;io); //  Delete IOReaderPrivate.</a>
+<a name="ln91">    free(p); // free the client data allocated on creation.</a>
+<a name="ln92">    return ARCHIVE_OK;</a>
+<a name="ln93">}</a>
+<a name="ln94"> </a>
+<a name="ln95">// This read callback is called whenever libarchive needs </a>
+<a name="ln96">// more data to crunch , this is very important since we have </a>
+<a name="ln97">// to read the data from QIODevice.</a>
+<a name="ln98">static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {</a>
+<a name="ln99">    Q_UNUSED(archive);</a>
+<a name="ln100">    ClientData_t *p = (ClientData_t*)data;</a>
+<a name="ln101">    *buffer = (void*)p-&gt;storage;</a>
+<a name="ln102">    return p-&gt;io-&gt;read(p-&gt;storage);</a>
+<a name="ln103">}</a>
+<a name="ln104"> </a>
+<a name="ln105">// This is the most important callback function required for libarchive to work with</a>
+<a name="ln106">// QIODevice , this can't be set with the provided libarchive public functions.</a>
+<a name="ln107">// We will be using a private function to set this callback.</a>
+<a name="ln108">// This callback seeks the QIODevice with respect to whence which is the same as</a>
+<a name="ln109">// given in fseek and lseek.</a>
+<a name="ln110">//</a>
+<a name="ln111">// Without this function you cannot extract 7zip archives.</a>
+<a name="ln112">static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {</a>
+<a name="ln113">    Q_UNUSED(archive);</a>
+<a name="ln114">    ClientData_t *p = (ClientData_t*)data;</a>
+<a name="ln115">    return static_cast&lt;int64_t&gt;(p-&gt;io-&gt;seek(request, whence));</a>
+<a name="ln116">}</a>
+<a name="ln117"> </a>
+<a name="ln118">// This is a custom functions which sets up the callbacks and other</a>
+<a name="ln119">// stuff for a libarchive struct.</a>
+<a name="ln120">int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device) {</a>
+<a name="ln121">    // This client data will be freed on close ,</a>
+<a name="ln122">    // we don't need to worry about this.</a>
+<a name="ln123">    ClientData_t *p = (ClientData_t*)calloc(1, sizeof *p);</a>
+<a name="ln124">    p-&gt;io = new QArchive::IOReaderPrivate;</a>
+<a name="ln125">    p-&gt;io-&gt;setIODevice(device);</a>
+<a name="ln126">    p-&gt;io-&gt;setBlockSize(blocksize);</a>
+<a name="ln127">    p-&gt;storage = (char*)calloc(1, (blocksize &lt; 1024) ?</a>
+<a name="ln128">                               sizeof(*(p-&gt;storage)) * 10204 :</a>
+<a name="ln129">                               sizeof(*(p-&gt;storage)) * blocksize);</a>
+<a name="ln130">    archive_read_set_open_callback(archive, archive_open_cb);</a>
+<a name="ln131">    archive_read_set_read_callback(archive, archive_read_cb);</a>
+<a name="ln132">    archive_read_set_seek_callback(archive, archive_seek_cb);</a>
+<a name="ln133">    archive_read_set_close_callback(archive, archive_close_cb);</a>
+<a name="ln134">    archive_read_set_callback_data(archive, (void*)p);</a>
+<a name="ln135">    return archive_read_open1(archive);</a>
+<a name="ln136">}</a>
+<a name="ln137">/* ---- */</a>
+<a name="ln138"> </a>
+<a name="ln139"> </a>
+<a name="ln140">/*</a>
+<a name="ln141"> * This function returns an allocated c string which is the combination</a>
+<a name="ln142"> * of the given c strings.</a>
+<a name="ln143"> * Automatically allocates space for the new c string but does not</a>
+<a name="ln144"> * free it automatically.</a>
+<a name="ln145">*/</a>
+<a name="ln146">char *concat(const char *dest, const char *src) {</a>
+<a name="ln147">    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);</a>
+<a name="ln148">    strcpy(ret, dest);</a>
+<a name="ln149">    strcat(ret, src);</a>
+<a name="ln150">    return ret;</a>
+<a name="ln151">}</a>
+<a name="ln152"> </a>
+<a name="ln153">/*</a>
+<a name="ln154"> * This function converts a string from &quot;/home/antonyjr/&quot;</a>
+<a name="ln155"> * to &quot;/home/antonyjr&quot; , i.e Removes the trailing '/' if found.</a>
+<a name="ln156">*/</a>
+<a name="ln157">QString getDirectoryFileName(const QString &amp;dir) {</a>
+<a name="ln158">    if(dir[dir.count() - 1] == QStringLiteral(&quot;/&quot;)) {</a>
+<a name="ln159">        return dir.mid(0, dir.count() - 1);</a>
+<a name="ln160">    }</a>
+<a name="ln161">    return dir;</a>
+<a name="ln162">}</a>
+
+</code></pre>
+<div class="balloon" rel="124"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v522/" target="_blank">V522</a> There might be dereferencing of a potential null pointer 'p'. Check lines: 124, 123.</p></div>
+<div class="balloon" rel="148"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v575/" target="_blank">V575</a> The potential null pointer is passed into 'strcpy' function. Inspect the first argument. Check lines: 148, 147.</p></div>
+
+<link rel="stylesheet" href="highlight.css">
+<script src="highlight.pack.js"></script>
+<script src="highlightjs-line-numbers.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<script>hljs.initLineNumbersOnLoad();</script>
+<script>
+  $(document).ready(function() {
+      $('.balloon').each(function () {
+          var bl = $(this);
+          var line = bl.attr('rel');
+          var text = $('a[name="ln'+line+'"]').text();
+
+          var space_count = 0;
+          for(var i = 0; i<text.length; i++){
+              var char = text[i];
+              if((char !== ' ')&&(char !== '\t'))break;
+              if(char === '\t')space_count++;
+              space_count++;
+          }
+
+          bl.css('margin-left', space_count*8);
+          $('a[name="ln'+line+'"]').after(bl);
+      });
+
+      window.location = window.location;
+  });
+</script>
+</body>
+</html>
