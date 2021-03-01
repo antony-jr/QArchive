@@ -33,6 +33,6 @@
  *  The Traditional Proxy files used in all Qt Modules , it just points to our
  *  Original API Header.
 */
-#include "include/qarchive_enums.hpp"
-#include "include/qarchivediskextractor.hpp"
-#include "include/qarchivediskcompressor.hpp"
+#include "qarchive_enums.hpp"
+#include "qarchivediskextractor.hpp"
+#include "qarchivediskcompressor.hpp"
