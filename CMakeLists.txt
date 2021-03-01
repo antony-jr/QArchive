@@ -4,8 +4,8 @@
 #  CMake Support for QArchive.
 # -------------------------------
 
-CMAKE_MINIMUM_REQUIRED( VERSION 3.2)
-project(QArchive)
+CMAKE_MINIMUM_REQUIRED( VERSION 3.17)
+project(QArchive VERSION 2.0.1)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
