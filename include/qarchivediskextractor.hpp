@@ -1,6 +1,5 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
-#include <QtCore/QtGlobal>
 #include <QScopedPointer>
 #include <QIODevice>
 #include <QString>
@@ -8,9 +7,11 @@
 #include <QThread>
 #include <QJsonObject>
 
+#include "qarchive_global.hpp"
+
 namespace QArchive {
 class DiskExtractorPrivate;
-class Q_DECL_EXPORT DiskExtractor : public QObject {
+class QARCHIVE_EXPORT DiskExtractor : public QObject {
     Q_OBJECT
   public:
     DiskExtractor(QObject *parent = nullptr, bool singleThreaded = true);

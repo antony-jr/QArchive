@@ -1,16 +1,17 @@
 #ifndef QARCHIVE_DISK_COMPRESSOR_HPP_INCLUDED
 #define QARCHIVE_DISK_COMPRESSOR_HPP_INCLUDED
-#include <QtCore/QtGlobal>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QScopedPointer>
 #include <QThread>
 
+#include "qarchive_global.hpp"
+
 namespace QArchive {
 
 class DiskCompressorPrivate;
-class Q_DECL_EXPORT DiskCompressor : public QObject {
+class QARCHIVE_EXPORT DiskCompressor : public QObject {
     Q_OBJECT
   public:
     DiskCompressor(QObject *parent = nullptr, bool singleThreaded = true);

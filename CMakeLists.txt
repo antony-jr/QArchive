@@ -27,6 +27,10 @@ include(CMakePackageConfigHelpers)
 include_directories(.)
 include_directories(include)
 
+if(BUILD_SHARED_LIBS)
+	add_definitions(-DQARCHIVE_SHARED_LIBRARY)
+endif()
+
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples/disk_compressor)
 	add_subdirectory(examples/disk_extractor)
@@ -48,6 +52,7 @@ add_library(QArchive
 	    include/qarchivediskextractor_p.hpp
 	    include/qarchiveutils_p.hpp
 	    include/qarchiveioreader_p.hpp
+	    include/qarchive_global.hpp
 	    )
 
 SET(toinstall)
@@ -56,6 +61,7 @@ list(APPEND toinstall
     include/qarchive_enums.hpp
     include/qarchivediskextractor.hpp
     include/qarchivediskcompressor.hpp
+    include/qarchive_global.hpp
 )	
 
 target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
