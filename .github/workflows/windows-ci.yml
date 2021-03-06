@@ -56,8 +56,9 @@ jobs:
       - name: Build QArchive
         shell: cmd
         run: |
+          mkdir build
           cmake -B build ^
             -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DEST_WIN }}\scripts\buildsystems\vcpkg.cmake ^
             -DVCPKG_TARGET_TRIPLET=x64-windows-static-release ^
-            -DMSVC_RUNTIME_DYNAMIC=OFF ^
+            -DMSVC_RUNTIME_DYNAMIC=OFF  ^
           cmake --build build
