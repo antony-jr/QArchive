@@ -10,7 +10,7 @@ on:
 
 env:
   VCPKG_COMMIT: e4ce66eecfd3e5cca5eac06c971921bf8e37cf88
-  VCPKG_DEST_WIN: C:\tools\vcpkg
+  VCPKG_DEST_WIN: C:\winci_tools\vcpkg
 
 jobs:
   windows_ci:
@@ -45,13 +45,11 @@ jobs:
             "libarchive:x64-windows-static-release"
           ${{ env.RUNVCPKG_VCPKG_ROOT }}/vcpkg.exe upgrade `
               --overlay-triplets=${{ github.workspace }}/triplets_overlay `
-              --overlay-ports=${{ github.workspace }}/vcpkg `
               --no-dry-run
           foreach($package in $packages)
           {
             ${{ env.RUNVCPKG_VCPKG_ROOT }}/vcpkg.exe install $package `
               --overlay-triplets=${{ github.workspace }}/triplets_overlay `
-              --overlay-ports=${{ github.workspace }}/vcpkg `
               --clean-after-build
           }
 
