@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   Test-and-Deploy:
+    name: "Test and Deploy"
     runs-on: ubuntu-18.04
     defaults:
       run:
