@@ -5,7 +5,7 @@
 # -------------------------------
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.17)
-project(QArchive VERSION 2.0.1)
+project(QArchive VERSION 2.0.4)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -27,9 +27,9 @@ include(CMakePackageConfigHelpers)
 include_directories(.)
 include_directories(include)
 
-if(BUILD_SHARED_LIBS)
-	add_definitions(-DQARCHIVE_SHARED_LIBRARY)
-endif()
+# Required for the import and exports 
+# for Windows Builds.
+add_definitions(-DQARCHIVE_BUILD)
 
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples/disk_compressor)
