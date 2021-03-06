@@ -33,15 +33,14 @@ jobs:
       - name: Install Dependencies via VCPKG
         run: |
           $packages = `
-            "qt5-base:x64-windows-static-release"
+            "qt5-base:x64-windows-static-release",
+            "libarchive:x64-windows-static-release"
           ${{ env.RUNVCPKG_VCPKG_ROOT }}/vcpkg.exe upgrade `
-              --overlay-triplets=${{ github.workspace }}/triplets_overlay `
               --overlay-ports=${{ github.workspace }}/vcpkg `
               --no-dry-run
           foreach($package in $packages)
           {
             ${{ env.RUNVCPKG_VCPKG_ROOT }}/vcpkg.exe install $package `
-              --overlay-triplets=${{ github.workspace }}/triplets_overlay `
               --overlay-ports=${{ github.workspace }}/vcpkg `
               --clean-after-build
           }
