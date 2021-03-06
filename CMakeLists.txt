@@ -31,6 +31,10 @@ include_directories(include)
 # for Windows Builds.
 add_definitions(-DQARCHIVE_BUILD)
 
+if(BUILD_TESTS)
+	add_subdirectory(tests)
+endif()
+
 if(BUILD_EXAMPLES)
 	add_subdirectory(examples/disk_compressor)
 	add_subdirectory(examples/disk_extractor)

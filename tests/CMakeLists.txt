@@ -23,6 +23,8 @@ add_executable(QArchiveTests main.cc
 	                     TestRunner.cc
 			     TestRunner.hpp
 			     QArchiveTestCases.hpp
+			     QArchiveDiskCompressorTests.cc
 			     QArchiveDiskCompressorTests.hpp
+			     QArchiveDiskExtractorTests.cc
 			     QArchiveDiskExtractorTests.hpp)
 target_link_libraries(QArchiveTests PRIVATE QArchive Qt5::Test Qt5::Concurrent)
