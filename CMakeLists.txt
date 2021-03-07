@@ -13,7 +13,7 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
+option(QARCHIVE_STATIC "Static Build of QArchive" ON)
 
 # Find the QtCore library and libarchive.
 find_package(LibArchive)
@@ -29,7 +29,11 @@ include_directories(include)
 
 # Required for the import and exports 
 # for Windows Builds.
-add_definitions(-DQARCHIVE_BUILD)
+if(BUILD_SHARED_LIBS)
+	set(QARCHIVE_STATIC OFF)
+	add_definitions(-DQARCHIVE_BUILD)
+endif()
+
 
 if(BUILD_TESTS)
 	add_subdirectory(tests)
@@ -66,11 +70,20 @@ list(APPEND toinstall
     include/qarchivediskextractor.hpp
     include/qarchivediskcompressor.hpp
     include/qarchive_global.hpp
+    ${PROJECT_BINARY_DIR}/config.h
 )	
 
 target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
 target_include_directories(QArchive INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include>")
 target_include_directories(QArchive INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/QArchive>" )
+
+# create a config.h to decide the type of build
+# when including public headers.
+configure_file(
+	"${PROJECT_SOURCE_DIR}/other/cmake/config.h.in"
+	"${PROJECT_BINARY_DIR}/config.h"
+	 @ONLY
+)
 
 # Add pkg-config and install instructions
 configure_file(

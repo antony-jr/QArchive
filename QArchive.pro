@@ -3,8 +3,10 @@
 # -------------------------------
 #  QMake support for QArchive.
 # -------------------------------
+# Remove the below line if its not static build.
+DEFINES += QARCHIVE_STATIC # if it is a static build.
 include(QArchive.pri)
 TEMPLATE = lib
-CONFIG += shared_and_static build_all release
+CONFIG += static build_all release
 TARGET = QArchive
-DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QARCHIVE_BUILD QT_DEPRECATED_WARNINGS

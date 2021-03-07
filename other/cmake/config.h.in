@@ -1,0 +1,5 @@
+#ifndef CONFIG_H_QARCHIVE_INCLUDED
+#define CONFIG_H_QARCHIVE_INCLUDED
+#cmakedefine QARCHIVE_STATIC
+#endif
+
