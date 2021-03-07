@@ -47,8 +47,8 @@ jobs:
           make -j$(nproc)
           sudo make install -j$(nproc)
           cd ..
-          rm -rf libarchive
           cd ..
+          rm -rf build
           cd website
           sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
           sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
@@ -103,6 +103,7 @@ jobs:
           PVS_LIC_KEY: ${{secrets.PVS_LICENSE_KEY}}
         run: |
           cd ..
+          mkdir build
           cd build
           source /opt/qt*/bin/qt*-env.sh || true
           cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On  ..
