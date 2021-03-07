@@ -67,15 +67,18 @@ jobs:
           cd website
 
       - name: Setup Node
+        if: github.event_name != 'pull_request'
         uses: actions/setup-node@v2
         with:
           node-version: '14.x'
 
       - name: Get yarn cache
+        if: github.event_name != 'pull_request'
         id: yarn-cache
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
       - name: Cache dependencies
+        if: github.event_name != 'pull_request'
         uses: actions/cache@v2
         with:
           path: ${{ steps.yarn-cache.outputs.dir }}
@@ -84,9 +87,13 @@ jobs:
             ${{ runner.os }}-website-
 
       - run: yarn install --frozen-lockfile
+        if: github.event_name != 'pull_request'
+        
       - run: yarn build
-
+        if: github.event_name != 'pull_request'
+        
       - name: Run PVS Analysis
+        if: github.event_name != 'pull_request' 
         env:
           PVS_LIC_NAME: ${{secrets.PVS_LICENSE_NAME}}
           PVS_LIC_KEY: ${{secrets.PVS_LICENSE_KEY}}
