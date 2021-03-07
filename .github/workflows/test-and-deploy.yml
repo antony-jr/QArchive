@@ -58,12 +58,16 @@ jobs:
           Xvfb :100 -ac &
           export DISPLAY=:100.0
           cd ..
-          cd tests
+          mkdir build
+          cd build
           source /opt/qt*/bin/qt*-env.sh || true
-          qmake . 
+          cmake -DBUILD_TESTS=ON .. 
           make -j$(nproc)
-          ./tests
+          cd tests
+          ./QArchiveTests
           cd ..
+          cd ..
+          rm -rf build
           cd website
 
       - name: Setup Node
