@@ -99,7 +99,9 @@ install(FILES
 install(TARGETS
 	QArchive
 	EXPORT QArchiveTargets
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin)
 
 install(FILES
   ${toinstall}
