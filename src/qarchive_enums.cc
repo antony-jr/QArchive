@@ -67,7 +67,7 @@ QString QArchive::errorCodeToString(short errorCode) {
         errorString = QString("QArchive::ArchiveWriteOpenError");
         break;
     case ArchiveFatalError:
-        errorString = QString("QArchive::ArchvieFatalError");
+        errorString = QString("QArchive::ArchiveFatalError");
         break;
     case FileDoesNotExist:
         errorString = QString("QArchive::FileDoesNotExist");
@@ -85,7 +85,7 @@ QString QArchive::errorCodeToString(short errorCode) {
         errorString = QString("QArchive::NoFilesToCompress");
         break;
     default:
-        errorString = QString("QArchvie::UnknownError");
+        errorString = QString("QArchive::UnknownError");
         break;
     }
     return errorString;

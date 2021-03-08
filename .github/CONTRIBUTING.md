@@ -1,6 +1,6 @@
 # Contribution Guide
 
-QArchive is a small library that modernizes **libarhive** using C++ and Qt5 , So you need to go through libarchive's   
+QArchive is a small library that modernizes **libarchive** using C++ and Qt5 , So you need to go through libarchive's   
 **[documentaion](https://github.com/libarchive/libarchive/wiki)** and **[Qt Docs](https://doc.qt.io/qt-5/)**.   
 You **don't need to be an expert** in any of these because everyone is learning and I specifically want this project to   
 welcome new contributors and let them know how a open source project works. All contributors and those who wish to   

@@ -13,7 +13,7 @@ Qt event loop and thus its a perfect fit for your Qt projects.
 
 I personally made this project to extract .7z archives in order to create a library that can update Qt Apps installed via
 Qt Installer Framework without using the updater tool provided by Qt , because I hated using sub-process and besides
-I wanted a in-built updater for my application and thats not possible with the already provided updater from 
+I wanted a in-built updater for my application and that's not possible with the already provided updater from 
 Qt Installer Framework.
 
 ## Features
@@ -122,7 +122,7 @@ You can also **become one of them by contributing to this project** , to know mo
 
 # Thank You ![Thank You](https://img.shields.io/badge/Always-Say%20Thank%20You!-blue.svg?style=flat-square)
 
-I really need to thank the developers of this libraries for creating it because QArchive is elegant because of them! :heart:   
+I really need to thank the developers of these libraries for creating it because QArchive is elegant because of them! :heart:   
 
 * [libarchive](https://github.com/libarchive/libarchive)
 * [Qt](https://github.com/qt)
