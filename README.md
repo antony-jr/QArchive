@@ -115,6 +115,17 @@ My utmost **gratitude goes to these people!** :heart:
             <a href="https://github.com/antony-jr/QArchive/commits?author=g-fb">💻</a>
         </td>
   </tr>
+  <tr align="center">
+         <td>
+            <img src="https://avatars.githubusercontent.com/u/2084073?s=400&u=6278d48f6a8eb75af82395593f31af5a960cb95a&v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/dprotti">Duilio Protti</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=dprotti">💻</a>
+        </td>
+  </tr>  
 </table>
 
 You can also **become one of them by contributing to this project** , to know more read **[CONTRIBUTING.md](.github/CONTRIBUTING.md)**.
