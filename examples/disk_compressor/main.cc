@@ -1,6 +1,6 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int ac, char **av) {
     if(ac < 2) {

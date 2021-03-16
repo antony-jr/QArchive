@@ -31,7 +31,7 @@ Qt Installer Framework.
 
 ```
 #include <QCoreApplication>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int argc, char **argv)
 {

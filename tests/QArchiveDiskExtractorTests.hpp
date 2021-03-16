@@ -1,6 +1,6 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
-#include <QArchive>
+#include <QArchive/QArchive>
 #include <QTest>
 #include <QTimer>
 #include <QJsonObject>

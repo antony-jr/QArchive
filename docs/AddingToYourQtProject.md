@@ -71,7 +71,7 @@ SUBDIRS = libs \ # Always use this order
 Whenever you want to use **QArchive** , you just need to include it!
 
 ```
-#include <QArchive>
+#include <QArchive/QArchive>
 ```
 
 
@@ -122,6 +122,6 @@ include(QArchive/QArchive.pri)
 Whenever you want to use **QArchive** , you just need to include it!
 
 ```
-#include <QArchive>
+#include <QArchive/QArchive>
 ```
 

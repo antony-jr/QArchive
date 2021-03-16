@@ -13,7 +13,7 @@ This simple example compresses a set of files and directories.(Directories are r
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int argc, char** argv)
 {

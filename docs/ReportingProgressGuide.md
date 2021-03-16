@@ -14,7 +14,7 @@ Eventhough this example is for the extractor , the same can be used for
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int ac, char **av)
 {
