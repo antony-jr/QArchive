@@ -2,7 +2,7 @@
 #include <string>
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 #include <QJsonObject>
 
 int main(int ac, char **av) {

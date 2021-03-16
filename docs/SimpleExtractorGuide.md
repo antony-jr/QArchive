@@ -12,7 +12,7 @@ This simple example extracts a given archive supported by libarchive.
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int ac, char **av)
 {

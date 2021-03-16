@@ -18,7 +18,7 @@ encrypt the archive using a password.
 ```
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive>
+#include <QArchive/QArchive>
 
 int main(int argc, char** argv)
 {

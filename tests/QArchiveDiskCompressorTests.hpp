@@ -1,4 +1,4 @@
-#include <QArchive>
+#include <QArchive/QArchive>
 #include <QTest>
 #include <QFileInfo>
 #include <QTimer>
