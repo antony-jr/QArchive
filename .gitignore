@@ -48,3 +48,6 @@ compile_commands.json
 
 # QtCreator local machine specific files for imported projects
 *creator.user*
+
+# Conan example build folder
+examples/conan/build
