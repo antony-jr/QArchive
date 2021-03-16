@@ -53,6 +53,12 @@ int main(int argc, char **argv)
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive).
 
+## Conan
+
+Starting version 2.0.1 `QArchive` is available on the [Conan C/C++ package manager](https://conan.io/), which means you can download prebuilt packages for all major platforms (Windows, Linux, macOS, etc).
+
+Find an example on how to consume Conan's precompiled packages in the examples folder.
+
 # Contributors [![QArchive Contributors](https://img.shields.io/github/contributors/antony-jr/QArchive.svg)](https://github.com/antony-jr/QArchive/graphs/contributors)
 
 My utmost **gratitude goes to these people!** :heart:
