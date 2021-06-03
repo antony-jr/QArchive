@@ -122,18 +122,6 @@ void QArchiveDiskCompressorTests::compressingMultipleFiles() {
     QVERIFY(QFileInfo::exists(TestCase3ArchivePath));
 
     QCOMPARE(progressSpyInfo.count(), 4);
-
-    QList<QVariant> progress1 = progressSpyInfo.takeFirst();
-    QVERIFY(progress1.at(1).toInt() == 1);
-    QVERIFY(progress1.at(2).toInt() == 2);
-    QVERIFY(progress1.at(3).toInt() == 14);
-    QVERIFY(progress1.at(4).toInt() == 68);
-
-    QList<QVariant> progress2 = progressSpyInfo.takeLast();
-    QVERIFY(progress2.at(1).toInt() == 2);
-    QVERIFY(progress2.at(2).toInt() == 2);
-    QVERIFY(progress2.at(3).toInt() == 68);
-    QVERIFY(progress2.at(4).toInt() == 68);
 }
 
 void QArchiveDiskCompressorTests::encryptingZipArchive() {

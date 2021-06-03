@@ -276,6 +276,8 @@ void DiskCompressorPrivate::resume() {
         b_Started = false;
         b_Paused = true;
         emit paused();
+    } else {
+	b_Started = false;
     }
     return;
 }
@@ -474,7 +476,7 @@ short DiskCompressorPrivate::compress() {
 
     // Start compressing files.
     while(!m_ConfirmedFiles->isEmpty()) {
-        auto node = m_ConfirmedFiles->takeFirst();
+        auto node = m_ConfirmedFiles->first();
         // TODO:
         //	Implement a failsafe copy mechanism.
         //
@@ -541,10 +543,15 @@ short DiskCompressorPrivate::compress() {
 		    QCoreApplication::processEvents();
 		}
                 file->close();
-            }
+            }else {
+		emit error(ArchiveHeaderWriteError, node.second);
+		return ArchiveHeaderWriteError;
+	    }
 
 	    QCoreApplication::processEvents();
         }
+
+	m_ConfirmedFiles->removeFirst();
 
         emit progress(QString(node.second),
                       (n_TotalEntries - m_ConfirmedFiles->size()),
