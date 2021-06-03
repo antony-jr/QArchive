@@ -417,19 +417,19 @@ short DiskCompressorPrivate::compress() {
         case BZipFormat:
         case BZip2Format:
             archive_write_add_filter_bzip2(m_ArchiveWrite.data());
-            archive_write_set_format_ustar(m_ArchiveWrite.data());
+            archive_write_set_format_gnutar(m_ArchiveWrite.data());
             break;
         case GZipFormat:
             archive_write_add_filter_gzip(m_ArchiveWrite.data());
-            archive_write_set_format_ustar(m_ArchiveWrite.data());
+            archive_write_set_format_gnutar(m_ArchiveWrite.data());
             break;
         case XzFormat:
             archive_write_add_filter_xz(m_ArchiveWrite.data());
-            archive_write_set_format_ustar(m_ArchiveWrite.data());
+            archive_write_set_format_gnutar(m_ArchiveWrite.data());
             break;
         case TarFormat:
             archive_write_add_filter_none(m_ArchiveWrite.data());
-            archive_write_set_format_ustar(m_ArchiveWrite.data());
+            archive_write_set_format_gnutar(m_ArchiveWrite.data());
             break;
         case XarFormat:
             archive_write_add_filter_none(m_ArchiveWrite.data());
