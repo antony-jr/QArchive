@@ -537,7 +537,7 @@ short DiskCompressorPrivate::compress() {
 		    // processEvents in this loop. So if the file is large
 		    // enough it can easily block the main thread.
                     emit progress(QString(node.second),
-                                  (n_TotalEntries - m_ConfirmedFiles->size()),
+                                  (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
                                    n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 		    
 		    QCoreApplication::processEvents();
