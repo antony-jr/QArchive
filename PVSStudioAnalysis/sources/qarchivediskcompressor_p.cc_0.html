@@ -289,297 +289,304 @@
 <a name="ln276">        b_Started = false;</a>
 <a name="ln277">        b_Paused = true;</a>
 <a name="ln278">        emit paused();</a>
-<a name="ln279">    }</a>
-<a name="ln280">    return;</a>
-<a name="ln281">}</a>
-<a name="ln282"> </a>
-<a name="ln283">void DiskCompressorPrivate::pause() {</a>
-<a name="ln284">    if(!b_Started || b_Finished || b_Paused) {</a>
-<a name="ln285">        return;</a>
-<a name="ln286">    }</a>
-<a name="ln287">    b_PauseRequested = true;</a>
-<a name="ln288">    return;</a>
-<a name="ln289">}</a>
-<a name="ln290"> </a>
-<a name="ln291">// Cancels the current compression process, if the compression process is</a>
-<a name="ln292">// paused then the compression cannot be canceled.</a>
-<a name="ln293">void DiskCompressorPrivate::cancel() {</a>
-<a name="ln294">    if(!b_Started || b_Finished || b_Paused) {</a>
-<a name="ln295">        return;</a>
-<a name="ln296">    }</a>
-<a name="ln297">    b_CancelRequested = true;</a>
-<a name="ln298">    return;</a>
-<a name="ln299">}</a>
-<a name="ln300"> </a>
-<a name="ln301">// Guesses the archive format from the given archive filename , on success</a>
-<a name="ln302">// this returns true or vice-versa.</a>
-<a name="ln303">bool DiskCompressorPrivate::guessArchiveFormat() {</a>
-<a name="ln304">    if(m_TemporaryFile-&gt;fileName().isEmpty()) {</a>
-<a name="ln305">        return false;</a>
-<a name="ln306">    }</a>
-<a name="ln307"> </a>
-<a name="ln308">    auto ext = QFileInfo(m_TemporaryFile-&gt;fileName()).suffix().toLower();</a>
-<a name="ln309">    if(ext == &quot;bz&quot;) {</a>
-<a name="ln310">        m_ArchiveFormat = BZipFormat;</a>
-<a name="ln311">    } else if(ext == &quot;bz2&quot;) {</a>
-<a name="ln312">        m_ArchiveFormat = BZip2Format;</a>
-<a name="ln313">    } else if(ext == &quot;gz&quot;) {</a>
-<a name="ln314">        m_ArchiveFormat = GZipFormat;</a>
-<a name="ln315">    } else if(ext == &quot;xz&quot;) {</a>
-<a name="ln316">        m_ArchiveFormat = XzFormat;</a>
-<a name="ln317">    } else if(ext == &quot;tar&quot;) {</a>
-<a name="ln318">        m_ArchiveFormat = TarFormat;</a>
-<a name="ln319">    } else if(ext == &quot;xar&quot;) {</a>
-<a name="ln320">        m_ArchiveFormat = XarFormat;</a>
-<a name="ln321">    } else if(ext == &quot;zip&quot;) {</a>
-<a name="ln322">        m_ArchiveFormat = ZipFormat;</a>
-<a name="ln323">    } else if(ext == &quot;7z&quot;) {</a>
-<a name="ln324">        m_ArchiveFormat = SevenZipFormat;</a>
-<a name="ln325">    } else {</a>
-<a name="ln326">        m_ArchiveFormat = 0;</a>
-<a name="ln327">        return false;</a>
-<a name="ln328">    }</a>
-<a name="ln329"> </a>
-<a name="ln330">    return true;</a>
-<a name="ln331">}</a>
-<a name="ln332"> </a>
-<a name="ln333">// Confirms all the files that are stagged for compression , Returns true</a>
-<a name="ln334">// on success and vice-versa.</a>
-<a name="ln335">// This populates m_ConfirmedFiles linked list with all the files added ,</a>
-<a name="ln336">// Directory's files will be recursively added.</a>
-<a name="ln337">bool DiskCompressorPrivate::confirmFiles() {</a>
-<a name="ln338">    m_ConfirmedFiles-&gt;clear();</a>
-<a name="ln339">    for(auto iter = m_StaggedFiles-&gt;begin() ; iter != m_StaggedFiles-&gt;end() ; ++iter) {</a>
-<a name="ln340">        auto node = *iter;</a>
-<a name="ln341">        QFileInfo info(/* file path given by the user = */node.second);</a>
-<a name="ln342"> </a>
-<a name="ln343">        // Check if the file exists.</a>
-<a name="ln344">        if(!info.exists()) {</a>
-<a name="ln345">            emit error(FileDoesNotExist, info.filePath());</a>
-<a name="ln346">            return false;</a>
-<a name="ln347">        }</a>
-<a name="ln348"> </a>
-<a name="ln349">        // Check permission to read.</a>
-<a name="ln350">        if(!info.isReadable()) {</a>
-<a name="ln351">            emit error(NoPermissionToReadFile, info.filePath());</a>
-<a name="ln352">            return false;</a>
-<a name="ln353">        }</a>
-<a name="ln354"> </a>
-<a name="ln355"> </a>
-<a name="ln356">        // Check if it is file or a directory ,</a>
-<a name="ln357">        // if directory then add files in directory</a>
-<a name="ln358">        // recursively.</a>
-<a name="ln359">        if(info.isDir()) {</a>
-<a name="ln360">            QVector&lt;QString&gt; dirList;</a>
-<a name="ln361">            dirList.append(info.filePath());</a>
-<a name="ln362">            bool replace = (node.first != node.second);</a>
-<a name="ln363"> </a>
-<a name="ln364">            while(!dirList.isEmpty()) {</a>
-<a name="ln365">                QDir dir(dirList.takeFirst());</a>
-<a name="ln366">                QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);</a>
-<a name="ln367">                for (int i = 0; i &lt; list.size(); i++) {</a>
-<a name="ln368">                    if(list.at(i).isDir()) {</a>
-<a name="ln369">                        dirList.append(list.at(i).filePath());</a>
-<a name="ln370">                        continue;</a>
-<a name="ln371">                    }</a>
-<a name="ln372">                    QString file = list.at(i).filePath();</a>
-<a name="ln373">                    QPair&lt;QString, QString&gt; fileNode;</a>
-<a name="ln374">                    if(replace) {</a>
-<a name="ln375">                        fileNode.first = file.replace(node.second, node.first);</a>
-<a name="ln376">                    } else {</a>
-<a name="ln377">                        fileNode.first = file;</a>
-<a name="ln378">                    }</a>
-<a name="ln379">                    fileNode.second = file;</a>
-<a name="ln380">                    m_ConfirmedFiles-&gt;append(fileNode);</a>
-<a name="ln381"> </a>
-<a name="ln382">                    QFileInfo info(file);</a>
-<a name="ln383">                    n_BytesTotal += info.size();</a>
-<a name="ln384">                }</a>
-<a name="ln385">            }</a>
-<a name="ln386">        } else { // Add it to the confirmed list.</a>
-<a name="ln387">            if(node.first == node.second) {</a>
-<a name="ln388">                node.first = info.filePath();</a>
-<a name="ln389">            }</a>
-<a name="ln390">            node.second = info.filePath();</a>
-<a name="ln391">            m_ConfirmedFiles-&gt;append(node);</a>
-<a name="ln392">            n_BytesTotal += info.size();</a>
-<a name="ln393">        }</a>
-<a name="ln394">    }</a>
-<a name="ln395">    return true;</a>
-<a name="ln396">}</a>
-<a name="ln397"> </a>
-<a name="ln398">// Does the compression and also resumes it if called twice.</a>
-<a name="ln399">short DiskCompressorPrivate::compress() {</a>
-<a name="ln400">    if(m_ArchiveWrite.isNull()) {</a>
-<a name="ln401">        /// Open Temporary file for write.</a>
-<a name="ln402">        if(!m_TemporaryFile-&gt;open(QIODevice::WriteOnly)) {</a>
-<a name="ln403">            emit error(ArchiveWriteOpenError, m_TemporaryFile-&gt;fileName());</a>
-<a name="ln404">            return ArchiveWriteOpenError;</a>
-<a name="ln405">        }</a>
-<a name="ln406"> </a>
-<a name="ln407">        m_ArchiveWrite = QSharedPointer&lt;struct archive&gt;(</a>
-<a name="ln408">				archive_write_new(), ArchiveWriteDestructor);</a>
-<a name="ln409">        if(m_ArchiveWrite.isNull()) {</a>
-<a name="ln410">            emit error(NotEnoughMemory, m_TemporaryFile-&gt;fileName());</a>
-<a name="ln411">            return NotEnoughMemory;</a>
-<a name="ln412">        }</a>
-<a name="ln413"> </a>
-<a name="ln414">        switch (m_ArchiveFormat) {</a>
-<a name="ln415">        case BZipFormat:</a>
-<a name="ln416">        case BZip2Format:</a>
-<a name="ln417">            archive_write_add_filter_bzip2(m_ArchiveWrite.data());</a>
-<a name="ln418">            archive_write_set_format_ustar(m_ArchiveWrite.data());</a>
-<a name="ln419">            break;</a>
-<a name="ln420">        case GZipFormat:</a>
-<a name="ln421">            archive_write_add_filter_gzip(m_ArchiveWrite.data());</a>
-<a name="ln422">            archive_write_set_format_ustar(m_ArchiveWrite.data());</a>
-<a name="ln423">            break;</a>
-<a name="ln424">        case XzFormat:</a>
-<a name="ln425">            archive_write_add_filter_xz(m_ArchiveWrite.data());</a>
-<a name="ln426">            archive_write_set_format_ustar(m_ArchiveWrite.data());</a>
-<a name="ln427">            break;</a>
-<a name="ln428">        case TarFormat:</a>
-<a name="ln429">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
-<a name="ln430">            archive_write_set_format_ustar(m_ArchiveWrite.data());</a>
-<a name="ln431">            break;</a>
-<a name="ln432">        case XarFormat:</a>
-<a name="ln433">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
-<a name="ln434">            archive_write_set_format_xar(m_ArchiveWrite.data());</a>
-<a name="ln435">            break;</a>
-<a name="ln436">        case SevenZipFormat:</a>
-<a name="ln437">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
-<a name="ln438">            archive_write_set_format_7zip(m_ArchiveWrite.data());</a>
-<a name="ln439">            break;</a>
-<a name="ln440">        case ZipFormat:</a>
-<a name="ln441">        default:</a>
-<a name="ln442">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
-<a name="ln443">            archive_write_set_format_zip(m_ArchiveWrite.data());</a>
-<a name="ln444">            break;</a>
-<a name="ln445">        }</a>
-<a name="ln446"> </a>
-<a name="ln447">        // Set Password if the format is Zip and a password is given by the user.</a>
-<a name="ln448">        //</a>
-<a name="ln449">        // Note:</a>
-<a name="ln450">        // Currently only Zip format is officially supported by libarchive for the</a>
-<a name="ln451">        // ability to use passwords and thus until the user uses Zip format , the</a>
-<a name="ln452">        // password even if given is ignored.</a>
-<a name="ln453">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln454">        if(!m_Password.isEmpty() &amp;&amp; m_ArchiveFormat == ZipFormat) {</a>
-<a name="ln455">            archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());</a>
-<a name="ln456">            archive_write_set_options(m_ArchiveWrite.data(), &quot;zip:encryption=traditional&quot;);</a>
-<a name="ln457">        }</a>
-<a name="ln458">#endif</a>
-<a name="ln459"> </a>
-<a name="ln460">        if(n_BlockSize) {</a>
-<a name="ln461">            archive_write_set_bytes_per_block(m_ArchiveWrite.data(), n_BlockSize);</a>
-<a name="ln462">        }</a>
-<a name="ln463"> </a>
-<a name="ln464">        // Finally open the write archive using the handle of the Temporary file.</a>
-<a name="ln465">        if(archive_write_open_fd(m_ArchiveWrite.data(),</a>
-<a name="ln466">				m_TemporaryFile-&gt;handle()) != ARCHIVE_OK) {</a>
-<a name="ln467">            m_ArchiveWrite.clear();</a>
-<a name="ln468">            emit error(ArchiveWriteOpenError, m_TemporaryFile-&gt;fileName());</a>
-<a name="ln469">            return ArchiveWriteOpenError;</a>
-<a name="ln470">        }</a>
-<a name="ln471"> </a>
-<a name="ln472">        n_TotalEntries = m_ConfirmedFiles-&gt;size(); // for reporting progress.</a>
-<a name="ln473">    }</a>
-<a name="ln474"> </a>
-<a name="ln475">    // Start compressing files.</a>
-<a name="ln476">    while(!m_ConfirmedFiles-&gt;isEmpty()) {</a>
-<a name="ln477">        auto node = m_ConfirmedFiles-&gt;takeFirst();</a>
-<a name="ln478">        // TODO:</a>
-<a name="ln479">        //	Implement a failsafe copy mechanism.</a>
-<a name="ln480">        //</a>
-<a name="ln481">        // Note:</a>
-<a name="ln482">        // Down below implementation is nearly good but</a>
-<a name="ln483">        // not very robust and thus needs a good implementation.</a>
-<a name="ln484">        int r;</a>
-<a name="ln485">        std::size_t len;</a>
-<a name="ln486">        char buff[16384]; /* Default buffer size */</a>
-<a name="ln487"> </a>
-<a name="ln488">        auto disk = QSharedPointer&lt;struct archive&gt;(</a>
-<a name="ln489">			archive_read_disk_new(), ArchiveReadDestructor);</a>
-<a name="ln490">        archive_read_disk_set_standard_lookup(disk.data());</a>
-<a name="ln491"> </a>
-<a name="ln492">        r = archive_read_disk_open(disk.data(),</a>
-<a name="ln493">			QFile::encodeName(/*file path = */node.second).constData());</a>
-<a name="ln494">        if(r != ARCHIVE_OK) {</a>
-<a name="ln495">            emit error(DiskOpenError, node.second);</a>
-<a name="ln496">            return DiskOpenError;</a>
-<a name="ln497">        }</a>
-<a name="ln498"> </a>
-<a name="ln499">        for (;;) {</a>
-<a name="ln500">            auto entry = QSharedPointer&lt;struct archive_entry&gt;(</a>
-<a name="ln501">			    archive_entry_new(), ArchiveEntryDestructor);</a>
-<a name="ln502">            r = archive_read_next_header2(disk.data(), entry.data());</a>
-<a name="ln503">            if (r == ARCHIVE_EOF) {</a>
-<a name="ln504">                break;</a>
-<a name="ln505">            }</a>
-<a name="ln506">            if (r != ARCHIVE_OK) {</a>
-<a name="ln507">                emit error(DiskReadError, node.second);</a>
-<a name="ln508">                return DiskReadError;</a>
-<a name="ln509">            }</a>
-<a name="ln510"> </a>
-<a name="ln511">            archive_read_disk_descend(disk.data());</a>
-<a name="ln512">            archive_entry_set_pathname(entry.data(), (node.first).toUtf8().constData());</a>
-<a name="ln513">            r = archive_write_header(m_ArchiveWrite.data(), entry.data());</a>
-<a name="ln514"> </a>
-<a name="ln515">            if (r == ARCHIVE_FATAL) {</a>
-<a name="ln516">                emit error(ArchiveFatalError, node.second);</a>
-<a name="ln517">                return ArchiveFatalError;</a>
-<a name="ln518">            }</a>
-<a name="ln519">            if (r &gt; ARCHIVE_FAILED) {</a>
-<a name="ln520">                QScopedPointer&lt;QFile&gt; file(new QFile(node.second));</a>
-<a name="ln521">                if(!file-&gt;open(QIODevice::ReadOnly)) {</a>
-<a name="ln522">                    emit error(DiskOpenError, node.second);</a>
-<a name="ln523">                    return DiskOpenError;</a>
-<a name="ln524">                }</a>
-<a name="ln525">                len = file-&gt;read(buff, sizeof(buff));</a>
-<a name="ln526">                while (len &gt; 0) {</a>
-<a name="ln527">                    archive_write_data(m_ArchiveWrite.data(), buff, len);</a>
-<a name="ln528">                    n_BytesProcessed += len;</a>
-<a name="ln529">                    len = file-&gt;read(buff, sizeof(buff));</a>
-<a name="ln530"> </a>
-<a name="ln531">		    // The original PR author create a timer to emit this </a>
-<a name="ln532">		    // signal every 100 ms but I think it's really not </a>
-<a name="ln533">		    // needed.</a>
-<a name="ln534">		    // I think his program lagged because we fail to call</a>
-<a name="ln535">		    // processEvents in this loop. So if the file is large</a>
-<a name="ln536">		    // enough it can easily block the main thread.</a>
-<a name="ln537">                    emit progress(QString(node.second),</a>
-<a name="ln538">                                  (n_TotalEntries - m_ConfirmedFiles-&gt;size()),</a>
-<a name="ln539">                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);</a>
-<a name="ln540">		    </a>
-<a name="ln541">		    QCoreApplication::processEvents();</a>
-<a name="ln542">		}</a>
-<a name="ln543">                file-&gt;close();</a>
-<a name="ln544">            }</a>
-<a name="ln545"> </a>
-<a name="ln546">	    QCoreApplication::processEvents();</a>
-<a name="ln547">        }</a>
-<a name="ln548"> </a>
-<a name="ln549">        emit progress(QString(node.second),</a>
-<a name="ln550">                      (n_TotalEntries - m_ConfirmedFiles-&gt;size()),</a>
-<a name="ln551">                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);</a>
-<a name="ln552"> </a>
+<a name="ln279">    } else {</a>
+<a name="ln280">	b_Started = false;</a>
+<a name="ln281">    }</a>
+<a name="ln282">    return;</a>
+<a name="ln283">}</a>
+<a name="ln284"> </a>
+<a name="ln285">void DiskCompressorPrivate::pause() {</a>
+<a name="ln286">    if(!b_Started || b_Finished || b_Paused) {</a>
+<a name="ln287">        return;</a>
+<a name="ln288">    }</a>
+<a name="ln289">    b_PauseRequested = true;</a>
+<a name="ln290">    return;</a>
+<a name="ln291">}</a>
+<a name="ln292"> </a>
+<a name="ln293">// Cancels the current compression process, if the compression process is</a>
+<a name="ln294">// paused then the compression cannot be canceled.</a>
+<a name="ln295">void DiskCompressorPrivate::cancel() {</a>
+<a name="ln296">    if(!b_Started || b_Finished || b_Paused) {</a>
+<a name="ln297">        return;</a>
+<a name="ln298">    }</a>
+<a name="ln299">    b_CancelRequested = true;</a>
+<a name="ln300">    return;</a>
+<a name="ln301">}</a>
+<a name="ln302"> </a>
+<a name="ln303">// Guesses the archive format from the given archive filename , on success</a>
+<a name="ln304">// this returns true or vice-versa.</a>
+<a name="ln305">bool DiskCompressorPrivate::guessArchiveFormat() {</a>
+<a name="ln306">    if(m_TemporaryFile-&gt;fileName().isEmpty()) {</a>
+<a name="ln307">        return false;</a>
+<a name="ln308">    }</a>
+<a name="ln309"> </a>
+<a name="ln310">    auto ext = QFileInfo(m_TemporaryFile-&gt;fileName()).suffix().toLower();</a>
+<a name="ln311">    if(ext == &quot;bz&quot;) {</a>
+<a name="ln312">        m_ArchiveFormat = BZipFormat;</a>
+<a name="ln313">    } else if(ext == &quot;bz2&quot;) {</a>
+<a name="ln314">        m_ArchiveFormat = BZip2Format;</a>
+<a name="ln315">    } else if(ext == &quot;gz&quot;) {</a>
+<a name="ln316">        m_ArchiveFormat = GZipFormat;</a>
+<a name="ln317">    } else if(ext == &quot;xz&quot;) {</a>
+<a name="ln318">        m_ArchiveFormat = XzFormat;</a>
+<a name="ln319">    } else if(ext == &quot;tar&quot;) {</a>
+<a name="ln320">        m_ArchiveFormat = TarFormat;</a>
+<a name="ln321">    } else if(ext == &quot;xar&quot;) {</a>
+<a name="ln322">        m_ArchiveFormat = XarFormat;</a>
+<a name="ln323">    } else if(ext == &quot;zip&quot;) {</a>
+<a name="ln324">        m_ArchiveFormat = ZipFormat;</a>
+<a name="ln325">    } else if(ext == &quot;7z&quot;) {</a>
+<a name="ln326">        m_ArchiveFormat = SevenZipFormat;</a>
+<a name="ln327">    } else {</a>
+<a name="ln328">        m_ArchiveFormat = 0;</a>
+<a name="ln329">        return false;</a>
+<a name="ln330">    }</a>
+<a name="ln331"> </a>
+<a name="ln332">    return true;</a>
+<a name="ln333">}</a>
+<a name="ln334"> </a>
+<a name="ln335">// Confirms all the files that are stagged for compression , Returns true</a>
+<a name="ln336">// on success and vice-versa.</a>
+<a name="ln337">// This populates m_ConfirmedFiles linked list with all the files added ,</a>
+<a name="ln338">// Directory's files will be recursively added.</a>
+<a name="ln339">bool DiskCompressorPrivate::confirmFiles() {</a>
+<a name="ln340">    m_ConfirmedFiles-&gt;clear();</a>
+<a name="ln341">    for(auto iter = m_StaggedFiles-&gt;begin() ; iter != m_StaggedFiles-&gt;end() ; ++iter) {</a>
+<a name="ln342">        auto node = *iter;</a>
+<a name="ln343">        QFileInfo info(/* file path given by the user = */node.second);</a>
+<a name="ln344"> </a>
+<a name="ln345">        // Check if the file exists.</a>
+<a name="ln346">        if(!info.exists()) {</a>
+<a name="ln347">            emit error(FileDoesNotExist, info.filePath());</a>
+<a name="ln348">            return false;</a>
+<a name="ln349">        }</a>
+<a name="ln350"> </a>
+<a name="ln351">        // Check permission to read.</a>
+<a name="ln352">        if(!info.isReadable()) {</a>
+<a name="ln353">            emit error(NoPermissionToReadFile, info.filePath());</a>
+<a name="ln354">            return false;</a>
+<a name="ln355">        }</a>
+<a name="ln356"> </a>
+<a name="ln357"> </a>
+<a name="ln358">        // Check if it is file or a directory ,</a>
+<a name="ln359">        // if directory then add files in directory</a>
+<a name="ln360">        // recursively.</a>
+<a name="ln361">        if(info.isDir()) {</a>
+<a name="ln362">            QVector&lt;QString&gt; dirList;</a>
+<a name="ln363">            dirList.append(info.filePath());</a>
+<a name="ln364">            bool replace = (node.first != node.second);</a>
+<a name="ln365"> </a>
+<a name="ln366">            while(!dirList.isEmpty()) {</a>
+<a name="ln367">                QDir dir(dirList.takeFirst());</a>
+<a name="ln368">                QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);</a>
+<a name="ln369">                for (int i = 0; i &lt; list.size(); i++) {</a>
+<a name="ln370">                    if(list.at(i).isDir()) {</a>
+<a name="ln371">                        dirList.append(list.at(i).filePath());</a>
+<a name="ln372">                        continue;</a>
+<a name="ln373">                    }</a>
+<a name="ln374">                    QString file = list.at(i).filePath();</a>
+<a name="ln375">                    QPair&lt;QString, QString&gt; fileNode;</a>
+<a name="ln376">                    if(replace) {</a>
+<a name="ln377">                        fileNode.first = file.replace(node.second, node.first);</a>
+<a name="ln378">                    } else {</a>
+<a name="ln379">                        fileNode.first = file;</a>
+<a name="ln380">                    }</a>
+<a name="ln381">                    fileNode.second = file;</a>
+<a name="ln382">                    m_ConfirmedFiles-&gt;append(fileNode);</a>
+<a name="ln383"> </a>
+<a name="ln384">                    QFileInfo info(file);</a>
+<a name="ln385">                    n_BytesTotal += info.size();</a>
+<a name="ln386">                }</a>
+<a name="ln387">            }</a>
+<a name="ln388">        } else { // Add it to the confirmed list.</a>
+<a name="ln389">            if(node.first == node.second) {</a>
+<a name="ln390">                node.first = info.filePath();</a>
+<a name="ln391">            }</a>
+<a name="ln392">            node.second = info.filePath();</a>
+<a name="ln393">            m_ConfirmedFiles-&gt;append(node);</a>
+<a name="ln394">            n_BytesTotal += info.size();</a>
+<a name="ln395">        }</a>
+<a name="ln396">    }</a>
+<a name="ln397">    return true;</a>
+<a name="ln398">}</a>
+<a name="ln399"> </a>
+<a name="ln400">// Does the compression and also resumes it if called twice.</a>
+<a name="ln401">short DiskCompressorPrivate::compress() {</a>
+<a name="ln402">    if(m_ArchiveWrite.isNull()) {</a>
+<a name="ln403">        /// Open Temporary file for write.</a>
+<a name="ln404">        if(!m_TemporaryFile-&gt;open(QIODevice::WriteOnly)) {</a>
+<a name="ln405">            emit error(ArchiveWriteOpenError, m_TemporaryFile-&gt;fileName());</a>
+<a name="ln406">            return ArchiveWriteOpenError;</a>
+<a name="ln407">        }</a>
+<a name="ln408"> </a>
+<a name="ln409">        m_ArchiveWrite = QSharedPointer&lt;struct archive&gt;(</a>
+<a name="ln410">				archive_write_new(), ArchiveWriteDestructor);</a>
+<a name="ln411">        if(m_ArchiveWrite.isNull()) {</a>
+<a name="ln412">            emit error(NotEnoughMemory, m_TemporaryFile-&gt;fileName());</a>
+<a name="ln413">            return NotEnoughMemory;</a>
+<a name="ln414">        }</a>
+<a name="ln415"> </a>
+<a name="ln416">        switch (m_ArchiveFormat) {</a>
+<a name="ln417">        case BZipFormat:</a>
+<a name="ln418">        case BZip2Format:</a>
+<a name="ln419">            archive_write_add_filter_bzip2(m_ArchiveWrite.data());</a>
+<a name="ln420">            archive_write_set_format_gnutar(m_ArchiveWrite.data());</a>
+<a name="ln421">            break;</a>
+<a name="ln422">        case GZipFormat:</a>
+<a name="ln423">            archive_write_add_filter_gzip(m_ArchiveWrite.data());</a>
+<a name="ln424">            archive_write_set_format_gnutar(m_ArchiveWrite.data());</a>
+<a name="ln425">            break;</a>
+<a name="ln426">        case XzFormat:</a>
+<a name="ln427">            archive_write_add_filter_xz(m_ArchiveWrite.data());</a>
+<a name="ln428">            archive_write_set_format_gnutar(m_ArchiveWrite.data());</a>
+<a name="ln429">            break;</a>
+<a name="ln430">        case TarFormat:</a>
+<a name="ln431">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
+<a name="ln432">            archive_write_set_format_gnutar(m_ArchiveWrite.data());</a>
+<a name="ln433">            break;</a>
+<a name="ln434">        case XarFormat:</a>
+<a name="ln435">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
+<a name="ln436">            archive_write_set_format_xar(m_ArchiveWrite.data());</a>
+<a name="ln437">            break;</a>
+<a name="ln438">        case SevenZipFormat:</a>
+<a name="ln439">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
+<a name="ln440">            archive_write_set_format_7zip(m_ArchiveWrite.data());</a>
+<a name="ln441">            break;</a>
+<a name="ln442">        case ZipFormat:</a>
+<a name="ln443">        default:</a>
+<a name="ln444">            archive_write_add_filter_none(m_ArchiveWrite.data());</a>
+<a name="ln445">            archive_write_set_format_zip(m_ArchiveWrite.data());</a>
+<a name="ln446">            break;</a>
+<a name="ln447">        }</a>
+<a name="ln448"> </a>
+<a name="ln449">        // Set Password if the format is Zip and a password is given by the user.</a>
+<a name="ln450">        //</a>
+<a name="ln451">        // Note:</a>
+<a name="ln452">        // Currently only Zip format is officially supported by libarchive for the</a>
+<a name="ln453">        // ability to use passwords and thus until the user uses Zip format , the</a>
+<a name="ln454">        // password even if given is ignored.</a>
+<a name="ln455">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln456">        if(!m_Password.isEmpty() &amp;&amp; m_ArchiveFormat == ZipFormat) {</a>
+<a name="ln457">            archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());</a>
+<a name="ln458">            archive_write_set_options(m_ArchiveWrite.data(), &quot;zip:encryption=traditional&quot;);</a>
+<a name="ln459">        }</a>
+<a name="ln460">#endif</a>
+<a name="ln461"> </a>
+<a name="ln462">        if(n_BlockSize) {</a>
+<a name="ln463">            archive_write_set_bytes_per_block(m_ArchiveWrite.data(), n_BlockSize);</a>
+<a name="ln464">        }</a>
+<a name="ln465"> </a>
+<a name="ln466">        // Finally open the write archive using the handle of the Temporary file.</a>
+<a name="ln467">        if(archive_write_open_fd(m_ArchiveWrite.data(),</a>
+<a name="ln468">				m_TemporaryFile-&gt;handle()) != ARCHIVE_OK) {</a>
+<a name="ln469">            m_ArchiveWrite.clear();</a>
+<a name="ln470">            emit error(ArchiveWriteOpenError, m_TemporaryFile-&gt;fileName());</a>
+<a name="ln471">            return ArchiveWriteOpenError;</a>
+<a name="ln472">        }</a>
+<a name="ln473"> </a>
+<a name="ln474">        n_TotalEntries = m_ConfirmedFiles-&gt;size(); // for reporting progress.</a>
+<a name="ln475">    }</a>
+<a name="ln476"> </a>
+<a name="ln477">    // Start compressing files.</a>
+<a name="ln478">    while(!m_ConfirmedFiles-&gt;isEmpty()) {</a>
+<a name="ln479">        auto node = m_ConfirmedFiles-&gt;first();</a>
+<a name="ln480">        // TODO:</a>
+<a name="ln481">        //	Implement a failsafe copy mechanism.</a>
+<a name="ln482">        //</a>
+<a name="ln483">        // Note:</a>
+<a name="ln484">        // Down below implementation is nearly good but</a>
+<a name="ln485">        // not very robust and thus needs a good implementation.</a>
+<a name="ln486">        int r;</a>
+<a name="ln487">        std::size_t len;</a>
+<a name="ln488">        char buff[16384]; /* Default buffer size */</a>
+<a name="ln489"> </a>
+<a name="ln490">        auto disk = QSharedPointer&lt;struct archive&gt;(</a>
+<a name="ln491">			archive_read_disk_new(), ArchiveReadDestructor);</a>
+<a name="ln492">        archive_read_disk_set_standard_lookup(disk.data());</a>
+<a name="ln493"> </a>
+<a name="ln494">        r = archive_read_disk_open(disk.data(),</a>
+<a name="ln495">			QFile::encodeName(/*file path = */node.second).constData());</a>
+<a name="ln496">        if(r != ARCHIVE_OK) {</a>
+<a name="ln497">            emit error(DiskOpenError, node.second);</a>
+<a name="ln498">            return DiskOpenError;</a>
+<a name="ln499">        }</a>
+<a name="ln500"> </a>
+<a name="ln501">        for (;;) {</a>
+<a name="ln502">            auto entry = QSharedPointer&lt;struct archive_entry&gt;(</a>
+<a name="ln503">			    archive_entry_new(), ArchiveEntryDestructor);</a>
+<a name="ln504">            r = archive_read_next_header2(disk.data(), entry.data());</a>
+<a name="ln505">            if (r == ARCHIVE_EOF) {</a>
+<a name="ln506">                break;</a>
+<a name="ln507">            }</a>
+<a name="ln508">            if (r != ARCHIVE_OK) {</a>
+<a name="ln509">                emit error(DiskReadError, node.second);</a>
+<a name="ln510">                return DiskReadError;</a>
+<a name="ln511">            }</a>
+<a name="ln512"> </a>
+<a name="ln513">            archive_read_disk_descend(disk.data());</a>
+<a name="ln514">            archive_entry_set_pathname(entry.data(), (node.first).toUtf8().constData());</a>
+<a name="ln515">            r = archive_write_header(m_ArchiveWrite.data(), entry.data());</a>
+<a name="ln516"> </a>
+<a name="ln517">            if (r == ARCHIVE_FATAL) {</a>
+<a name="ln518">                emit error(ArchiveFatalError, node.second);</a>
+<a name="ln519">                return ArchiveFatalError;</a>
+<a name="ln520">            }</a>
+<a name="ln521">            if (r &gt; ARCHIVE_FAILED) {</a>
+<a name="ln522">                QScopedPointer&lt;QFile&gt; file(new QFile(node.second));</a>
+<a name="ln523">                if(!file-&gt;open(QIODevice::ReadOnly)) {</a>
+<a name="ln524">                    emit error(DiskOpenError, node.second);</a>
+<a name="ln525">                    return DiskOpenError;</a>
+<a name="ln526">                }</a>
+<a name="ln527">                len = file-&gt;read(buff, sizeof(buff));</a>
+<a name="ln528">                while (len &gt; 0) {</a>
+<a name="ln529">                    archive_write_data(m_ArchiveWrite.data(), buff, len);</a>
+<a name="ln530">                    n_BytesProcessed += len;</a>
+<a name="ln531">                    len = file-&gt;read(buff, sizeof(buff));</a>
+<a name="ln532"> </a>
+<a name="ln533">		    // The original PR author create a timer to emit this </a>
+<a name="ln534">		    // signal every 100 ms but I think it's really not </a>
+<a name="ln535">		    // needed.</a>
+<a name="ln536">		    // I think his program lagged because we fail to call</a>
+<a name="ln537">		    // processEvents in this loop. So if the file is large</a>
+<a name="ln538">		    // enough it can easily block the main thread.</a>
+<a name="ln539">                    emit progress(QString(node.second),</a>
+<a name="ln540">                                  (n_TotalEntries - m_ConfirmedFiles-&gt;size()),</a>
+<a name="ln541">                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);</a>
+<a name="ln542">		    </a>
+<a name="ln543">		    QCoreApplication::processEvents();</a>
+<a name="ln544">		}</a>
+<a name="ln545">                file-&gt;close();</a>
+<a name="ln546">            }else {</a>
+<a name="ln547">		emit error(ArchiveHeaderWriteError, node.second);</a>
+<a name="ln548">		return ArchiveHeaderWriteError;</a>
+<a name="ln549">	    }</a>
+<a name="ln550"> </a>
+<a name="ln551">	    QCoreApplication::processEvents();</a>
+<a name="ln552">        }</a>
 <a name="ln553"> </a>
-<a name="ln554">        QCoreApplication::processEvents();</a>
-<a name="ln555">        if(b_PauseRequested) {</a>
-<a name="ln556">            b_PauseRequested = false;</a>
-<a name="ln557">            return OperationPaused;</a>
-<a name="ln558">        }</a>
+<a name="ln554">	m_ConfirmedFiles-&gt;removeFirst();</a>
+<a name="ln555"> </a>
+<a name="ln556">        emit progress(QString(node.second),</a>
+<a name="ln557">                      (n_TotalEntries - m_ConfirmedFiles-&gt;size()),</a>
+<a name="ln558">                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);</a>
 <a name="ln559"> </a>
-<a name="ln560">        if(b_CancelRequested) {</a>
-<a name="ln561">            b_CancelRequested = false;</a>
-<a name="ln562">            m_ConfirmedFiles-&gt;clear();</a>
-<a name="ln563">            m_ArchiveWrite.clear();</a>
-<a name="ln564">            return OperationCanceled;</a>
+<a name="ln560"> </a>
+<a name="ln561">        QCoreApplication::processEvents();</a>
+<a name="ln562">        if(b_PauseRequested) {</a>
+<a name="ln563">            b_PauseRequested = false;</a>
+<a name="ln564">            return OperationPaused;</a>
 <a name="ln565">        }</a>
-<a name="ln566">    }</a>
-<a name="ln567">    m_ArchiveWrite.clear();</a>
-<a name="ln568">    return NoError;</a>
-<a name="ln569">}</a>
+<a name="ln566"> </a>
+<a name="ln567">        if(b_CancelRequested) {</a>
+<a name="ln568">            b_CancelRequested = false;</a>
+<a name="ln569">            m_ConfirmedFiles-&gt;clear();</a>
+<a name="ln570">            m_ArchiveWrite.clear();</a>
+<a name="ln571">            return OperationCanceled;</a>
+<a name="ln572">        }</a>
+<a name="ln573">    }</a>
+<a name="ln574">    m_ArchiveWrite.clear();</a>
+<a name="ln575">    return NoError;</a>
+<a name="ln576">}</a>
 
 </code></pre>
 <div class="balloon" rel="190"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v1048/" target="_blank">V1048</a> The 'b_Started' variable was assigned the same value.</p></div>
