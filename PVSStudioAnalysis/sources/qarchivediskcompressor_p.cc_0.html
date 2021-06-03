@@ -550,7 +550,7 @@
 <a name="ln537">		    // processEvents in this loop. So if the file is large</a>
 <a name="ln538">		    // enough it can easily block the main thread.</a>
 <a name="ln539">                    emit progress(QString(node.second),</a>
-<a name="ln540">                                  (n_TotalEntries - m_ConfirmedFiles-&gt;size()),</a>
+<a name="ln540">                                  (n_TotalEntries - (m_ConfirmedFiles-&gt;size() - 1)),</a>
 <a name="ln541">                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);</a>
 <a name="ln542">		    </a>
 <a name="ln543">		    QCoreApplication::processEvents();</a>
