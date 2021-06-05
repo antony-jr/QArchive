@@ -165,4 +165,5 @@ If you think that this project is **cool** then you can give it a :star: or :for
 The BSD 3-clause "New" or "Revised" License.
 
 Copyright (C) 2017-present, QArchive Contributors and Antony J.R
+
 All Rights Reserved.
