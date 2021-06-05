@@ -61,13 +61,20 @@ jobs:
           mkdir build
           cd build
           source /opt/qt*/bin/qt*-env.sh || true
-          cmake -DBUILD_TESTS=ON .. 
+          cmake .. 
           make -j$(nproc)
-          cd tests
-          ./QArchiveTests
-          cd ..
+          sudo make install
           cd ..
           rm -rf build
+          cd tests
+          mkdir build
+          cd build
+          cmake ..
+          make -j$(nproc)
+          ./QArchiveTests
+          cd ..
+          rm -rf build
+          cd ..
           cd website
 
       - name: Setup Node
