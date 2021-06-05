@@ -14,6 +14,13 @@ QArchive(needs atleast libarchive v3.3.3 to use passwords).
 * [Qt5 Framework](https://qt.io)
 
 
+## Conan
+
+*Thanks to [Eric Riff](https://github.com/ericriff)*.
+
+Starting from version 2.0.1 `QArchive` is available on the [Conan C/C++ package manager](https://conan.io/), which means you can download prebuilt packages for all major platforms (Windows, Linux, macOS, etc).
+
+
 ## Getting from source
 
 The recommended way to install QArchive is to clone the github repo into your project directory , if your

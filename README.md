@@ -56,7 +56,9 @@ Learn more about **QArchive** at the official [documentation](https://antony-jr.
 
 ## Conan
 
-Starting version 2.0.1 `QArchive` is available on the [Conan C/C++ package manager](https://conan.io/), which means you can download prebuilt packages for all major platforms (Windows, Linux, macOS, etc).
+*Thanks to [Eric Riff](https://github.com/ericriff)*.
+
+Starting from version 2.0.1 `QArchive` is available on the [Conan C/C++ package manager](https://conan.io/), which means you can download prebuilt packages for all major platforms (Windows, Linux, macOS, etc).
 
 Find an example on how to consume Conan's precompiled packages in the examples folder.
 
@@ -131,6 +133,15 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=dprotti">💻</a>
         </td>
+	<td>
+            <img src="https://avatars.githubusercontent.com/u/57375845?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/ericriff">Eric Riff</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=ericriff">💻</a>
+        </td>
   </tr>  
 </table>
 
@@ -153,5 +164,5 @@ If you think that this project is **cool** then you can give it a :star: or :for
 
 The BSD 3-clause "New" or "Revised" License.
 
-Copyright (C) 2017 , antony jr.   
+Copyright (C) 2017-present, QArchive Contributors and Antony J.R
 All Rights Reserved.
