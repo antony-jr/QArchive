@@ -49,30 +49,33 @@ if(BUILD_EXAMPLES)
 endif()
 
 add_library(QArchive
-	    src/qarchivediskcompressor.cc
-	    src/qarchivememoryextractor.cc
-	    src/qarchivediskextractor.cc
 	    src/qarchive_enums.cc
-	    src/qarchivediskcompressor_p.cc
-	    src/qarchiveextractor_p.cc
 	    src/qarchiveutils_p.cc
 	    src/qarchiveioreader_p.cc
-	    include/qarchivediskcompressor.hpp
-	    include/qarchivememoryextractor.hpp
-	    include/qarchivediskextractor.hpp
+	    src/qarchiveextractor_p.cc
+	    src/qarchiveextractor.cc
+	    src/qarchivediskextractor.cc
+	    src/qarchivememoryextractor.cc
+	    src/qarchivediskcompressor.cc
+	    src/qarchivediskcompressor_p.cc
 	    include/qarchive_enums.hpp
-	    include/qarchivediskcompressor_p.hpp
-	    include/qarchiveextractor_p.hpp
 	    include/qarchiveutils_p.hpp
 	    include/qarchiveioreader_p.hpp
+	    include/qarchiveextractor_p.hpp
+	    include/qarchiveextractor.hpp
+	    include/qarchivediskextractor.hpp
+	    include/qarchivememoryextractor.hpp
+	    include/qarchivediskcompressor.hpp
+	    include/qarchivediskcompressor_p.hpp
 	    include/qarchive_global.hpp)
 
 SET(toinstall)
 list(APPEND toinstall
     QArchive
     include/qarchive_enums.hpp
-    include/qarchivememoryextractor.hpp
+    include/qarchiveextractor.hpp
     include/qarchivediskextractor.hpp
+    include/qarchivememoryextractor.hpp
     include/qarchivediskcompressor.hpp
     include/qarchive_global.hpp
     ${PROJECT_BINARY_DIR}/config.h

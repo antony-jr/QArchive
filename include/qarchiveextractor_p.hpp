@@ -48,8 +48,8 @@ class ExtractorPrivate : public QObject {
     void canceled();
     void paused();
     void resumed();
-    void finished();
-    void finished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
+    void diskFinished();
+    void memoryFinished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
     void error(short);
     void info(QJsonObject);
     void progress(QString, int, int, qint64, qint64);

@@ -371,9 +371,9 @@ void ExtractorPrivate::start() {
         b_Finished = true;
         m_Archive->close();
 	if(!b_MemoryMode) {
-	   emit finished();
+	   emit diskFinished();
 	}else {
-	   emit finished(m_ExtractedFiles.take());
+	   emit memoryFinished(m_ExtractedFiles.take());
 	   m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);
 	}
     }
@@ -422,9 +422,9 @@ void ExtractorPrivate::resume() {
         b_Finished = true;
         m_Archive->close();
 	if(!b_MemoryMode) {
-        	emit finished();
+        	emit diskFinished();
 	}else {
-		emit finished(m_ExtractedFiles.take());
+		emit memoryFinished(m_ExtractedFiles.take());
 	        m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);	
 	}
     }
