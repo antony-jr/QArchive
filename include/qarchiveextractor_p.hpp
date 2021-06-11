@@ -1,8 +1,10 @@
-#ifndef QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
-#define QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
+#ifndef QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
+#define QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
 #include <QIODevice>
+#include <QBuffer>
 #include <QObject>
 #include <QString>
+#include <QVector>
 #include <QEventLoop>
 #include <QStringList>
 #include <QScopedPointer>
@@ -11,11 +13,11 @@
 #include <qarchiveutils_p.hpp>
 
 namespace QArchive {
-class DiskExtractorPrivate : public QObject {
+class ExtractorPrivate : public QObject {
     Q_OBJECT
   public:
-    DiskExtractorPrivate();
-    ~DiskExtractorPrivate();
+    ExtractorPrivate(bool memoryMode = false);
+    ~ExtractorPrivate();
   public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
@@ -47,12 +49,14 @@ class DiskExtractorPrivate : public QObject {
     void paused();
     void resumed();
     void finished();
+    void finished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
     void error(short);
     void info(QJsonObject);
     void progress(QString, int, int, qint64, qint64);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
   private:
+    bool b_MemoryMode = false;
     bool b_PauseRequested = false,
          b_CancelRequested = false,
          b_Paused = false,
@@ -78,6 +82,7 @@ class DiskExtractorPrivate : public QObject {
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QStringList> m_ExtractFilters;
     QScopedPointer<QJsonObject> m_Info;
+    QScopedPointer<QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>> m_ExtractedFiles;
 };
 }
-#endif // QARCHIVE_DISK_EXTRACTOR_PRIVATE_HPP_INCLUDED
+#endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED

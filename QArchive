@@ -34,5 +34,6 @@
  *  Original API Header.
 */
 #include "qarchive_enums.hpp"
+#include "qarchivememoryextractor.hpp"
 #include "qarchivediskextractor.hpp"
 #include "qarchivediskcompressor.hpp"

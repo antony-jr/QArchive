@@ -1,6 +1,10 @@
 #include <QCoreApplication>
 #include <QDebug>
-#include <QArchive/QArchive>
+#ifdef BUILD_EXAMPLES
+# include <QArchive>
+#else
+# include <QArchive/QArchive>
+#endif 
 
 int main(int ac, char **av) {
     if(ac < 2) {

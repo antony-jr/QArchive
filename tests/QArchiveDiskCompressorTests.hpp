@@ -1,6 +1,10 @@
 #ifndef QARCHIVE_DISK_COMPRESSOR_TESTS_HPP_INCLUDED
 #define QARCHIVE_DISK_COMPRESSOR_TESTS_HPP_INCLUDED
-#include <QArchive/QArchive>
+#ifdef BUILD_TESTS
+# include <QArchive>
+#else
+# include <QArchive/QArchive>
+#endif
 #include <QTest>
 #include <QFileInfo>
 #include <QTimer>

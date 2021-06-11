@@ -6,7 +6,7 @@
 # include <QArchive>
 #else
 # include <QArchive/QArchive>
-#endif 
+#endif
 #include <QJsonObject>
 
 int main(int ac, char **av) {
@@ -15,7 +15,7 @@ int main(int ac, char **av) {
         return 0;
     }
 
-    using QArchive::DiskExtractor;
+    using QArchive::MemoryExtractor;
     using std::cout;
     using std::cin;
     using std::string;
@@ -26,10 +26,10 @@ int main(int ac, char **av) {
     QString ArchivePath = QString(av[1]);
     QString DestinationPath = QString(av[2]);
 
-    /* Construct DiskExtractor Object. */
-    DiskExtractor Extractor(ArchivePath, DestinationPath);
+    /* Construct MemoryExtractor Object. */
+    MemoryExtractor Extractor(ArchivePath);
     /* Connect Signals with Slots (in this case lambda functions). */
-    QObject::connect(&Extractor, &DiskExtractor::extractionRequirePassword, [&](int tries) {
+    QObject::connect(&Extractor, &MemoryExtractor::extractionRequirePassword, [&](int tries) {
         string passwd;
         cout << "[*] Please Enter Archive Password(Tries = " << tries << "):: ";
         cin >> passwd;
@@ -42,15 +42,18 @@ int main(int ac, char **av) {
         Extractor.start();
     });
 
-    QObject::connect(&Extractor, &DiskExtractor::started, [&]() {
+    QObject::connect(&Extractor, &MemoryExtractor::started, [&]() {
         qInfo() << "[+] Starting Extractor... ";
     });
-    QObject::connect(&Extractor, &DiskExtractor::finished, [&]() {
-        qInfo() << "[+] Extracted File(s) Successfully!";
+    QObject::connect(&Extractor, &MemoryExtractor::finished,
+    [&](QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>> *data) {
+        qInfo() << "[+] Extracted File(s) Successfully! (In Memory)";
+	delete data;
 	app.quit();
         return;
     });
-    QObject::connect(&Extractor, &DiskExtractor::error, [&](short code) {
+
+    QObject::connect(&Extractor, &MemoryExtractor::error, [&](short code) {
         if(code == QArchive::ArchivePasswordNeeded ||
                 code == QArchive::ArchivePasswordIncorrect) {
             return;
@@ -59,12 +62,12 @@ int main(int ac, char **av) {
         app.quit();
         return;
     });
-    QObject::connect(&Extractor, &DiskExtractor::info, [&](QJsonObject info) {
+    QObject::connect(&Extractor, &MemoryExtractor::info, [&](QJsonObject info) {
         qInfo() << "ARCHIVE CONTENTS:: " << info;
         return;
     });
 
-    QObject::connect(&Extractor, &DiskExtractor::progress, 
+    QObject::connect(&Extractor, &MemoryExtractor::progress, 
     [&](QString file, int proc, int total, qint64 br, qint64 bt) {
         qInfo() << "Progress("<< proc << "/" << total << "): "
                 << file << " : " << (br*100/bt) << "% done.";
