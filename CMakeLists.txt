@@ -51,6 +51,8 @@ endif()
 add_library(QArchive
 	    src/qarchive_enums.cc
 	    src/qarchiveutils_p.cc
+	    src/qarchivememoryfile.cc
+	    src/qarchivememoryextractoroutput.cc
 	    src/qarchiveioreader_p.cc
 	    src/qarchiveextractor_p.cc
 	    src/qarchiveextractor.cc
@@ -60,6 +62,8 @@ add_library(QArchive
 	    src/qarchivediskcompressor_p.cc
 	    include/qarchive_enums.hpp
 	    include/qarchiveutils_p.hpp
+	    include/qarchivememoryfile.hpp
+	    include/qarchivememoryextractoroutput.hpp
 	    include/qarchiveioreader_p.hpp
 	    include/qarchiveextractor_p.hpp
 	    include/qarchiveextractor.hpp
@@ -73,6 +77,8 @@ SET(toinstall)
 list(APPEND toinstall
     QArchive
     include/qarchive_enums.hpp
+    include/qarchivememoryfile.hpp
+    include/qarchivememoryextractoroutput.hpp
     include/qarchiveextractor.hpp
     include/qarchivediskextractor.hpp
     include/qarchivememoryextractor.hpp

@@ -158,7 +158,7 @@ ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     m_ExtractFilters.reset(new QStringList);
 
     if(b_MemoryMode) {
-	m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);
+	    m_ExtractedFiles.reset(new QVector<MemoryFile>);
     }
 }
 
@@ -272,7 +272,7 @@ void ExtractorPrivate::clear() {
     m_ExtractFilters->clear();
     
     if(b_MemoryMode) {
-	m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);
+	m_ExtractedFiles.reset(new QVector<MemoryFile>);
     }
 
     if(b_QIODeviceOwned){
@@ -281,6 +281,7 @@ void ExtractorPrivate::clear() {
     }else{
     	m_Archive = nullptr;
     }
+    m_CurrentArchiveEntry = nullptr;
     b_QIODeviceOwned = false;
     return;
 }
@@ -373,8 +374,8 @@ void ExtractorPrivate::start() {
 	if(!b_MemoryMode) {
 	   emit diskFinished();
 	}else {
-	   emit memoryFinished(m_ExtractedFiles.take());
-	   m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);
+	   emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+	   m_ExtractedFiles.reset(new QVector<MemoryFile>);
 	}
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -424,8 +425,8 @@ void ExtractorPrivate::resume() {
 	if(!b_MemoryMode) {
         	emit diskFinished();
 	}else {
-		emit memoryFinished(m_ExtractedFiles.take());
-	        m_ExtractedFiles.reset(new QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>);	
+		emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+	        m_ExtractedFiles.reset(new QVector<MemoryFile>);	
 	}
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -583,7 +584,35 @@ short ExtractorPrivate::extract() {
 
     }
     for (;;) {
-            ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
+	    if(m_CurrentArchiveEntry) {
+		    err = writeData(m_CurrentArchiveEntry);
+		    if(err == OperationPaused){
+		    	return err;
+		    }else if(err){ // NoError = 0
+		    	m_ArchiveRead.clear();
+		    	m_ArchiveWrite.clear(); 
+		    	return err;
+	    	    }
+	    	    ++n_ProcessedEntries;
+	
+	    	   // Report final progress signal after extracting the file fully.
+	    	   if(n_BytesTotal > 0 && n_TotalEntries > 0){
+	    		emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
+                              n_ProcessedEntries,
+                              n_TotalEntries,
+                              n_BytesProcessed, n_BytesTotal);
+	     	   }else{
+			emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
+			    1,
+			    1,
+			    1,
+			    1);
+
+	     	   }
+
+		   m_CurrentArchiveEntry = nullptr;
+	    }
+	    ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
             if (ret == ARCHIVE_EOF) {
                 break;
             }
@@ -650,22 +679,29 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
        }
     }
 
-    QPair<QJsonObject, QSharedPointer<QBuffer>> pair;	
+    MutableMemoryFile currentNode;
     int ret = ARCHIVE_OK;
+    if(m_CurrentArchiveEntry != entry) {
     if(!b_MemoryMode) {
         ret = archive_write_header(m_ArchiveWrite.data(), entry);
     }else {
-	pair.first = getArchiveEntryInformation(entry);
+	currentNode.setFileInformation(getArchiveEntryInformation(entry));
 
 	/// Skip Directories.
-	if(pair.first.value("FileType").toString() == "Directory") {
+	if((currentNode.getFileInformation()).value("FileType").toString() == "Directory") {
 		return NoError;
 	}	
 
-	pair.second = QSharedPointer<QBuffer>(new QBuffer);
-	if(!(pair.second)->open(QIODevice::ReadWrite)) {
+	currentNode.setBuffer(new QBuffer);
+
+	if((currentNode.getBuffer())->open(QIODevice::ReadWrite) == false) {
 		return ArchiveHeaderWriteError;
 	}
+
+	m_CurrentMemoryFile = currentNode;
+    }
+    } else {
+	currentNode = m_CurrentMemoryFile;
     }
     if (ret == ARCHIVE_OK) {
         const void *buff;
@@ -694,8 +730,8 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                     return ArchiveWriteError;
                    }
 		 } else {
-			(pair.second)->seek(offset);
-			if((pair.second)->write((const char*)buff, size) == -1) {
+			(currentNode.getBuffer())->seek(offset);
+			if((currentNode.getBuffer())->write((const char*)buff, size) == -1) {
 				return ArchiveWriteError;
 			}
 		 }
@@ -715,6 +751,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
 	    // Check for pause and cancel requests.
 	    if(b_PauseRequested) {
                 b_PauseRequested = false;
+		m_CurrentArchiveEntry = entry;
                 return OperationPaused;
             }else if(b_CancelRequested) {
                 b_CancelRequested = false;
@@ -732,8 +769,12 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         return ArchiveHeaderWriteError;
        }
     } else {
-        (pair.second)->close();
-	m_ExtractedFiles->append(pair);
+        (currentNode.getBuffer())->close();
+	m_ExtractedFiles->append(
+		MemoryFile(
+			currentNode.getFileInformation(), 
+			currentNode.getBuffer()));
+	m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;
 }

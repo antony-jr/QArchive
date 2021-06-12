@@ -16,6 +16,7 @@ int main(int ac, char **av) {
     }
 
     using QArchive::MemoryExtractor;
+    using QArchive::MemoryFile;
     using std::cout;
     using std::cin;
     using std::string;
@@ -46,9 +47,9 @@ int main(int ac, char **av) {
         qInfo() << "[+] Starting Extractor... ";
     });
     QObject::connect(&Extractor, &MemoryExtractor::finished,
-    [&](QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>> *data) {
+    [&](QArchive::MemoryExtractorOutput *data) {
         qInfo() << "[+] Extracted File(s) Successfully! (In Memory)";
-	delete data;
+	qInfo() << "Extracted " << data->getFiles().count() << " File(s).";
 	app.quit();
         return;
     });

@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QThread>
 #include <QJsonObject>
+#include <QMetaType>
 
 #include "qarchiveextractor.hpp"
 #include "qarchive_global.hpp"
@@ -21,7 +22,8 @@ class QARCHIVE_EXPORT MemoryExtractor : public Extractor {
     MemoryExtractor(const QString&, QObject *parent = nullptr, bool singleThreaded = true);
     ~MemoryExtractor();
   Q_SIGNALS:
-    void finished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
+    void finished(MemoryExtractorOutput*);
 };
 }
+
 #endif // QARCHIVE_MEMORY_EXTRACTOR_HPP_INCLUDED

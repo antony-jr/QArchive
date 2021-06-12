@@ -10,7 +10,9 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QJsonObject>
-#include <qarchiveutils_p.hpp>
+
+#include "qarchivememoryextractoroutput.hpp"
+#include "qarchiveutils_p.hpp"
 
 namespace QArchive {
 class ExtractorPrivate : public QObject {
@@ -49,7 +51,7 @@ class ExtractorPrivate : public QObject {
     void paused();
     void resumed();
     void diskFinished();
-    void memoryFinished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
+    void memoryFinished(MemoryExtractorOutput*);
     void error(short);
     void info(QJsonObject);
     void progress(QString, int, int, qint64, qint64);
@@ -78,11 +80,13 @@ class ExtractorPrivate : public QObject {
             m_Password,
             m_ArchivePath;
     QIODevice *m_Archive = nullptr;
+    archive_entry *m_CurrentArchiveEntry = nullptr;
+    MutableMemoryFile m_CurrentMemoryFile;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QStringList> m_ExtractFilters;
     QScopedPointer<QJsonObject> m_Info;
-    QScopedPointer<QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>> m_ExtractedFiles;
+    QScopedPointer<QVector<MemoryFile>> m_ExtractedFiles;
 };
 }
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED

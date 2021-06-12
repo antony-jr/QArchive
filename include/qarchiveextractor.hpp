@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QJsonObject>
 
+#include "qarchivememoryextractoroutput.hpp"
 #include "qarchive_global.hpp"
 
 namespace QArchive {
@@ -42,7 +43,7 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     void paused();
     void resumed();
     void diskFinished();
-    void memoryFinished(QVector<QPair<QJsonObject, QSharedPointer<QBuffer>>>*);
+    void memoryFinished(MemoryExtractorOutput*);
     void error(short);
     void progress(QString, int, int, qint64, qint64);
     void getInfoRequirePassword(int);

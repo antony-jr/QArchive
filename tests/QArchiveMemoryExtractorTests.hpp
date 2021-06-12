@@ -1,5 +1,5 @@
-#ifndef QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
-#define QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
+#ifndef QARCHIVE_MEMORY_EXTRACTOR_TESTS_HPP_INCLUDED
+#define QARCHIVE_MEMORY_EXTRACTOR_TESTS_HPP_INCLUDED
 #ifdef BUILD_TESTS
 # include <QArchive>
 #else
@@ -12,11 +12,11 @@
 #include <QArchiveTestCases.hpp>
 #include <QTemporaryDir>
 
-class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
+class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
   public:
-    QArchiveDiskExtractorTests(QTemporaryDir *dir);
-    ~QArchiveDiskExtractorTests();
+    QArchiveMemoryExtractorTests(QTemporaryDir *dir);
+    ~QArchiveMemoryExtractorTests();
   private slots:
     void initTestCase();
     void simpleExtraction();
@@ -31,7 +31,8 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
     void extractTarArchiveWithNoFilters();
     void isExtractorObjectReuseable();
     void testProgress();
+    void cleanupTestCase();
   protected slots:
     void defaultErrorHandler(short code);
 };
-#endif // QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
+#endif // QARCHIVE_MEMORY_EXTRACTOR_TESTS_HPP_INCLUDED
