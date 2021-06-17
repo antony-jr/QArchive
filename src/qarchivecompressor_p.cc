@@ -460,6 +460,10 @@ void CompressorPrivate::cancel() {
 // Guesses the archive format from the given archive filename , on success
 // this returns true or vice-versa.
 bool CompressorPrivate::guessArchiveFormat() {
+    if(b_MemoryMode) {
+	    return false;
+    }
+
     if(m_TemporaryFile->fileName().isEmpty()) {
         return false;
     }

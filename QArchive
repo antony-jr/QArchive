@@ -36,4 +36,5 @@
 #include "qarchive_enums.hpp"
 #include "qarchivememoryextractor.hpp"
 #include "qarchivediskextractor.hpp"
+#include "qarchivememorycompressor.hpp"
 #include "qarchivediskcompressor.hpp"

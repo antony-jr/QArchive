@@ -46,6 +46,7 @@ if(BUILD_EXAMPLES)
 	add_subdirectory(examples/disk_extractor)
 	add_subdirectory(examples/disk_extractor_with_QIODevice)
 	add_subdirectory(examples/memory_extractor)
+	add_subdirectory(examples/memory_compressor)
 endif()
 
 add_library(QArchive
