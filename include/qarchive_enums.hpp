@@ -69,7 +69,9 @@ enum : short {
     DiskReadError,
     DiskOpenError,
     NoPermissionToReadFile,
-    NoFilesToCompress
+    NoFilesToCompress,
+    CannotOpenFile,
+    IODeviceSequential
 };
 }
 #endif

@@ -22,6 +22,9 @@ void ArchiveEntryDestructor(archive_entry*);
 /* Open Archive from QIODevice. (non-sequential) */
 int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device);
 
+/* Write Archive to QIODevice. */
+int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device);
+
 /* Basic string manupilators.  */
 char *concat(const char*, const char*);
 QString getDirectoryFileName(const QString&);

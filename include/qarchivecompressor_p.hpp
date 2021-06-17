@@ -1,27 +1,30 @@
-#ifndef QARCHIVE_DISK_COMPRESSOR_PRIVATE_HPP_INCLUDED
-#define QARCHIVE_DISK_COMPRESSOR_PRIVATE_HPP_INCLUDED
+#ifndef QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED
+#define QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QFile>
-#include <QPair>
+#include <QBuffer>
 #include <QSaveFile>
-#include <QLinkedList>
+#include <QVector>
 #include <QScopedPointer>
 #include <QSharedPointer>
-#include <qarchiveutils_p.hpp>
+
+#include "qarchiveutils_p.hpp"
 
 namespace QArchive {
-class DiskCompressorPrivate : public QObject {
+class CompressorPrivate : public QObject {
     Q_OBJECT
   public:
-    DiskCompressorPrivate();
-    ~DiskCompressorPrivate();
+    CompressorPrivate(bool memoryMode = false);
+    ~CompressorPrivate();
   public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
     void setPassword(const QString&);
     void setBlockSize(int);
+    void addFiles(const QString&, QIODevice*);
+    void addFiles(const QStringList&, const QVariantList&);
     void addFiles(const QString&);
     void addFiles(const QStringList&);
     void addFiles(const QString&, const QString&);
@@ -49,9 +52,26 @@ class DiskCompressorPrivate : public QObject {
     void canceled();
     void paused();
     void resumed();
-    void finished();
+    void memoryFinished(QBuffer*);
+    void diskFinished();
+
+  public:
+    struct Node {
+	    Node();
+	    ~Node();
+
+	    short open();
+
+	    QString path,entry;
+	    QIODevice *io = nullptr;
+	    bool valid = false;
+	    bool isInMemory = false;
+    };
 
   private:
+    void freeNodes(QVector<Node*>*);
+  private:
+    bool b_MemoryMode = false;
     bool b_PauseRequested = false,
          b_CancelRequested = false,
          b_Paused = false,
@@ -66,8 +86,9 @@ class DiskCompressorPrivate : public QObject {
            n_BytesTotal = 0;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QSaveFile> m_TemporaryFile;
-    QScopedPointer<QLinkedList<QPair<QString, QString>>> m_ConfirmedFiles;
-    QScopedPointer<QLinkedList<QPair<QString, QString>>> m_StaggedFiles;
+    QScopedPointer<QBuffer> m_Buffer;
+    QScopedPointer<QVector<Node*>> m_ConfirmedFiles;
+    QScopedPointer<QVector<Node*>> m_StaggedFiles;
 };
 }
-#endif // QARCHIVE_DISK_COMPRESSOR_PRIVATE_HPP_INCLUDED
+#endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

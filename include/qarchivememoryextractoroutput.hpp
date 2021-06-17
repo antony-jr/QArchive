@@ -16,7 +16,7 @@ class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
     ~MemoryExtractorOutput();
 
     QVector<MemoryFile> &getFiles() const;
-   
+
    private:
     QScopedPointer<QVector<MemoryFile>> m_Files;
 };

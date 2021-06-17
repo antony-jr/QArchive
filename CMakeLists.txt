@@ -56,10 +56,11 @@ add_library(QArchive
 	    src/qarchiveioreader_p.cc
 	    src/qarchiveextractor_p.cc
 	    src/qarchiveextractor.cc
+	    src/qarchivecompressor_p.cc
+	    src/qarchivecompressor.cc
 	    src/qarchivediskextractor.cc
 	    src/qarchivememoryextractor.cc
 	    src/qarchivediskcompressor.cc
-	    src/qarchivediskcompressor_p.cc
 	    include/qarchive_enums.hpp
 	    include/qarchiveutils_p.hpp
 	    include/qarchivememoryfile.hpp
@@ -67,10 +68,11 @@ add_library(QArchive
 	    include/qarchiveioreader_p.hpp
 	    include/qarchiveextractor_p.hpp
 	    include/qarchiveextractor.hpp
+	    include/qarchivecompressor_p.hpp
+	    include/qarchivecompressor.hpp
 	    include/qarchivediskextractor.hpp
 	    include/qarchivememoryextractor.hpp
 	    include/qarchivediskcompressor.hpp
-	    include/qarchivediskcompressor_p.hpp
 	    include/qarchive_global.hpp)
 
 SET(toinstall)
@@ -80,6 +82,7 @@ list(APPEND toinstall
     include/qarchivememoryfile.hpp
     include/qarchivememoryextractoroutput.hpp
     include/qarchiveextractor.hpp
+    include/qarchivecompressor.hpp
     include/qarchivediskextractor.hpp
     include/qarchivememoryextractor.hpp
     include/qarchivediskcompressor.hpp
