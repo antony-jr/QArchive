@@ -25,6 +25,8 @@ add_executable(QArchiveTests main.cc
 			     QArchiveTestCases.hpp
 			     QArchiveDiskCompressorTests.cc
 			     QArchiveDiskCompressorTests.hpp
+			     QArchiveMemoryCompressorTests.cc
+			     QArchiveMemoryCompressorTests.hpp
 			     QArchiveDiskExtractorTests.cc
 			     QArchiveDiskExtractorTests.hpp
 			     QArchiveMemoryExtractorTests.cc

@@ -12,6 +12,7 @@ TestRunner::TestRunner()
     m_CompressorTests.reset(new QArchiveDiskCompressorTests(m_TempDir.data()));
     m_ExtractorTests.reset(new QArchiveDiskExtractorTests(m_TempDir.data()));
     m_MemoryExtractorTests.reset(new QArchiveMemoryExtractorTests(m_TempDir.data()));
+    m_MemoryCompressorTests.reset(new QArchiveMemoryCompressorTests(m_TempDir.data()));
 
     connect(m_FutureWatcher.data(), &QFutureWatcher<void>::finished,
             this, &TestRunner::finished, Qt::DirectConnection);
@@ -39,4 +40,7 @@ void TestRunner::runTests() {
 
     // Run memory extractor tests
     QTest::qExec(m_MemoryExtractorTests.data());
+
+    // Run memory compressor tests
+    QTest::qExec(m_MemoryCompressorTests.data());
 }

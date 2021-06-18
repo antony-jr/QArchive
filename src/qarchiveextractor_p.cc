@@ -510,10 +510,12 @@ short ExtractorPrivate::openArchive() {
 	b_QIODeviceOwned = true;
         m_Archive = (QIODevice*)file;
     } else {
-
-        if(!m_Archive->isOpen()) { // Check if it is opened.
-            return ArchiveIsNotOpened;
-        } else if(!m_Archive->isReadable()) { // Check if it is readable. 
+	/// Open the archive if it's not opened.
+	if(!m_Archive->isOpen() && !m_Archive->open(QIODevice::ReadOnly)) {
+	    return ArchiveIsNotOpened; 
+	}
+        
+	if(!m_Archive->isReadable()) { // Check if it is readable. 
             return ArchiveIsNotReadable;
         }
     }
