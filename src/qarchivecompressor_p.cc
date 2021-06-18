@@ -74,6 +74,20 @@ void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
     vec->clear();
 }
 
+static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *vec) {
+for(auto iter = vec->begin(),
+            end = vec->end();
+            iter != end;
+            ++iter) {
+        if(*iter && (*iter)->valid) {
+		if((*iter)->entry == entry) {
+			return true;
+		}
+	}
+}
+return false;
+}
+
 // CompressorPrivate is the private class which handles the
 // compression of data to disk.
 // It can compress data in all formats of archive supported by libarchive.
@@ -173,9 +187,15 @@ void CompressorPrivate::addFiles(const QString &file) {
     if(b_Started || b_Paused) {
         return;
     }
+
+    QFileInfo info(file);
+    if(contains(info.fileName(), m_StaggedFiles.data())) {
+	    return;
+    }
+
     auto node = new Node;
     node->path = file;
-    node->entry = QDir::cleanPath(file);
+    node->entry = info.fileName();
     m_StaggedFiles->append(node);
     return;
 }
@@ -185,9 +205,14 @@ void CompressorPrivate::addFiles(const QStringList &files) {
         return;
     }
     for(auto i = 0; i < files.size(); ++i) {
-        auto node = new Node;
+        QFileInfo info(files.at(i));
+        if(contains(info.fileName(), m_StaggedFiles.data())) {
+		continue;
+	}
+
+	auto node = new Node;
         node->path = files.at(i);
-        node->entry = QDir::cleanPath(files.at(i));
+        node->entry = info.fileName();
         m_StaggedFiles->append(node);
     }
     return;
@@ -199,6 +224,10 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     if(b_Started || b_Paused) {
         return;
     }
+    if(contains(entryName, m_StaggedFiles.data())) {
+	return;
+    }
+
     auto node = new Node;
     node->path = file;
     node->entry = entryName;
@@ -216,7 +245,11 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
         return;
     }
     for(auto i = 0; i < files.size(); ++i) {
-        auto node = new Node;
+        if(contains(entryNames.at(i), m_StaggedFiles.data())) {
+		continue;
+	}
+
+	auto node = new Node;
         node->path = files.at(i);
         node->entry = entryNames.at(i);
         m_StaggedFiles->append(node);

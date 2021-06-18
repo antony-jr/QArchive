@@ -84,6 +84,12 @@ QString QArchive::errorCodeToString(short errorCode) {
     case NoFilesToCompress:
         errorString = QString("QArchive::NoFilesToCompress");
         break;
+    case CannotOpenFile:
+	errorString = QString("QArchive::CannotOpenFile");
+	break;
+    case IODeviceSequential:
+	errorString = QString("QArchive::IODeviceSequential");
+	break;
     default:
         errorString = QString("QArchive::UnknownError");
         break;
