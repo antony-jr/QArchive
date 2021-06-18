@@ -98,7 +98,7 @@ CompressorPrivate::CompressorPrivate(bool memoryMode)
 }
 
 CompressorPrivate::~CompressorPrivate() {
-    m_ArchiveWrite.clear();
+    clear();
 }
 
 // Set the filename for the archive to written on disk , the filename can
