@@ -6,9 +6,9 @@
 using namespace QArchive;
 
 DiskExtractor::DiskExtractor(QObject *parent, bool singleThreaded)
-    : Extractor(false, parent, singleThreaded) { 
+    : Extractor(false, parent, singleThreaded) {
     connect(this, &DiskExtractor::diskFinished,
-	    this, &DiskExtractor::finished, Qt::DirectConnection);    
+            this, &DiskExtractor::finished, Qt::DirectConnection);
 }
 
 DiskExtractor::DiskExtractor(QIODevice *archive, QObject *parent, bool singleThreaded)

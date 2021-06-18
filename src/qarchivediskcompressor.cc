@@ -5,7 +5,7 @@ using namespace QArchive;
 DiskCompressor::DiskCompressor(QObject *parent, bool singleThreaded)
     : Compressor(false, parent, singleThreaded) {
     connect(this, &DiskCompressor::diskFinished,
-	    this, &DiskCompressor::finished, Qt::DirectConnection);
+            this, &DiskCompressor::finished, Qt::DirectConnection);
     return;
 }
 

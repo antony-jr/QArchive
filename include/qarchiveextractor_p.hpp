@@ -66,7 +66,7 @@ class ExtractorPrivate : public QObject {
          b_Finished = false,
          b_NoProgress = true,
          b_ArchiveOpened = false,
-	 b_QIODeviceOwned = false; // If set, free m_Archive on clear()
+         b_QIODeviceOwned = false; // If set, free m_Archive on clear()
     int n_PasswordTriedCountGetInfo = 0,
         n_PasswordTriedCountExtract = 0,
         n_ProcessedEntries = 0,

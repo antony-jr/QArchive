@@ -92,8 +92,8 @@ static int archive_close_cb(struct archive *archive, void *data) {
     return ARCHIVE_OK;
 }
 
-// This read callback is called whenever libarchive needs 
-// more data to crunch , this is very important since we have 
+// This read callback is called whenever libarchive needs
+// more data to crunch , this is very important since we have
 // to read the data from QIODevice.
 static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
     Q_UNUSED(archive);
@@ -126,7 +126,7 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
     p->storage = (char*)calloc(1, (blocksize < 1024) ?
                                sizeof(*(p->storage)) * 10204 :
                                sizeof(*(p->storage)) * blocksize);
-    
+
     archive_read_set_open_callback(archive, archive_open_cb);
     archive_read_set_read_callback(archive, archive_read_cb);
     archive_read_set_seek_callback(archive, archive_seek_cb);
@@ -147,9 +147,9 @@ static int archive_w_open_cb(struct archive *archive, void *data) {
         return ARCHIVE_FATAL;
     }
     if(!p->isOpen()) {
-	    if(!p->open(QIODevice::WriteOnly)) {
-		    return ARCHIVE_FATAL;
-	    }
+        if(!p->open(QIODevice::WriteOnly)) {
+            return ARCHIVE_FATAL;
+        }
     }
     return ARCHIVE_OK;
 }
@@ -158,13 +158,13 @@ static int archive_w_close_cb(struct archive *archive, void *data) {
     Q_UNUSED(archive);
     QIODevice *p = (QIODevice*)data;
     if(!p) {
-	    return ARCHIVE_FATAL;
+        return ARCHIVE_FATAL;
     }
     p->close();
     return ARCHIVE_OK;
 }
 
-static la_ssize_t archive_write_cb(struct archive *archive, void *data, const void *buffer, size_t length) { 
+static la_ssize_t archive_write_cb(struct archive *archive, void *data, const void *buffer, size_t length) {
     Q_UNUSED(archive);
     QIODevice *p = (QIODevice*)data;
     return p->write((const char*)buffer, length);
@@ -181,12 +181,12 @@ int archive_w_free_cb(struct archive *archive, void *data) {
 // This is a custom functions which sets up the callbacks and other
 // stuff for a libarchive struct to use QIODevice to write.
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
-   return archive_write_open2(archive, 
-		   	     (void*)device, 
-			     archive_w_open_cb, 
-			     archive_write_cb, 
-			     archive_w_close_cb, 
-			     archive_w_free_cb);
+    return archive_write_open2(archive,
+                               (void*)device,
+                               archive_w_open_cb,
+                               archive_write_cb,
+                               archive_w_close_cb,
+                               archive_w_free_cb);
 }
 /* ---- */
 

@@ -29,7 +29,7 @@ class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
     void encryptingZipArchive();
     void runningCompressorNonSingleThreaded();
     void compressingTarArchiveWithoutFilters();
- protected slots:
+  protected slots:
     void defaultErrorHandler(short code, QString file);
     void defaultExtractorErrorHandler(short code);
 };

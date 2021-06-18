@@ -5,7 +5,7 @@ using namespace QArchive;
 MemoryCompressor::MemoryCompressor(QObject *parent, bool singleThreaded)
     : Compressor(true, parent, singleThreaded) {
     connect(this, &MemoryCompressor::memoryFinished,
-	    this, &MemoryCompressor::finished, Qt::DirectConnection);
+            this, &MemoryCompressor::finished, Qt::DirectConnection);
     return;
 }
 

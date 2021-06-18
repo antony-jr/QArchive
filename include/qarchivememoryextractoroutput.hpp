@@ -9,15 +9,15 @@
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
-	Q_OBJECT
-   public:
+    Q_OBJECT
+  public:
     MemoryExtractorOutput(QObject *parent = nullptr);
     MemoryExtractorOutput(QVector<MemoryFile>*, QObject *parent = nullptr);
     ~MemoryExtractorOutput();
 
     QVector<MemoryFile> &getFiles() const;
 
-   private:
+  private:
     QScopedPointer<QVector<MemoryFile>> m_Files;
 };
 }

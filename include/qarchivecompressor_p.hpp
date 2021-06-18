@@ -57,15 +57,15 @@ class CompressorPrivate : public QObject {
 
   public:
     struct Node {
-	    Node();
-	    ~Node();
+        Node();
+        ~Node();
 
-	    short open();
+        short open();
 
-	    QString path,entry;
-	    QIODevice *io = nullptr;
-	    bool valid = false;
-	    bool isInMemory = false;
+        QString path,entry;
+        QIODevice *io = nullptr;
+        bool valid = false;
+        bool isInMemory = false;
     };
 
   private:

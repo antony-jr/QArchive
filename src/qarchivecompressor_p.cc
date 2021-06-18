@@ -23,60 +23,55 @@ extern "C" {
 
 using namespace QArchive;
 
-// Node is a private structure which is used store info about entries to be 
+// Node is a private structure which is used store info about entries to be
 // compressed by the Compressor.
 CompressorPrivate::Node::Node() { }
-CompressorPrivate::Node::~Node() { 
-	if(!valid) { 
-		return;
-	}
+CompressorPrivate::Node::~Node() {
+    if(!valid) {
+        return;
+    }
 }
 
 short CompressorPrivate::Node::open() {
-	if(valid) {
-		return NoError;
-	}
+    if(valid) {
+        return NoError;
+    }
 
-	if(path.isEmpty() && (io == nullptr && entry.isEmpty())) {
-		return FileDoesNotExist; 
-	}
+    if(path.isEmpty() && (io == nullptr && entry.isEmpty())) {
+        return FileDoesNotExist;
+    }
 
-	if(path.isEmpty() && io) {
-		isInMemory = true;
-		if(!io->isOpen() &&
-		   !io->open(QIODevice::ReadOnly)) {
-			return CannotOpenFile;
-		}
-		
-		if(!io->isReadable()) {
-			return NoPermissionToReadFile;
-		}
+    if(path.isEmpty() && io) {
+        isInMemory = true;
+        if(!io->isOpen() &&
+                !io->open(QIODevice::ReadOnly)) {
+            return CannotOpenFile;
+        }
 
-		if(io->isSequential()) {
-			return IODeviceSequential;
-		}
+        if(!io->isReadable()) {
+            return NoPermissionToReadFile;
+        }
 
-	}
-	
-	valid = true;
-	return NoError;
+        if(io->isSequential()) {
+            return IODeviceSequential;
+        }
+
+    }
+
+    valid = true;
+    return NoError;
 }
 
 void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
- for(auto iter = vec->begin(),
-	     end = vec->end();
-	     iter != end;
-	     ++iter) {
-   if(*iter && (*iter)->valid) {
- 	if((*iter)->isInMemory) {
-		(*iter)->io->close();
-		(*iter)->io = nullptr;
+    for(auto iter = vec->begin(),
+            end = vec->end();
+            iter != end;
+            ++iter) {
+        if(*iter) {
+		delete *iter;
 	}
-	(*iter)->valid = false;
-	delete *iter;
-   }
-   vec->clear();
-  }
+    }
+    vec->clear();
 }
 
 // CompressorPrivate is the private class which handles the
@@ -89,16 +84,16 @@ CompressorPrivate::CompressorPrivate(bool memoryMode)
     b_MemoryMode = memoryMode;
 
     if(!b_MemoryMode) {
-    	m_TemporaryFile.reset(new QSaveFile);
+        m_TemporaryFile.reset(new QSaveFile);
     } else {
-	m_Buffer.reset(new QBuffer);
+        m_Buffer.reset(new QBuffer);
     }
     m_StaggedFiles.reset(new QVector<Node*>);
     m_ConfirmedFiles.reset(new QVector<Node*>);
 }
 
 CompressorPrivate::~CompressorPrivate() {
-    clear();
+   clear();
 }
 
 // Set the filename for the archive to written on disk , the filename can
@@ -145,33 +140,33 @@ void CompressorPrivate::setBlockSize(int size) {
 }
 
 void CompressorPrivate::addFiles(const QString &entryName, QIODevice *device) {
-	if(b_Started || b_Paused) {
-		return;
-	}
+    if(b_Started || b_Paused) {
+        return;
+    }
 
-	auto node = new Node;
-	node->entry = entryName;
-	node->io = device;
-	m_StaggedFiles->append(node);
-	return;
+    auto node = new Node;
+    node->entry = entryName;
+    node->io = device;
+    m_StaggedFiles->append(node);
+    return;
 }
 
 void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList &devices) {
-	if(b_Started || b_Paused) {
-		return;
-	}
+    if(b_Started || b_Paused) {
+        return;
+    }
 
-	if(entries.size() != devices.size()) {
-		return;
-	}
+    if(entries.size() != devices.size()) {
+        return;
+    }
 
-	for(auto i = 0; i < entries.size(); ++i) {
-	   auto node = new Node;
-	   node->entry = entries.at(i);
-	   node->io = devices.at(i).value<QIODevice*>();
-           m_StaggedFiles->append(node);
-	}
-	return;
+    for(auto i = 0; i < entries.size(); ++i) {
+        auto node = new Node;
+        node->entry = entries.at(i);
+        node->io = devices.at(i).value<QIODevice*>();
+        m_StaggedFiles->append(node);
+    }
+    return;
 }
 
 void CompressorPrivate::addFiles(const QString &file) {
@@ -191,14 +186,14 @@ void CompressorPrivate::addFiles(const QStringList &files) {
     }
     for(auto i = 0; i < files.size(); ++i) {
         auto node = new Node;
-	node->path = files.at(i);
-	node->entry = QDir::cleanPath(files.at(i));
+        node->path = files.at(i);
+        node->entry = QDir::cleanPath(files.at(i));
         m_StaggedFiles->append(node);
     }
     return;
 }
 
-// Adds a single file and uses a custom entry name with 
+// Adds a single file and uses a custom entry name with
 // respect to the given data.
 void CompressorPrivate::addFiles(const QString &entryName, const QString &file) {
     if(b_Started || b_Paused) {
@@ -211,7 +206,7 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     return;
 }
 
-// Adds multiple files and uses a corresponding list of 
+// Adds multiple files and uses a corresponding list of
 // entry names with respect to the given data.
 void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringList &files) {
     if(b_Started || b_Paused) {
@@ -222,8 +217,8 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
     }
     for(auto i = 0; i < files.size(); ++i) {
         auto node = new Node;
-	node->path = files.at(i);
-	node->entry = entryNames.at(i);
+        node->path = files.at(i);
+        node->entry = entryNames.at(i);
         m_StaggedFiles->append(node);
     }
     return;
@@ -235,14 +230,14 @@ void CompressorPrivate::removeFiles(const QString &entry) {
     }
     int index = 0;
     for(auto iter = m_StaggedFiles->begin(),
-	      end = m_StaggedFiles->end();
-	      iter != end;
-	      ++iter) {
-	    if(*iter && (*iter)->entry == entry) {
-		    m_StaggedFiles->remove(index);
-		    return;
-	    }
-	    ++index;
+            end = m_StaggedFiles->end();
+            iter != end;
+            ++iter) {
+        if(*iter && (*iter)->entry == entry) {
+            m_StaggedFiles->remove(index);
+            return;
+        }
+        ++index;
     }
     return;
 }
@@ -254,21 +249,21 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
     QVector<int> indexes;
     int index = 0;
     for(auto iter = m_StaggedFiles->begin(),
-	      end = m_StaggedFiles->end();
-	      iter != end;
-	      ++iter) {
-	    if(*iter && entries.contains((*iter)->entry)) {
-		    indexes.append(index);
-		    return;
-	    }
-	    ++index;
+            end = m_StaggedFiles->end();
+            iter != end;
+            ++iter) {
+        if(*iter && entries.contains((*iter)->entry)) {
+            indexes.append(index);
+            return;
+        }
+        ++index;
     }
 
     for(auto iter = indexes.begin(),
-	     end = indexes.end();
-	     iter != end;
-	     ++iter) {
-	    m_StaggedFiles->remove(*iter);
+            end = indexes.end();
+            iter != end;
+            ++iter) {
+        m_StaggedFiles->remove(*iter);
     }
     return;
 }
@@ -280,14 +275,14 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, 
     Q_UNUSED(file);
     int index = 0;
     for(auto iter = m_StaggedFiles->begin(),
-	      end = m_StaggedFiles->end();
-	      iter != end;
-	      ++iter) {
-	    if(*iter && (*iter)->entry == entryName) {
-		    m_StaggedFiles->remove(index);
-		    return;
-	    }
-	    ++index;
+            end = m_StaggedFiles->end();
+            iter != end;
+            ++iter) {
+        if(*iter && (*iter)->entry == entryName) {
+            m_StaggedFiles->remove(index);
+            return;
+        }
+        ++index;
     }
     return;
 }
@@ -297,24 +292,24 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNa
         return;
     }
     Q_UNUSED(files);
-     QVector<int> indexes;
+    QVector<int> indexes;
     int index = 0;
     for(auto iter = m_StaggedFiles->begin(),
-	      end = m_StaggedFiles->end();
-	      iter != end;
-	      ++iter) {
-	    if(*iter && entryNames.contains((*iter)->entry)) {
-		    indexes.append(index);
-		    return;
-	    }
-	    ++index;
+            end = m_StaggedFiles->end();
+            iter != end;
+            ++iter) {
+        if(*iter && entryNames.contains((*iter)->entry)) {
+            indexes.append(index);
+            return;
+        }
+        ++index;
     }
 
     for(auto iter = indexes.begin(),
-	     end = indexes.end();
-	     iter != end;
-	     ++iter) {
-	    m_StaggedFiles->remove(*iter);
+            end = indexes.end();
+            iter != end;
+            ++iter) {
+        m_StaggedFiles->remove(*iter);
     }
 
     return;
@@ -341,9 +336,9 @@ void CompressorPrivate::clear() {
     freeNodes(m_StaggedFiles.data());
 
     if(!b_MemoryMode) {
-    	m_TemporaryFile.reset(new QSaveFile);
+        m_TemporaryFile.reset(new QSaveFile);
     } else {
-	m_Buffer.reset(new QBuffer);
+        m_Buffer.reset(new QBuffer);
     }
 }
 
@@ -358,25 +353,25 @@ void CompressorPrivate::start() {
         emit error(ArchiveFileAlreadyExists, m_TemporaryFile->fileName());
         return;
     } else if(m_StaggedFiles->isEmpty()) {
-	if(b_MemoryMode) {
-		emit error(NoFilesToCompress, QString());
-	} else {
-        	emit error(NoFilesToCompress, m_TemporaryFile->fileName());
-	}
-	return;
+        if(b_MemoryMode) {
+            emit error(NoFilesToCompress, QString());
+        } else {
+            emit error(NoFilesToCompress, m_TemporaryFile->fileName());
+        }
+        return;
     }
 
     // Guess Archive Format if not given.
     if(!m_ArchiveFormat) { // if ArchiveFormat == 0 then no format is set.
-      if(!guessArchiveFormat()) {
-        m_ArchiveFormat = ZipFormat; // Default format.
-      }
+        if(!guessArchiveFormat()) {
+            m_ArchiveFormat = ZipFormat; // Default format.
+        }
     }
 
     /// Confirm files.
     n_BytesTotal = 0;
     if(!confirmFiles()) {
-       return;
+        return;
     }
 
     b_Started = true;
@@ -390,12 +385,12 @@ void CompressorPrivate::start() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-	   emit memoryFinished(m_Buffer.take());
-	   m_Buffer.reset(new QBuffer);
-	} else {
-	   m_TemporaryFile->commit();
-           emit diskFinished();
-	}
+            emit memoryFinished(m_Buffer.take());
+            m_Buffer.reset(new QBuffer);
+        } else {
+            m_TemporaryFile->commit();
+            emit diskFinished();
+        }
     } else if(ret == OperationCanceled) {
         b_Started = false;
         emit canceled();
@@ -420,12 +415,12 @@ void CompressorPrivate::resume() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-	  emit memoryFinished(m_Buffer.take());
-	  m_Buffer.reset(new QBuffer);
-	} else {
-	  m_TemporaryFile->commit();
-          emit diskFinished();
-	}
+            emit memoryFinished(m_Buffer.take());
+            m_Buffer.reset(new QBuffer);
+        } else {
+            m_TemporaryFile->commit();
+            emit diskFinished();
+        }
     } else if(ret == OperationCanceled) {
         b_Started = false;
         emit canceled();
@@ -434,7 +429,7 @@ void CompressorPrivate::resume() {
         b_Paused = true;
         emit paused();
     } else {
-	b_Started = false;
+        b_Started = false;
     }
     return;
 }
@@ -461,7 +456,7 @@ void CompressorPrivate::cancel() {
 // this returns true or vice-versa.
 bool CompressorPrivate::guessArchiveFormat() {
     if(b_MemoryMode) {
-	    return false;
+        return false;
     }
 
     if(m_TemporaryFile->fileName().isEmpty()) {
@@ -501,72 +496,82 @@ bool CompressorPrivate::confirmFiles() {
     freeNodes(m_ConfirmedFiles.data());
     for(auto iter = m_StaggedFiles->begin() ; iter != m_StaggedFiles->end() ; ++iter) {
         auto node = *iter;
-	short eCode = NoError;
-	if((eCode = node->open()) != NoError) {
-		if(!node->isInMemory) {
-			emit error(eCode, node->path);
-		} else {
-			emit error(eCode, QString());
-		}
-		return false;
-	}
+        short eCode = NoError;
+        if((eCode = node->open()) != NoError) {
+            if(!node->isInMemory) {
+                emit error(eCode, node->path);
+            } else {
+                emit error(eCode, QString());
+            }
+            return false;
+        }
 
-	if(!node->valid) {
-		continue;
-	}
+        if(!node->valid) {
+            continue;
+        }
 
-	if(!node->isInMemory) {
-	   QFileInfo info(/* file path given by the user = */node->path);
+        if(!node->isInMemory) {
+            QFileInfo info(/* file path given by the user = */node->path);
 
-           // Check if the file exists.
-           if(!info.exists()) {
-               emit error(FileDoesNotExist, info.filePath());
-               return false;
+            // Check if the file exists.
+            if(!info.exists()) {
+                emit error(FileDoesNotExist, info.filePath());
+                return false;
             }
 
-           // Check permission to read.
-           if(!info.isReadable()) {
-              emit error(NoPermissionToReadFile, info.filePath());
-              return false;
-           }
+            // Check permission to read.
+            if(!info.isReadable()) {
+                emit error(NoPermissionToReadFile, info.filePath());
+                return false;
+            }
 
 
-           // Check if it is file or a directory ,
-           // if directory then add files in directory
-           // recursively.
-           if(info.isDir()) {
-              QVector<QString> dirList;
-              dirList.append(info.filePath());
-	      
-	      while(!dirList.isEmpty()) {
-                QDir dir(dirList.takeFirst());
-                QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-                for (int i = 0; i < list.size(); i++) {
-                    if(list.at(i).isDir()) {
-                        dirList.append(list.at(i).filePath());
-                        continue;
+            // Check if it is file or a directory ,
+            // if directory then add files in directory
+            // recursively.
+            if(info.isDir()) {
+                QVector<QString> dirList;
+                dirList.append(info.filePath());
+
+                while(!dirList.isEmpty()) {
+                    QDir dir(dirList.takeFirst());
+                    QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
+                    for (int i = 0; i < list.size(); i++) {
+                        if(list.at(i).isDir()) {
+                            dirList.append(list.at(i).filePath());
+                            continue;
+                        }
+                        QString file = list.at(i).filePath();
+                        auto fileNode = new Node;
+                        fileNode->isInMemory = node->isInMemory;
+			fileNode->valid = node->valid;
+			fileNode->entry = file.replace(QDir::cleanPath(node->path), node->entry);
+                        fileNode->path =  file;
+
+                        m_ConfirmedFiles->append(fileNode);
+
+                        QFileInfo info(file);
+                        n_BytesTotal += info.size();
                     }
-                    QString file = list.at(i).filePath();
-		    auto fileNode = new Node;
-		    fileNode->entry = file.replace(QDir::cleanPath(node->path), node->entry);
-		    fileNode->path =  file;
-
-                    m_ConfirmedFiles->append(fileNode);
-
-                    QFileInfo info(file);
-                    n_BytesTotal += info.size();
                 }
-              }
             } else { // Add it to the confirmed list.
-              node->path = info.filePath();
-              m_ConfirmedFiles->append(node);
-              n_BytesTotal += info.size();
-           }
-	} else { // If QIODevice given
-	   auto io = node->io;
-	   m_ConfirmedFiles->append(node);
-	   n_BytesTotal += io->size();
-	}
+		auto fileNode = new Node;
+		fileNode->isInMemory = node->isInMemory;
+		fileNode->valid = node->valid;
+		fileNode->path = info.filePath();
+		fileNode->entry = node->entry;
+                m_ConfirmedFiles->append(fileNode);
+                n_BytesTotal += info.size();
+            }
+        } else { // If QIODevice given
+            auto fileNode = new Node;
+	    fileNode->isInMemory = node->isInMemory;
+	    fileNode->valid = node->valid;
+	    fileNode->io = node->io;
+	    fileNode->entry = node->entry;
+	    m_ConfirmedFiles->append(fileNode);
+            n_BytesTotal += node->io->size();
+        }
     }
     return true;
 }
@@ -575,22 +580,22 @@ bool CompressorPrivate::confirmFiles() {
 short CompressorPrivate::compress() {
     if(m_ArchiveWrite.isNull()) {
         if(!b_MemoryMode) {
-           /// Open Temporary file for write.
-           if(!m_TemporaryFile->open(QIODevice::WriteOnly)) {
-              emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
-              return ArchiveWriteOpenError;
-           }
-	}
+            /// Open Temporary file for write.
+            if(!m_TemporaryFile->open(QIODevice::WriteOnly)) {
+                emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
+                return ArchiveWriteOpenError;
+            }
+        }
 
         m_ArchiveWrite = QSharedPointer<struct archive>(
-				archive_write_new(), ArchiveWriteDestructor);
+                             archive_write_new(), ArchiveWriteDestructor);
         if(m_ArchiveWrite.isNull()) {
             if(b_MemoryMode) {
-		    emit error(NotEnoughMemory, QString());
-	    } else {
-	    	emit error(NotEnoughMemory, m_TemporaryFile->fileName());
-	    }
-	    return NotEnoughMemory;
+                emit error(NotEnoughMemory, QString());
+            } else {
+                emit error(NotEnoughMemory, m_TemporaryFile->fileName());
+            }
+            return NotEnoughMemory;
         }
 
         switch (m_ArchiveFormat) {
@@ -643,23 +648,23 @@ short CompressorPrivate::compress() {
             archive_write_set_bytes_per_block(m_ArchiveWrite.data(), n_BlockSize);
         }
 
-	if(!b_MemoryMode) {
-           // Finally open the write archive using the handle of the Temporary file.
-	   if(archive_write_open_fd(m_ArchiveWrite.data(),
-				m_TemporaryFile->handle()) != ARCHIVE_OK) {
-            m_ArchiveWrite.clear();
-            emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
-            return ArchiveWriteOpenError;
-           }
-	} else {
-	    if(archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
-				         (QIODevice*)m_Buffer.data()) != ARCHIVE_OK) {
+        if(!b_MemoryMode) {
+            // Finally open the write archive using the handle of the Temporary file.
+            if(archive_write_open_fd(m_ArchiveWrite.data(),
+                                     m_TemporaryFile->handle()) != ARCHIVE_OK) {
+                m_ArchiveWrite.clear();
+                emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
+                return ArchiveWriteOpenError;
+            }
+        } else {
+            if(archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
+                                         (QIODevice*)m_Buffer.data()) != ARCHIVE_OK) {
 
-		    m_ArchiveWrite.clear();
-		    emit error(ArchiveWriteOpenError, QString());
-		    return ArchiveWriteOpenError;
-	    }
-	}
+                m_ArchiveWrite.clear();
+                emit error(ArchiveWriteOpenError, QString());
+                return ArchiveWriteOpenError;
+            }
+        }
 
         n_TotalEntries = m_ConfirmedFiles->size(); // for reporting progress.
     }
@@ -670,119 +675,120 @@ short CompressorPrivate::compress() {
         int r;
         std::size_t len;
         char buff[16384];
-        
+
         if(!node->isInMemory) {
-        // TODO:
-        //	Implement a failsafe copy mechanism.
-        //
-        // Note:
-        // Down below implementation is nearly good but
-        // not very robust and thus needs a good implementation.
-        auto disk = QSharedPointer<struct archive>(
-			archive_read_disk_new(), ArchiveReadDestructor);
-           archive_read_disk_set_standard_lookup(disk.data());
-	   
-	   r = archive_read_disk_open(disk.data(),
-			QFile::encodeName(/*file path = */node->path).constData());
-	   
-	   if(r != ARCHIVE_OK) {
-		   emit error(DiskOpenError, node->path);
-		   return DiskOpenError;
-	   }
+            // TODO:
+            //	Implement a failsafe copy mechanism.
+            //
+            // Note:
+            // Down below implementation is nearly good but
+            // not very robust and thus needs a good implementation.
+            auto disk = QSharedPointer<struct archive>(
+                            archive_read_disk_new(), ArchiveReadDestructor);
+            archive_read_disk_set_standard_lookup(disk.data());
 
-        for (;;) {
+            r = archive_read_disk_open(disk.data(),
+                                       QFile::encodeName(/*file path = */node->path).constData());
+
+            if(r != ARCHIVE_OK) {
+                emit error(DiskOpenError, node->path);
+                return DiskOpenError;
+            }
+
+            for (;;) {
                 auto entry = QSharedPointer<struct archive_entry>(
-				archive_entry_new(), ArchiveEntryDestructor);
+                                 archive_entry_new(), ArchiveEntryDestructor);
                 r = archive_read_next_header2(disk.data(), entry.data());
-		
-		if (r == ARCHIVE_EOF) {
-			break;
-		}
-		
-		if (r != ARCHIVE_OK) {
-			emit error(DiskReadError, node->path);
-            		return DiskReadError;
-        	}
 
-            	archive_read_disk_descend(disk.data());
-            	archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
-            	r = archive_write_header(m_ArchiveWrite.data(), entry.data());
+                if (r == ARCHIVE_EOF) {
+                    break;
+                }
 
-            	if (r == ARCHIVE_FATAL) {
-                	emit error(ArchiveFatalError, node->path);
-                	return ArchiveFatalError;
-            	}
-            	if (r > ARCHIVE_FAILED) {
-                	QScopedPointer<QFile> file(new QFile(node->path));
-                	if(!file->open(QIODevice::ReadOnly)) {
-				emit error(DiskOpenError, node->path);
-                    		return DiskOpenError;
-                	}
-                	len = file->read(buff, sizeof(buff));
-                	while (len > 0) {
-                    		archive_write_data(m_ArchiveWrite.data(), buff, len);
-                    		n_BytesProcessed += len;
+                if (r != ARCHIVE_OK) {
+                    emit error(DiskReadError, node->path);
+                    return DiskReadError;
+                }
 
-                    		emit progress(node->entry,
-                                  (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
-                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);
-		    
-		   		 QCoreApplication::processEvents();
-				 len = file->read(buff, sizeof(buff));
-			}
-               		file->close();
-            	}else {
-			emit error(ArchiveHeaderWriteError, node->path);
-			return ArchiveHeaderWriteError;
-	    	}
+                archive_read_disk_descend(disk.data());
+                archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
+                r = archive_write_header(m_ArchiveWrite.data(), entry.data());
 
-	    	QCoreApplication::processEvents();
-        }
+                if (r == ARCHIVE_FATAL) {
+                    emit error(ArchiveFatalError, node->path);
+                    return ArchiveFatalError;
+                }
+                if (r > ARCHIVE_FAILED) {
+                    QScopedPointer<QFile> file(new QFile(node->path));
+                    if(!file->open(QIODevice::ReadOnly)) {
+                        emit error(DiskOpenError, node->path);
+                        return DiskOpenError;
+                    }
+                    len = file->read(buff, sizeof(buff));
+                    while (len > 0) {
+                        archive_write_data(m_ArchiveWrite.data(), buff, len);
+                        n_BytesProcessed += len;
+
+                        emit progress(node->entry,
+                                      (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
+                                      n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+
+                        QCoreApplication::processEvents();
+                        len = file->read(buff, sizeof(buff));
+                    }
+                    file->close();
+                } else {
+                    emit error(ArchiveHeaderWriteError, node->path);
+                    return ArchiveHeaderWriteError;
+                }
+
+                QCoreApplication::processEvents();
+            }
         } else {
-	  auto entry = QSharedPointer<struct archive_entry>(
-			  archive_entry_new(), 
-			  ArchiveEntryDestructor);
+            auto entry = QSharedPointer<struct archive_entry>(
+                             archive_entry_new(),
+                             ArchiveEntryDestructor);
 
-	  // Setup archive entry.
-	  archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
-	  archive_entry_set_filetype(entry.data(), AE_IFREG);
-	  archive_entry_set_size(entry.data(), (node->io)->size());
+            // Setup archive entry.
+            archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
+            archive_entry_set_filetype(entry.data(), AE_IFREG);
+            archive_entry_set_size(entry.data(), (node->io)->size());
 
-	  (node->io)->seek(0);
+            (node->io)->seek(0);
 
-	  // Write entry to memory
-	  r = archive_write_header(m_ArchiveWrite.data(), entry.data());
+            // Write entry to memory
+            r = archive_write_header(m_ArchiveWrite.data(), entry.data());
 
-          if (r == ARCHIVE_FATAL) {
+            if (r == ARCHIVE_FATAL) {
                 emit error(ArchiveFatalError, node->entry);
                 return ArchiveFatalError;
-          }
-            
-	  if (r > ARCHIVE_FAILED) {
+            }
+
+            if (r > ARCHIVE_FAILED) {
                 len = (node->io)->read(buff, sizeof(buff));
-		while (len > 0) {
-                   archive_write_data(m_ArchiveWrite.data(), buff, len);
-		   n_BytesProcessed += len;
-                   
-		   emit progress(node->entry,
-                        (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
-                        n_TotalEntries, n_BytesProcessed, n_BytesTotal);
-		    
-		   QCoreApplication::processEvents();
-		   len = (node->io)->read(buff, sizeof(buff));
-		}
-          } else {
-		emit error(ArchiveHeaderWriteError, node->entry);
-		return ArchiveHeaderWriteError;
-	  }
+                while (len > 0) {
+                    archive_write_data(m_ArchiveWrite.data(), buff, len);
+                    n_BytesProcessed += len;
+
+                    emit progress(node->entry,
+                                  (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
+                                  n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+
+                    QCoreApplication::processEvents();
+                    len = (node->io)->read(buff, sizeof(buff));
+                }
+            } else {
+                emit error(ArchiveHeaderWriteError, node->entry);
+                return ArchiveHeaderWriteError;
+            }
         }
 
-	m_ConfirmedFiles->removeFirst();
+        m_ConfirmedFiles->removeFirst();
 
         emit progress(node->entry,
                       (n_TotalEntries - m_ConfirmedFiles->size()),
                       n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
+	delete node;
 
         QCoreApplication::processEvents();
         if(b_PauseRequested) {

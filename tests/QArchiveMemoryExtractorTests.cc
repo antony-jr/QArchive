@@ -32,7 +32,7 @@ void QArchiveMemoryExtractorTests::simpleExtraction() {
     QArchive::MemoryExtractor e(TestCase1ArchivePath);
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
-   
+
     QSignalSpy spyInfo(&e, &QArchive::MemoryExtractor::finished);
     e.start();
 
@@ -121,11 +121,11 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
     /// Test3OUtputFile1 should not exists
     QVERIFY(data->getFiles().count() == 1);
     QVERIFY(
-	data->getFiles()
-	.at(0)
-	.fileInformation()
-	.value("FileName")
-	.toString() != QFileInfo(Test3OutputFile1).fileName());
+        data->getFiles()
+        .at(0)
+        .fileInformation()
+        .value("FileName")
+        .toString() != QFileInfo(Test3OutputFile1).fileName());
 
     auto buffer = data->getFiles().at(0).buffer();
 
@@ -179,7 +179,7 @@ void QArchiveMemoryExtractorTests::testInvalidArchivePath() {
 
 void QArchiveMemoryExtractorTests::runningExtractorNonSingleThreaded() {
     QArchive::MemoryExtractor e(TestCase1ArchivePath,
-                              /*parent=*/nullptr, /*singleThread=*/false);
+                                /*parent=*/nullptr, /*singleThread=*/false);
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
     QSignalSpy spyInfo(&e, &QArchive::MemoryExtractor::finished);
@@ -250,7 +250,7 @@ void QArchiveMemoryExtractorTests::extractTarArchiveWithNoFilters() {
     e.start();
 
     QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
-    
+
     /// Verify output
     QList<QVariant> output = spyInfo.takeFirst();
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
@@ -274,7 +274,7 @@ void QArchiveMemoryExtractorTests::isExtractorObjectReuseable() {
     e.start();
 
     QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
-   
+
     /// Verify output of first archive
     QList<QVariant> output = spyInfo.takeFirst();
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
@@ -292,7 +292,7 @@ void QArchiveMemoryExtractorTests::isExtractorObjectReuseable() {
     e.start();
 
     QVERIFY(spyInfo.wait() || spyInfo.count() == 2);
-    
+
     output = spyInfo.takeFirst();
     data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 

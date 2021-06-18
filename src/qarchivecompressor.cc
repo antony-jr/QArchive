@@ -32,7 +32,7 @@ Compressor::Compressor(bool memoryMode, QObject *parent, bool singleThreaded)
     connect(m_Compressor.data(), &CompressorPrivate::resumed,
             this, &Compressor::resumed, Qt::DirectConnection);
     connect(m_Compressor.data(), &CompressorPrivate::memoryFinished,
-	    this, &Compressor::memoryFinished, Qt::DirectConnection);
+            this, &Compressor::memoryFinished, Qt::DirectConnection);
     connect(m_Compressor.data(), &CompressorPrivate::diskFinished,
             this, &Compressor::diskFinished, Qt::DirectConnection);
     return;
@@ -71,13 +71,13 @@ void Compressor::setBlockSize(int size) {
 }
 
 void Compressor::addFiles(const QString &entry, QIODevice *io) {
-   getMethod(m_Compressor, "addFiles(const QString&, QIODevice*)")
-   .invoke(m_Compressor.data(), Qt::QueuedConnection, Q_ARG(QString, entry), Q_ARG(QIODevice*, io));
+    getMethod(m_Compressor, "addFiles(const QString&, QIODevice*)")
+    .invoke(m_Compressor.data(), Qt::QueuedConnection, Q_ARG(QString, entry), Q_ARG(QIODevice*, io));
 }
 
 void Compressor::addFiles(const QStringList &entries, const QVariantList &devices) {
-   getMethod(m_Compressor, "addFiles(const QStringList&, const QVariantList&)")
-   .invoke(m_Compressor.data(), Qt::QueuedConnection, Q_ARG(QStringList, entries), Q_ARG(QVariantList, devices));
+    getMethod(m_Compressor, "addFiles(const QStringList&, const QVariantList&)")
+    .invoke(m_Compressor.data(), Qt::QueuedConnection, Q_ARG(QStringList, entries), Q_ARG(QVariantList, devices));
 }
 
 void Compressor::addFiles(const QString &file) {
