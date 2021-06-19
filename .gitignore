@@ -51,3 +51,6 @@ compile_commands.json
 
 # Conan example build folder
 examples/conan/build
+
+# build dir
+build
