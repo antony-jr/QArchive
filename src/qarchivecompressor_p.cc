@@ -782,9 +782,13 @@ short CompressorPrivate::compress() {
                              ArchiveEntryDestructor);
 
             // Setup archive entry.
+	    auto datetime = QDateTime::currentDateTime();
             archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
             archive_entry_set_filetype(entry.data(), AE_IFREG);
             archive_entry_set_size(entry.data(), (node->io)->size());
+	    archive_entry_set_atime(entry.data(), (time_t)datetime.currentSecsSinceEpoch(), 0);
+	    archive_entry_set_mtime(entry.data(), (time_t)datetime.currentSecsSinceEpoch(), 0);
+	    archive_entry_set_birthtime(entry.data(), (time_t)datetime.currentSecsSinceEpoch(), 0);
 
             (node->io)->seek(0);
 

@@ -48,7 +48,7 @@ void QArchiveMemoryCompressorTests::simpleCompression() {
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(Test1OutputContents, QString(outputBuffer->readAll()));
+    QCOMPARE(QString(outputBuffer->readAll()), Test1OutputContents);
     outputBuffer->close();
 
     data->deleteLater();
@@ -116,7 +116,7 @@ void QArchiveMemoryCompressorTests::usingPauseResume() {
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(Test2OutputContents, QString(outputBuffer->readAll()));
+    QCOMPARE(QString(outputBuffer->readAll()), Test2OutputContents);
     outputBuffer->close();
 
     data->deleteLater();
@@ -174,8 +174,8 @@ void QArchiveMemoryCompressorTests::compressingMultipleFiles() {
     outputBuffer1->open(QIODevice::ReadOnly);
     outputBuffer2->open(QIODevice::ReadOnly);
 
-    QCOMPARE(Test3Output1Contents, QString(outputBuffer1->readAll()));
-    QCOMPARE(Test3Output2Contents, QString(outputBuffer2->readAll()));
+    QCOMPARE(QString(outputBuffer1->readAll()), Test3Output1Contents);
+    QCOMPARE(QString(outputBuffer2->readAll()), Test3Output2Contents);
 
     outputBuffer1->close();
     outputBuffer2->close();
@@ -226,7 +226,7 @@ void QArchiveMemoryCompressorTests::encryptingZipArchive() {
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(Test4OutputContents, QString(outputBuffer->readAll()));
+    QCOMPARE(QString(outputBuffer->readAll()), Test4OutputContents);
     outputBuffer->close();
 
     data->deleteLater();
@@ -272,7 +272,7 @@ void QArchiveMemoryCompressorTests::runningCompressorNonSingleThreaded() {
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(Test5OutputContents, QString(outputBuffer->readAll()));
+    QCOMPARE(QString(outputBuffer->readAll()), Test5OutputContents);
     outputBuffer->close();
 
     data->deleteLater();
@@ -317,7 +317,7 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithoutFilters() {
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(Test6OutputContents, QString(outputBuffer->readAll()));
+    QCOMPARE(QString(outputBuffer->readAll()), Test6OutputContents);
     outputBuffer->close();
 
     data->deleteLater();
