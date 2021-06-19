@@ -89,6 +89,7 @@ list(APPEND toinstall
     include/qarchivediskextractor.hpp
     include/qarchivememoryextractor.hpp
     include/qarchivediskcompressor.hpp
+    include/qarchivememorycompressor.hpp
     include/qarchive_global.hpp
     ${PROJECT_BINARY_DIR}/config.h
 )	

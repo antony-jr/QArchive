@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 	buffer->open(QIODevice::ReadOnly);
 
 	qDebug() << "Filename:: " << fileInfo.value("FileName").toString();
-	qDebug() << "Contents:: " << QString(buffer.readAll());
+	qDebug() << "Contents:: " << QString(buffer->readAll());
 
 	// Only delete the output object and 
 	// any other buffer you allocated.	
