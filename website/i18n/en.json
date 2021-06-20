@@ -6,8 +6,8 @@
     "tagline": "A Simple Archiver for Qt Projects.",
     "docs": {
       "AddingQArchive": {
-        "title": "Add QArchive to Your Qt Project",
-        "sidebar_label": "Adding QArchive to Your Qt Project"
+        "title": "Add QArchive to Your Project",
+        "sidebar_label": "Adding QArchive to Your Project"
       },
       "CreatingEncryptedZipArchiveGuide": {
         "title": "Creating Encrypted ZIP Archive using QArchive",

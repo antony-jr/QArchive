@@ -27,14 +27,14 @@ code using the function   ```QArchive::errorCodeToString(short)```.
 | QArchive::NoPermissionToReadArchive     |    14   |
 | QArchive::InvalidOutputDirectory        |    15   |
 | QArchive::InvalidArchiveFile            |    16   |
-| QArchive::ArchiveFileNameNotGiven       |    25   |
-| QArchive::ArchiveFileAlreadyExists      |    26   |
-| QArchive::ArchiveWriteOpenError         |    27   |
-| QArchive::ArchiveFatalError             |    28   |
-| QArchive::FileDoesNotExist		  |    29   |
-| QArchive::DiskReadError                 |    30   |
-| QArchive::DiskOpenError                 |    31   |
-| QArchive::NoPermissionToReadFile        |    32   |
-| QArchive::NoFilesToCompress             |    33   |
-
-
+| QArchive::ArchiveFileNameNotGiven       |   100   |
+| QArchive::ArchiveFileAlreadyExists      |   101   |
+| QArchive::ArchiveWriteOpenError         |   102   |
+| QArchive::ArchiveFatalError             |   103   |
+| QArchive::FileDoesNotExist		  |   104   |
+| QArchive::DiskReadError                 |   105   |
+| QArchive::DiskOpenError                 |   106   |
+| QArchive::NoPermissionToReadFile        |   107   |
+| QArchive::NoFilesToCompress             |   108   |
+| QArchive::CannotOpenFile		  |   109   |
+| QArchive::IODeviceSequential		  |   110   |
