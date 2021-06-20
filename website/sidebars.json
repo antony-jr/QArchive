@@ -10,7 +10,9 @@
 	   "ExtractingPasswordProtectedArchiveGuide",
 	   "ReportingProgressGuide",
 	   "SimpleCompressorGuide",
-	   "CreatingEncryptedZipArchiveGuide"
+	   "CreatingEncryptedZipArchiveGuide",
+	   "MemoryExtractorGuide",
+	   "MemoryCompressorGuide"
     ],
     "API" : [
 	   "QArchiveFormats",

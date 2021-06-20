@@ -4,9 +4,10 @@ title: Simple Extractor using QArchive
 sidebar_label: Creating a Simple Extractor
 ---
 
-Please refer the full class documentation [here](QArchiveDiskExtractor.md)
+Please refer the full class documentation [**here**.](QArchiveDiskExtractor.md)
 
-This simple example extracts a given archive supported by libarchive.
+This simple example extracts a given archive supported by libarchive. This examples make file expects that QArchive is installed to the system. (or you can also modify it to use add_subdirectory).
+
 
 ## main.cpp
 ```
@@ -52,13 +53,25 @@ int main(int ac, char **av)
 }
 ```
 
-## extract.pro
+## CMakeLists.txt
 
 ```
-include(QArchive/QArchive.pri)
-TEMPLATE = app
-TARGET = extract
-SOURCES += main.cpp
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+project(DiskExtractor)
+    
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+   
+# Assuming you installed QArchive to the system.     
+find_package(QArchive)
+    
+# Include Directories.
+include_directories(.)
+include_directories(${CMAKE_BINARY_DIR})
+
+add_executable(DiskExtractor main.cpp)
+target_link_libraries(DiskExtractor PRIVATE QArchive)
 ```
 
 ## Compilation and Execution
@@ -66,9 +79,9 @@ SOURCES += main.cpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ..
+ $ cmake ..
  $ make -j$(nproc)
- $ ./extract
+ $ ./DiskExtractor
 ```
 
 This Program is created in the examples tree on the official repo.
