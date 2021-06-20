@@ -564,6 +564,7 @@ bool CompressorPrivate::confirmFiles() {
             // recursively.
             if(info.isDir()) {
                 QVector<QString> dirList;
+		QString toReplace = info.filePath();
                 dirList.append(info.filePath());
 
                 while(!dirList.isEmpty()) {
@@ -575,16 +576,15 @@ bool CompressorPrivate::confirmFiles() {
                             continue;
                         }
                         QString file = list.at(i).filePath();
-                        auto fileNode = new Node;
+			auto fileNode = new Node;
                         fileNode->isInMemory = node->isInMemory;
 			fileNode->valid = node->valid;
-			fileNode->entry = file.replace(QDir::cleanPath(node->path), node->entry);
-                        fileNode->path =  file;
+			fileNode->path = file;
+			fileNode->entry = file.replace(toReplace, node->entry);
 
                         m_ConfirmedFiles->append(fileNode);
 
-                        QFileInfo info(file);
-                        n_BytesTotal += info.size();
+                        n_BytesTotal += QFileInfo(list.at(i).filePath()).size();
                     }
                 }
             } else { // Add it to the confirmed list.
@@ -605,6 +605,11 @@ bool CompressorPrivate::confirmFiles() {
 	    m_ConfirmedFiles->append(fileNode);
             n_BytesTotal += node->io->size();
         }
+    }
+
+    /// Important: Check if total bytes is not zero.
+    if(n_BytesTotal == 0) {
+	return false;
     }
     return true;
 }
