@@ -34,7 +34,7 @@ The class belongs to the QArchive namespace, so make sure to include it.
 
 |                                                                   |                                            |
 |-------------------------------------------------------------------|--------------------------------------------|
-| **QVector<[QArchive::MemoryFile](QArchiveMemoryFile.md)>& const** | [getFiles]()                               |
+| **QVector<[QArchive::MemoryFile](QArchiveMemoryFile.md)>& const** | [getFiles()](#qvectorqarchivememoryfileqarchivedocsqarchivememoryfilehtml-getfiles-const)|
 
 
 ## Member Functions Documentation

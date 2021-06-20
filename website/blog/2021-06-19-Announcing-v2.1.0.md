@@ -10,15 +10,23 @@ When this library was first created the only scope was hard drive based extracti
 
 In this release, **I present you with new classes to handle in-memory extraction and compression with ease**. Down below are the new classes which are added to the **QArchive namespace.**
 
-   * QArchive::MemoryExtractor
+   * [QArchive::MemoryExtractor](/QArchive/docs/QArchiveMemoryExtractor.html)
 
-   * QArchive::MemoryFile
+   * [QArchive::MemoryFile](/QArchive/docs/QArchiveMemoryFile.html)
 
-   * QArchive::MemoryExtractorOutput
+   * [QArchive::MemoryExtractorOutput](/QArchive/docs/QArchiveExtractorOutput.html)
 
-   * QArchive::MemoryCompressor
+   * [QArchive::MemoryCompressor](/QArchive/docs/QArchiveMemoryCompressor.html)
 
 Pleae see the documentation for detailed information on these classes.
+
+### Bugfixes
+
+  * Fixed memory leaks.
+
+  * Fix pause/resume in extractor and compressor classes.
+  
+  * Fix addFiles for directory
 
 ### A Little Demo
 

@@ -4,7 +4,7 @@ title: Simple Compressor using QArchive (In Memory)
 sidebar_label: Creating Simple Compressor (In Memory)
 ---
 
-Please refer the full class documentation [**here**](QArchiveDiskCompressor.md)
+Please refer the full class documentation [**here**](QArchiveMemoryCompressor.md).
 
 This simple example compresses a set of files and directories **within memory**.(Directories are recursively added)
 
