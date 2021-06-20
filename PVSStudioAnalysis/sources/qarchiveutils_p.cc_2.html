@@ -105,8 +105,8 @@
 <a name="ln92">    return ARCHIVE_OK;</a>
 <a name="ln93">}</a>
 <a name="ln94"> </a>
-<a name="ln95">// This read callback is called whenever libarchive needs </a>
-<a name="ln96">// more data to crunch , this is very important since we have </a>
+<a name="ln95">// This read callback is called whenever libarchive needs</a>
+<a name="ln96">// more data to crunch , this is very important since we have</a>
 <a name="ln97">// to read the data from QIODevice.</a>
 <a name="ln98">static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {</a>
 <a name="ln99">    Q_UNUSED(archive);</a>
@@ -116,30 +116,30 @@
 <a name="ln103">}</a>
 <a name="ln104"> </a>
 <a name="ln105">// This is the most important callback function required for libarchive to work with</a>
-<a name="ln106">// QIODevice , this can't be set with the provided libarchive public functions.</a>
-<a name="ln107">// We will be using a private function to set this callback.</a>
-<a name="ln108">// This callback seeks the QIODevice with respect to whence which is the same as</a>
-<a name="ln109">// given in fseek and lseek.</a>
-<a name="ln110">//</a>
-<a name="ln111">// Without this function you cannot extract 7zip archives.</a>
-<a name="ln112">static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {</a>
-<a name="ln113">    Q_UNUSED(archive);</a>
-<a name="ln114">    ClientData_t *p = (ClientData_t*)data;</a>
-<a name="ln115">    return static_cast&lt;int64_t&gt;(p-&gt;io-&gt;seek(request, whence));</a>
-<a name="ln116">}</a>
-<a name="ln117"> </a>
-<a name="ln118">// This is a custom functions which sets up the callbacks and other</a>
-<a name="ln119">// stuff for a libarchive struct.</a>
-<a name="ln120">int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device) {</a>
-<a name="ln121">    // This client data will be freed on close ,</a>
-<a name="ln122">    // we don't need to worry about this.</a>
-<a name="ln123">    ClientData_t *p = (ClientData_t*)calloc(1, sizeof *p);</a>
-<a name="ln124">    p-&gt;io = new QArchive::IOReaderPrivate;</a>
-<a name="ln125">    p-&gt;io-&gt;setIODevice(device);</a>
-<a name="ln126">    p-&gt;io-&gt;setBlockSize(blocksize);</a>
-<a name="ln127">    p-&gt;storage = (char*)calloc(1, (blocksize &lt; 1024) ?</a>
-<a name="ln128">                               sizeof(*(p-&gt;storage)) * 10204 :</a>
-<a name="ln129">                               sizeof(*(p-&gt;storage)) * blocksize);</a>
+<a name="ln106">// QIODevice.</a>
+<a name="ln107">// This callback seeks the QIODevice with respect to whence which is the same as</a>
+<a name="ln108">// given in fseek and lseek.</a>
+<a name="ln109">//</a>
+<a name="ln110">// Without this function you cannot extract 7zip archives.</a>
+<a name="ln111">static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {</a>
+<a name="ln112">    Q_UNUSED(archive);</a>
+<a name="ln113">    ClientData_t *p = (ClientData_t*)data;</a>
+<a name="ln114">    return static_cast&lt;int64_t&gt;(p-&gt;io-&gt;seek(request, whence));</a>
+<a name="ln115">}</a>
+<a name="ln116"> </a>
+<a name="ln117">// This is a custom functions which sets up the callbacks and other</a>
+<a name="ln118">// stuff for a libarchive struct.</a>
+<a name="ln119">int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device) {</a>
+<a name="ln120">    // This client data will be freed on close ,</a>
+<a name="ln121">    // we don't need to worry about this.</a>
+<a name="ln122">    ClientData_t *p = (ClientData_t*)calloc(1, sizeof *p);</a>
+<a name="ln123">    p-&gt;io = new QArchive::IOReaderPrivate;</a>
+<a name="ln124">    p-&gt;io-&gt;setIODevice(device);</a>
+<a name="ln125">    p-&gt;io-&gt;setBlockSize(blocksize);</a>
+<a name="ln126">    p-&gt;storage = (char*)calloc(1, (blocksize &lt; 1024) ?</a>
+<a name="ln127">                               sizeof(*(p-&gt;storage)) * 10204 :</a>
+<a name="ln128">                               sizeof(*(p-&gt;storage)) * blocksize);</a>
+<a name="ln129"> </a>
 <a name="ln130">    archive_read_set_open_callback(archive, archive_open_cb);</a>
 <a name="ln131">    archive_read_set_read_callback(archive, archive_read_cb);</a>
 <a name="ln132">    archive_read_set_seek_callback(archive, archive_seek_cb);</a>
@@ -149,34 +149,87 @@
 <a name="ln136">}</a>
 <a name="ln137">/* ---- */</a>
 <a name="ln138"> </a>
-<a name="ln139"> </a>
-<a name="ln140">/*</a>
-<a name="ln141"> * This function returns an allocated c string which is the combination</a>
-<a name="ln142"> * of the given c strings.</a>
-<a name="ln143"> * Automatically allocates space for the new c string but does not</a>
-<a name="ln144"> * free it automatically.</a>
-<a name="ln145">*/</a>
-<a name="ln146">char *concat(const char *dest, const char *src) {</a>
-<a name="ln147">    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);</a>
-<a name="ln148">    strcpy(ret, dest);</a>
-<a name="ln149">    strcat(ret, src);</a>
-<a name="ln150">    return ret;</a>
-<a name="ln151">}</a>
-<a name="ln152"> </a>
-<a name="ln153">/*</a>
-<a name="ln154"> * This function converts a string from &quot;/home/antonyjr/&quot;</a>
-<a name="ln155"> * to &quot;/home/antonyjr&quot; , i.e Removes the trailing '/' if found.</a>
-<a name="ln156">*/</a>
-<a name="ln157">QString getDirectoryFileName(const QString &amp;dir) {</a>
-<a name="ln158">    if(dir[dir.count() - 1] == QStringLiteral(&quot;/&quot;)) {</a>
-<a name="ln159">        return dir.mid(0, dir.count() - 1);</a>
-<a name="ln160">    }</a>
-<a name="ln161">    return dir;</a>
-<a name="ln162">}</a>
+<a name="ln139">/*</a>
+<a name="ln140"> * Custom libarchive callbacks to handle QIODevice as the archive</a>
+<a name="ln141"> * output. */</a>
+<a name="ln142"> </a>
+<a name="ln143">static int archive_w_open_cb(struct archive *archive, void *data) {</a>
+<a name="ln144">    Q_UNUSED(archive);</a>
+<a name="ln145">    QIODevice *p = (QIODevice*)data;</a>
+<a name="ln146">    if(!p) {</a>
+<a name="ln147">        return ARCHIVE_FATAL;</a>
+<a name="ln148">    }</a>
+<a name="ln149">    if(!p-&gt;isOpen()) {</a>
+<a name="ln150">        if(!p-&gt;open(QIODevice::WriteOnly)) {</a>
+<a name="ln151">            return ARCHIVE_FATAL;</a>
+<a name="ln152">        }</a>
+<a name="ln153">    }</a>
+<a name="ln154">    return ARCHIVE_OK;</a>
+<a name="ln155">}</a>
+<a name="ln156"> </a>
+<a name="ln157">static int archive_w_close_cb(struct archive *archive, void *data) {</a>
+<a name="ln158">    Q_UNUSED(archive);</a>
+<a name="ln159">    QIODevice *p = (QIODevice*)data;</a>
+<a name="ln160">    if(!p) {</a>
+<a name="ln161">        return ARCHIVE_FATAL;</a>
+<a name="ln162">    }</a>
+<a name="ln163">    p-&gt;close();</a>
+<a name="ln164">    return ARCHIVE_OK;</a>
+<a name="ln165">}</a>
+<a name="ln166"> </a>
+<a name="ln167">static la_ssize_t archive_write_cb(struct archive *archive, void *data, const void *buffer, size_t length) {</a>
+<a name="ln168">    Q_UNUSED(archive);</a>
+<a name="ln169">    QIODevice *p = (QIODevice*)data;</a>
+<a name="ln170">    return p-&gt;write((const char*)buffer, length);</a>
+<a name="ln171">}</a>
+<a name="ln172"> </a>
+<a name="ln173">/// Should not delete the client data because it's our QIODevice</a>
+<a name="ln174">/// buffer.</a>
+<a name="ln175">int archive_w_free_cb(struct archive *archive, void *data) {</a>
+<a name="ln176">    Q_UNUSED(archive);</a>
+<a name="ln177">    Q_UNUSED(data);</a>
+<a name="ln178">    return ARCHIVE_OK;</a>
+<a name="ln179">}</a>
+<a name="ln180"> </a>
+<a name="ln181">// This is a custom functions which sets up the callbacks and other</a>
+<a name="ln182">// stuff for a libarchive struct to use QIODevice to write.</a>
+<a name="ln183">int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {</a>
+<a name="ln184">    return archive_write_open2(archive,</a>
+<a name="ln185">                               (void*)device,</a>
+<a name="ln186">                               archive_w_open_cb,</a>
+<a name="ln187">                               archive_write_cb,</a>
+<a name="ln188">                               archive_w_close_cb,</a>
+<a name="ln189">                               archive_w_free_cb);</a>
+<a name="ln190">}</a>
+<a name="ln191">/* ---- */</a>
+<a name="ln192"> </a>
+<a name="ln193">/*</a>
+<a name="ln194"> * This function returns an allocated c string which is the combination</a>
+<a name="ln195"> * of the given c strings.</a>
+<a name="ln196"> * Automatically allocates space for the new c string but does not</a>
+<a name="ln197"> * free it automatically.</a>
+<a name="ln198">*/</a>
+<a name="ln199">char *concat(const char *dest, const char *src) {</a>
+<a name="ln200">    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);</a>
+<a name="ln201">    strcpy(ret, dest);</a>
+<a name="ln202">    strcat(ret, src);</a>
+<a name="ln203">    return ret;</a>
+<a name="ln204">}</a>
+<a name="ln205"> </a>
+<a name="ln206">/*</a>
+<a name="ln207"> * This function converts a string from &quot;/home/antonyjr/&quot;</a>
+<a name="ln208"> * to &quot;/home/antonyjr&quot; , i.e Removes the trailing '/' if found.</a>
+<a name="ln209">*/</a>
+<a name="ln210">QString getDirectoryFileName(const QString &amp;dir) {</a>
+<a name="ln211">    if(dir[dir.count() - 1] == QStringLiteral(&quot;/&quot;)) {</a>
+<a name="ln212">        return dir.mid(0, dir.count() - 1);</a>
+<a name="ln213">    }</a>
+<a name="ln214">    return dir;</a>
+<a name="ln215">}</a>
 
 </code></pre>
-<div class="balloon" rel="124"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v522/" target="_blank">V522</a> There might be dereferencing of a potential null pointer 'p'. Check lines: 124, 123.</p></div>
-<div class="balloon" rel="148"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v575/" target="_blank">V575</a> The potential null pointer is passed into 'strcpy' function. Inspect the first argument. Check lines: 148, 147.</p></div>
+<div class="balloon" rel="123"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v522/" target="_blank">V522</a> There might be dereferencing of a potential null pointer 'p'. Check lines: 123, 122.</p></div>
+<div class="balloon" rel="201"><p><span style="font-size:18px">&uarr;</span> <a href="https://www.viva64.com/en/w/v575/" target="_blank">V575</a> The potential null pointer is passed into 'strcpy' function. Inspect the first argument. Check lines: 201, 200.</p></div>
 
 <link rel="stylesheet" href="highlight.css">
 <script src="highlight.pack.js"></script>

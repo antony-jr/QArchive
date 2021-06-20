@@ -4,7 +4,7 @@
         <title>QArchive Blog</title>
         <link>https://antony-jr.github.io/QArchive/blog</link>
         <description>The best place to stay up-to-date with the latest QArchive news and events.</description>
-        <lastBuildDate>Thu, 28 Dec 2017 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 19 Jun 2021 06:00:00 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <image>
@@ -14,32 +14,11 @@
         </image>
         <copyright>Copyright © 2021QArchive Contributors and Antony J.R</copyright>
         <item>
-            <title><![CDATA[Excited about the new cool documentation!]]></title>
-            <link>https://antony-jr.github.io/QArchive/blog/2017/12/28/excited-with-the-new-documentation.html</link>
-            <guid>https://antony-jr.github.io/QArchive/blog/2017/12/28/excited-with-the-new-documentation.html</guid>
-            <pubDate>Thu, 28 Dec 2017 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Hey folks , The good news is , QArchive's Documentation is up and running with no errors<br> and the <strong>best</strong> part is , The documentation is <strong>freakin</strong> sexy and thus I've decided to<br> use docusarus for all my <strong>project</strong> documentations.</p> <p>I really recommend you folks t...</p>]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Writing Documentation for software is the hardest part!]]></title>
-            <link>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-documentation-is-hard.html</link>
-            <guid>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-documentation-is-hard.html</guid>
-            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Hey everyone , I don't know if you know this but developing a software is easier compared<br> to writing a documentation for the users. I've started writing documentations for my<br> libraries and its kinda of boring. Will get back to you when I finish all m...</p>]]></description>
-        </item>
-        <item>
-            <title><![CDATA[I will be writing the documentation in Qt Style!]]></title>
-            <link>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-docs-like-qt.html</link>
-            <guid>https://antony-jr.github.io/QArchive/blog/2017/12/27/writing-docs-like-qt.html</guid>
-            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Hey folks , I learned a lot just by looking at Qt Docs. Its really a good style they follow<br> and I decided to follow the exact style with some of my imaginations , afterall this is a simple header for Qt Projects , right ?...</p> <p><strong>See ya!</strong>.</p> ]]></description>
-        </item>
-        <item>
-            <title><![CDATA[Publishing the official documentation!]]></title>
-            <link>https://antony-jr.github.io/QArchive/blog/2017/12/27/publishing-the-official-documentation.html</link>
-            <guid>https://antony-jr.github.io/QArchive/blog/2017/12/27/publishing-the-official-documentation.html</guid>
-            <pubDate>Wed, 27 Dec 2017 06:00:00 GMT</pubDate>
-            <description><![CDATA[<p>Hello everyone , I know that I already published a Wiki for QArchive at github but I thought it<br> would be good if the documentation and other guides are published with some awesome styles<br> and illustrations. So I am recreating the Wiki in <strong>Docusaurus</strong> , ...</p>]]></description>
+            <title><![CDATA[Announcing QArchive v2.1.x]]></title>
+            <link>https://antony-jr.github.io/QArchive/blog/2021/06/19/Announcing-v2.1.0.html</link>
+            <guid>https://antony-jr.github.io/QArchive/blog/2021/06/19/Announcing-v2.1.0.html</guid>
+            <pubDate>Sat, 19 Jun 2021 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>QArchive has come a long road. I would say that I never expected that it would actually live this long. In this <strong>release</strong> QArchive gets a very big upgrade.</p> <p>When this library was first created the only scope was hard drive based extraction and compressi...</p>]]></description>
         </item>
     </channel>
 </rss>
