@@ -53,6 +53,10 @@
         "title": "Class QArchive::MemoryCompressor",
         "sidebar_label": "QArchive::MemoryCompressor"
       },
+      "QArchiveMemoryExtractor": {
+        "title": "Class QArchive::MemoryExtractor",
+        "sidebar_label": "QArchive::MemoryExtractor"
+      },
       "ReportingProgressGuide": {
         "title": "Reporting Progress for Extraction",
         "sidebar_label": "Reporting Progress"

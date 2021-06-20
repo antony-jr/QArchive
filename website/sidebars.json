@@ -18,6 +18,7 @@
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",
 	   "QArchiveDiskExtractor",
+	   "QArchiveMemoryExtractor",
 	   "QArchiveDiskCompressor",
 	   "QArchiveMemoryCompressor"
     ]
