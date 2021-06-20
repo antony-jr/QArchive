@@ -4,7 +4,7 @@ title: Simple Compressor using QArchive
 sidebar_label: Creating Simple Compressor
 ---
 
-Please refer the full class documentation [here](QArchiveDiskCompressor.md)
+Please refer the full class documentation [**here**](QArchiveDiskCompressor.md)
 
 This simple example compresses a set of files and directories.(Directories are recursively added)
 
@@ -56,14 +56,25 @@ int main(int argc, char** argv)
 }
 ```
 
-## create_archive.pro
+## CMakeLists.txt
 
 ```
-include(QArchive/QArchive.pri)
-TEMPLATE = app
-TARGET = create_archive
-QT += core
-SOURCES += main.cpp
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+project(DiskCompressor)
+    
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+# Assuming you installed QArchive to system.        
+find_package(QArchive)
+    
+# Include Directories.
+include_directories(.)
+include_directories(${CMAKE_BINARY_DIR})
+
+add_executable(DiskCompressor main.cpp)
+target_link_libraries(DiskCompressor PRIVATE QArchive)
 ```
 
 ## Compilation and Execution
@@ -71,10 +82,9 @@ SOURCES += main.cpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ..
+ $ cmake ..
  $ make -j$(nproc)
- $ ./create_archive
- $ # Make sure you have files for the new archive!
+ $ ./DiskCompressor
 ```
 
 This Program is created in the examples tree on the official repo.

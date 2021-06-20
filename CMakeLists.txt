@@ -36,45 +36,66 @@ endif()
 
 
 if(BUILD_TESTS)
+	add_definitions(-DBUILD_TESTS)
 	add_subdirectory(tests)
 endif()
 
 if(BUILD_EXAMPLES)
+	add_definitions(-DBUILD_EXAMPLES)
 	add_subdirectory(examples/disk_compressor)
 	add_subdirectory(examples/disk_extractor)
 	add_subdirectory(examples/disk_extractor_with_QIODevice)
+	add_subdirectory(examples/memory_extractor)
+	add_subdirectory(examples/memory_compressor)
 endif()
 
 add_library(QArchive
-	    src/qarchivediskcompressor.cc
-	    src/qarchivediskextractor.cc
 	    src/qarchive_enums.cc
-	    src/qarchivediskcompressor_p.cc
-	    src/qarchivediskextractor_p.cc
 	    src/qarchiveutils_p.cc
+	    src/qarchivememoryfile.cc
+	    src/qarchivememoryextractoroutput.cc
 	    src/qarchiveioreader_p.cc
-	    include/qarchivediskcompressor.hpp
-	    include/qarchivediskextractor.hpp
+	    src/qarchiveextractor_p.cc
+	    src/qarchiveextractor.cc
+	    src/qarchivecompressor_p.cc
+	    src/qarchivecompressor.cc
+	    src/qarchivediskextractor.cc
+	    src/qarchivememoryextractor.cc
+	    src/qarchivediskcompressor.cc
+	    src/qarchivememorycompressor.cc
 	    include/qarchive_enums.hpp
-	    include/qarchivediskcompressor_p.hpp
-	    include/qarchivediskextractor_p.hpp
 	    include/qarchiveutils_p.hpp
+	    include/qarchivememoryfile.hpp
+	    include/qarchivememoryextractoroutput.hpp
 	    include/qarchiveioreader_p.hpp
-	    include/qarchive_global.hpp
-	    )
+	    include/qarchiveextractor_p.hpp
+	    include/qarchiveextractor.hpp
+	    include/qarchivecompressor_p.hpp
+	    include/qarchivecompressor.hpp
+	    include/qarchivediskextractor.hpp
+	    include/qarchivememoryextractor.hpp
+	    include/qarchivediskcompressor.hpp
+	    include/qarchivememorycompressor.hpp
+	    include/qarchive_global.hpp)
 
 SET(toinstall)
 list(APPEND toinstall
     QArchive
     include/qarchive_enums.hpp
+    include/qarchivememoryfile.hpp
+    include/qarchivememoryextractoroutput.hpp
+    include/qarchiveextractor.hpp
+    include/qarchivecompressor.hpp
     include/qarchivediskextractor.hpp
+    include/qarchivememoryextractor.hpp
     include/qarchivediskcompressor.hpp
+    include/qarchivememorycompressor.hpp
     include/qarchive_global.hpp
     ${PROJECT_BINARY_DIR}/config.h
 )	
 
 target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
-target_include_directories(QArchive INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/include>")
+target_include_directories(QArchive INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/QArchive>")
 target_include_directories(QArchive INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/QArchive>" )
 
 # create a config.h to decide the type of build

@@ -5,17 +5,24 @@
 	   "AddingQArchive"
     ],
     "Guides" : [
+	   "BuildingGuide",
 	   "SimpleExtractorGuide",
 	   "ExtractingPasswordProtectedArchiveGuide",
 	   "ReportingProgressGuide",
 	   "SimpleCompressorGuide",
-	   "CreatingEncryptedZipArchiveGuide"
+	   "CreatingEncryptedZipArchiveGuide",
+	   "MemoryExtractorGuide",
+	   "MemoryCompressorGuide"
     ],
     "API" : [
 	   "QArchiveFormats",
 	   "QArchiveErrorCodes",
 	   "QArchiveDiskExtractor",
-	   "QArchiveDiskCompressor"
+	   "QArchiveMemoryExtractor",
+	   "QArchiveMemoryExtractorOutput",
+	   "QArchiveMemoryFile",
+	   "QArchiveDiskCompressor",
+	   "QArchiveMemoryCompressor"
     ]
   }
 }

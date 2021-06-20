@@ -6,8 +6,12 @@
     "tagline": "A Simple Archiver for Qt Projects.",
     "docs": {
       "AddingQArchive": {
-        "title": "Add QArchive to Your Qt Project",
-        "sidebar_label": "Adding QArchive to Your Qt Project"
+        "title": "Add QArchive to Your Project",
+        "sidebar_label": "Adding QArchive to Your Project"
+      },
+      "BuildingGuide": {
+        "title": "Building Examples",
+        "sidebar_label": "Building Examples"
       },
       "CreatingEncryptedZipArchiveGuide": {
         "title": "Creating Encrypted ZIP Archive using QArchive",
@@ -20,6 +24,14 @@
       "Installation": {
         "title": "Installing QArchive.",
         "sidebar_label": "Installation"
+      },
+      "MemoryCompressorGuide": {
+        "title": "Simple Compressor using QArchive (In Memory)",
+        "sidebar_label": "Creating Simple Compressor (In Memory)"
+      },
+      "MemoryExtractorGuide": {
+        "title": "Simple Extractor using QArchive (In Memory)",
+        "sidebar_label": "Creating a Simple Extractor (In Memory)"
       },
       "QArchiveDiskCompressor": {
         "title": "Class QArchive::DiskCompressor",
@@ -36,6 +48,22 @@
       "QArchiveFormats": {
         "title": "QArchive Supported Compression Formats",
         "sidebar_label": "QArchive Compression Formats"
+      },
+      "QArchiveMemoryCompressor": {
+        "title": "Class QArchive::MemoryCompressor",
+        "sidebar_label": "QArchive::MemoryCompressor"
+      },
+      "QArchiveMemoryExtractor": {
+        "title": "Class QArchive::MemoryExtractor",
+        "sidebar_label": "QArchive::MemoryExtractor"
+      },
+      "QArchiveMemoryExtractorOutput": {
+        "title": "Class QArchive::MemoryExtractorOutput",
+        "sidebar_label": "QArchive::MemoryExtractorOutput"
+      },
+      "QArchiveMemoryFile": {
+        "title": "Class QArchive::MemoryFile",
+        "sidebar_label": "QArchive::MemoryFile"
       },
       "ReportingProgressGuide": {
         "title": "Reporting Progress for Extraction",

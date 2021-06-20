@@ -251,30 +251,6 @@ void QArchiveDiskExtractorTests::testProgress() {
     QCOMPARE(progressSpyInfo.count(), 4);
 }
 
-void QArchiveDiskExtractorTests::canDeleteSourceAfterUse() {
-    QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
-    QObject::connect(&e, &QArchive::DiskExtractor::error,
-                     this, &QArchiveDiskExtractorTests::defaultErrorHandler);
-
-    QFile TestOutput;
-    QSignalSpy spyInfo(&e, SIGNAL(finished()));
-    e.start();
-
-    QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
-    TestOutput.setFileName(Test5OutputFile);
-    QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
-    QVERIFY(Test5OutputContents == QString(TestOutput.readAll()));
-    TestOutput.close();
-
-    QVERIFY(QFile(TestCase5ArchivePath).remove());
-}
-
-void QArchiveDiskExtractorTests::cleanupTestCase() {
-    QDir dir(TestOutputDir);
-    dir.removeRecursively();
-}
-
-
 void QArchiveDiskExtractorTests::defaultErrorHandler(short code) {
     auto scode = QString::number(code);
     scode.prepend("error:: ");

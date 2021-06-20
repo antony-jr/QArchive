@@ -5,8 +5,11 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QScopedPointer>
-#include <QArchiveDiskExtractorTests.hpp>
-#include <QArchiveDiskCompressorTests.hpp>
+
+#include "QArchiveDiskExtractorTests.hpp"
+#include "QArchiveDiskCompressorTests.hpp"
+#include "QArchiveMemoryExtractorTests.hpp"
+#include "QArchiveMemoryCompressorTests.hpp"
 
 class TestRunner : public QObject {
     Q_OBJECT
@@ -24,6 +27,8 @@ class TestRunner : public QObject {
     QScopedPointer<QFuture<void>> m_Future;
     QScopedPointer<QFutureWatcher<void>> m_FutureWatcher;
     QScopedPointer<QArchiveDiskCompressorTests> m_CompressorTests;
+    QScopedPointer<QArchiveMemoryCompressorTests> m_MemoryCompressorTests;
     QScopedPointer<QArchiveDiskExtractorTests> m_ExtractorTests;
+    QScopedPointer<QArchiveMemoryExtractorTests> m_MemoryExtractorTests;
 };
 #endif

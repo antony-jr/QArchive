@@ -36,3 +36,16 @@ or as a git submodule ,
  $ cd YourProject
  $ git submodule add https://github.com/antony-jr/QArchive
 ```
+
+## Installing it to System
+
+This way you can include QArchive in your project with CMake's **find_package** (```find_package(QArchive)```), without having to add QArchive to your git repo. This way your project CI/CD will only have to install QArchive to the system.
+
+
+```
+ $ git clone https://github.com/antony-jr/QArchive
+ $ cd QArchive
+ $ cmake .
+ $ make -j$(nproc)
+ $ sudo make install 
+```

@@ -8,8 +8,8 @@ namespace QArchive {
 QString errorCodeToString(short);
 
 /*
- * Common error codes , these are most likely will be
- * used across all QArchive Objects , Thus these are
+ * Common error codes, these are most likely will be
+ * used across all QArchive Objects, Thus these are
  * given an global error code values.
 */
 enum : short {
@@ -19,8 +19,8 @@ enum : short {
 };
 
 /*
- * DiskExtractor error codes , these error codes are
- * only valid for the DiskExtractor class.
+ * Extractor error codes, these error codes are
+ * only valid for the Extractor class.
  * The class is responsible for extraction of data from
  * Archives.
 */
@@ -42,26 +42,10 @@ enum : short {
 };
 
 /*
- * DiskCompressor Supported Formats.
- * These codes are used to represent Archive formats in form
- * of a short integer.
+ * Compressor error codes.
 */
 enum : short {
-    TarFormat = 17,
-    ZipFormat,
-    SevenZipFormat,
-    BZipFormat,
-    BZip2Format,
-    GZipFormat,
-    XzFormat,
-    XarFormat
-};
-
-/*
- * DiskCompressor error codes.
-*/
-enum : short {
-    ArchiveFileNameNotGiven = 25,
+    ArchiveFileNameNotGiven = 100,
     ArchiveFileAlreadyExists,
     ArchiveWriteOpenError,
     ArchiveFatalError,
@@ -69,7 +53,25 @@ enum : short {
     DiskReadError,
     DiskOpenError,
     NoPermissionToReadFile,
-    NoFilesToCompress
+    NoFilesToCompress,
+    CannotOpenFile,
+    IODeviceSequential
+};
+
+/*
+ * Compressor Supported Formats.
+ * These codes are used to represent Archive formats in form
+ * of a short integer.
+*/
+enum : short {
+    TarFormat = 200,
+    ZipFormat,
+    SevenZipFormat,
+    BZipFormat,
+    BZip2Format,
+    GZipFormat,
+    XzFormat,
+    XarFormat
 };
 }
 #endif

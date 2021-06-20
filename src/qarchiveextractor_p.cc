@@ -2,8 +2,8 @@
 #include <QDateTime>
 #include <QFileInfo>
 
-#include <qarchivediskextractor_p.hpp>
-#include <qarchive_enums.hpp>
+#include "qarchiveextractor_p.hpp"
+#include "qarchive_enums.hpp"
 
 extern "C" {
 #include <archive.h>
@@ -39,26 +39,164 @@ extern "C" {
 
 using namespace QArchive;
 
-// DiskExtractorPrivate constructor constructs the object which is the private class
+/// MutableMemoryFile class provides a memory files which has both setters and getters 
+/// unlike MemoryFile which only has getters.
+/// This will force the users to not mess up the integrity of a MemoryFile like 
+/// deleting the internal pointers which will be automatically freed by MemoryFile 
+/// destructor.
+MutableMemoryFile::MutableMemoryFile() { }
+MutableMemoryFile::~MutableMemoryFile() {
+    m_Buffer.clear();
+}
+
+
+void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
+    m_FileInformation = info;
+}
+
+void MutableMemoryFile::setBuffer(QBuffer *buffer) {
+    m_Buffer.reset(buffer);
+}
+
+QJsonObject MutableMemoryFile::getFileInformation() {
+    return m_FileInformation;
+}
+
+QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() {
+    return m_Buffer;
+}
+/// ---
+
+
+static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
+    QJsonObject CurrentEntry;
+    QString CurrentFile = QString(archive_entry_pathname(entry));
+
+    auto entry_stat = archive_entry_stat(entry);
+    qint64 size = (qint64)entry_stat->st_size;
+    QString sizeUnits = "Bytes";
+    if(size == 0) {
+        sizeUnits = "None";
+        size = 0;
+    } else if(size < 1024) {
+        sizeUnits = "Bytes";
+        size = size;
+    } else if(size >= 1024 && size < 1048576) {
+        sizeUnits = "KiB";
+        size /= 1024;
+    } else if(size >= 1048576 && size < 1073741824) {
+        sizeUnits = "MiB";
+        size /= 1048576;
+    } else {
+        sizeUnits = "GiB";
+        size /= 1073741824;
+    }
+
+    // MSVC (and maybe Windows in general?) workaround
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    qint64 blockSizeInBytes = 512;
+    qint64 blocks = (qint64) (entry_stat->st_size / blockSizeInBytes);
+#else
+    qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
+    qint64 blocks = (qint64)entry_stat->st_blocks;
+#endif
+    auto lastAccessT = entry_stat->st_atim;
+    auto lastModT = entry_stat->st_mtim;
+    auto lastStatusModT = entry_stat->st_ctim;
+
+    auto ft = archive_entry_filetype(entry);
+    QString FileType;
+    switch(ft) {
+    case AE_IFREG: // Regular file
+        FileType = "RegularFile";
+        break;
+    case AE_IFLNK: // Link
+        FileType = "SymbolicLink";
+        break;
+    case AE_IFSOCK: // Socket
+        FileType = "Socket";
+        break;
+    case AE_IFCHR: // Character Device
+        FileType = "CharacterDevice";
+        break;
+    case AE_IFBLK: // Block Device
+        FileType = "BlockDevice";
+        break;
+    case AE_IFDIR: // Directory.
+        FileType = "Directory";
+        break;
+    case AE_IFIFO: // Named PIPE. (fifo)
+        FileType = "NamedPipe";
+        break;
+    default:
+        FileType = "UnknownFile";
+        break;
+    };
+
+    QFile fileInfo(CurrentFile);
+    // Set the values.
+    if(FileType != "RegularFile") {
+        CurrentEntry.insert("FileName", getDirectoryFileName(CurrentFile));
+    } else {
+        CurrentEntry.insert("FileName", fileInfo.fileName());
+    }
+
+    CurrentEntry.insert("FileType", QJsonValue(FileType));
+    CurrentEntry.insert("Size", QJsonValue(size));
+    CurrentEntry.insert("SizeUnit", sizeUnits);
+    CurrentEntry.insert("BlockSize", QJsonValue(blockSizeInBytes));
+    CurrentEntry.insert("BlockSizeUnit", "Bytes");
+    CurrentEntry.insert("Blocks", QJsonValue(blocks));
+    if(lastAccessT) {
+        CurrentEntry.insert("LastAccessedTime",
+                            QJsonValue(
+                                (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastAccessedTime", "Unknown");
+    }
+
+    if(lastModT) {
+        CurrentEntry.insert("LastModifiedTime",
+                            QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastModifiedTime", "Unknown");
+    }
+
+    if(lastStatusModT) {
+        CurrentEntry.insert("LastStatusModifiedTime",
+                            QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
+    } else {
+        CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
+    }
+
+    return CurrentEntry;
+}
+
+// ExtractorPrivate constructor constructs the object which is the private class
 // implementation to the DiskExtractor.
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
 // This class only extracts the data to the disk and hence the name DiskExtractor.
 // This class will not be able to extract or work in-memory.
-DiskExtractorPrivate::DiskExtractorPrivate()
+ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     : QObject(),
       n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
+    b_MemoryMode = memoryMode;
+
     m_Info.reset(new QJsonObject);
     m_ExtractFilters.reset(new QStringList);
+
+    if(b_MemoryMode) {
+        m_ExtractedFiles.reset(new QVector<MemoryFile>);
+    }
 }
 
-DiskExtractorPrivate::~DiskExtractorPrivate() {
-	clear();
+ExtractorPrivate::~ExtractorPrivate() {
+    clear();
 }
-
 
 // Sets the given pointer to QIODevice as the Archive file itself.
-void DiskExtractorPrivate::setArchive(QIODevice *archive) {
+void ExtractorPrivate::setArchive(QIODevice *archive) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -69,7 +207,7 @@ void DiskExtractorPrivate::setArchive(QIODevice *archive) {
 
 // Sets the archive path as the given QString which will be later
 // opened to be used as the Archive file.
-void DiskExtractorPrivate::setArchive(const QString &archivePath) {
+void ExtractorPrivate::setArchive(const QString &archivePath) {
     if(b_Started || b_Paused || archivePath.isEmpty()) {
         return;
     }
@@ -79,7 +217,7 @@ void DiskExtractorPrivate::setArchive(const QString &archivePath) {
 }
 
 // Blocksize to be used when extracting the given archive.
-void DiskExtractorPrivate::setBlockSize(int n) {
+void ExtractorPrivate::setBlockSize(int n) {
     if(b_Started || b_Paused) {
         return;
     }
@@ -88,8 +226,8 @@ void DiskExtractorPrivate::setBlockSize(int n) {
 }
 
 // Sets the directory where the extraction data to be extracted.
-void DiskExtractorPrivate::setOutputDirectory(const QString &destination) {
-    if(b_Started || b_Paused || destination.isEmpty()) {
+void ExtractorPrivate::setOutputDirectory(const QString &destination) {
+    if(b_MemoryMode || b_Started || b_Paused || destination.isEmpty()) {
         return;
     }
     m_OutputDirectory = destination + "/";
@@ -97,16 +235,16 @@ void DiskExtractorPrivate::setOutputDirectory(const QString &destination) {
 }
 
 // Enables/Disables the progress of the extraction with respect to the
-// given bool. 
-void DiskExtractorPrivate::setCalculateProgress(bool c) {
+// given bool.
+void ExtractorPrivate::setCalculateProgress(bool c) {
     b_NoProgress = !c;
     return;
 }
 
 // Sets the password for the archive when extracting the data.
 // This method should be accessible even if the extractor is started
-// since the user may set password anytime. 
-void DiskExtractorPrivate::setPassword(const QString &passwd) {
+// since the user may set password anytime.
+void ExtractorPrivate::setPassword(const QString &passwd) {
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     if(passwd.isEmpty()) {
         return;
@@ -121,7 +259,7 @@ void DiskExtractorPrivate::setPassword(const QString &passwd) {
 // Adds extract filters , if set , only the files in the filter
 // will be extracted , the filter has to correspond to the exact
 // path given in the archive.
-void DiskExtractorPrivate::addFilter(const QString &filter) {
+void ExtractorPrivate::addFilter(const QString &filter) {
     if(b_Started || b_Paused || filter.isEmpty()) {
         return;
     }
@@ -130,7 +268,7 @@ void DiskExtractorPrivate::addFilter(const QString &filter) {
 }
 
 // Overload of addFilter to accept list of QStrings.
-void DiskExtractorPrivate::addFilter(const QStringList &filters) {
+void ExtractorPrivate::addFilter(const QStringList &filters) {
     if(b_Started || b_Paused || filters.isEmpty()) {
         return;
     }
@@ -139,7 +277,7 @@ void DiskExtractorPrivate::addFilter(const QStringList &filters) {
 }
 
 // Clears all internal data and sets it back to default.
-void DiskExtractorPrivate::clear() {
+void ExtractorPrivate::clear() {
     if(b_Started) {
         return;
     }
@@ -162,18 +300,23 @@ void DiskExtractorPrivate::clear() {
     m_Info.reset(new QJsonObject);
     m_ExtractFilters->clear();
 
-    if(b_QIODeviceOwned){
-	    m_Archive->close();
-	    m_Archive->deleteLater();
-    }else{
-    	m_Archive = nullptr;
+    if(b_MemoryMode) {
+        m_ExtractedFiles.reset(new QVector<MemoryFile>);
     }
+
+    if(b_QIODeviceOwned) {
+        m_Archive->close();
+        m_Archive->deleteLater();
+    } else {
+        m_Archive = nullptr;
+    }
+    m_CurrentArchiveEntry = nullptr;
     b_QIODeviceOwned = false;
     return;
 }
 
 // Returns the information of the archive through info signal.
-void DiskExtractorPrivate::getInfo() {
+void ExtractorPrivate::getInfo() {
     if(!m_Info->isEmpty()) {
         emit info(*(m_Info.data()));
         return;
@@ -202,10 +345,11 @@ void DiskExtractorPrivate::getInfo() {
     return;
 }
 
-void DiskExtractorPrivate::start() {
+void ExtractorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
     }
+
     short errorCode = NoError;
 
     // Open the Archive.
@@ -215,20 +359,23 @@ void DiskExtractorPrivate::start() {
     }
 
     // Check and Set Output Directory.
-    if(!m_OutputDirectory.isEmpty()) {
-        if((errorCode = checkOutputDirectory()) != NoError) {
-            emit error(errorCode );
-            return;
+    // If it's not memory mode.
+    if(!b_MemoryMode) {
+        if(!m_OutputDirectory.isEmpty()) {
+            if((errorCode = checkOutputDirectory()) != NoError) {
+                emit error(errorCode );
+                return;
+            }
         }
     }
 
-
     // All Okay then start the extraction.
     b_Started = true;
+    b_Finished = false;
     emit started();
 
     // Get basic information about the archive if the user wants progress on the
-    // extraction. 
+    // extraction.
     if(n_TotalEntries == -1 && !b_NoProgress) {
         errorCode = getTotalEntriesCount();
         if(n_TotalEntries == -1) {
@@ -241,7 +388,7 @@ void DiskExtractorPrivate::start() {
                 ++n_PasswordTriedCountExtract;
             }
 #endif
-            emit error(errorCode );
+            emit error(errorCode);
             return;
         }
     }
@@ -253,14 +400,19 @@ void DiskExtractorPrivate::start() {
         b_Started = false;
         b_Finished = true;
         m_Archive->close();
-	emit finished();
+        if(!b_MemoryMode) {
+            emit diskFinished();
+        } else {
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            m_ExtractedFiles.reset(new QVector<MemoryFile>);
+        }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
-        emit error(errorCode );
+        emit error(errorCode);
     }
 #endif
     else if(errorCode == OperationCanceled) {
@@ -276,9 +428,9 @@ void DiskExtractorPrivate::start() {
     }
     return;
 }
- 
+
 // Pauses the extractor.
-void DiskExtractorPrivate::pause() {
+void ExtractorPrivate::pause() {
     if(b_Started && !b_Paused) {
         b_PauseRequested = true;
     }
@@ -286,7 +438,7 @@ void DiskExtractorPrivate::pause() {
 }
 
 // Resumes the extractor.
-void DiskExtractorPrivate::resume() {
+void ExtractorPrivate::resume() {
     if(!b_Paused) {
         return;
     }
@@ -299,14 +451,19 @@ void DiskExtractorPrivate::resume() {
         b_Started = false;
         b_Finished = true;
         m_Archive->close();
-        emit finished();
+        if(!b_MemoryMode) {
+            emit diskFinished();
+        } else {
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            m_ExtractedFiles.reset(new QVector<MemoryFile>);
+        }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded) {
         b_Started = false;
         emit extractionRequirePassword(n_PasswordTriedCountExtract);
         ++n_PasswordTriedCountExtract;
-        emit error(ret );
+        emit error(ret);
     }
 #endif
     else if(ret == OperationCanceled) {
@@ -324,7 +481,7 @@ void DiskExtractorPrivate::resume() {
 }
 
 // Cancels the extraction.
-void DiskExtractorPrivate::cancel() {
+void ExtractorPrivate::cancel() {
     if(b_Started && !b_Paused && !b_Finished) {
         b_CancelRequested = true;
     }
@@ -332,7 +489,7 @@ void DiskExtractorPrivate::cancel() {
 }
 
 
-short DiskExtractorPrivate::openArchive() {
+short ExtractorPrivate::openArchive() {
     if(m_ArchivePath.isEmpty() && !m_Archive) {
         return ArchiveNotGiven;
     } else if(b_ArchiveOpened) {
@@ -367,7 +524,7 @@ short DiskExtractorPrivate::openArchive() {
         QFile *file;
         try {
             file = new QFile(this);
-	} catch ( ... ) {
+        } catch ( ... ) {
             m_Archive = nullptr; // Just a precaution.
             return NotEnoughMemory;
         }
@@ -379,13 +536,15 @@ short DiskExtractorPrivate::openArchive() {
             return CannotOpenArchive;
         }
 
-	b_QIODeviceOwned = true;
+        b_QIODeviceOwned = true;
         m_Archive = (QIODevice*)file;
     } else {
-
-        if(!m_Archive->isOpen()) { // Check if it is opened.
+        /// Open the archive if it's not opened.
+        if(!m_Archive->isOpen() && !m_Archive->open(QIODevice::ReadOnly)) {
             return ArchiveIsNotOpened;
-        } else if(!m_Archive->isReadable()) { // Check if it is readable. 
+        }
+
+        if(!m_Archive->isReadable()) { // Check if it is readable.
             return ArchiveIsNotReadable;
         }
     }
@@ -393,9 +552,9 @@ short DiskExtractorPrivate::openArchive() {
     return NoError;
 }
 
-short DiskExtractorPrivate::checkOutputDirectory() {
+short ExtractorPrivate::checkOutputDirectory() {
     QFileInfo info(m_OutputDirectory + "/");
-    // Check if its a directory and not a file , Also check if it exists. 
+    // Check if its a directory and not a file , Also check if it exists.
     if(!info.exists() || !info.isDir()) {
         return InvalidOutputDirectory;
     }
@@ -408,7 +567,7 @@ short DiskExtractorPrivate::checkOutputDirectory() {
     return NoError;
 }
 
-short DiskExtractorPrivate::extract() {
+short ExtractorPrivate::extract() {
     if(m_Archive == nullptr) {
         return ArchiveNotGiven;
     }
@@ -416,14 +575,19 @@ short DiskExtractorPrivate::extract() {
     short err = NoError;
     archive_entry *entry = nullptr;
 
-    if(m_ArchiveRead.isNull() && m_ArchiveWrite.isNull()) {
+    if(m_ArchiveRead.isNull() && (b_MemoryMode || m_ArchiveWrite.isNull())) {
         n_ProcessedEntries = 0;
 
         m_ArchiveRead = QSharedPointer<struct archive>(archive_read_new(), ArchiveReadDestructor);
-        m_ArchiveWrite = QSharedPointer<struct archive>(archive_write_disk_new(), ArchiveWriteDestructor);
-        if(!m_ArchiveRead.data() || !m_ArchiveWrite.data()) {
+        if(!b_MemoryMode) {
+            m_ArchiveWrite = QSharedPointer<struct archive>(archive_write_disk_new(), ArchiveWriteDestructor);
+            if(!m_ArchiveRead.data() || !m_ArchiveWrite.data()) {
+                m_ArchiveRead.clear();
+                m_ArchiveWrite.clear();
+                return NotEnoughMemory;
+            }
+        } else if(!m_ArchiveRead.data()) {
             m_ArchiveRead.clear();
-            m_ArchiveWrite.clear();
             return NotEnoughMemory;
         }
 
@@ -441,65 +605,95 @@ short DiskExtractorPrivate::extract() {
             return ArchiveReadError;
         }
 
-        if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {
-            m_ArchiveRead.clear();
-            m_ArchiveWrite.clear();
-            return ArchiveWriteError;
+        if(!b_MemoryMode) {
+            if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {
+                m_ArchiveRead.clear();
+                m_ArchiveWrite.clear();
+                return ArchiveWriteError;
+            }
         }
 
     }
     for (;;) {
-            ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
-            if (ret == ARCHIVE_EOF) {
-                break;
-            }
-            if (ret != ARCHIVE_OK) {
-                err = ArchiveCorrupted;
-                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
-                    err = ArchivePasswordNeeded;
-                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {
-                    err = ArchivePasswordIncorrect;
-                }
+        if(m_CurrentArchiveEntry) {
+            err = writeData(m_CurrentArchiveEntry);
+            if(err == OperationPaused) {
+                return err;
+            } else if(err) { // NoError = 0
                 m_ArchiveRead.clear();
                 m_ArchiveWrite.clear();
                 return err;
             }
+            ++n_ProcessedEntries;
 
-	    err = writeData(entry);
-	    if(err == OperationPaused){
-		    return err;
-	    }else if(err){ // NoError = 0
-		    m_ArchiveRead.clear();
-		    m_ArchiveWrite.clear(); 
-		    return err;
-	    }
-	    ++n_ProcessedEntries;
-	
-	    // Report final progress signal after extracting the file fully.
-	    if(n_BytesTotal > 0 && n_TotalEntries > 0){
-	    		emit progress(QString(archive_entry_pathname(entry)),
+            // Report final progress signal after extracting the file fully.
+            if(n_BytesTotal > 0 && n_TotalEntries > 0) {
+                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
                               n_ProcessedEntries,
                               n_TotalEntries,
                               n_BytesProcessed, n_BytesTotal);
-	     }else{
-			emit progress(QString(archive_entry_pathname(entry)),
-			    1,
-			    1,
-			    1,
-			    1);
+            } else {
+                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
+                              1,
+                              1,
+                              1,
+                              1);
 
-	     }
-	     QCoreApplication::processEvents(); // call event loop for the signal to take effect.
+            }
+
+            m_CurrentArchiveEntry = nullptr;
+        }
+        ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
+        if (ret == ARCHIVE_EOF) {
+            break;
+        }
+        if (ret != ARCHIVE_OK) {
+            err = ArchiveCorrupted;
+            if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
+                err = ArchivePasswordNeeded;
+            } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {
+                err = ArchivePasswordIncorrect;
+            }
+            m_ArchiveRead.clear();
+            m_ArchiveWrite.clear();
+            return err;
+        }
+
+        err = writeData(entry);
+        if(err == OperationPaused) {
+            return err;
+        } else if(err) { // NoError = 0
+            m_ArchiveRead.clear();
+            m_ArchiveWrite.clear();
+            return err;
+        }
+        ++n_ProcessedEntries;
+
+        // Report final progress signal after extracting the file fully.
+        if(n_BytesTotal > 0 && n_TotalEntries > 0) {
+            emit progress(QString(archive_entry_pathname(entry)),
+                          n_ProcessedEntries,
+                          n_TotalEntries,
+                          n_BytesProcessed, n_BytesTotal);
+        } else {
+            emit progress(QString(archive_entry_pathname(entry)),
+                          1,
+                          1,
+                          1,
+                          1);
+
+        }
+        QCoreApplication::processEvents(); // call event loop for the signal to take effect.
     }
 
     /* free memory. */
     m_ArchiveRead.clear();
-    m_ArchiveWrite.clear(); 
+    m_ArchiveWrite.clear();
     return NoError;
 }
 
-short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
-    if(m_ArchiveRead.isNull() || m_ArchiveWrite.isNull() || m_Archive == nullptr) {
+short ExtractorPrivate::writeData(struct archive_entry *entry) {
+    if(m_ArchiveRead.isNull() || (!b_MemoryMode && m_ArchiveWrite.isNull()) || m_Archive == nullptr) {
         return ArchiveNotGiven;
     }
 
@@ -508,13 +702,38 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
         return NoError;
     }
 
-    if(!m_OutputDirectory.isEmpty()) {
-        char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));
-        archive_entry_set_pathname(entry, new_entry);
-        free(new_entry);
+    if(!b_MemoryMode) {
+        if(!m_OutputDirectory.isEmpty()) {
+            char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));
+            archive_entry_set_pathname(entry, new_entry);
+            free(new_entry);
+        }
     }
 
-    int ret = archive_write_header(m_ArchiveWrite.data(), entry);
+    MutableMemoryFile currentNode;
+    int ret = ARCHIVE_OK;
+    if(m_CurrentArchiveEntry != entry) {
+        if(!b_MemoryMode) {
+            ret = archive_write_header(m_ArchiveWrite.data(), entry);
+        } else {
+            currentNode.setFileInformation(getArchiveEntryInformation(entry));
+
+            /// Skip Directories.
+            if((currentNode.getFileInformation()).value("FileType").toString() == "Directory") {
+                return NoError;
+            }
+
+            currentNode.setBuffer(new QBuffer);
+
+            if((currentNode.getBuffer())->open(QIODevice::ReadWrite) == false) {
+                return ArchiveHeaderWriteError;
+            }
+
+            m_CurrentMemoryFile = currentNode;
+        }
+    } else {
+        currentNode = m_CurrentMemoryFile;
+    }
     if (ret == ARCHIVE_OK) {
         const void *buff;
         size_t size;
@@ -536,28 +755,36 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
                 }
                 return err;
             } else {
-                ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
-                if (ret != ARCHIVE_OK) {
-                    return ArchiveWriteError;
+                if(!b_MemoryMode) {
+                    ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
+                    if (ret != ARCHIVE_OK) {
+                        return ArchiveWriteError;
+                    }
+                } else {
+                    (currentNode.getBuffer())->seek(offset);
+                    if((currentNode.getBuffer())->write((const char*)buff, size) == -1) {
+                        return ArchiveWriteError;
+                    }
                 }
                 n_BytesProcessed += size;
-		if(n_BytesTotal > 0 && n_TotalEntries > 0){
-	    		emit progress(QString(archive_entry_pathname(entry)),
-                              n_ProcessedEntries,
-                              n_TotalEntries,
-                              n_BytesProcessed, n_BytesTotal);
-		}
+                if(n_BytesTotal > 0 && n_TotalEntries > 0) {
+                    emit progress(QString(archive_entry_pathname(entry)),
+                                  n_ProcessedEntries,
+                                  n_TotalEntries,
+                                  n_BytesProcessed, n_BytesTotal);
+                }
 
-	    }
+            }
 
-	    // Allow the execution of the event loop
+            // Allow the execution of the event loop
             QCoreApplication::processEvents();
 
-	    // Check for pause and cancel requests.
-	    if(b_PauseRequested) {
+            // Check for pause and cancel requests.
+            if(b_PauseRequested) {
                 b_PauseRequested = false;
+                m_CurrentArchiveEntry = entry;
                 return OperationPaused;
-            }else if(b_CancelRequested) {
+            } else if(b_CancelRequested) {
                 b_CancelRequested = false;
                 return OperationCanceled;
             }
@@ -567,14 +794,23 @@ short DiskExtractorPrivate::writeData(struct archive_entry *entry) {
         return ArchiveHeaderWriteError;
     }
 
-    ret = archive_write_finish_entry(m_ArchiveWrite.data());
-    if (ret == ARCHIVE_FATAL) {
-        return ArchiveHeaderWriteError;
+    if(!b_MemoryMode) {
+        ret = archive_write_finish_entry(m_ArchiveWrite.data());
+        if (ret == ARCHIVE_FATAL) {
+            return ArchiveHeaderWriteError;
+        }
+    } else {
+        (currentNode.getBuffer())->close();
+        m_ExtractedFiles->append(
+            MemoryFile(
+                currentNode.getFileInformation(),
+                currentNode.getBuffer()));
+        m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;
 }
 
-short DiskExtractorPrivate::getTotalEntriesCount() {
+short ExtractorPrivate::getTotalEntriesCount() {
     if(!m_Archive) {
         return ArchiveNotGiven;
     }
@@ -631,7 +867,7 @@ short DiskExtractorPrivate::getTotalEntriesCount() {
     return NoError;
 }
 
-short DiskExtractorPrivate::processArchiveInformation() {
+short ExtractorPrivate::processArchiveInformation() {
     if(m_Archive == nullptr) {
         return ArchiveNotGiven;
     }
@@ -672,106 +908,10 @@ short DiskExtractorPrivate::processArchiveInformation() {
             return err;
         }
         QString CurrentFile = QString(archive_entry_pathname(entry));
-        QJsonObject CurrentEntry;
-        auto entry_stat = archive_entry_stat(entry);
-        qint64 size = (qint64)entry_stat->st_size;
-        QString sizeUnits = "Bytes";
-        if(size == 0) {
-            sizeUnits = "None";
-            size = 0;
-        } else if(size < 1024) {
-            sizeUnits = "Bytes";
-            size = size;
-        } else if(size >= 1024 && size < 1048576) {
-            sizeUnits = "KiB";
-            size /= 1024;
-        } else if(size >= 1048576 && size < 1073741824) {
-            sizeUnits = "MiB";
-            size /= 1048576;
-        } else {
-            sizeUnits = "GiB";
-            size /= 1073741824;
-        }
-
-        // MSVC (and maybe Windows in general?) workaround
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        qint64 blockSizeInBytes = 512;
-        qint64 blocks = (qint64) (entry_stat->st_size / blockSizeInBytes);
-#else
-        qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
-        qint64 blocks = (qint64)entry_stat->st_blocks;
-#endif
-        auto lastAccessT = entry_stat->st_atim;
-        auto lastModT = entry_stat->st_mtim;
-        auto lastStatusModT = entry_stat->st_ctim;
-
-        QFileInfo fileInfo(CurrentFile);
-
-        auto ft = archive_entry_filetype(entry);
-        QString FileType;
-        switch(ft) {
-        case AE_IFREG: // Regular file
-            FileType = "RegularFile";
-            break;
-        case AE_IFLNK: // Link
-            FileType = "SymbolicLink";
-            break;
-        case AE_IFSOCK: // Socket
-            FileType = "Socket";
-            break;
-        case AE_IFCHR: // Character Device
-            FileType = "CharacterDevice";
-            break;
-        case AE_IFBLK: // Block Device
-            FileType = "BlockDevice";
-            break;
-        case AE_IFDIR: // Directory.
-            FileType = "Directory";
-            break;
-        case AE_IFIFO: // Named PIPE. (fifo)
-            FileType = "NamedPipe";
-            break;
-        default:
-            FileType = "UnknownFile";
-            break;
-        };
-        // Set the values.
-        if(FileType != "RegularFile") {
-            CurrentEntry.insert("FileName", getDirectoryFileName(CurrentFile));
-        } else {
-            CurrentEntry.insert("FileName", fileInfo.fileName());
-        }
-
-        CurrentEntry.insert("FileType", QJsonValue(FileType));
-        CurrentEntry.insert("Size", QJsonValue(size));
-        CurrentEntry.insert("SizeUnit", sizeUnits);
-        CurrentEntry.insert("BlockSize", QJsonValue(blockSizeInBytes));
-        CurrentEntry.insert("BlockSizeUnit", "Bytes");
-        CurrentEntry.insert("Blocks", QJsonValue(blocks));
-        if(lastAccessT) {
-            CurrentEntry.insert("LastAccessedTime",
-			    QJsonValue(
-				   (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
-        } else {
-            CurrentEntry.insert("LastAccessedTime", "Unknown");
-        }
-
-        if(lastModT) {
-            CurrentEntry.insert("LastModifiedTime",
-			    QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
-        } else {
-            CurrentEntry.insert("LastModifiedTime", "Unknown");
-        }
-
-        if(lastStatusModT) {
-            CurrentEntry.insert("LastStatusModifiedTime",
-		QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
-        } else {
-            CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
-        }
+        QJsonObject CurrentEntry = getArchiveEntryInformation(entry);
         m_Info->insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
-	QCoreApplication::processEvents();
+        QCoreApplication::processEvents();
     }
 
     // set total number of entries.

@@ -1,6 +1,10 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
-#include <QArchive/QArchive>
+#ifdef BUILD_TESTS
+# include <QArchive>
+#else
+# include <QArchive/QArchive>
+#endif
 #include <QTest>
 #include <QTimer>
 #include <QJsonObject>
@@ -27,8 +31,6 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
     void extractTarArchiveWithNoFilters();
     void isExtractorObjectReuseable();
     void testProgress();
-    void canDeleteSourceAfterUse();
-    void cleanupTestCase();
   protected slots:
     void defaultErrorHandler(short code);
 };

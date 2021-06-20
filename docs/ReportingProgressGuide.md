@@ -4,10 +4,10 @@ title: Reporting Progress for Extraction
 sidebar_label: Reporting Progress
 ---
 
-Please refer the full class documentation [here](QArchiveDiskExtractor.md)
+Please refer the full class documentation [**here**.](QArchiveDiskExtractor.md)
 
 This simple example extracts a given archive and also reports the progress.
-Eventhough this example is for the extractor , the same can be used for 
+Eventhough this example is for the extractor, the same can be used for 
 **compressor** too.
 
 ## main.cpp
@@ -71,13 +71,26 @@ int main(int ac, char **av)
 }
 ```
 
-## extract.pro
+## CMakeLists.txt
 
 ```
-include(QArchive/QArchive.pri)
-TEMPLATE = app
-TARGET = extract
-SOURCES += main.cpp
+CMAKE_MINIMUM_REQUIRED(VERSION 3.17)
+project(DiskExtractor)
+    
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+# Assuming you installed QArchive to system.        
+find_package(QArchive)
+    
+# Include Directories.
+include_directories(.)
+include_directories(${CMAKE_BINARY_DIR})
+
+add_executable(DiskExtractor main.cpp)
+target_link_libraries(DiskExtractor PRIVATE QArchive)
+
 ```
 
 ## Compilation and Execution
@@ -85,9 +98,9 @@ SOURCES += main.cpp
 ```
  $ mkdir build
  $ cd build
- $ qmake ..
+ $ cmake ..
  $ make -j$(nproc)
- $ ./extract
+ $ ./DiskExtractor
 ```
 
 This Program is created in the examples tree on the official repo.
