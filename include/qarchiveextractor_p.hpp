@@ -15,6 +15,21 @@
 #include "qarchiveutils_p.hpp"
 
 namespace QArchive {
+class MutableMemoryFile {
+  public:
+    MutableMemoryFile();
+    ~MutableMemoryFile();
+
+    void setFileInformation(const QJsonObject&);
+    void setBuffer(QBuffer*);
+
+    QJsonObject getFileInformation();
+    QSharedPointer<QBuffer> getBuffer();
+  private:
+    QJsonObject m_FileInformation;
+    QSharedPointer<QBuffer> m_Buffer;
+};
+
 class ExtractorPrivate : public QObject {
     Q_OBJECT
   public:

@@ -57,13 +57,23 @@ int main(int argc, char **argv) {
 
    QObject::connect(&extractor, &QArchive::MemoryExtractor::finished,
    [&](QArchive::MemoryExtractorOutput *output) {
-	auto buffer = output->getFiles().at(0).buffer();
-	auto fileInfo = output->getFiles().at(0).fileInformation();
+	QVector<QArchive::MemoryFile> files = output->getFiles();
 
-	buffer->open(QIODevice::ReadOnly);
+	for(auto iter = files.begin(),
+		 end = files.end();
+		 iter != end;
+		 ++iter) {
+	    QJsonObject fileInfo = (*iter).fileInformation();
+	    QBuffer *buffer = (*iter).buffer();
 
-	qDebug() << "Filename:: " << fileInfo.value("FileName").toString();
-	qDebug() << "Contents:: " << QString(buffer->readAll());
+	    // By default buffer is closed.
+	    buffer->open(QIODevice::ReadOnly);
+
+	    qDebug() << "Filename:: " << fileInfo.value("FileName").toString();
+	    qDebug() << "Contents:: " << QString(buffer->readAll());
+		
+	    buffer->close();
+	}
 
 	// Only delete the output object and 
 	// any other buffer you allocated.	
@@ -71,6 +81,8 @@ int main(int argc, char **argv) {
 	archive->deleteLater();
 	app.quit();
    });
+
+   compressor.start(); 
    return app.exec();
 }
 ```

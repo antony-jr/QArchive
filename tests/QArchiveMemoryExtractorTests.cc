@@ -126,6 +126,13 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
         .fileInformation()
         .value("FileName")
         .toString() != QFileInfo(Test3OutputFile1).fileName());
+    
+    QVERIFY(
+        data->getFiles()
+        .at(0)
+        .fileInformation()
+        .value("FileName")
+        .toString() == QFileInfo(Test3OutputFile2).fileName());
 
     auto buffer = data->getFiles().at(0).buffer();
 

@@ -39,6 +39,35 @@ extern "C" {
 
 using namespace QArchive;
 
+/// MutableMemoryFile class provides a memory files which has both setters and getters 
+/// unlike MemoryFile which only has getters.
+/// This will force the users to not mess up the integrity of a MemoryFile like 
+/// deleting the internal pointers which will be automatically freed by MemoryFile 
+/// destructor.
+MutableMemoryFile::MutableMemoryFile() { }
+MutableMemoryFile::~MutableMemoryFile() {
+    m_Buffer.clear();
+}
+
+
+void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
+    m_FileInformation = info;
+}
+
+void MutableMemoryFile::setBuffer(QBuffer *buffer) {
+    m_Buffer.reset(buffer);
+}
+
+QJsonObject MutableMemoryFile::getFileInformation() {
+    return m_FileInformation;
+}
+
+QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() {
+    return m_Buffer;
+}
+/// ---
+
+
 static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
     QJsonObject CurrentEntry;
     QString CurrentFile = QString(archive_entry_pathname(entry));

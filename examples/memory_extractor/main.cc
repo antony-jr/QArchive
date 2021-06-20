@@ -48,8 +48,24 @@ int main(int ac, char **av) {
     });
     QObject::connect(&Extractor, &MemoryExtractor::finished,
     [&](QArchive::MemoryExtractorOutput *data) {
+    	QVector<QArchive::MemoryFile> files = data->getFiles();
+
         qInfo() << "[+] Extracted File(s) Successfully! (In Memory)";
-	qInfo() << "Extracted " << data->getFiles().count() << " File(s).";
+	
+	for(auto iter = files.begin(),
+		 end = files.end();
+		 iter != end;
+		 ++iter) {
+		QJsonObject fileInfo = (*iter).fileInformation();
+		QBuffer *buffer = (*iter).buffer(); 
+		qDebug() << "FileName:: " << fileInfo.value("FileName").toString();
+		qDebug() << "Buf Size:: " << buffer->size();
+	}
+
+	qInfo() << "Extracted " << files.count() << " File(s).";
+	
+
+	data->deleteLater();
 	app.quit();
         return;
     });
