@@ -9,6 +9,10 @@
         "title": "Add QArchive to Your Project",
         "sidebar_label": "Adding QArchive to Your Project"
       },
+      "BuildingGuide": {
+        "title": "Building Examples",
+        "sidebar_label": "Building Examples"
+      },
       "CreatingEncryptedZipArchiveGuide": {
         "title": "Creating Encrypted ZIP Archive using QArchive",
         "sidebar_label": "Creating Encrypted Archive"
