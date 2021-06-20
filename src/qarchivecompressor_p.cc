@@ -580,6 +580,14 @@ bool CompressorPrivate::confirmFiles() {
                         fileNode->isInMemory = node->isInMemory;
 			fileNode->valid = node->valid;
 			fileNode->path = file;
+			
+			if(toReplace[toReplace.size() - 1] == '/' || 
+			   toReplace[toReplace.size() - 1] == '\\') {
+				if((node->entry)[(node->entry).size() - 1] != '/' &&
+				   (node->entry)[(node->entry).size() - 1] != '\\') {
+					(node->entry).append('/');
+				}
+			}
 			fileNode->entry = file.replace(toReplace, node->entry);
 
                         m_ConfirmedFiles->append(fileNode);
