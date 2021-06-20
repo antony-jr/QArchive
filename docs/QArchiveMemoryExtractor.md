@@ -63,7 +63,7 @@ The class belongs to the QArchive namespace, so make sure to include it.
 | **void**            | [getInfoRequirePassword](#void-getinforequirepasswordint-numberoftries)(int)    |
 | **void**            | [extractionRequirePassword](#void-extractionrequirepasswordint-numberoftries)(int)|
 | **void**	      | [started](#void-startedvoid)(void)                                              |
-| **void**            | [finished](#void-finishedqarchivememoryextractoroutput-output)([QArchive::MemoryExtractorOutput]()\*)           |
+| **void**            | [finished](#void-finishedqarchivememoryextractoroutputqarchivedocsqarchivememoryextractoroutputhtml-output)([QArchive::MemoryExtractorOutput](QArchiveMemoryExtractorOutput.md)\*)           |
 | **void**            | [paused](#void-pausedvoid)(void)                                                |
 | **void**            | [resumed](#void-resumedvoid)(void)                                              |
 | **void**            | [canceled](#void-canceledvoid)(void)                                            |
@@ -348,12 +348,12 @@ Emitted when the extraction is started.
 
 ---
 
-### void finished([QArchive::MemoryExtractorOutput]() \*output)
+### void finished([QArchive::MemoryExtractorOutput](QArchiveMemoryExtractorOutput.md) \*output)
 <p align="right"><code>[SIGNAL]</code></p>
 
 Emitted when the extraction is finished successfully. **The first argument is a [QArchive::MemoryExtractorOutput]() class pointer which can be used to get files which are allocated in memory.** The pointer is **not owned**, you have to delete it after you finished using it. **You only need to delete this ouput pointer and nothing else.**
 
-**Also See:** [QArchive::MemoryExtractorOutput](), [QArchive::MemoryFile]().
+**Also See:** [QArchive::MemoryExtractorOutput](QArchiveMemoryExtractorOutput.md), [QArchive::MemoryFile](QArchiveMemoryFile.md).
 
 ```
 QObject::connect(&Extractor, &QArchive::MemoryExtractor::finished,

@@ -19,6 +19,8 @@
 	   "QArchiveErrorCodes",
 	   "QArchiveDiskExtractor",
 	   "QArchiveMemoryExtractor",
+	   "QArchiveMemoryExtractorOutput",
+	   "QArchiveMemoryFile",
 	   "QArchiveDiskCompressor",
 	   "QArchiveMemoryCompressor"
     ]
