@@ -15,8 +15,8 @@ sure you follow the **issue template** which will not be that hard. Be specific 
 
 ### Developing QArchive
 
-If you wish to develop some **code** for the project then you are much **welcomed** but make sure you **open an issue first** to   
-describe the cause why we need to improve the code after that **open a pull request** and also make sure to **follow the pull request template**.    And you need to follow the following **rules when updating the source files**.
+If you wish to develop some **code** for the project then you are much **welcomed**.
+**open a pull request** and also make sure to **follow the pull request template**. And you need to follow the following **rules when updating the source files**.
 
  * You **must** follow the **[google coding style](https://google.github.io/styleguide/cppguide.html)**.
  * You **can** use **[Artistic Styles](http://astyle.sourceforge.net/)** to automatically format your code to follow the
@@ -34,7 +34,7 @@ describe the cause why we need to improve the code after that **open a pull requ
  * **Update the docs** if you add any new method to a public **class**.
  * **Do not** add **unwanted file(s)** and doing so will make your **pull request invalid**.
  
-After making changes to the source file(s) , open a pull request and give a **good title** and **mention** the **issue you opened before**. Thats it! And last but not the least , **Thank You very much for Contributing!** :heart:
+After making changes to the source file(s), open a pull request and give a **good title** and **mention** the **issue you opened before**. Thats it! And last but not the least, **Thank You very much for Contributing!** :heart:
 
 ### Reference
 
