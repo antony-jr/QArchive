@@ -32,7 +32,7 @@ The class belongs to the QArchive namespace, so make sure to include it.
 |------------------------------------------------------------------------------------------------------------------|
 | [MemoryExtractor](#memoryextractorqobject-parent--nullptr--bool-singlethreaded--true)(QObject \*parent = nullptr , bool singleThreaded = true )|
 | [MemoryExtractor](#memoryextractorqiodevice-archive--qobject-parent--nullptr--bool-singlethreaded--true)(QIODevice \*, QObject \*parent = nullptr , bool singleThreaded = true )|
- 
+| [MemoryExtractor](#memoryextractorconst-qstring-archivepath--qobject-parent--nullptr--bool-singlethreaded--true)(const QString&, QObject \*parent = nullptr,  bool singleThreaded = true )|
 
 ### Slots
 
@@ -115,6 +115,28 @@ the archive stagged for extraction.
  
  // With parent and non-single threaded
  auto PDExtractor = new QArchive::MemoryExtractor(&archive , &app , false);
+```
+
+---
+
+### MemoryExtractor(const QString &archivePath , QObject \*parent = nullptr , bool singleThreaded = true)
+
+This is an overloaded constructor. This expects a QString which is assumed to be the file path of
+the archive stagged for extraction.
+
+```
+ QCoreApplication app(argc , argv);
+ QString archivePath("/tmp/SomeArchive.zip");
+ 
+ // Default construction , no parent and single threaded
+ QArchive::MemoryExtractor Extractor(archivePath);
+ 
+ // With parent and single threaded
+ auto PExtractor = new QArchive::MemoryExtractor(archivePath ,  &app);
+ 
+ // With parent and non-single threaded
+ auto PDExtractor = new QArchive::MemoryExtractor(archivePath , &app , false);
+
 ```
 
 ---
