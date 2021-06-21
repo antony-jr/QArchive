@@ -80,6 +80,7 @@ be sequential</strong>.</p>
 <tbody>
 <tr><td><a href="#memoryextractorqobject-parent--nullptr--bool-singlethreaded--true">MemoryExtractor</a>(QObject *parent = nullptr , bool singleThreaded = true )</td></tr>
 <tr><td><a href="#memoryextractorqiodevice-archive--qobject-parent--nullptr--bool-singlethreaded--true">MemoryExtractor</a>(QIODevice *, QObject *parent = nullptr , bool singleThreaded = true )</td></tr>
+<tr><td><a href="#memoryextractorconst-qstring-archivepath--qobject-parent--nullptr--bool-singlethreaded--true">MemoryExtractor</a>(const QString&amp;, QObject *parent = nullptr,  bool singleThreaded = true )</td></tr>
 </tbody>
 </table>
 <h3><a class="anchor" aria-hidden="true" id="slots"></a><a href="#slots" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Slots</h3>
@@ -156,6 +157,23 @@ the archive stagged for extraction.</p>
  
  <span class="hljs-comment">// With parent and non-single threaded</span>
  auto PDExtractor = <span class="hljs-keyword">new</span> QArchive::<span class="hljs-constructor">MemoryExtractor(&amp;<span class="hljs-params">archive</span> , &amp;<span class="hljs-params">app</span> , <span class="hljs-params">false</span>)</span>;
+</code></pre>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="memoryextractorconst-qstring-archivepath--qobject-parent--nullptr--bool-singlethreaded--true"></a><a href="#memoryextractorconst-qstring-archivepath--qobject-parent--nullptr--bool-singlethreaded--true" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>MemoryExtractor(const QString &amp;archivePath , QObject *parent = nullptr , bool singleThreaded = true)</h3>
+<p>This is an overloaded constructor. This expects a QString which is assumed to be the file path of
+the archive stagged for extraction.</p>
+<pre><code class="hljs"> QCoreApplication app(argc , argv);
+ QString archive<span class="hljs-constructor">Path(<span class="hljs-string">"/tmp/SomeArchive.zip"</span>)</span>;
+ 
+ <span class="hljs-comment">// Default construction , no parent and single threaded</span>
+ QArchive::MemoryExtractor <span class="hljs-constructor">Extractor(<span class="hljs-params">archivePath</span>)</span>;
+ 
+ <span class="hljs-comment">// With parent and single threaded</span>
+ auto PExtractor = <span class="hljs-keyword">new</span> QArchive::<span class="hljs-constructor">MemoryExtractor(<span class="hljs-params">archivePath</span> ,  &amp;<span class="hljs-params">app</span>)</span>;
+ 
+ <span class="hljs-comment">// With parent and non-single threaded</span>
+ auto PDExtractor = <span class="hljs-keyword">new</span> QArchive::<span class="hljs-constructor">MemoryExtractor(<span class="hljs-params">archivePath</span> , &amp;<span class="hljs-params">app</span> , <span class="hljs-params">false</span>)</span>;
+
 </code></pre>
 <hr>
 <h3><a class="anchor" aria-hidden="true" id="void-setarchiveconst-qstring-archive"></a><a href="#void-setarchiveconst-qstring-archive" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void setArchive(const QString &amp;Archive)</h3>
