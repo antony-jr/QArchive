@@ -34,7 +34,7 @@ const siteConfig = {
   copyright:
     'Copyright © ' +
     new Date().getFullYear() +
-    'QArchive Contributors and Antony J.R',
+    ' D. Antony J.R.',
   organizationName: 'antony-jr', // or set an env variable ORGANIZATION_NAME
   highlight: {
     // Highlight.js theme to use for syntax highlighting in code blocks
