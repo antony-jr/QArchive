@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD $$PWD/include $$PWD/other/qmake
 QT += core
 LIBS += -larchive
+DEFINES += QARCHIVE_STATIC
 SOURCES +=  $$PWD/src/qarchive_enums.cc \
 	    $$PWD/src/qarchiveutils_p.cc \
 	    $$PWD/src/qarchivememoryfile.cc \

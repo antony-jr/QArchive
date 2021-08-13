@@ -228,7 +228,7 @@ SUBDIRS = libs \ # Always use this order
 
 ### Including QArchive in your Source
 
-Whenever you want to use **QArchive** , you just need to include it!
+Whenever you want to use **QArchive**, you just need to include it!
 
 ```
 #include <QArchive>
@@ -265,6 +265,10 @@ Prepend or append these **lines** to your **Qt Project file**.
 
 ```
 include(QArchive/QArchive.pri)
+
+# DEFINES -= QARCHIVE_STATIC # uncomment this if you are building as shared library.
+# LIBS += $$PWD/libarchive # uncomment to give custom dir to libarchive libs.
+# INCLUDEPATH += $$PWD/libarchive-includes # uncomment to give custom dir to libarchive headers.
 ```
 
 ### Including QArchive in your Source
