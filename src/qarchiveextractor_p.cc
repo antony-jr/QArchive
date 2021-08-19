@@ -150,21 +150,39 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
     if(lastAccessT) {
         CurrentEntry.insert("LastAccessedTime",
                             QJsonValue(
-                                (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));
+                                (
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+                                    QDateTime::fromSecsSinceEpoch(lastAccessT)
+#else
+                                    QDateTime::fromTime_t(lastAccessT)
+#endif
+                                ).toString(Qt::ISODate)));
     } else {
         CurrentEntry.insert("LastAccessedTime", "Unknown");
     }
 
     if(lastModT) {
         CurrentEntry.insert("LastModifiedTime",
-                            QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));
+                            QJsonValue((
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+                                           QDateTime::fromSecsSinceEpoch(lastModT)
+#else
+                                           QDateTime::fromTime_t(lastModT)
+#endif
+                                       ).toString(Qt::ISODate)));
     } else {
         CurrentEntry.insert("LastModifiedTime", "Unknown");
     }
 
     if(lastStatusModT) {
         CurrentEntry.insert("LastStatusModifiedTime",
-                            QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));
+                            QJsonValue((
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+                                           QDateTime::fromSecsSinceEpoch(lastStatusModT)
+#else
+                                           QDateTime::fromTime_t(lastStatusModT)
+#endif
+                                       ).toString(Qt::ISODate)));
     } else {
         CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
     }
