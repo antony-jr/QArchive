@@ -142,6 +142,15 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=ericriff">💻</a>
         </td>
+	<td>
+            <img src="https://avatars.githubusercontent.com/u/2747603?v=4" width="100px"><br>
+            <sub>
+                <strong>
+                    <a href="https://github.com/ZemingLiu">GGBond</a>
+                </strong>
+            </sub><br>
+            <a href="https://github.com/antony-jr/QArchive/commits?author=ZemingLiu">💻</a>
+        </td>
   </tr>  
 </table>
 
