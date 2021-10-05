@@ -163,785 +163,803 @@
 <a name="ln150">    if(lastAccessT) {</a>
 <a name="ln151">        CurrentEntry.insert(&quot;LastAccessedTime&quot;,</a>
 <a name="ln152">                            QJsonValue(</a>
-<a name="ln153">                                (QDateTime::fromTime_t(lastAccessT)).toString(Qt::ISODate)));</a>
-<a name="ln154">    } else {</a>
-<a name="ln155">        CurrentEntry.insert(&quot;LastAccessedTime&quot;, &quot;Unknown&quot;);</a>
-<a name="ln156">    }</a>
-<a name="ln157"> </a>
-<a name="ln158">    if(lastModT) {</a>
-<a name="ln159">        CurrentEntry.insert(&quot;LastModifiedTime&quot;,</a>
-<a name="ln160">                            QJsonValue((QDateTime::fromTime_t(lastModT)).toString(Qt::ISODate)));</a>
-<a name="ln161">    } else {</a>
-<a name="ln162">        CurrentEntry.insert(&quot;LastModifiedTime&quot;, &quot;Unknown&quot;);</a>
-<a name="ln163">    }</a>
-<a name="ln164"> </a>
-<a name="ln165">    if(lastStatusModT) {</a>
-<a name="ln166">        CurrentEntry.insert(&quot;LastStatusModifiedTime&quot;,</a>
-<a name="ln167">                            QJsonValue((QDateTime::fromTime_t(lastStatusModT)).toString(Qt::ISODate)));</a>
-<a name="ln168">    } else {</a>
-<a name="ln169">        CurrentEntry.insert(&quot;LastStatusModifiedTime&quot;, &quot;Unknown&quot;);</a>
-<a name="ln170">    }</a>
-<a name="ln171"> </a>
-<a name="ln172">    return CurrentEntry;</a>
-<a name="ln173">}</a>
-<a name="ln174"> </a>
-<a name="ln175">// ExtractorPrivate constructor constructs the object which is the private class</a>
-<a name="ln176">// implementation to the DiskExtractor.</a>
-<a name="ln177">// This class is responsible for extraction and information retrival of the data</a>
-<a name="ln178">// inside an archive.</a>
-<a name="ln179">// This class only extracts the data to the disk and hence the name DiskExtractor.</a>
-<a name="ln180">// This class will not be able to extract or work in-memory.</a>
-<a name="ln181">ExtractorPrivate::ExtractorPrivate(bool memoryMode)</a>
-<a name="ln182">    : QObject(),</a>
-<a name="ln183">      n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {</a>
-<a name="ln184">    b_MemoryMode = memoryMode;</a>
-<a name="ln185"> </a>
-<a name="ln186">    m_Info.reset(new QJsonObject);</a>
-<a name="ln187">    m_ExtractFilters.reset(new QStringList);</a>
-<a name="ln188"> </a>
-<a name="ln189">    if(b_MemoryMode) {</a>
-<a name="ln190">        m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
-<a name="ln191">    }</a>
-<a name="ln192">}</a>
-<a name="ln193"> </a>
-<a name="ln194">ExtractorPrivate::~ExtractorPrivate() {</a>
-<a name="ln195">    clear();</a>
-<a name="ln196">}</a>
-<a name="ln197"> </a>
-<a name="ln198">// Sets the given pointer to QIODevice as the Archive file itself.</a>
-<a name="ln199">void ExtractorPrivate::setArchive(QIODevice *archive) {</a>
-<a name="ln200">    if(b_Started || b_Paused) {</a>
-<a name="ln201">        return;</a>
-<a name="ln202">    }</a>
-<a name="ln203">    clear();</a>
-<a name="ln204">    m_Archive = archive;</a>
-<a name="ln205">    return;</a>
-<a name="ln206">}</a>
-<a name="ln207"> </a>
-<a name="ln208">// Sets the archive path as the given QString which will be later</a>
-<a name="ln209">// opened to be used as the Archive file.</a>
-<a name="ln210">void ExtractorPrivate::setArchive(const QString &amp;archivePath) {</a>
-<a name="ln211">    if(b_Started || b_Paused || archivePath.isEmpty()) {</a>
-<a name="ln212">        return;</a>
-<a name="ln213">    }</a>
-<a name="ln214">    clear();</a>
-<a name="ln215">    m_ArchivePath = archivePath;</a>
-<a name="ln216">    return;</a>
-<a name="ln217">}</a>
-<a name="ln218"> </a>
-<a name="ln219">// Blocksize to be used when extracting the given archive.</a>
-<a name="ln220">void ExtractorPrivate::setBlockSize(int n) {</a>
-<a name="ln221">    if(b_Started || b_Paused) {</a>
-<a name="ln222">        return;</a>
-<a name="ln223">    }</a>
-<a name="ln224">    n_BlockSize = n;</a>
-<a name="ln225">    return;</a>
-<a name="ln226">}</a>
-<a name="ln227"> </a>
-<a name="ln228">// Sets the directory where the extraction data to be extracted.</a>
-<a name="ln229">void ExtractorPrivate::setOutputDirectory(const QString &amp;destination) {</a>
-<a name="ln230">    if(b_MemoryMode || b_Started || b_Paused || destination.isEmpty()) {</a>
-<a name="ln231">        return;</a>
-<a name="ln232">    }</a>
-<a name="ln233">    m_OutputDirectory = destination + &quot;/&quot;;</a>
+<a name="ln153">                                (</a>
+<a name="ln154">#if (QT_VERSION &gt;= QT_VERSION_CHECK(5, 8, 0))</a>
+<a name="ln155">                                    QDateTime::fromSecsSinceEpoch(lastAccessT)</a>
+<a name="ln156">#else</a>
+<a name="ln157">                                    QDateTime::fromTime_t(lastAccessT)</a>
+<a name="ln158">#endif</a>
+<a name="ln159">                                ).toString(Qt::ISODate)));</a>
+<a name="ln160">    } else {</a>
+<a name="ln161">        CurrentEntry.insert(&quot;LastAccessedTime&quot;, &quot;Unknown&quot;);</a>
+<a name="ln162">    }</a>
+<a name="ln163"> </a>
+<a name="ln164">    if(lastModT) {</a>
+<a name="ln165">        CurrentEntry.insert(&quot;LastModifiedTime&quot;,</a>
+<a name="ln166">                            QJsonValue((</a>
+<a name="ln167">#if (QT_VERSION &gt;= QT_VERSION_CHECK(5, 8, 0))</a>
+<a name="ln168">                                           QDateTime::fromSecsSinceEpoch(lastModT)</a>
+<a name="ln169">#else</a>
+<a name="ln170">                                           QDateTime::fromTime_t(lastModT)</a>
+<a name="ln171">#endif</a>
+<a name="ln172">                                       ).toString(Qt::ISODate)));</a>
+<a name="ln173">    } else {</a>
+<a name="ln174">        CurrentEntry.insert(&quot;LastModifiedTime&quot;, &quot;Unknown&quot;);</a>
+<a name="ln175">    }</a>
+<a name="ln176"> </a>
+<a name="ln177">    if(lastStatusModT) {</a>
+<a name="ln178">        CurrentEntry.insert(&quot;LastStatusModifiedTime&quot;,</a>
+<a name="ln179">                            QJsonValue((</a>
+<a name="ln180">#if (QT_VERSION &gt;= QT_VERSION_CHECK(5, 8, 0))</a>
+<a name="ln181">                                           QDateTime::fromSecsSinceEpoch(lastStatusModT)</a>
+<a name="ln182">#else</a>
+<a name="ln183">                                           QDateTime::fromTime_t(lastStatusModT)</a>
+<a name="ln184">#endif</a>
+<a name="ln185">                                       ).toString(Qt::ISODate)));</a>
+<a name="ln186">    } else {</a>
+<a name="ln187">        CurrentEntry.insert(&quot;LastStatusModifiedTime&quot;, &quot;Unknown&quot;);</a>
+<a name="ln188">    }</a>
+<a name="ln189"> </a>
+<a name="ln190">    return CurrentEntry;</a>
+<a name="ln191">}</a>
+<a name="ln192"> </a>
+<a name="ln193">// ExtractorPrivate constructor constructs the object which is the private class</a>
+<a name="ln194">// implementation to the DiskExtractor.</a>
+<a name="ln195">// This class is responsible for extraction and information retrival of the data</a>
+<a name="ln196">// inside an archive.</a>
+<a name="ln197">// This class only extracts the data to the disk and hence the name DiskExtractor.</a>
+<a name="ln198">// This class will not be able to extract or work in-memory.</a>
+<a name="ln199">ExtractorPrivate::ExtractorPrivate(bool memoryMode)</a>
+<a name="ln200">    : QObject(),</a>
+<a name="ln201">      n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {</a>
+<a name="ln202">    b_MemoryMode = memoryMode;</a>
+<a name="ln203"> </a>
+<a name="ln204">    m_Info.reset(new QJsonObject);</a>
+<a name="ln205">    m_ExtractFilters.reset(new QStringList);</a>
+<a name="ln206"> </a>
+<a name="ln207">    if(b_MemoryMode) {</a>
+<a name="ln208">        m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
+<a name="ln209">    }</a>
+<a name="ln210">}</a>
+<a name="ln211"> </a>
+<a name="ln212">ExtractorPrivate::~ExtractorPrivate() {</a>
+<a name="ln213">    clear();</a>
+<a name="ln214">}</a>
+<a name="ln215"> </a>
+<a name="ln216">// Sets the given pointer to QIODevice as the Archive file itself.</a>
+<a name="ln217">void ExtractorPrivate::setArchive(QIODevice *archive) {</a>
+<a name="ln218">    if(b_Started || b_Paused) {</a>
+<a name="ln219">        return;</a>
+<a name="ln220">    }</a>
+<a name="ln221">    clear();</a>
+<a name="ln222">    m_Archive = archive;</a>
+<a name="ln223">    return;</a>
+<a name="ln224">}</a>
+<a name="ln225"> </a>
+<a name="ln226">// Sets the archive path as the given QString which will be later</a>
+<a name="ln227">// opened to be used as the Archive file.</a>
+<a name="ln228">void ExtractorPrivate::setArchive(const QString &amp;archivePath) {</a>
+<a name="ln229">    if(b_Started || b_Paused || archivePath.isEmpty()) {</a>
+<a name="ln230">        return;</a>
+<a name="ln231">    }</a>
+<a name="ln232">    clear();</a>
+<a name="ln233">    m_ArchivePath = archivePath;</a>
 <a name="ln234">    return;</a>
 <a name="ln235">}</a>
 <a name="ln236"> </a>
-<a name="ln237">// Enables/Disables the progress of the extraction with respect to the</a>
-<a name="ln238">// given bool.</a>
-<a name="ln239">void ExtractorPrivate::setCalculateProgress(bool c) {</a>
-<a name="ln240">    b_NoProgress = !c;</a>
-<a name="ln241">    return;</a>
-<a name="ln242">}</a>
-<a name="ln243"> </a>
-<a name="ln244">// Sets the password for the archive when extracting the data.</a>
-<a name="ln245">// This method should be accessible even if the extractor is started</a>
-<a name="ln246">// since the user may set password anytime.</a>
-<a name="ln247">void ExtractorPrivate::setPassword(const QString &amp;passwd) {</a>
-<a name="ln248">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln249">    if(passwd.isEmpty()) {</a>
-<a name="ln250">        return;</a>
-<a name="ln251">    }</a>
-<a name="ln252">    m_Password = passwd;</a>
-<a name="ln253">#else</a>
-<a name="ln254">    (void)passwd;</a>
-<a name="ln255">#endif</a>
-<a name="ln256">    return;</a>
-<a name="ln257">}</a>
-<a name="ln258"> </a>
-<a name="ln259">// Adds extract filters , if set , only the files in the filter</a>
-<a name="ln260">// will be extracted , the filter has to correspond to the exact</a>
-<a name="ln261">// path given in the archive.</a>
-<a name="ln262">void ExtractorPrivate::addFilter(const QString &amp;filter) {</a>
-<a name="ln263">    if(b_Started || b_Paused || filter.isEmpty()) {</a>
-<a name="ln264">        return;</a>
-<a name="ln265">    }</a>
-<a name="ln266">    *(m_ExtractFilters.data()) &lt;&lt; filter;</a>
-<a name="ln267">    return;</a>
-<a name="ln268">}</a>
-<a name="ln269"> </a>
-<a name="ln270">// Overload of addFilter to accept list of QStrings.</a>
-<a name="ln271">void ExtractorPrivate::addFilter(const QStringList &amp;filters) {</a>
-<a name="ln272">    if(b_Started || b_Paused || filters.isEmpty()) {</a>
-<a name="ln273">        return;</a>
-<a name="ln274">    }</a>
-<a name="ln275">    *(m_ExtractFilters.data()) &lt;&lt; filters;</a>
-<a name="ln276">    return;</a>
-<a name="ln277">}</a>
-<a name="ln278"> </a>
-<a name="ln279">// Clears all internal data and sets it back to default.</a>
-<a name="ln280">void ExtractorPrivate::clear() {</a>
-<a name="ln281">    if(b_Started) {</a>
+<a name="ln237">// Blocksize to be used when extracting the given archive.</a>
+<a name="ln238">void ExtractorPrivate::setBlockSize(int n) {</a>
+<a name="ln239">    if(b_Started || b_Paused) {</a>
+<a name="ln240">        return;</a>
+<a name="ln241">    }</a>
+<a name="ln242">    n_BlockSize = n;</a>
+<a name="ln243">    return;</a>
+<a name="ln244">}</a>
+<a name="ln245"> </a>
+<a name="ln246">// Sets the directory where the extraction data to be extracted.</a>
+<a name="ln247">void ExtractorPrivate::setOutputDirectory(const QString &amp;destination) {</a>
+<a name="ln248">    if(b_MemoryMode || b_Started || b_Paused || destination.isEmpty()) {</a>
+<a name="ln249">        return;</a>
+<a name="ln250">    }</a>
+<a name="ln251">    m_OutputDirectory = destination + &quot;/&quot;;</a>
+<a name="ln252">    return;</a>
+<a name="ln253">}</a>
+<a name="ln254"> </a>
+<a name="ln255">// Enables/Disables the progress of the extraction with respect to the</a>
+<a name="ln256">// given bool.</a>
+<a name="ln257">void ExtractorPrivate::setCalculateProgress(bool c) {</a>
+<a name="ln258">    b_NoProgress = !c;</a>
+<a name="ln259">    return;</a>
+<a name="ln260">}</a>
+<a name="ln261"> </a>
+<a name="ln262">// Sets the password for the archive when extracting the data.</a>
+<a name="ln263">// This method should be accessible even if the extractor is started</a>
+<a name="ln264">// since the user may set password anytime.</a>
+<a name="ln265">void ExtractorPrivate::setPassword(const QString &amp;passwd) {</a>
+<a name="ln266">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln267">    if(passwd.isEmpty()) {</a>
+<a name="ln268">        return;</a>
+<a name="ln269">    }</a>
+<a name="ln270">    m_Password = passwd;</a>
+<a name="ln271">#else</a>
+<a name="ln272">    (void)passwd;</a>
+<a name="ln273">#endif</a>
+<a name="ln274">    return;</a>
+<a name="ln275">}</a>
+<a name="ln276"> </a>
+<a name="ln277">// Adds extract filters , if set , only the files in the filter</a>
+<a name="ln278">// will be extracted , the filter has to correspond to the exact</a>
+<a name="ln279">// path given in the archive.</a>
+<a name="ln280">void ExtractorPrivate::addFilter(const QString &amp;filter) {</a>
+<a name="ln281">    if(b_Started || b_Paused || filter.isEmpty()) {</a>
 <a name="ln282">        return;</a>
 <a name="ln283">    }</a>
-<a name="ln284">    n_BlockSize = 10240;</a>
-<a name="ln285">    n_PasswordTriedCountGetInfo = n_PasswordTriedCountExtract = 0;</a>
-<a name="ln286">    n_TotalEntries = -1;</a>
-<a name="ln287">    b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;</a>
-<a name="ln288"> </a>
-<a name="ln289">    // TODO: do we need to reset n_BytesTotal here?</a>
-<a name="ln290">    n_BytesProcessed = 0;</a>
-<a name="ln291">    n_BytesTotal = 0;</a>
-<a name="ln292"> </a>
-<a name="ln293">    m_ArchivePath.clear();</a>
-<a name="ln294">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln295">    m_Password.clear();</a>
-<a name="ln296">#endif</a>
-<a name="ln297">    m_OutputDirectory.clear();</a>
-<a name="ln298">    m_ArchiveRead.clear();</a>
-<a name="ln299">    m_ArchiveWrite.clear();</a>
-<a name="ln300">    m_Info.reset(new QJsonObject);</a>
-<a name="ln301">    m_ExtractFilters-&gt;clear();</a>
-<a name="ln302"> </a>
-<a name="ln303">    if(b_MemoryMode) {</a>
-<a name="ln304">        m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
-<a name="ln305">    }</a>
+<a name="ln284">    *(m_ExtractFilters.data()) &lt;&lt; filter;</a>
+<a name="ln285">    return;</a>
+<a name="ln286">}</a>
+<a name="ln287"> </a>
+<a name="ln288">// Overload of addFilter to accept list of QStrings.</a>
+<a name="ln289">void ExtractorPrivate::addFilter(const QStringList &amp;filters) {</a>
+<a name="ln290">    if(b_Started || b_Paused || filters.isEmpty()) {</a>
+<a name="ln291">        return;</a>
+<a name="ln292">    }</a>
+<a name="ln293">    *(m_ExtractFilters.data()) &lt;&lt; filters;</a>
+<a name="ln294">    return;</a>
+<a name="ln295">}</a>
+<a name="ln296"> </a>
+<a name="ln297">// Clears all internal data and sets it back to default.</a>
+<a name="ln298">void ExtractorPrivate::clear() {</a>
+<a name="ln299">    if(b_Started) {</a>
+<a name="ln300">        return;</a>
+<a name="ln301">    }</a>
+<a name="ln302">    n_BlockSize = 10240;</a>
+<a name="ln303">    n_PasswordTriedCountGetInfo = n_PasswordTriedCountExtract = 0;</a>
+<a name="ln304">    n_TotalEntries = -1;</a>
+<a name="ln305">    b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;</a>
 <a name="ln306"> </a>
-<a name="ln307">    if(b_QIODeviceOwned) {</a>
-<a name="ln308">        m_Archive-&gt;close();</a>
-<a name="ln309">        m_Archive-&gt;deleteLater();</a>
-<a name="ln310">    } else {</a>
-<a name="ln311">        m_Archive = nullptr;</a>
-<a name="ln312">    }</a>
-<a name="ln313">    m_CurrentArchiveEntry = nullptr;</a>
-<a name="ln314">    b_QIODeviceOwned = false;</a>
-<a name="ln315">    return;</a>
-<a name="ln316">}</a>
-<a name="ln317"> </a>
-<a name="ln318">// Returns the information of the archive through info signal.</a>
-<a name="ln319">void ExtractorPrivate::getInfo() {</a>
-<a name="ln320">    if(!m_Info-&gt;isEmpty()) {</a>
-<a name="ln321">        emit info(*(m_Info.data()));</a>
-<a name="ln322">        return;</a>
+<a name="ln307">    // TODO: do we need to reset n_BytesTotal here?</a>
+<a name="ln308">    n_BytesProcessed = 0;</a>
+<a name="ln309">    n_BytesTotal = 0;</a>
+<a name="ln310"> </a>
+<a name="ln311">    m_ArchivePath.clear();</a>
+<a name="ln312">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln313">    m_Password.clear();</a>
+<a name="ln314">#endif</a>
+<a name="ln315">    m_OutputDirectory.clear();</a>
+<a name="ln316">    m_ArchiveRead.clear();</a>
+<a name="ln317">    m_ArchiveWrite.clear();</a>
+<a name="ln318">    m_Info.reset(new QJsonObject);</a>
+<a name="ln319">    m_ExtractFilters-&gt;clear();</a>
+<a name="ln320"> </a>
+<a name="ln321">    if(b_MemoryMode) {</a>
+<a name="ln322">        m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
 <a name="ln323">    }</a>
-<a name="ln324">    short errorCode = NoError;</a>
-<a name="ln325"> </a>
-<a name="ln326">    // Open the Archive.</a>
-<a name="ln327">    if((errorCode = openArchive()) != NoError) {</a>
-<a name="ln328">        emit error(errorCode);</a>
-<a name="ln329">        return;</a>
+<a name="ln324"> </a>
+<a name="ln325">    if(b_QIODeviceOwned) {</a>
+<a name="ln326">        m_Archive-&gt;close();</a>
+<a name="ln327">        m_Archive-&gt;deleteLater();</a>
+<a name="ln328">    } else {</a>
+<a name="ln329">        m_Archive = nullptr;</a>
 <a name="ln330">    }</a>
-<a name="ln331"> </a>
-<a name="ln332">    errorCode = processArchiveInformation();</a>
-<a name="ln333">    if(!errorCode) {</a>
-<a name="ln334">        emit info(*(m_Info.data()));</a>
-<a name="ln335">    }</a>
-<a name="ln336">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln337">    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
-<a name="ln338">        emit getInfoRequirePassword(n_PasswordTriedCountGetInfo);</a>
-<a name="ln339">        ++n_PasswordTriedCountGetInfo;</a>
-<a name="ln340">    }</a>
-<a name="ln341">#endif</a>
-<a name="ln342">    else {</a>
-<a name="ln343">        emit error(errorCode);</a>
-<a name="ln344">    }</a>
-<a name="ln345">    return;</a>
-<a name="ln346">}</a>
-<a name="ln347"> </a>
-<a name="ln348">void ExtractorPrivate::start() {</a>
-<a name="ln349">    if(b_Started || b_Paused) {</a>
-<a name="ln350">        return;</a>
-<a name="ln351">    }</a>
-<a name="ln352"> </a>
-<a name="ln353">    short errorCode = NoError;</a>
-<a name="ln354"> </a>
-<a name="ln355">    // Open the Archive.</a>
-<a name="ln356">    if((errorCode = openArchive()) != NoError) {</a>
-<a name="ln357">        emit error(errorCode);</a>
-<a name="ln358">        return;</a>
-<a name="ln359">    }</a>
-<a name="ln360"> </a>
-<a name="ln361">    // Check and Set Output Directory.</a>
-<a name="ln362">    // If it's not memory mode.</a>
-<a name="ln363">    if(!b_MemoryMode) {</a>
-<a name="ln364">        if(!m_OutputDirectory.isEmpty()) {</a>
-<a name="ln365">            if((errorCode = checkOutputDirectory()) != NoError) {</a>
-<a name="ln366">                emit error(errorCode );</a>
-<a name="ln367">                return;</a>
-<a name="ln368">            }</a>
-<a name="ln369">        }</a>
-<a name="ln370">    }</a>
-<a name="ln371"> </a>
-<a name="ln372">    // All Okay then start the extraction.</a>
-<a name="ln373">    b_Started = true;</a>
-<a name="ln374">    b_Finished = false;</a>
-<a name="ln375">    emit started();</a>
-<a name="ln376"> </a>
-<a name="ln377">    // Get basic information about the archive if the user wants progress on the</a>
-<a name="ln378">    // extraction.</a>
-<a name="ln379">    if(n_TotalEntries == -1 &amp;&amp; !b_NoProgress) {</a>
-<a name="ln380">        errorCode = getTotalEntriesCount();</a>
-<a name="ln381">        if(n_TotalEntries == -1) {</a>
-<a name="ln382">            // If the total entries is unchanged then there must be an</a>
-<a name="ln383">            // error.</a>
-<a name="ln384">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln385">            b_Started = false;</a>
-<a name="ln386">            if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
-<a name="ln387">                emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
-<a name="ln388">                ++n_PasswordTriedCountExtract;</a>
-<a name="ln389">            }</a>
-<a name="ln390">#endif</a>
-<a name="ln391">            emit error(errorCode);</a>
-<a name="ln392">            return;</a>
-<a name="ln393">        }</a>
-<a name="ln394">    }</a>
-<a name="ln395"> </a>
-<a name="ln396">    n_BytesProcessed = 0;</a>
-<a name="ln397"> </a>
-<a name="ln398">    errorCode = extract();</a>
-<a name="ln399">    if(errorCode == NoError) {</a>
-<a name="ln400">        b_Started = false;</a>
-<a name="ln401">        b_Finished = true;</a>
-<a name="ln402">        m_Archive-&gt;close();</a>
-<a name="ln403">        if(!b_MemoryMode) {</a>
-<a name="ln404">            emit diskFinished();</a>
-<a name="ln405">        } else {</a>
-<a name="ln406">            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));</a>
-<a name="ln407">            m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
-<a name="ln408">        }</a>
-<a name="ln409">    }</a>
-<a name="ln410">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln411">    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
-<a name="ln412">        b_Started = false;</a>
-<a name="ln413">        emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
-<a name="ln414">        ++n_PasswordTriedCountExtract;</a>
-<a name="ln415">        emit error(errorCode);</a>
-<a name="ln416">    }</a>
-<a name="ln417">#endif</a>
-<a name="ln418">    else if(errorCode == OperationCanceled) {</a>
-<a name="ln419">        b_Started = false;</a>
-<a name="ln420">        emit canceled();</a>
-<a name="ln421">    } else if(errorCode == OperationPaused) {</a>
-<a name="ln422">        b_Started = false;</a>
-<a name="ln423">        b_Paused = true;</a>
-<a name="ln424">        emit paused();</a>
-<a name="ln425">    } else {</a>
-<a name="ln426">        b_Started = false;</a>
-<a name="ln427">        emit error(errorCode );</a>
-<a name="ln428">    }</a>
-<a name="ln429">    return;</a>
-<a name="ln430">}</a>
-<a name="ln431"> </a>
-<a name="ln432">// Pauses the extractor.</a>
-<a name="ln433">void ExtractorPrivate::pause() {</a>
-<a name="ln434">    if(b_Started &amp;&amp; !b_Paused) {</a>
-<a name="ln435">        b_PauseRequested = true;</a>
-<a name="ln436">    }</a>
-<a name="ln437">    return;</a>
-<a name="ln438">}</a>
-<a name="ln439"> </a>
-<a name="ln440">// Resumes the extractor.</a>
-<a name="ln441">void ExtractorPrivate::resume() {</a>
-<a name="ln442">    if(!b_Paused) {</a>
-<a name="ln443">        return;</a>
-<a name="ln444">    }</a>
-<a name="ln445">    b_Paused = false;</a>
-<a name="ln446">    b_Started = true;</a>
-<a name="ln447">    emit resumed();</a>
-<a name="ln448"> </a>
-<a name="ln449">    short ret = extract();</a>
-<a name="ln450">    if(ret == NoError) {</a>
-<a name="ln451">        b_Started = false;</a>
-<a name="ln452">        b_Finished = true;</a>
-<a name="ln453">        m_Archive-&gt;close();</a>
-<a name="ln454">        if(!b_MemoryMode) {</a>
-<a name="ln455">            emit diskFinished();</a>
-<a name="ln456">        } else {</a>
-<a name="ln457">            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));</a>
-<a name="ln458">            m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
-<a name="ln459">        }</a>
-<a name="ln460">    }</a>
-<a name="ln461">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln462">    else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded) {</a>
-<a name="ln463">        b_Started = false;</a>
-<a name="ln464">        emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
-<a name="ln465">        ++n_PasswordTriedCountExtract;</a>
-<a name="ln466">        emit error(ret);</a>
-<a name="ln467">    }</a>
-<a name="ln468">#endif</a>
-<a name="ln469">    else if(ret == OperationCanceled) {</a>
-<a name="ln470">        b_Started = false;</a>
-<a name="ln471">        emit canceled();</a>
-<a name="ln472">    } else if(ret == OperationPaused) {</a>
-<a name="ln473">        b_Started = false;</a>
-<a name="ln474">        b_Paused = true;</a>
-<a name="ln475">        emit paused();</a>
-<a name="ln476">    } else {</a>
-<a name="ln477">        b_Started = false;</a>
-<a name="ln478">        emit error(ret );</a>
-<a name="ln479">    }</a>
-<a name="ln480">    return;</a>
-<a name="ln481">}</a>
-<a name="ln482"> </a>
-<a name="ln483">// Cancels the extraction.</a>
-<a name="ln484">void ExtractorPrivate::cancel() {</a>
-<a name="ln485">    if(b_Started &amp;&amp; !b_Paused &amp;&amp; !b_Finished) {</a>
-<a name="ln486">        b_CancelRequested = true;</a>
-<a name="ln487">    }</a>
-<a name="ln488">    return;</a>
-<a name="ln489">}</a>
-<a name="ln490"> </a>
-<a name="ln491"> </a>
-<a name="ln492">short ExtractorPrivate::openArchive() {</a>
-<a name="ln493">    if(m_ArchivePath.isEmpty() &amp;&amp; !m_Archive) {</a>
-<a name="ln494">        return ArchiveNotGiven;</a>
-<a name="ln495">    } else if(b_ArchiveOpened) {</a>
-<a name="ln496">        return NoError;</a>
+<a name="ln331">    m_CurrentArchiveEntry = nullptr;</a>
+<a name="ln332">    b_QIODeviceOwned = false;</a>
+<a name="ln333">    return;</a>
+<a name="ln334">}</a>
+<a name="ln335"> </a>
+<a name="ln336">// Returns the information of the archive through info signal.</a>
+<a name="ln337">void ExtractorPrivate::getInfo() {</a>
+<a name="ln338">    if(!m_Info-&gt;isEmpty()) {</a>
+<a name="ln339">        emit info(*(m_Info.data()));</a>
+<a name="ln340">        return;</a>
+<a name="ln341">    }</a>
+<a name="ln342">    short errorCode = NoError;</a>
+<a name="ln343"> </a>
+<a name="ln344">    // Open the Archive.</a>
+<a name="ln345">    if((errorCode = openArchive()) != NoError) {</a>
+<a name="ln346">        emit error(errorCode);</a>
+<a name="ln347">        return;</a>
+<a name="ln348">    }</a>
+<a name="ln349"> </a>
+<a name="ln350">    errorCode = processArchiveInformation();</a>
+<a name="ln351">    if(!errorCode) {</a>
+<a name="ln352">        emit info(*(m_Info.data()));</a>
+<a name="ln353">    }</a>
+<a name="ln354">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln355">    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
+<a name="ln356">        emit getInfoRequirePassword(n_PasswordTriedCountGetInfo);</a>
+<a name="ln357">        ++n_PasswordTriedCountGetInfo;</a>
+<a name="ln358">    }</a>
+<a name="ln359">#endif</a>
+<a name="ln360">    else {</a>
+<a name="ln361">        emit error(errorCode);</a>
+<a name="ln362">    }</a>
+<a name="ln363">    return;</a>
+<a name="ln364">}</a>
+<a name="ln365"> </a>
+<a name="ln366">void ExtractorPrivate::start() {</a>
+<a name="ln367">    if(b_Started || b_Paused) {</a>
+<a name="ln368">        return;</a>
+<a name="ln369">    }</a>
+<a name="ln370"> </a>
+<a name="ln371">    short errorCode = NoError;</a>
+<a name="ln372"> </a>
+<a name="ln373">    // Open the Archive.</a>
+<a name="ln374">    if((errorCode = openArchive()) != NoError) {</a>
+<a name="ln375">        emit error(errorCode);</a>
+<a name="ln376">        return;</a>
+<a name="ln377">    }</a>
+<a name="ln378"> </a>
+<a name="ln379">    // Check and Set Output Directory.</a>
+<a name="ln380">    // If it's not memory mode.</a>
+<a name="ln381">    if(!b_MemoryMode) {</a>
+<a name="ln382">        if(!m_OutputDirectory.isEmpty()) {</a>
+<a name="ln383">            if((errorCode = checkOutputDirectory()) != NoError) {</a>
+<a name="ln384">                emit error(errorCode );</a>
+<a name="ln385">                return;</a>
+<a name="ln386">            }</a>
+<a name="ln387">        }</a>
+<a name="ln388">    }</a>
+<a name="ln389"> </a>
+<a name="ln390">    // All Okay then start the extraction.</a>
+<a name="ln391">    b_Started = true;</a>
+<a name="ln392">    b_Finished = false;</a>
+<a name="ln393">    emit started();</a>
+<a name="ln394"> </a>
+<a name="ln395">    // Get basic information about the archive if the user wants progress on the</a>
+<a name="ln396">    // extraction.</a>
+<a name="ln397">    if(n_TotalEntries == -1 &amp;&amp; !b_NoProgress) {</a>
+<a name="ln398">        errorCode = getTotalEntriesCount();</a>
+<a name="ln399">        if(n_TotalEntries == -1) {</a>
+<a name="ln400">            // If the total entries is unchanged then there must be an</a>
+<a name="ln401">            // error.</a>
+<a name="ln402">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln403">            b_Started = false;</a>
+<a name="ln404">            if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
+<a name="ln405">                emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
+<a name="ln406">                ++n_PasswordTriedCountExtract;</a>
+<a name="ln407">            }</a>
+<a name="ln408">#endif</a>
+<a name="ln409">            emit error(errorCode);</a>
+<a name="ln410">            return;</a>
+<a name="ln411">        }</a>
+<a name="ln412">    }</a>
+<a name="ln413"> </a>
+<a name="ln414">    n_BytesProcessed = 0;</a>
+<a name="ln415"> </a>
+<a name="ln416">    errorCode = extract();</a>
+<a name="ln417">    if(errorCode == NoError) {</a>
+<a name="ln418">        b_Started = false;</a>
+<a name="ln419">        b_Finished = true;</a>
+<a name="ln420">        m_Archive-&gt;close();</a>
+<a name="ln421">        if(!b_MemoryMode) {</a>
+<a name="ln422">            emit diskFinished();</a>
+<a name="ln423">        } else {</a>
+<a name="ln424">            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));</a>
+<a name="ln425">            m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
+<a name="ln426">        }</a>
+<a name="ln427">    }</a>
+<a name="ln428">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln429">    else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {</a>
+<a name="ln430">        b_Started = false;</a>
+<a name="ln431">        emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
+<a name="ln432">        ++n_PasswordTriedCountExtract;</a>
+<a name="ln433">        emit error(errorCode);</a>
+<a name="ln434">    }</a>
+<a name="ln435">#endif</a>
+<a name="ln436">    else if(errorCode == OperationCanceled) {</a>
+<a name="ln437">        b_Started = false;</a>
+<a name="ln438">        emit canceled();</a>
+<a name="ln439">    } else if(errorCode == OperationPaused) {</a>
+<a name="ln440">        b_Started = false;</a>
+<a name="ln441">        b_Paused = true;</a>
+<a name="ln442">        emit paused();</a>
+<a name="ln443">    } else {</a>
+<a name="ln444">        b_Started = false;</a>
+<a name="ln445">        emit error(errorCode );</a>
+<a name="ln446">    }</a>
+<a name="ln447">    return;</a>
+<a name="ln448">}</a>
+<a name="ln449"> </a>
+<a name="ln450">// Pauses the extractor.</a>
+<a name="ln451">void ExtractorPrivate::pause() {</a>
+<a name="ln452">    if(b_Started &amp;&amp; !b_Paused) {</a>
+<a name="ln453">        b_PauseRequested = true;</a>
+<a name="ln454">    }</a>
+<a name="ln455">    return;</a>
+<a name="ln456">}</a>
+<a name="ln457"> </a>
+<a name="ln458">// Resumes the extractor.</a>
+<a name="ln459">void ExtractorPrivate::resume() {</a>
+<a name="ln460">    if(!b_Paused) {</a>
+<a name="ln461">        return;</a>
+<a name="ln462">    }</a>
+<a name="ln463">    b_Paused = false;</a>
+<a name="ln464">    b_Started = true;</a>
+<a name="ln465">    emit resumed();</a>
+<a name="ln466"> </a>
+<a name="ln467">    short ret = extract();</a>
+<a name="ln468">    if(ret == NoError) {</a>
+<a name="ln469">        b_Started = false;</a>
+<a name="ln470">        b_Finished = true;</a>
+<a name="ln471">        m_Archive-&gt;close();</a>
+<a name="ln472">        if(!b_MemoryMode) {</a>
+<a name="ln473">            emit diskFinished();</a>
+<a name="ln474">        } else {</a>
+<a name="ln475">            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));</a>
+<a name="ln476">            m_ExtractedFiles.reset(new QVector&lt;MemoryFile&gt;);</a>
+<a name="ln477">        }</a>
+<a name="ln478">    }</a>
+<a name="ln479">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln480">    else if(ret == ArchivePasswordIncorrect || ret == ArchivePasswordNeeded) {</a>
+<a name="ln481">        b_Started = false;</a>
+<a name="ln482">        emit extractionRequirePassword(n_PasswordTriedCountExtract);</a>
+<a name="ln483">        ++n_PasswordTriedCountExtract;</a>
+<a name="ln484">        emit error(ret);</a>
+<a name="ln485">    }</a>
+<a name="ln486">#endif</a>
+<a name="ln487">    else if(ret == OperationCanceled) {</a>
+<a name="ln488">        b_Started = false;</a>
+<a name="ln489">        emit canceled();</a>
+<a name="ln490">    } else if(ret == OperationPaused) {</a>
+<a name="ln491">        b_Started = false;</a>
+<a name="ln492">        b_Paused = true;</a>
+<a name="ln493">        emit paused();</a>
+<a name="ln494">    } else {</a>
+<a name="ln495">        b_Started = false;</a>
+<a name="ln496">        emit error(ret );</a>
 <a name="ln497">    }</a>
-<a name="ln498">    // Check and Open the given archive.</a>
-<a name="ln499">    //</a>
-<a name="ln500">    // Note:</a>
-<a name="ln501">    // At this point of code either m_ArchivePath or m_Archive has to be</a>
-<a name="ln502">    // set or else the function should have exited with an error signal.</a>
-<a name="ln503">    if(!m_ArchivePath.isEmpty()) {</a>
-<a name="ln504"> </a>
-<a name="ln505">        QFileInfo info(m_ArchivePath);</a>
-<a name="ln506">        // Check if the file exists.</a>
-<a name="ln507">        if(!info.exists()) {</a>
-<a name="ln508">            return ArchiveDoesNotExists;</a>
-<a name="ln509">        } else if(!info.isFile()) { // Check if its really a file.</a>
-<a name="ln510">            return InvalidArchiveFile;</a>
-<a name="ln511">        }</a>
-<a name="ln512"> </a>
-<a name="ln513">        // Check if we have the permission to read it.</a>
-<a name="ln514">        auto perm = info.permissions();</a>
-<a name="ln515">        if(</a>
-<a name="ln516">            !(perm &amp; QFileDevice::ReadUser) &amp;&amp;</a>
-<a name="ln517">            !(perm &amp; QFileDevice::ReadGroup) &amp;&amp;</a>
-<a name="ln518">            !(perm &amp; QFileDevice::ReadOther)</a>
-<a name="ln519">        ) {</a>
-<a name="ln520">            return NoPermissionToReadArchive;</a>
-<a name="ln521">        }</a>
+<a name="ln498">    return;</a>
+<a name="ln499">}</a>
+<a name="ln500"> </a>
+<a name="ln501">// Cancels the extraction.</a>
+<a name="ln502">void ExtractorPrivate::cancel() {</a>
+<a name="ln503">    if(b_Started &amp;&amp; !b_Paused &amp;&amp; !b_Finished) {</a>
+<a name="ln504">        b_CancelRequested = true;</a>
+<a name="ln505">    }</a>
+<a name="ln506">    return;</a>
+<a name="ln507">}</a>
+<a name="ln508"> </a>
+<a name="ln509"> </a>
+<a name="ln510">short ExtractorPrivate::openArchive() {</a>
+<a name="ln511">    if(m_ArchivePath.isEmpty() &amp;&amp; !m_Archive) {</a>
+<a name="ln512">        return ArchiveNotGiven;</a>
+<a name="ln513">    } else if(b_ArchiveOpened) {</a>
+<a name="ln514">        return NoError;</a>
+<a name="ln515">    }</a>
+<a name="ln516">    // Check and Open the given archive.</a>
+<a name="ln517">    //</a>
+<a name="ln518">    // Note:</a>
+<a name="ln519">    // At this point of code either m_ArchivePath or m_Archive has to be</a>
+<a name="ln520">    // set or else the function should have exited with an error signal.</a>
+<a name="ln521">    if(!m_ArchivePath.isEmpty()) {</a>
 <a name="ln522"> </a>
-<a name="ln523"> </a>
-<a name="ln524">        QFile *file;</a>
-<a name="ln525">        try {</a>
-<a name="ln526">            file = new QFile(this);</a>
-<a name="ln527">        } catch ( ... ) {</a>
-<a name="ln528">            m_Archive = nullptr; // Just a precaution.</a>
-<a name="ln529">            return NotEnoughMemory;</a>
-<a name="ln530">        }</a>
-<a name="ln531">        file-&gt;setFileName(m_ArchivePath);</a>
-<a name="ln532"> </a>
-<a name="ln533">        // Finally open the file.</a>
-<a name="ln534">        if(!file-&gt;open(QIODevice::ReadOnly)) {</a>
-<a name="ln535">            file-&gt;deleteLater();</a>
-<a name="ln536">            return CannotOpenArchive;</a>
-<a name="ln537">        }</a>
-<a name="ln538"> </a>
-<a name="ln539">        b_QIODeviceOwned = true;</a>
-<a name="ln540">        m_Archive = (QIODevice*)file;</a>
-<a name="ln541">    } else {</a>
-<a name="ln542">        /// Open the archive if it's not opened.</a>
-<a name="ln543">        if(!m_Archive-&gt;isOpen() &amp;&amp; !m_Archive-&gt;open(QIODevice::ReadOnly)) {</a>
-<a name="ln544">            return ArchiveIsNotOpened;</a>
-<a name="ln545">        }</a>
-<a name="ln546"> </a>
-<a name="ln547">        if(!m_Archive-&gt;isReadable()) { // Check if it is readable.</a>
-<a name="ln548">            return ArchiveIsNotReadable;</a>
-<a name="ln549">        }</a>
-<a name="ln550">    }</a>
-<a name="ln551">    b_ArchiveOpened = true;</a>
-<a name="ln552">    return NoError;</a>
-<a name="ln553">}</a>
-<a name="ln554"> </a>
-<a name="ln555">short ExtractorPrivate::checkOutputDirectory() {</a>
-<a name="ln556">    QFileInfo info(m_OutputDirectory + &quot;/&quot;);</a>
-<a name="ln557">    // Check if its a directory and not a file , Also check if it exists.</a>
-<a name="ln558">    if(!info.exists() || !info.isDir()) {</a>
-<a name="ln559">        return InvalidOutputDirectory;</a>
-<a name="ln560">    }</a>
-<a name="ln561"> </a>
-<a name="ln562">    // Check if we have the permission to read and write.</a>
-<a name="ln563">    if(!info.isWritable() || !info.isReadable()) {</a>
-<a name="ln564">        return NoPermissionToWrite;</a>
-<a name="ln565">    }</a>
-<a name="ln566">    m_OutputDirectory = info.absoluteFilePath();</a>
-<a name="ln567">    return NoError;</a>
-<a name="ln568">}</a>
-<a name="ln569"> </a>
-<a name="ln570">short ExtractorPrivate::extract() {</a>
-<a name="ln571">    if(m_Archive == nullptr) {</a>
-<a name="ln572">        return ArchiveNotGiven;</a>
-<a name="ln573">    }</a>
-<a name="ln574">    int ret = 0;</a>
-<a name="ln575">    short err = NoError;</a>
-<a name="ln576">    archive_entry *entry = nullptr;</a>
-<a name="ln577"> </a>
-<a name="ln578">    if(m_ArchiveRead.isNull() &amp;&amp; (b_MemoryMode || m_ArchiveWrite.isNull())) {</a>
-<a name="ln579">        n_ProcessedEntries = 0;</a>
-<a name="ln580"> </a>
-<a name="ln581">        m_ArchiveRead = QSharedPointer&lt;struct archive&gt;(archive_read_new(), ArchiveReadDestructor);</a>
-<a name="ln582">        if(!b_MemoryMode) {</a>
-<a name="ln583">            m_ArchiveWrite = QSharedPointer&lt;struct archive&gt;(archive_write_disk_new(), ArchiveWriteDestructor);</a>
-<a name="ln584">            if(!m_ArchiveRead.data() || !m_ArchiveWrite.data()) {</a>
-<a name="ln585">                m_ArchiveRead.clear();</a>
-<a name="ln586">                m_ArchiveWrite.clear();</a>
-<a name="ln587">                return NotEnoughMemory;</a>
-<a name="ln588">            }</a>
-<a name="ln589">        } else if(!m_ArchiveRead.data()) {</a>
-<a name="ln590">            m_ArchiveRead.clear();</a>
-<a name="ln591">            return NotEnoughMemory;</a>
-<a name="ln592">        }</a>
-<a name="ln593"> </a>
-<a name="ln594">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln595">        if(!m_Password.isEmpty()) {</a>
-<a name="ln596">            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toUtf8().constData());</a>
-<a name="ln597">        }</a>
-<a name="ln598">#endif</a>
-<a name="ln599">        archive_read_support_format_all(m_ArchiveRead.data());</a>
-<a name="ln600">        archive_read_support_filter_all(m_ArchiveRead.data());</a>
-<a name="ln601"> </a>
-<a name="ln602">        if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {</a>
-<a name="ln603">            m_ArchiveRead.clear();</a>
-<a name="ln604">            m_ArchiveWrite.clear();</a>
-<a name="ln605">            return ArchiveReadError;</a>
-<a name="ln606">        }</a>
-<a name="ln607"> </a>
-<a name="ln608">        if(!b_MemoryMode) {</a>
-<a name="ln609">            if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {</a>
-<a name="ln610">                m_ArchiveRead.clear();</a>
-<a name="ln611">                m_ArchiveWrite.clear();</a>
-<a name="ln612">                return ArchiveWriteError;</a>
-<a name="ln613">            }</a>
-<a name="ln614">        }</a>
-<a name="ln615"> </a>
-<a name="ln616">    }</a>
-<a name="ln617">    for (;;) {</a>
-<a name="ln618">        if(m_CurrentArchiveEntry) {</a>
-<a name="ln619">            err = writeData(m_CurrentArchiveEntry);</a>
-<a name="ln620">            if(err == OperationPaused) {</a>
-<a name="ln621">                return err;</a>
-<a name="ln622">            } else if(err) { // NoError = 0</a>
-<a name="ln623">                m_ArchiveRead.clear();</a>
-<a name="ln624">                m_ArchiveWrite.clear();</a>
-<a name="ln625">                return err;</a>
-<a name="ln626">            }</a>
-<a name="ln627">            ++n_ProcessedEntries;</a>
-<a name="ln628"> </a>
-<a name="ln629">            // Report final progress signal after extracting the file fully.</a>
-<a name="ln630">            if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
-<a name="ln631">                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),</a>
-<a name="ln632">                              n_ProcessedEntries,</a>
-<a name="ln633">                              n_TotalEntries,</a>
-<a name="ln634">                              n_BytesProcessed, n_BytesTotal);</a>
-<a name="ln635">            } else {</a>
-<a name="ln636">                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),</a>
-<a name="ln637">                              1,</a>
-<a name="ln638">                              1,</a>
-<a name="ln639">                              1,</a>
-<a name="ln640">                              1);</a>
-<a name="ln641"> </a>
-<a name="ln642">            }</a>
-<a name="ln643"> </a>
-<a name="ln644">            m_CurrentArchiveEntry = nullptr;</a>
-<a name="ln645">        }</a>
-<a name="ln646">        ret = archive_read_next_header(m_ArchiveRead.data(), &amp;entry);</a>
-<a name="ln647">        if (ret == ARCHIVE_EOF) {</a>
-<a name="ln648">            break;</a>
-<a name="ln649">        }</a>
-<a name="ln650">        if (ret != ARCHIVE_OK) {</a>
-<a name="ln651">            err = ArchiveCorrupted;</a>
-<a name="ln652">            if(PASSWORD_NEEDED(m_ArchiveRead.data())) {</a>
-<a name="ln653">                err = ArchivePasswordNeeded;</a>
-<a name="ln654">            } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {</a>
-<a name="ln655">                err = ArchivePasswordIncorrect;</a>
-<a name="ln656">            }</a>
-<a name="ln657">            m_ArchiveRead.clear();</a>
-<a name="ln658">            m_ArchiveWrite.clear();</a>
-<a name="ln659">            return err;</a>
-<a name="ln660">        }</a>
+<a name="ln523">        QFileInfo info(m_ArchivePath);</a>
+<a name="ln524">        // Check if the file exists.</a>
+<a name="ln525">        if(!info.exists()) {</a>
+<a name="ln526">            return ArchiveDoesNotExists;</a>
+<a name="ln527">        } else if(!info.isFile()) { // Check if its really a file.</a>
+<a name="ln528">            return InvalidArchiveFile;</a>
+<a name="ln529">        }</a>
+<a name="ln530"> </a>
+<a name="ln531">        // Check if we have the permission to read it.</a>
+<a name="ln532">        auto perm = info.permissions();</a>
+<a name="ln533">        if(</a>
+<a name="ln534">            !(perm &amp; QFileDevice::ReadUser) &amp;&amp;</a>
+<a name="ln535">            !(perm &amp; QFileDevice::ReadGroup) &amp;&amp;</a>
+<a name="ln536">            !(perm &amp; QFileDevice::ReadOther)</a>
+<a name="ln537">        ) {</a>
+<a name="ln538">            return NoPermissionToReadArchive;</a>
+<a name="ln539">        }</a>
+<a name="ln540"> </a>
+<a name="ln541"> </a>
+<a name="ln542">        QFile *file;</a>
+<a name="ln543">        try {</a>
+<a name="ln544">            file = new QFile(this);</a>
+<a name="ln545">        } catch ( ... ) {</a>
+<a name="ln546">            m_Archive = nullptr; // Just a precaution.</a>
+<a name="ln547">            return NotEnoughMemory;</a>
+<a name="ln548">        }</a>
+<a name="ln549">        file-&gt;setFileName(m_ArchivePath);</a>
+<a name="ln550"> </a>
+<a name="ln551">        // Finally open the file.</a>
+<a name="ln552">        if(!file-&gt;open(QIODevice::ReadOnly)) {</a>
+<a name="ln553">            file-&gt;deleteLater();</a>
+<a name="ln554">            return CannotOpenArchive;</a>
+<a name="ln555">        }</a>
+<a name="ln556"> </a>
+<a name="ln557">        b_QIODeviceOwned = true;</a>
+<a name="ln558">        m_Archive = (QIODevice*)file;</a>
+<a name="ln559">    } else {</a>
+<a name="ln560">        /// Open the archive if it's not opened.</a>
+<a name="ln561">        if(!m_Archive-&gt;isOpen() &amp;&amp; !m_Archive-&gt;open(QIODevice::ReadOnly)) {</a>
+<a name="ln562">            return ArchiveIsNotOpened;</a>
+<a name="ln563">        }</a>
+<a name="ln564"> </a>
+<a name="ln565">        if(!m_Archive-&gt;isReadable()) { // Check if it is readable.</a>
+<a name="ln566">            return ArchiveIsNotReadable;</a>
+<a name="ln567">        }</a>
+<a name="ln568">    }</a>
+<a name="ln569">    b_ArchiveOpened = true;</a>
+<a name="ln570">    return NoError;</a>
+<a name="ln571">}</a>
+<a name="ln572"> </a>
+<a name="ln573">short ExtractorPrivate::checkOutputDirectory() {</a>
+<a name="ln574">    QFileInfo info(m_OutputDirectory + &quot;/&quot;);</a>
+<a name="ln575">    // Check if its a directory and not a file , Also check if it exists.</a>
+<a name="ln576">    if(!info.exists() || !info.isDir()) {</a>
+<a name="ln577">        return InvalidOutputDirectory;</a>
+<a name="ln578">    }</a>
+<a name="ln579"> </a>
+<a name="ln580">    // Check if we have the permission to read and write.</a>
+<a name="ln581">    if(!info.isWritable() || !info.isReadable()) {</a>
+<a name="ln582">        return NoPermissionToWrite;</a>
+<a name="ln583">    }</a>
+<a name="ln584">    m_OutputDirectory = info.absoluteFilePath();</a>
+<a name="ln585">    return NoError;</a>
+<a name="ln586">}</a>
+<a name="ln587"> </a>
+<a name="ln588">short ExtractorPrivate::extract() {</a>
+<a name="ln589">    if(m_Archive == nullptr) {</a>
+<a name="ln590">        return ArchiveNotGiven;</a>
+<a name="ln591">    }</a>
+<a name="ln592">    int ret = 0;</a>
+<a name="ln593">    short err = NoError;</a>
+<a name="ln594">    archive_entry *entry = nullptr;</a>
+<a name="ln595"> </a>
+<a name="ln596">    if(m_ArchiveRead.isNull() &amp;&amp; (b_MemoryMode || m_ArchiveWrite.isNull())) {</a>
+<a name="ln597">        n_ProcessedEntries = 0;</a>
+<a name="ln598"> </a>
+<a name="ln599">        m_ArchiveRead = QSharedPointer&lt;struct archive&gt;(archive_read_new(), ArchiveReadDestructor);</a>
+<a name="ln600">        if(!b_MemoryMode) {</a>
+<a name="ln601">            m_ArchiveWrite = QSharedPointer&lt;struct archive&gt;(archive_write_disk_new(), ArchiveWriteDestructor);</a>
+<a name="ln602">            if(!m_ArchiveRead.data() || !m_ArchiveWrite.data()) {</a>
+<a name="ln603">                m_ArchiveRead.clear();</a>
+<a name="ln604">                m_ArchiveWrite.clear();</a>
+<a name="ln605">                return NotEnoughMemory;</a>
+<a name="ln606">            }</a>
+<a name="ln607">        } else if(!m_ArchiveRead.data()) {</a>
+<a name="ln608">            m_ArchiveRead.clear();</a>
+<a name="ln609">            return NotEnoughMemory;</a>
+<a name="ln610">        }</a>
+<a name="ln611"> </a>
+<a name="ln612">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln613">        if(!m_Password.isEmpty()) {</a>
+<a name="ln614">            archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toUtf8().constData());</a>
+<a name="ln615">        }</a>
+<a name="ln616">#endif</a>
+<a name="ln617">        archive_read_support_format_all(m_ArchiveRead.data());</a>
+<a name="ln618">        archive_read_support_filter_all(m_ArchiveRead.data());</a>
+<a name="ln619"> </a>
+<a name="ln620">        if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {</a>
+<a name="ln621">            m_ArchiveRead.clear();</a>
+<a name="ln622">            m_ArchiveWrite.clear();</a>
+<a name="ln623">            return ArchiveReadError;</a>
+<a name="ln624">        }</a>
+<a name="ln625"> </a>
+<a name="ln626">        if(!b_MemoryMode) {</a>
+<a name="ln627">            if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {</a>
+<a name="ln628">                m_ArchiveRead.clear();</a>
+<a name="ln629">                m_ArchiveWrite.clear();</a>
+<a name="ln630">                return ArchiveWriteError;</a>
+<a name="ln631">            }</a>
+<a name="ln632">        }</a>
+<a name="ln633"> </a>
+<a name="ln634">    }</a>
+<a name="ln635">    for (;;) {</a>
+<a name="ln636">        if(m_CurrentArchiveEntry) {</a>
+<a name="ln637">            err = writeData(m_CurrentArchiveEntry);</a>
+<a name="ln638">            if(err == OperationPaused) {</a>
+<a name="ln639">                return err;</a>
+<a name="ln640">            } else if(err) { // NoError = 0</a>
+<a name="ln641">                m_ArchiveRead.clear();</a>
+<a name="ln642">                m_ArchiveWrite.clear();</a>
+<a name="ln643">                return err;</a>
+<a name="ln644">            }</a>
+<a name="ln645">            ++n_ProcessedEntries;</a>
+<a name="ln646"> </a>
+<a name="ln647">            // Report final progress signal after extracting the file fully.</a>
+<a name="ln648">            if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
+<a name="ln649">                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),</a>
+<a name="ln650">                              n_ProcessedEntries,</a>
+<a name="ln651">                              n_TotalEntries,</a>
+<a name="ln652">                              n_BytesProcessed, n_BytesTotal);</a>
+<a name="ln653">            } else {</a>
+<a name="ln654">                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),</a>
+<a name="ln655">                              1,</a>
+<a name="ln656">                              1,</a>
+<a name="ln657">                              1,</a>
+<a name="ln658">                              1);</a>
+<a name="ln659"> </a>
+<a name="ln660">            }</a>
 <a name="ln661"> </a>
-<a name="ln662">        err = writeData(entry);</a>
-<a name="ln663">        if(err == OperationPaused) {</a>
-<a name="ln664">            return err;</a>
-<a name="ln665">        } else if(err) { // NoError = 0</a>
-<a name="ln666">            m_ArchiveRead.clear();</a>
-<a name="ln667">            m_ArchiveWrite.clear();</a>
-<a name="ln668">            return err;</a>
-<a name="ln669">        }</a>
-<a name="ln670">        ++n_ProcessedEntries;</a>
-<a name="ln671"> </a>
-<a name="ln672">        // Report final progress signal after extracting the file fully.</a>
-<a name="ln673">        if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
-<a name="ln674">            emit progress(QString(archive_entry_pathname(entry)),</a>
-<a name="ln675">                          n_ProcessedEntries,</a>
-<a name="ln676">                          n_TotalEntries,</a>
-<a name="ln677">                          n_BytesProcessed, n_BytesTotal);</a>
-<a name="ln678">        } else {</a>
-<a name="ln679">            emit progress(QString(archive_entry_pathname(entry)),</a>
-<a name="ln680">                          1,</a>
-<a name="ln681">                          1,</a>
-<a name="ln682">                          1,</a>
-<a name="ln683">                          1);</a>
-<a name="ln684"> </a>
-<a name="ln685">        }</a>
-<a name="ln686">        QCoreApplication::processEvents(); // call event loop for the signal to take effect.</a>
-<a name="ln687">    }</a>
-<a name="ln688"> </a>
-<a name="ln689">    /* free memory. */</a>
-<a name="ln690">    m_ArchiveRead.clear();</a>
-<a name="ln691">    m_ArchiveWrite.clear();</a>
-<a name="ln692">    return NoError;</a>
-<a name="ln693">}</a>
-<a name="ln694"> </a>
-<a name="ln695">short ExtractorPrivate::writeData(struct archive_entry *entry) {</a>
-<a name="ln696">    if(m_ArchiveRead.isNull() || (!b_MemoryMode &amp;&amp; m_ArchiveWrite.isNull()) || m_Archive == nullptr) {</a>
-<a name="ln697">        return ArchiveNotGiven;</a>
-<a name="ln698">    }</a>
-<a name="ln699"> </a>
-<a name="ln700">    if(!m_ExtractFilters-&gt;isEmpty() &amp;&amp;</a>
-<a name="ln701">            !m_ExtractFilters-&gt;contains(QString(archive_entry_pathname(entry)))) {</a>
-<a name="ln702">        return NoError;</a>
-<a name="ln703">    }</a>
-<a name="ln704"> </a>
-<a name="ln705">    if(!b_MemoryMode) {</a>
-<a name="ln706">        if(!m_OutputDirectory.isEmpty()) {</a>
-<a name="ln707">            char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));</a>
-<a name="ln708">            archive_entry_set_pathname(entry, new_entry);</a>
-<a name="ln709">            free(new_entry);</a>
-<a name="ln710">        }</a>
-<a name="ln711">    }</a>
+<a name="ln662">            m_CurrentArchiveEntry = nullptr;</a>
+<a name="ln663">        }</a>
+<a name="ln664">        ret = archive_read_next_header(m_ArchiveRead.data(), &amp;entry);</a>
+<a name="ln665">        if (ret == ARCHIVE_EOF) {</a>
+<a name="ln666">            break;</a>
+<a name="ln667">        }</a>
+<a name="ln668">        if (ret != ARCHIVE_OK) {</a>
+<a name="ln669">            err = ArchiveCorrupted;</a>
+<a name="ln670">            if(PASSWORD_NEEDED(m_ArchiveRead.data())) {</a>
+<a name="ln671">                err = ArchivePasswordNeeded;</a>
+<a name="ln672">            } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {</a>
+<a name="ln673">                err = ArchivePasswordIncorrect;</a>
+<a name="ln674">            }</a>
+<a name="ln675">            m_ArchiveRead.clear();</a>
+<a name="ln676">            m_ArchiveWrite.clear();</a>
+<a name="ln677">            return err;</a>
+<a name="ln678">        }</a>
+<a name="ln679"> </a>
+<a name="ln680">        err = writeData(entry);</a>
+<a name="ln681">        if(err == OperationPaused) {</a>
+<a name="ln682">            return err;</a>
+<a name="ln683">        } else if(err) { // NoError = 0</a>
+<a name="ln684">            m_ArchiveRead.clear();</a>
+<a name="ln685">            m_ArchiveWrite.clear();</a>
+<a name="ln686">            return err;</a>
+<a name="ln687">        }</a>
+<a name="ln688">        ++n_ProcessedEntries;</a>
+<a name="ln689"> </a>
+<a name="ln690">        // Report final progress signal after extracting the file fully.</a>
+<a name="ln691">        if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
+<a name="ln692">            emit progress(QString(archive_entry_pathname(entry)),</a>
+<a name="ln693">                          n_ProcessedEntries,</a>
+<a name="ln694">                          n_TotalEntries,</a>
+<a name="ln695">                          n_BytesProcessed, n_BytesTotal);</a>
+<a name="ln696">        } else {</a>
+<a name="ln697">            emit progress(QString(archive_entry_pathname(entry)),</a>
+<a name="ln698">                          1,</a>
+<a name="ln699">                          1,</a>
+<a name="ln700">                          1,</a>
+<a name="ln701">                          1);</a>
+<a name="ln702"> </a>
+<a name="ln703">        }</a>
+<a name="ln704">        QCoreApplication::processEvents(); // call event loop for the signal to take effect.</a>
+<a name="ln705">    }</a>
+<a name="ln706"> </a>
+<a name="ln707">    /* free memory. */</a>
+<a name="ln708">    m_ArchiveRead.clear();</a>
+<a name="ln709">    m_ArchiveWrite.clear();</a>
+<a name="ln710">    return NoError;</a>
+<a name="ln711">}</a>
 <a name="ln712"> </a>
-<a name="ln713">    MutableMemoryFile currentNode;</a>
-<a name="ln714">    int ret = ARCHIVE_OK;</a>
-<a name="ln715">    if(m_CurrentArchiveEntry != entry) {</a>
-<a name="ln716">        if(!b_MemoryMode) {</a>
-<a name="ln717">            ret = archive_write_header(m_ArchiveWrite.data(), entry);</a>
-<a name="ln718">        } else {</a>
-<a name="ln719">            currentNode.setFileInformation(getArchiveEntryInformation(entry));</a>
-<a name="ln720"> </a>
-<a name="ln721">            /// Skip Directories.</a>
-<a name="ln722">            if((currentNode.getFileInformation()).value(&quot;FileType&quot;).toString() == &quot;Directory&quot;) {</a>
-<a name="ln723">                return NoError;</a>
-<a name="ln724">            }</a>
-<a name="ln725"> </a>
-<a name="ln726">            currentNode.setBuffer(new QBuffer);</a>
-<a name="ln727"> </a>
-<a name="ln728">            if((currentNode.getBuffer())-&gt;open(QIODevice::ReadWrite) == false) {</a>
-<a name="ln729">                return ArchiveHeaderWriteError;</a>
-<a name="ln730">            }</a>
-<a name="ln731"> </a>
-<a name="ln732">            m_CurrentMemoryFile = currentNode;</a>
-<a name="ln733">        }</a>
-<a name="ln734">    } else {</a>
-<a name="ln735">        currentNode = m_CurrentMemoryFile;</a>
-<a name="ln736">    }</a>
-<a name="ln737">    if (ret == ARCHIVE_OK) {</a>
-<a name="ln738">        const void *buff;</a>
-<a name="ln739">        size_t size;</a>
-<a name="ln740">#if ARCHIVE_VERSION_NUMBER &gt;= 3000000</a>
-<a name="ln741">        int64_t offset;</a>
-<a name="ln742">#else</a>
-<a name="ln743">        off_t offset;</a>
-<a name="ln744">#endif</a>
-<a name="ln745">        for (;;) {</a>
-<a name="ln746">            ret = archive_read_data_block(m_ArchiveRead.data(), &amp;buff, &amp;size, &amp;offset);</a>
-<a name="ln747">            if (ret == ARCHIVE_EOF) {</a>
-<a name="ln748">                break;</a>
-<a name="ln749">            } else if (ret != ARCHIVE_OK) {</a>
-<a name="ln750">                short err = ArchiveCorrupted;</a>
-<a name="ln751">                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {</a>
-<a name="ln752">                    err = ArchivePasswordNeeded;</a>
-<a name="ln753">                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {</a>
-<a name="ln754">                    err = ArchivePasswordIncorrect;</a>
-<a name="ln755">                }</a>
-<a name="ln756">                return err;</a>
-<a name="ln757">            } else {</a>
-<a name="ln758">                if(!b_MemoryMode) {</a>
-<a name="ln759">                    ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);</a>
-<a name="ln760">                    if (ret != ARCHIVE_OK) {</a>
-<a name="ln761">                        return ArchiveWriteError;</a>
-<a name="ln762">                    }</a>
-<a name="ln763">                } else {</a>
-<a name="ln764">                    (currentNode.getBuffer())-&gt;seek(offset);</a>
-<a name="ln765">                    if((currentNode.getBuffer())-&gt;write((const char*)buff, size) == -1) {</a>
-<a name="ln766">                        return ArchiveWriteError;</a>
-<a name="ln767">                    }</a>
-<a name="ln768">                }</a>
-<a name="ln769">                n_BytesProcessed += size;</a>
-<a name="ln770">                if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
-<a name="ln771">                    emit progress(QString(archive_entry_pathname(entry)),</a>
-<a name="ln772">                                  n_ProcessedEntries,</a>
-<a name="ln773">                                  n_TotalEntries,</a>
-<a name="ln774">                                  n_BytesProcessed, n_BytesTotal);</a>
-<a name="ln775">                }</a>
-<a name="ln776"> </a>
-<a name="ln777">            }</a>
-<a name="ln778"> </a>
-<a name="ln779">            // Allow the execution of the event loop</a>
-<a name="ln780">            QCoreApplication::processEvents();</a>
-<a name="ln781"> </a>
-<a name="ln782">            // Check for pause and cancel requests.</a>
-<a name="ln783">            if(b_PauseRequested) {</a>
-<a name="ln784">                b_PauseRequested = false;</a>
-<a name="ln785">                m_CurrentArchiveEntry = entry;</a>
-<a name="ln786">                return OperationPaused;</a>
-<a name="ln787">            } else if(b_CancelRequested) {</a>
-<a name="ln788">                b_CancelRequested = false;</a>
-<a name="ln789">                return OperationCanceled;</a>
-<a name="ln790">            }</a>
-<a name="ln791"> </a>
-<a name="ln792">        }</a>
-<a name="ln793">    } else {</a>
-<a name="ln794">        return ArchiveHeaderWriteError;</a>
-<a name="ln795">    }</a>
+<a name="ln713">short ExtractorPrivate::writeData(struct archive_entry *entry) {</a>
+<a name="ln714">    if(m_ArchiveRead.isNull() || (!b_MemoryMode &amp;&amp; m_ArchiveWrite.isNull()) || m_Archive == nullptr) {</a>
+<a name="ln715">        return ArchiveNotGiven;</a>
+<a name="ln716">    }</a>
+<a name="ln717"> </a>
+<a name="ln718">    if(!m_ExtractFilters-&gt;isEmpty() &amp;&amp;</a>
+<a name="ln719">            !m_ExtractFilters-&gt;contains(QString(archive_entry_pathname(entry)))) {</a>
+<a name="ln720">        return NoError;</a>
+<a name="ln721">    }</a>
+<a name="ln722"> </a>
+<a name="ln723">    if(!b_MemoryMode) {</a>
+<a name="ln724">        if(!m_OutputDirectory.isEmpty()) {</a>
+<a name="ln725">            char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));</a>
+<a name="ln726">            archive_entry_set_pathname(entry, new_entry);</a>
+<a name="ln727">            free(new_entry);</a>
+<a name="ln728">        }</a>
+<a name="ln729">    }</a>
+<a name="ln730"> </a>
+<a name="ln731">    MutableMemoryFile currentNode;</a>
+<a name="ln732">    int ret = ARCHIVE_OK;</a>
+<a name="ln733">    if(m_CurrentArchiveEntry != entry) {</a>
+<a name="ln734">        if(!b_MemoryMode) {</a>
+<a name="ln735">            ret = archive_write_header(m_ArchiveWrite.data(), entry);</a>
+<a name="ln736">        } else {</a>
+<a name="ln737">            currentNode.setFileInformation(getArchiveEntryInformation(entry));</a>
+<a name="ln738"> </a>
+<a name="ln739">            /// Skip Directories.</a>
+<a name="ln740">            if((currentNode.getFileInformation()).value(&quot;FileType&quot;).toString() == &quot;Directory&quot;) {</a>
+<a name="ln741">                return NoError;</a>
+<a name="ln742">            }</a>
+<a name="ln743"> </a>
+<a name="ln744">            currentNode.setBuffer(new QBuffer);</a>
+<a name="ln745"> </a>
+<a name="ln746">            if((currentNode.getBuffer())-&gt;open(QIODevice::ReadWrite) == false) {</a>
+<a name="ln747">                return ArchiveHeaderWriteError;</a>
+<a name="ln748">            }</a>
+<a name="ln749"> </a>
+<a name="ln750">            m_CurrentMemoryFile = currentNode;</a>
+<a name="ln751">        }</a>
+<a name="ln752">    } else {</a>
+<a name="ln753">        currentNode = m_CurrentMemoryFile;</a>
+<a name="ln754">    }</a>
+<a name="ln755">    if (ret == ARCHIVE_OK) {</a>
+<a name="ln756">        const void *buff;</a>
+<a name="ln757">        size_t size;</a>
+<a name="ln758">#if ARCHIVE_VERSION_NUMBER &gt;= 3000000</a>
+<a name="ln759">        int64_t offset;</a>
+<a name="ln760">#else</a>
+<a name="ln761">        off_t offset;</a>
+<a name="ln762">#endif</a>
+<a name="ln763">        for (;;) {</a>
+<a name="ln764">            ret = archive_read_data_block(m_ArchiveRead.data(), &amp;buff, &amp;size, &amp;offset);</a>
+<a name="ln765">            if (ret == ARCHIVE_EOF) {</a>
+<a name="ln766">                break;</a>
+<a name="ln767">            } else if (ret != ARCHIVE_OK) {</a>
+<a name="ln768">                short err = ArchiveCorrupted;</a>
+<a name="ln769">                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {</a>
+<a name="ln770">                    err = ArchivePasswordNeeded;</a>
+<a name="ln771">                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {</a>
+<a name="ln772">                    err = ArchivePasswordIncorrect;</a>
+<a name="ln773">                }</a>
+<a name="ln774">                return err;</a>
+<a name="ln775">            } else {</a>
+<a name="ln776">                if(!b_MemoryMode) {</a>
+<a name="ln777">                    ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);</a>
+<a name="ln778">                    if (ret != ARCHIVE_OK) {</a>
+<a name="ln779">                        return ArchiveWriteError;</a>
+<a name="ln780">                    }</a>
+<a name="ln781">                } else {</a>
+<a name="ln782">                    (currentNode.getBuffer())-&gt;seek(offset);</a>
+<a name="ln783">                    if((currentNode.getBuffer())-&gt;write((const char*)buff, size) == -1) {</a>
+<a name="ln784">                        return ArchiveWriteError;</a>
+<a name="ln785">                    }</a>
+<a name="ln786">                }</a>
+<a name="ln787">                n_BytesProcessed += size;</a>
+<a name="ln788">                if(n_BytesTotal &gt; 0 &amp;&amp; n_TotalEntries &gt; 0) {</a>
+<a name="ln789">                    emit progress(QString(archive_entry_pathname(entry)),</a>
+<a name="ln790">                                  n_ProcessedEntries,</a>
+<a name="ln791">                                  n_TotalEntries,</a>
+<a name="ln792">                                  n_BytesProcessed, n_BytesTotal);</a>
+<a name="ln793">                }</a>
+<a name="ln794"> </a>
+<a name="ln795">            }</a>
 <a name="ln796"> </a>
-<a name="ln797">    if(!b_MemoryMode) {</a>
-<a name="ln798">        ret = archive_write_finish_entry(m_ArchiveWrite.data());</a>
-<a name="ln799">        if (ret == ARCHIVE_FATAL) {</a>
-<a name="ln800">            return ArchiveHeaderWriteError;</a>
-<a name="ln801">        }</a>
-<a name="ln802">    } else {</a>
-<a name="ln803">        (currentNode.getBuffer())-&gt;close();</a>
-<a name="ln804">        m_ExtractedFiles-&gt;append(</a>
-<a name="ln805">            MemoryFile(</a>
-<a name="ln806">                currentNode.getFileInformation(),</a>
-<a name="ln807">                currentNode.getBuffer()));</a>
-<a name="ln808">        m_CurrentMemoryFile = MutableMemoryFile();</a>
-<a name="ln809">    }</a>
-<a name="ln810">    return NoError;</a>
-<a name="ln811">}</a>
-<a name="ln812"> </a>
-<a name="ln813">short ExtractorPrivate::getTotalEntriesCount() {</a>
-<a name="ln814">    if(!m_Archive) {</a>
-<a name="ln815">        return ArchiveNotGiven;</a>
-<a name="ln816">    }</a>
-<a name="ln817"> </a>
-<a name="ln818">    n_BytesTotal = 0;</a>
-<a name="ln819">    int ret = 0;</a>
-<a name="ln820">    int count = 0;</a>
-<a name="ln821">    archive_entry *entry = nullptr;</a>
-<a name="ln822">    struct archive *inArchive = archive_read_new();</a>
-<a name="ln823">    if(!inArchive) {</a>
-<a name="ln824">        return NotEnoughMemory;</a>
-<a name="ln825">    }</a>
-<a name="ln826"> </a>
-<a name="ln827">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln828">    if(!m_Password.isEmpty()) {</a>
-<a name="ln829">        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());</a>
-<a name="ln830">    }</a>
-<a name="ln831">#endif</a>
-<a name="ln832"> </a>
-<a name="ln833">    archive_read_support_format_all(inArchive);</a>
-<a name="ln834">    archive_read_support_filter_all(inArchive);</a>
-<a name="ln835">    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {</a>
-<a name="ln836">        archive_read_close(inArchive);</a>
-<a name="ln837">        archive_read_free(inArchive);</a>
-<a name="ln838">        return ArchiveReadError;</a>
-<a name="ln839">    }</a>
-<a name="ln840">    for (;;) {</a>
-<a name="ln841">        ret = archive_read_next_header(inArchive, &amp;entry);</a>
-<a name="ln842">        if (ret == ARCHIVE_EOF) {</a>
-<a name="ln843">            break;</a>
-<a name="ln844">        }</a>
-<a name="ln845">        if (ret != ARCHIVE_OK) {</a>
-<a name="ln846">            short err = ArchiveCorrupted;</a>
-<a name="ln847">            if(PASSWORD_NEEDED(inArchive)) {</a>
-<a name="ln848">                err = ArchivePasswordNeeded;</a>
-<a name="ln849">            } else if(PASSWORD_INCORRECT(inArchive)) {</a>
-<a name="ln850">                err = ArchivePasswordIncorrect;</a>
-<a name="ln851">            }</a>
-<a name="ln852">            archive_read_close(inArchive);</a>
-<a name="ln853">            archive_read_free(inArchive);</a>
-<a name="ln854">            return err;</a>
-<a name="ln855">        }</a>
-<a name="ln856">        count += 1;</a>
-<a name="ln857">        n_BytesTotal += archive_entry_size(entry);</a>
-<a name="ln858">        QCoreApplication::processEvents();</a>
-<a name="ln859">    }</a>
-<a name="ln860"> </a>
-<a name="ln861">    // set total number of entries.</a>
-<a name="ln862">    n_TotalEntries = count;</a>
-<a name="ln863"> </a>
-<a name="ln864">    // free memory.</a>
-<a name="ln865">    archive_read_close(inArchive);</a>
-<a name="ln866">    archive_read_free(inArchive);</a>
-<a name="ln867">    return NoError;</a>
-<a name="ln868">}</a>
-<a name="ln869"> </a>
-<a name="ln870">short ExtractorPrivate::processArchiveInformation() {</a>
-<a name="ln871">    if(m_Archive == nullptr) {</a>
-<a name="ln872">        return ArchiveNotGiven;</a>
-<a name="ln873">    }</a>
-<a name="ln874"> </a>
-<a name="ln875">    int ret = 0;</a>
-<a name="ln876">    archive_entry *entry = nullptr;</a>
-<a name="ln877">    struct archive *inArchive = archive_read_new();</a>
-<a name="ln878">    if(!inArchive) {</a>
-<a name="ln879">        return NotEnoughMemory;</a>
-<a name="ln880">    }</a>
-<a name="ln881">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
-<a name="ln882">    if(!m_Password.isEmpty()) {</a>
-<a name="ln883">        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());</a>
-<a name="ln884">    }</a>
-<a name="ln885">#endif</a>
-<a name="ln886">    archive_read_support_format_all(inArchive);</a>
-<a name="ln887">    archive_read_support_filter_all(inArchive);</a>
-<a name="ln888"> </a>
-<a name="ln889">    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {</a>
-<a name="ln890">        archive_read_close(inArchive);</a>
-<a name="ln891">        archive_read_free(inArchive);</a>
-<a name="ln892">        return ArchiveReadError;</a>
-<a name="ln893">    }</a>
-<a name="ln894">    for (;;) {</a>
-<a name="ln895">        ret = archive_read_next_header(inArchive, &amp;entry);</a>
-<a name="ln896">        if (ret == ARCHIVE_EOF) {</a>
-<a name="ln897">            break;</a>
-<a name="ln898">        }</a>
-<a name="ln899">        if (ret != ARCHIVE_OK) {</a>
-<a name="ln900">            short err = ArchiveCorrupted;</a>
-<a name="ln901">            if(PASSWORD_NEEDED(inArchive)) {</a>
-<a name="ln902">                err = ArchivePasswordNeeded;</a>
-<a name="ln903">            } else if(PASSWORD_INCORRECT(inArchive)) {</a>
-<a name="ln904">                err = ArchivePasswordIncorrect;</a>
-<a name="ln905">            }</a>
-<a name="ln906">            archive_read_close(inArchive);</a>
-<a name="ln907">            archive_read_free(inArchive);</a>
-<a name="ln908">            return err;</a>
-<a name="ln909">        }</a>
-<a name="ln910">        QString CurrentFile = QString(archive_entry_pathname(entry));</a>
-<a name="ln911">        QJsonObject CurrentEntry = getArchiveEntryInformation(entry);</a>
-<a name="ln912">        m_Info-&gt;insert(CurrentFile, CurrentEntry);</a>
-<a name="ln913">        n_BytesTotal += archive_entry_size(entry);</a>
-<a name="ln914">        QCoreApplication::processEvents();</a>
-<a name="ln915">    }</a>
-<a name="ln916"> </a>
-<a name="ln917">    // set total number of entries.</a>
-<a name="ln918">    n_TotalEntries = m_Info-&gt;size();</a>
-<a name="ln919"> </a>
-<a name="ln920">    // free memory.</a>
-<a name="ln921">    archive_read_close(inArchive);</a>
-<a name="ln922">    archive_read_free(inArchive);</a>
-<a name="ln923">    return NoError;</a>
-<a name="ln924">}</a>
+<a name="ln797">            // Allow the execution of the event loop</a>
+<a name="ln798">            QCoreApplication::processEvents();</a>
+<a name="ln799"> </a>
+<a name="ln800">            // Check for pause and cancel requests.</a>
+<a name="ln801">            if(b_PauseRequested) {</a>
+<a name="ln802">                b_PauseRequested = false;</a>
+<a name="ln803">                m_CurrentArchiveEntry = entry;</a>
+<a name="ln804">                return OperationPaused;</a>
+<a name="ln805">            } else if(b_CancelRequested) {</a>
+<a name="ln806">                b_CancelRequested = false;</a>
+<a name="ln807">                return OperationCanceled;</a>
+<a name="ln808">            }</a>
+<a name="ln809"> </a>
+<a name="ln810">        }</a>
+<a name="ln811">    } else {</a>
+<a name="ln812">        return ArchiveHeaderWriteError;</a>
+<a name="ln813">    }</a>
+<a name="ln814"> </a>
+<a name="ln815">    if(!b_MemoryMode) {</a>
+<a name="ln816">        ret = archive_write_finish_entry(m_ArchiveWrite.data());</a>
+<a name="ln817">        if (ret == ARCHIVE_FATAL) {</a>
+<a name="ln818">            return ArchiveHeaderWriteError;</a>
+<a name="ln819">        }</a>
+<a name="ln820">    } else {</a>
+<a name="ln821">        (currentNode.getBuffer())-&gt;close();</a>
+<a name="ln822">        m_ExtractedFiles-&gt;append(</a>
+<a name="ln823">            MemoryFile(</a>
+<a name="ln824">                currentNode.getFileInformation(),</a>
+<a name="ln825">                currentNode.getBuffer()));</a>
+<a name="ln826">        m_CurrentMemoryFile = MutableMemoryFile();</a>
+<a name="ln827">    }</a>
+<a name="ln828">    return NoError;</a>
+<a name="ln829">}</a>
+<a name="ln830"> </a>
+<a name="ln831">short ExtractorPrivate::getTotalEntriesCount() {</a>
+<a name="ln832">    if(!m_Archive) {</a>
+<a name="ln833">        return ArchiveNotGiven;</a>
+<a name="ln834">    }</a>
+<a name="ln835"> </a>
+<a name="ln836">    n_BytesTotal = 0;</a>
+<a name="ln837">    int ret = 0;</a>
+<a name="ln838">    int count = 0;</a>
+<a name="ln839">    archive_entry *entry = nullptr;</a>
+<a name="ln840">    struct archive *inArchive = archive_read_new();</a>
+<a name="ln841">    if(!inArchive) {</a>
+<a name="ln842">        return NotEnoughMemory;</a>
+<a name="ln843">    }</a>
+<a name="ln844"> </a>
+<a name="ln845">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln846">    if(!m_Password.isEmpty()) {</a>
+<a name="ln847">        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());</a>
+<a name="ln848">    }</a>
+<a name="ln849">#endif</a>
+<a name="ln850"> </a>
+<a name="ln851">    archive_read_support_format_all(inArchive);</a>
+<a name="ln852">    archive_read_support_filter_all(inArchive);</a>
+<a name="ln853">    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {</a>
+<a name="ln854">        archive_read_close(inArchive);</a>
+<a name="ln855">        archive_read_free(inArchive);</a>
+<a name="ln856">        return ArchiveReadError;</a>
+<a name="ln857">    }</a>
+<a name="ln858">    for (;;) {</a>
+<a name="ln859">        ret = archive_read_next_header(inArchive, &amp;entry);</a>
+<a name="ln860">        if (ret == ARCHIVE_EOF) {</a>
+<a name="ln861">            break;</a>
+<a name="ln862">        }</a>
+<a name="ln863">        if (ret != ARCHIVE_OK) {</a>
+<a name="ln864">            short err = ArchiveCorrupted;</a>
+<a name="ln865">            if(PASSWORD_NEEDED(inArchive)) {</a>
+<a name="ln866">                err = ArchivePasswordNeeded;</a>
+<a name="ln867">            } else if(PASSWORD_INCORRECT(inArchive)) {</a>
+<a name="ln868">                err = ArchivePasswordIncorrect;</a>
+<a name="ln869">            }</a>
+<a name="ln870">            archive_read_close(inArchive);</a>
+<a name="ln871">            archive_read_free(inArchive);</a>
+<a name="ln872">            return err;</a>
+<a name="ln873">        }</a>
+<a name="ln874">        count += 1;</a>
+<a name="ln875">        n_BytesTotal += archive_entry_size(entry);</a>
+<a name="ln876">        QCoreApplication::processEvents();</a>
+<a name="ln877">    }</a>
+<a name="ln878"> </a>
+<a name="ln879">    // set total number of entries.</a>
+<a name="ln880">    n_TotalEntries = count;</a>
+<a name="ln881"> </a>
+<a name="ln882">    // free memory.</a>
+<a name="ln883">    archive_read_close(inArchive);</a>
+<a name="ln884">    archive_read_free(inArchive);</a>
+<a name="ln885">    return NoError;</a>
+<a name="ln886">}</a>
+<a name="ln887"> </a>
+<a name="ln888">short ExtractorPrivate::processArchiveInformation() {</a>
+<a name="ln889">    if(m_Archive == nullptr) {</a>
+<a name="ln890">        return ArchiveNotGiven;</a>
+<a name="ln891">    }</a>
+<a name="ln892"> </a>
+<a name="ln893">    int ret = 0;</a>
+<a name="ln894">    archive_entry *entry = nullptr;</a>
+<a name="ln895">    struct archive *inArchive = archive_read_new();</a>
+<a name="ln896">    if(!inArchive) {</a>
+<a name="ln897">        return NotEnoughMemory;</a>
+<a name="ln898">    }</a>
+<a name="ln899">#if ARCHIVE_VERSION_NUMBER &gt;= 3003003</a>
+<a name="ln900">    if(!m_Password.isEmpty()) {</a>
+<a name="ln901">        archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());</a>
+<a name="ln902">    }</a>
+<a name="ln903">#endif</a>
+<a name="ln904">    archive_read_support_format_all(inArchive);</a>
+<a name="ln905">    archive_read_support_filter_all(inArchive);</a>
+<a name="ln906"> </a>
+<a name="ln907">    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {</a>
+<a name="ln908">        archive_read_close(inArchive);</a>
+<a name="ln909">        archive_read_free(inArchive);</a>
+<a name="ln910">        return ArchiveReadError;</a>
+<a name="ln911">    }</a>
+<a name="ln912">    for (;;) {</a>
+<a name="ln913">        ret = archive_read_next_header(inArchive, &amp;entry);</a>
+<a name="ln914">        if (ret == ARCHIVE_EOF) {</a>
+<a name="ln915">            break;</a>
+<a name="ln916">        }</a>
+<a name="ln917">        if (ret != ARCHIVE_OK) {</a>
+<a name="ln918">            short err = ArchiveCorrupted;</a>
+<a name="ln919">            if(PASSWORD_NEEDED(inArchive)) {</a>
+<a name="ln920">                err = ArchivePasswordNeeded;</a>
+<a name="ln921">            } else if(PASSWORD_INCORRECT(inArchive)) {</a>
+<a name="ln922">                err = ArchivePasswordIncorrect;</a>
+<a name="ln923">            }</a>
+<a name="ln924">            archive_read_close(inArchive);</a>
+<a name="ln925">            archive_read_free(inArchive);</a>
+<a name="ln926">            return err;</a>
+<a name="ln927">        }</a>
+<a name="ln928">        QString CurrentFile = QString(archive_entry_pathname(entry));</a>
+<a name="ln929">        QJsonObject CurrentEntry = getArchiveEntryInformation(entry);</a>
+<a name="ln930">        m_Info-&gt;insert(CurrentFile, CurrentEntry);</a>
+<a name="ln931">        n_BytesTotal += archive_entry_size(entry);</a>
+<a name="ln932">        QCoreApplication::processEvents();</a>
+<a name="ln933">    }</a>
+<a name="ln934"> </a>
+<a name="ln935">    // set total number of entries.</a>
+<a name="ln936">    n_TotalEntries = m_Info-&gt;size();</a>
+<a name="ln937"> </a>
+<a name="ln938">    // free memory.</a>
+<a name="ln939">    archive_read_close(inArchive);</a>
+<a name="ln940">    archive_read_free(inArchive);</a>
+<a name="ln941">    return NoError;</a>
+<a name="ln942">}</a>
 
 </code></pre>
 <div class="balloon" rel="80"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v1048/" target="_blank">V1048</a> The 'size' variable was assigned the same value.</p></div>
 <div class="balloon" rel="83"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v570/" target="_blank">V570</a> The 'size' variable is assigned to itself.</p></div>
 <div class="balloon" rel="84"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v560/" target="_blank">V560</a> A part of conditional expression is always true: size >= 1024.</p></div>
 <div class="balloon" rel="87"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v560/" target="_blank">V560</a> A part of conditional expression is always true: size >= 1048576.</p></div>
-<div class="balloon" rel="287"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v1048/" target="_blank">V1048</a> The 'b_Started' variable was assigned the same value.</p></div>
+<div class="balloon" rel="305"><p><span style="font-size:18px">&uarr;</span> <a href="https://pvs-studio.com/en/docs/warnings/v1048/" target="_blank">V1048</a> The 'b_Started' variable was assigned the same value.</p></div>
 
 <link rel="stylesheet" href="highlight.css">
 <script src="highlight.pack.js"></script>
