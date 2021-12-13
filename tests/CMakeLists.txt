@@ -14,10 +14,7 @@ if(NOT BUILD_TESTS)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test REQUIRED)
-if(${QT_VERSION_MAJOR} EQUAL 5)
-    find_package(Qt5Concurrent)
-endif()
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test Concurrent REQUIRED)
 
 # Include Directories.
 include_directories(.)
@@ -35,8 +32,4 @@ add_executable(QArchiveTests main.cc
 			     QArchiveDiskExtractorTests.hpp
 			     QArchiveMemoryExtractorTests.cc
 			     QArchiveMemoryExtractorTests.hpp)
-if(${QT_VERSION_MAJOR} EQUAL 5)
-    target_link_libraries(QArchiveTests PRIVATE QArchive Qt5::Test Qt5::Concurrent)
-else()
-    target_link_libraries(QArchiveTests PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test)
-endif()
+target_link_libraries(QArchiveTests PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Concurrent)
