@@ -17,7 +17,8 @@ option(QARCHIVE_STATIC "Static Build of QArchive" ON)
 
 # Find the QtCore library and libarchive.
 find_package(LibArchive)
-find_package(Qt5Core)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 
 # cmake macros used
 include(GNUInstallDirs)
@@ -94,7 +95,7 @@ list(APPEND toinstall
     ${PROJECT_BINARY_DIR}/config.h
 )	
 
-target_link_libraries(QArchive PUBLIC Qt5::Core LibArchive::LibArchive)
+target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core LibArchive::LibArchive)
 target_include_directories(QArchive INTERFACE
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

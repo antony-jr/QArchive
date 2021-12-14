@@ -12,8 +12,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 if(NOT BUILD_TESTS)
 	find_package(QArchive)
 endif()
-find_package(Qt5Test)
-find_package(Qt5Concurrent)
+
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test Concurrent REQUIRED)
 
 # Include Directories.
 include_directories(.)
@@ -31,4 +32,4 @@ add_executable(QArchiveTests main.cc
 			     QArchiveDiskExtractorTests.hpp
 			     QArchiveMemoryExtractorTests.cc
 			     QArchiveMemoryExtractorTests.hpp)
-target_link_libraries(QArchiveTests PRIVATE QArchive Qt5::Test Qt5::Concurrent)
+target_link_libraries(QArchiveTests PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Concurrent)
