@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_dependency(Qt${QT_VERSION_MAJOR}Core)
 find_dependency(LibArchive)
 
