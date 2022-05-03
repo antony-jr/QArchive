@@ -711,7 +711,7 @@ short ExtractorPrivate::extract() {
         if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
-            return ArchiveReadError;
+	    return ArchiveReadError;
         }
 
         if(!b_MemoryMode) {

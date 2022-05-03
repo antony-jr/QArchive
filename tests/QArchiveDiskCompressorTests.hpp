@@ -25,9 +25,11 @@ class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
     void simpleCompression();
     void usingPauseResume();
     void compressingMultipleFiles();
-    void encryptingZipArchive();
+    void encryptingZipArchive(); 
     void runningCompressorNonSingleThreaded();
     void compressingTarArchiveWithoutFilters();
+    void compressingTarArchiveWithZSTD();
+
   protected slots:
     void defaultErrorHandler(short code, QString file);
 };

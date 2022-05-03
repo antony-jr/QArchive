@@ -324,15 +324,60 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithoutFilters() {
     archive->deleteLater();
 }
 
+void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
+    QArchive::MemoryCompressor compressor(QArchive::ZstdFormat);
+
+    /* Write the file to compress and add it. */
+    auto array = Test7OutputContents.toLocal8Bit();
+    QBuffer buffer(&array);
+    compressor.addFiles(/*entry name=*/QFileInfo(Test7OutputFile).fileName(), (QIODevice*)&buffer);
+
+    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
+                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
+    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+    compressor.start();
+
+    /*  Must emit exactly one signal. */
+    QVERIFY(spyInfo.wait() || spyInfo.count());
+
+    QList<QVariant> output = spyInfo.takeFirst();
+    QVERIFY(output.count() == 1);
+    auto archive = output.at(0).value<QBuffer*>();
+
+    QArchive::MemoryExtractor extractor((QIODevice*)archive);
+    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
+                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+
+    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+    extractor.start();
+
+    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+
+    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+
+    QVERIFY(extractorOutput.count() == 1);
+    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+
+    QVERIFY(data->getFiles().count() >= 1);
+    auto outputBuffer = data->getFiles().at(0).buffer();
+
+    outputBuffer->open(QIODevice::ReadOnly);
+    QCOMPARE(QString(outputBuffer->readAll()), Test7OutputContents);
+    outputBuffer->close();
+
+    data->deleteLater();
+    archive->deleteLater();
+}
+
 void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, QString file) {
-    auto scode = QString::number(code);
+    auto scode = QArchive::errorCodeToString(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
     return;
 }
 
 void QArchiveMemoryCompressorTests::defaultExtractorErrorHandler(short code) {
-    auto scode = QString::number(code);
+    auto scode = QArchive::errorCodeToString(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
     return;

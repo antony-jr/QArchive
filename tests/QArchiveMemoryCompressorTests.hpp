@@ -29,6 +29,8 @@ class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
     void encryptingZipArchive();
     void runningCompressorNonSingleThreaded();
     void compressingTarArchiveWithoutFilters();
+    void compressingTarArchiveWithZSTD();
+
   protected slots:
     void defaultErrorHandler(short code, QString file);
     void defaultExtractorErrorHandler(short code);

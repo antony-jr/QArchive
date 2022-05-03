@@ -15,3 +15,4 @@ sidebar_label: QArchive Compression Formats
 | QArchive::GZipFormat    | Represents .tar.gz format.              |  205  |
 | QArchive::XzFormat      | Represents .tar.xz format.              |  206  |
 | QArchive::XarFormat     | Represents .xar format.                 |  207  |
+| QArchive::ZstdFormat    | Represents .tar.zstd format.            |  208  |

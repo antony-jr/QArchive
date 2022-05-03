@@ -48,6 +48,10 @@ class QArchiveTestCases {
         TestCase6ArchivePath = QString(TestCasesDir + "Test6.tar");
         TestCase6OutputDir = QString(TestOutputDir + "Test6");
         Test6OutputFile = QString(TestCase6OutputDir + "/Output.txt");
+
+	TestCase7ArchivePath = QString(TestCasesDir + "Test7.tar.zstd");
+	TestCase7OutputDir = QString(TestOutputDir + "Test7");
+	Test7OutputFile = QString(TestCase7OutputDir + "/Output.txt");	
     }
 
     ~QArchiveTestCases() {
@@ -74,6 +78,9 @@ class QArchiveTestCases {
             TestCase6ArchivePath,
             TestCase6OutputDir,
             Test6OutputFile,
+	    TestCase7ArchivePath,
+	    TestCase7OutputDir,
+	    Test7OutputFile,
             TemporaryFilePath;
     const QString Test1OutputContents = QString("TEST1SUCCESS!");
     const QString Test2OutputContents = QString("TEST2SUCCESS!");
@@ -83,6 +90,7 @@ class QArchiveTestCases {
     const QString Test4OutputContents = QString("TEST4SUCCESS!");
     const QString Test5OutputContents = QString("TEST5SUCCESS!");
     const QString Test6OutputContents = QString("TEST6SUCCESS!");
+    const QString Test7OutputContents = QString("TEST7SUCCESS!");
 };
 
 #endif // QARCHIVE_TEST_CASES_HPP_INCLUDED
