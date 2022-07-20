@@ -14,6 +14,11 @@ extern "C" {
 #include <sys/stat.h>
 }
 
+// Support older libarchive versions where la_ssize_t is not defined yet
+#if ARCHIVE_VERSION_NUMBER <= 3001002
+#define la_ssize_t __LA_SSIZE_T
+#endif
+
 /*
  * This function destructs struct archive which is set
  * in the read mode via Qt Smart Pointer.
@@ -170,6 +175,7 @@ static la_ssize_t archive_write_cb(struct archive *archive, void *data, const vo
     return p->write((const char*)buffer, length);
 }
 
+#if ARCHIVE_VERSION_NUMBER >= 3005000
 /// Should not delete the client data because it's our QIODevice
 /// buffer.
 int archive_w_free_cb(struct archive *archive, void *data) {
@@ -177,16 +183,25 @@ int archive_w_free_cb(struct archive *archive, void *data) {
     Q_UNUSED(data);
     return ARCHIVE_OK;
 }
+#endif
 
 // This is a custom functions which sets up the callbacks and other
 // stuff for a libarchive struct to use QIODevice to write.
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
+#if ARCHIVE_VERSION_NUMBER < 3005000
+    return archive_write_open(archive,
+                               (void*)device,
+                               archive_w_open_cb,
+                               archive_write_cb,
+                               archive_w_close_cb);
+#else
     return archive_write_open2(archive,
                                (void*)device,
                                archive_w_open_cb,
                                archive_write_cb,
                                archive_w_close_cb,
                                archive_w_free_cb);
+#endif
 }
 /* ---- */
 
