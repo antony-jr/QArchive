@@ -72,37 +72,33 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
     QJsonObject CurrentEntry;
     QString CurrentFile = QString(archive_entry_pathname(entry));
 
-    auto entry_stat = archive_entry_stat(entry);
-    qint64 size = (qint64)entry_stat->st_size;
+    qint64 size = archive_entry_size(entry);
+    qint64 roundedSize = size;
     QString sizeUnits = "Bytes";
-    if(size == 0) {
+    if(roundedSize == 0) {
         sizeUnits = "None";
-        size = 0;
-    } else if(size < 1024) {
+        roundedSize = 0;
+    } else if(roundedSize < 1024) {
         sizeUnits = "Bytes";
-        size = size;
-    } else if(size >= 1024 && size < 1048576) {
+        roundedSize = roundedSize;
+    } else if(roundedSize >= 1024 && roundedSize < 1048576) {
         sizeUnits = "KiB";
-        size /= 1024;
-    } else if(size >= 1048576 && size < 1073741824) {
+        roundedSize /= 1024;
+    } else if(roundedSize >= 1048576 && roundedSize < 1073741824) {
         sizeUnits = "MiB";
-        size /= 1048576;
+        roundedSize /= 1048576;
     } else {
         sizeUnits = "GiB";
-        size /= 1073741824;
+        roundedSize /= 1073741824;
     }
 
-    // MSVC (and maybe Windows in general?) workaround
-#if defined(_WIN32) && !defined(__CYGWIN__)
+    // The libarchive neither populates st_blksize nor st_blocks. So, these values are useless. Use 512 for all cases as a very likely value.
     qint64 blockSizeInBytes = 512;
-    qint64 blocks = (qint64) (entry_stat->st_size / blockSizeInBytes);
-#else
-    qint64 blockSizeInBytes = (qint64)entry_stat->st_blksize;
-    qint64 blocks = (qint64)entry_stat->st_blocks;
-#endif
-    auto lastAccessT = entry_stat->st_atim;
-    auto lastModT = entry_stat->st_mtim;
-    auto lastStatusModT = entry_stat->st_ctim;
+    qint64 blocks = size / blockSizeInBytes + (size % blockSizeInBytes > 0 ? 1 : 0); // add one more block if there is a remainder
+
+    auto lastAccessT = archive_entry_atime(entry);
+    auto lastModT = archive_entry_mtime(entry);
+    auto lastStatusModT = archive_entry_ctime(entry);
 
     auto ft = archive_entry_filetype(entry);
     QString FileType;
@@ -142,7 +138,8 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
     }
 
     CurrentEntry.insert("FileType", QJsonValue(FileType));
-    CurrentEntry.insert("Size", QJsonValue(size));
+    CurrentEntry.insert("RawSize", QJsonValue(size));
+    CurrentEntry.insert("Size", QJsonValue(roundedSize));
     CurrentEntry.insert("SizeUnit", sizeUnits);
     CurrentEntry.insert("BlockSize", QJsonValue(blockSizeInBytes));
     CurrentEntry.insert("BlockSizeUnit", "Bytes");
@@ -929,6 +926,8 @@ short ExtractorPrivate::processArchiveInformation() {
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry);
         m_Info->insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
+        // Clear the entry since it is re-used by the libarchive internally that may lead to the stale data be taken.
+        archive_entry_clear(entry);
         QCoreApplication::processEvents();
     }
 
