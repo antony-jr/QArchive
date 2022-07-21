@@ -42,6 +42,7 @@ enum : short {
     NoPermissionToReadArchive,
     InvalidOutputDirectory,
     InvalidArchiveFile,
+    ApplyPatternFailed,
 };
 
 /*

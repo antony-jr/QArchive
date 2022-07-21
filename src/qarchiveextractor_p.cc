@@ -67,8 +67,54 @@ QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() {
 }
 /// ---
 
+namespace QArchive {
+    class ArchiveFilter {
+    public:
+        ArchiveFilter()
+            : m_match(archive_match_new(), archive_match_free) {
+        }
 
-static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
+        short addIncludePattern(const QString& pattern) {
+            if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+                return ApplyPatternFailed;
+            return NoError;
+        }
+
+        short addIncludePatterns(const QStringList& includePatterns) {
+            for (const auto& pattern : includePatterns) {
+                auto ret = addIncludePattern(pattern);
+                if (ret != NoError)
+                    return ret;
+            }
+            return NoError;
+        }
+
+        short addExcludePattern(const QString& pattern) {
+            if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+                return ApplyPatternFailed;
+            return NoError;
+        }
+
+        short addExcludePatterns(const QStringList& excludePatterns) {
+            for (const auto& pattern : excludePatterns) {
+                auto ret = addExcludePattern(pattern);
+                if (ret != NoError)
+                    return ret;
+            }
+            return NoError;
+        }
+
+        bool isEntryExcluded(struct archive_entry* entry) {
+            return archive_match_excluded(m_match.data(), entry);
+        }
+
+    private:
+        QSharedPointer<struct archive> m_match;
+
+    };
+}
+
+static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
     QJsonObject CurrentEntry;
     QString CurrentFile = QString(archive_entry_pathname(entry));
 
@@ -184,6 +230,8 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry) {
         CurrentEntry.insert("LastStatusModifiedTime", "Unknown");
     }
 
+    CurrentEntry.insert("Excluded", bExcluded);
+
     return CurrentEntry;
 }
 
@@ -199,7 +247,7 @@ ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     b_MemoryMode = memoryMode;
 
     m_Info.reset(new QJsonObject);
-    m_ExtractFilters.reset(new QStringList);
+    m_archiveFilter.reset(new ArchiveFilter);
 
     if(b_MemoryMode) {
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
@@ -278,7 +326,7 @@ void ExtractorPrivate::addFilter(const QString &filter) {
     if(b_Started || b_Paused || filter.isEmpty()) {
         return;
     }
-    *(m_ExtractFilters.data()) << filter;
+    m_ExtractFilters << filter;
     return;
 }
 
@@ -287,7 +335,47 @@ void ExtractorPrivate::addFilter(const QStringList &filters) {
     if(b_Started || b_Paused || filters.isEmpty()) {
         return;
     }
-    *(m_ExtractFilters.data()) << filters;
+    m_ExtractFilters << filters;
+    return;
+}
+
+void ExtractorPrivate::addIncludePattern(const QString &pattern) {
+    if(b_Started || b_Paused || pattern.isEmpty()) {
+        return;
+    }
+    auto errorCode = m_archiveFilter->addIncludePattern(pattern);
+    if (errorCode != NoError)
+        emit error(errorCode);
+    return;
+}
+
+void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
+    if(b_Started || b_Paused || patterns.isEmpty()) {
+        return;
+    }
+    auto errorCode = m_archiveFilter->addIncludePatterns(patterns);
+    if (errorCode != NoError)
+        emit error(errorCode);
+    return;
+}
+
+void ExtractorPrivate::addExcludePattern(const QString &pattern) {
+    if(b_Started || b_Paused || pattern.isEmpty()) {
+        return;
+    }
+    auto errorCode = m_archiveFilter->addExcludePattern(pattern);
+    if (errorCode != NoError)
+        emit error(errorCode);
+    return;
+}
+
+void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
+    if(b_Started || b_Paused || patterns.isEmpty()) {
+        return;
+    }
+    auto errorCode = m_archiveFilter->addExcludePatterns(patterns);
+    if (errorCode != NoError)
+        emit error(errorCode);
     return;
 }
 
@@ -301,8 +389,6 @@ void ExtractorPrivate::clear() {
     n_TotalEntries = -1;
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;
 
-    // TODO: do we need to reset n_BytesTotal here?
-    n_BytesProcessed = 0;
     n_BytesTotal = 0;
 
     m_ArchivePath.clear();
@@ -313,7 +399,8 @@ void ExtractorPrivate::clear() {
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
     m_Info.reset(new QJsonObject);
-    m_ExtractFilters->clear();
+    m_ExtractFilters.clear();
+    m_archiveFilter.reset(new ArchiveFilter);
 
     if(b_MemoryMode) {
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
@@ -407,8 +494,6 @@ void ExtractorPrivate::start() {
             return;
         }
     }
-
-    n_BytesProcessed = 0;
 
     errorCode = extract();
     if(errorCode == NoError) {
@@ -592,6 +677,7 @@ short ExtractorPrivate::extract() {
 
     if(m_ArchiveRead.isNull() && (b_MemoryMode || m_ArchiveWrite.isNull())) {
         n_ProcessedEntries = 0;
+        n_BytesProcessed = 0;
 
         m_ArchiveRead = QSharedPointer<struct archive>(archive_read_new(), ArchiveReadDestructor);
         if(!b_MemoryMode) {
@@ -656,6 +742,7 @@ short ExtractorPrivate::extract() {
 
             }
 
+            archive_entry_clear(m_CurrentArchiveEntry);
             m_CurrentArchiveEntry = nullptr;
         }
         ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
@@ -698,6 +785,7 @@ short ExtractorPrivate::extract() {
                           1);
 
         }
+        archive_entry_clear(entry);
         QCoreApplication::processEvents(); // call event loop for the signal to take effect.
     }
 
@@ -712,8 +800,10 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         return ArchiveNotGiven;
     }
 
-    if(!m_ExtractFilters->isEmpty() &&
-            !m_ExtractFilters->contains(QString(archive_entry_pathname(entry)))) {
+    if((!m_ExtractFilters.isEmpty() &&
+            !m_ExtractFilters.contains(QString(archive_entry_pathname(entry))))
+        || (m_archiveFilter->isEntryExcluded(entry))) {
+        n_BytesProcessed += archive_entry_size(entry);
         return NoError;
     }
 
@@ -731,7 +821,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         if(!b_MemoryMode) {
             ret = archive_write_header(m_ArchiveWrite.data(), entry);
         } else {
-            currentNode.setFileInformation(getArchiveEntryInformation(entry));
+            currentNode.setFileInformation(getArchiveEntryInformation(entry, false));
 
             /// Skip Directories.
             if((currentNode.getFileInformation()).value("FileType").toString() == "Directory") {
@@ -923,7 +1013,7 @@ short ExtractorPrivate::processArchiveInformation() {
             return err;
         }
         QString CurrentFile = QString(archive_entry_pathname(entry));
-        QJsonObject CurrentEntry = getArchiveEntryInformation(entry);
+        QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
         m_Info->insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
         // Clear the entry since it is re-used by the libarchive internally that may lead to the stale data be taken.

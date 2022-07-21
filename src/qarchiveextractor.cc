@@ -121,6 +121,39 @@ void Extractor::addFilter(const QStringList &filters) {
     return;
 }
 
+void Extractor::addIncludePattern(const QString &filter) {
+    getMethod(m_Extractor,
+              "addIncludePattern(const QString&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QString, filter));
+    return;
+}
+
+void Extractor::addIncludePattern(const QStringList &filters) {
+    getMethod(m_Extractor,
+              "addIncludePattern(const QStringList&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QStringList, filters));
+    return;
+}
+
+
+void Extractor::addExcludePattern(const QString &filter) {
+    getMethod(m_Extractor,
+              "addExcludePattern(const QString&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QString, filter));
+    return;
+}
+
+void Extractor::addExcludePattern(const QStringList &filters) {
+    getMethod(m_Extractor,
+              "addExcludePattern(const QStringList&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QStringList, filters));
+    return;
+}
+
 void Extractor::clear() {
     getMethod(m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;

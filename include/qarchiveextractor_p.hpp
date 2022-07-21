@@ -15,6 +15,9 @@
 #include "qarchiveutils_p.hpp"
 
 namespace QArchive {
+
+class ArchiveFilter;
+
 class MutableMemoryFile {
   public:
     MutableMemoryFile();
@@ -44,6 +47,10 @@ class ExtractorPrivate : public QObject {
     void setPassword(const QString&);
     void addFilter(const QString&);
     void addFilter(const QStringList&);
+    void addIncludePattern(const QString&);
+    void addIncludePattern(const QStringList&);
+    void addExcludePattern(const QString&);
+    void addExcludePattern(const QStringList&);
     void clear();
 
     void getInfo();
@@ -99,9 +106,10 @@ class ExtractorPrivate : public QObject {
     MutableMemoryFile m_CurrentMemoryFile;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
-    QScopedPointer<QStringList> m_ExtractFilters;
+    QStringList m_ExtractFilters;
     QScopedPointer<QJsonObject> m_Info;
     QScopedPointer<QVector<MemoryFile>> m_ExtractedFiles;
+    QSharedPointer<ArchiveFilter> m_archiveFilter;
 };
 }
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
