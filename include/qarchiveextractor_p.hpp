@@ -10,6 +10,7 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QJsonObject>
+#include <QDir>
 
 #include "qarchivememoryextractoroutput.hpp"
 #include "qarchiveutils_p.hpp"
@@ -51,6 +52,7 @@ class ExtractorPrivate : public QObject {
     void addIncludePattern(const QStringList&);
     void addExcludePattern(const QString&);
     void addExcludePattern(const QStringList&);
+    void setBasePath(const QString&);
     void clear();
 
     void getInfo();
@@ -110,6 +112,8 @@ class ExtractorPrivate : public QObject {
     QScopedPointer<QJsonObject> m_Info;
     QScopedPointer<QVector<MemoryFile>> m_ExtractedFiles;
     QSharedPointer<ArchiveFilter> m_archiveFilter;
+    bool b_hasBasePath = false;
+    QDir m_basePath;
 };
 }
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED

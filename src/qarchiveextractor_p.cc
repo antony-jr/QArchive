@@ -379,6 +379,14 @@ void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
     return;
 }
 
+void ExtractorPrivate::setBasePath(const QString& path) {
+    if (b_Started || b_Paused) {
+        return;
+    }
+    m_basePath.setPath("/" + path);
+    b_hasBasePath = !path.isEmpty();
+}
+
 // Clears all internal data and sets it back to default.
 void ExtractorPrivate::clear() {
     if(b_Started) {
@@ -807,11 +815,17 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         return NoError;
     }
 
+    if(b_hasBasePath) {
+        const auto& relativePath = m_basePath.relativeFilePath(QString::fromLatin1("/") + archive_entry_pathname(entry)).toStdWString();
+        if (relativePath == L".") // Root directory
+            return NoError;
+        archive_entry_copy_pathname_w(entry, relativePath.c_str());
+    }
     if(!b_MemoryMode) {
         if(!m_OutputDirectory.isEmpty()) {
-            char *new_entry = concat(m_OutputDirectory.toUtf8().constData(), archive_entry_pathname(entry));
-            archive_entry_set_pathname(entry, new_entry);
-            free(new_entry);
+            QDir outDir(m_OutputDirectory);
+            const auto& new_entry = outDir.absoluteFilePath(QString::fromStdWString(archive_entry_pathname_w(entry))).toStdWString();
+            archive_entry_copy_pathname_w(entry, new_entry.c_str());
         }
     }
 
