@@ -28,6 +28,11 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     void setPassword(const QString&);
     void addFilter(const QString&);
     void addFilter(const QStringList&);
+    void addIncludePattern(const QString&);
+    void addIncludePattern(const QStringList&);
+    void addExcludePattern(const QString&);
+    void addExcludePattern(const QStringList&);
+    void setBasePath(const QString&);
     void clear();
 
     void getInfo();

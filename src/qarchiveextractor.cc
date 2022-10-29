@@ -121,6 +121,47 @@ void Extractor::addFilter(const QStringList &filters) {
     return;
 }
 
+void Extractor::addIncludePattern(const QString &pattern) {
+    getMethod(m_Extractor,
+              "addIncludePattern(const QString&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QString, pattern));
+    return;
+}
+
+void Extractor::addIncludePattern(const QStringList &patterns) {
+    getMethod(m_Extractor,
+              "addIncludePattern(const QStringList&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QStringList, patterns));
+    return;
+}
+
+
+void Extractor::addExcludePattern(const QString & pattern) {
+    getMethod(m_Extractor,
+              "addExcludePattern(const QString&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QString, pattern));
+    return;
+}
+
+void Extractor::addExcludePattern(const QStringList & patterns) {
+    getMethod(m_Extractor,
+              "addExcludePattern(const QStringList&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QStringList, patterns));
+    return;
+}
+
+void Extractor::setBasePath(const QString &path) {
+    getMethod(m_Extractor,
+              "setBasePath(const QString&)").invoke(m_Extractor.data(),
+                      Qt::QueuedConnection,
+                      Q_ARG(QString, path));
+    return;
+}
+
 void Extractor::clear() {
     getMethod(m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
     return;
