@@ -169,6 +169,15 @@ My utmost **gratitude goes to these people!** :heart:
            </sub><br>
 	   <a href="https://github.com/antony-jr/QArchive/commits?author=yosicovich">💻</a> 
         </td>
+        <td> 
+           <img src="https://avatars.githubusercontent.com/u/3681516?v=4" width="100px"><br> 
+           <sub> 
+              <strong> 
+                 <a href="https://github.com/tastytea">tastytea</a> 
+              </strong> 
+           </sub><br> 
+           <a href="https://github.com/antony-jr/QArchive/commits?author=tastytea">💻</a>  
+        </td> 
   </tr>  
 </table>
 
