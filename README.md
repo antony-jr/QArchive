@@ -160,6 +160,15 @@ My utmost **gratitude goes to these people!** :heart:
             </sub><br>
             <a href="https://github.com/antony-jr/QArchive/commits?author=DeuxVis">💻</a>
         </td>
+	<td>
+	   <img src="https://avatars.githubusercontent.com/u/39350000?v=4" width="100px"><br>
+	   <sub>
+              <strong>
+                 <a href="https://github.com/yosicovich">yosicovich</a>
+	      </strong>
+           </sub><br>
+	   <a href="https://github.com/antony-jr/QArchive/commits?author=yosicovich">💻</a> 
+        </td>
   </tr>  
 </table>
 

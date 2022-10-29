@@ -7,7 +7,14 @@
 
 /* List of projects/orgs using your project for the users page */
 
-const users = [];
+const users = [
+ {	
+    caption: 'Spirit',
+    image: '/QArchive/img/spirit.png',
+    infoLink: 'https://antonyjr.in/spirit/',
+    pinned: true,
+ },
+];
 
 const siteConfig = {
   title: 'QArchive' /* title for your website */,

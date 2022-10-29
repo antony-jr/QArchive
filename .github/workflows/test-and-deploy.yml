@@ -19,14 +19,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: lukka/get-cmake@latest
 
-
-      - name: Install PVS Studio
-        run: |
-          wget -q -O - https://files.viva64.com/etc/pubkey.txt | sudo apt-key add -
-          sudo wget -O /etc/apt/sources.list.d/viva64.list https://files.viva64.com/etc/viva64.list
-          sudo apt-get update -qq
-          sudo apt-get -y install pvs-studio
-
       - name: Install Qt
         run: |
           sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-bionic -y
@@ -94,29 +86,6 @@ jobs:
       - run: yarn build
         if: github.event_name != 'pull_request'
         
-      - name: Run PVS Analysis
-        if: github.event_name != 'pull_request' 
-        env:
-          PVS_LIC_NAME: ${{secrets.PVS_LICENSE_NAME}}
-          PVS_LIC_KEY: ${{secrets.PVS_LICENSE_KEY}}
-        run: |
-          cd ..
-          mkdir build
-          cd build
-          source /opt/qt*/bin/qt*-env.sh || true
-          cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=On  ..
-          make -j$(nproc)
-          pvs-studio-analyzer credentials "$PVS_LIC_NAME" "$PVS_LIC_KEY" -o pvs.lic
-          pvs-studio-analyzer analyze -l pvs.lic \
-              -e "/opt/qt511/*" \
-              -e "*moc_*" \
-              -o project.log -j$(nproc) 
-          plog-converter -a GA:1,2 -t fullhtml \
-              -o ../website/build/QArchive/PVSStudioAnalysis project.log
-          cd ..
-          rm -rf build
-          cd website
-
       - name: Deploy
         if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v3

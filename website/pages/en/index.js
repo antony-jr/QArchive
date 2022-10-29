@@ -55,14 +55,19 @@ class HomeSplash extends React.Component {
                       }>
                       Get Started
                     </Button>
-                    <Button
+		    {/*
+		      It's really irritating to get PVS Studio
+		      license every year by requesting license,
+		      must move on to something open source.
+		      
+		      <Button
                       href={
                         siteConfig.baseUrl +
                         'PVSStudioAnalysis/' +
                         'index.html'
                       }>
                       PVS Studio Report
-                    </Button>
+		    </Button>*/}
 	            <Button href={'https://github.com/antony-jr/QArchive'}>
 	    	      View on Github
 	    	    </Button>
