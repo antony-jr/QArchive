@@ -4,8 +4,7 @@
 </p>
 
 
-# QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Test and Deploy](https://github.com/antony-jr/QArchive/actions/workflows/test-and-deploy.yml/badge.svg?branch=master)](https://github.com/antony-jr/QArchive/actions/workflows/test-and-deploy.yml)
-
+# QArchive [![GitHub issues](https://img.shields.io/github/issues/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/issues) [![GitHub forks](https://img.shields.io/github/forks/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/network) [![GitHub stars](https://img.shields.io/github/stars/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/stargazers) [![GitHub license](https://img.shields.io/github/license/antony-jr/QArchive.svg?style=flat-square)](https://github.com/antony-jr/QArchive/blob/master/LICENSE) [![Test and Deploy](https://github.com/antony-jr/QArchive/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/antony-jr/QArchive/actions/workflows/tests.yml)
 
 QArchive is a cross-platform C++ library that modernizes libarchive , This library helps you to extract and compress 
 archives supported by libarchive. The whole library itself is crafted to work perfectly well with the 

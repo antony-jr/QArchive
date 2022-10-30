@@ -63,12 +63,12 @@ jobs:
       - name: Install Qt and LibArchive
         run: brew install qt@5 libarchive
 
-      - name: Install QArchive
+      - name: Run Tests
         run: |
           mkdir build
           cd build
-          export QT_DIR=$(brew --prefix qt@5)
-          cmake -DBUILD_TESTS=ON ..
+          export Qt5_DIR=$(brew --prefix qt@5)
+          cmake -DBUILD_TESTS=ON -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include ..
           cmake --build . --config release
           ./tests/QArchiveTests
           cd ..
