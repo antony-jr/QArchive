@@ -67,6 +67,7 @@ jobs:
         run: |
           mkdir build
           cd build
+          export QT_DIR=$(brew --prefix qt@5)
           export Qt5_DIR=$(brew --prefix qt@5)
           cmake -DBUILD_TESTS=ON -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include ..
           cmake --build . --config release
