@@ -126,7 +126,7 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
         .fileInformation()
         .value("FileName")
         .toString() != QFileInfo(Test3OutputFile1).fileName());
-    
+
     QVERIFY(
         data->getFiles()
         .at(0)
@@ -175,6 +175,21 @@ void QArchiveMemoryExtractorTests::informationExtraction() {
     QSignalSpy spyInfo(&e, SIGNAL(info(QJsonObject)));
     e.getInfo();
     QVERIFY(spyInfo.wait() || spyInfo.count());
+}
+
+void QArchiveMemoryExtractorTests::startAfterInformationExtraction() {
+    QArchive::MemoryExtractor e(TestCase5ArchivePath);
+    QObject::connect(&e, &QArchive::MemoryExtractor::error,
+                     this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
+
+    QSignalSpy spyInfo(&e, SIGNAL(info(QJsonObject)));
+    QSignalSpy spyStart(&e, &QArchive::MemoryExtractor::finished);
+
+    e.getInfo();
+    e.start();
+
+    QVERIFY(spyStart.wait() || spyStart.count());
+    QVERIFY(spyInfo.count() == 1 && spyStart.count() == 1);
 }
 
 void QArchiveMemoryExtractorTests::testInvalidArchivePath() {

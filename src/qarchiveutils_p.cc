@@ -190,10 +190,10 @@ int archive_w_free_cb(struct archive *archive, void *data) {
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
 #if ARCHIVE_VERSION_NUMBER < 3005000
     return archive_write_open(archive,
-                               (void*)device,
-                               archive_w_open_cb,
-                               archive_write_cb,
-                               archive_w_close_cb);
+                              (void*)device,
+                              archive_w_open_cb,
+                              archive_write_cb,
+                              archive_w_close_cb);
 #else
     return archive_write_open2(archive,
                                (void*)device,

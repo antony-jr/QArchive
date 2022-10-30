@@ -82,7 +82,10 @@ class ExtractorPrivate : public QObject {
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
   private:
-    bool b_MemoryMode = false;
+    bool b_MemoryMode = false,
+         b_ProcessingArchive = false,
+         b_StartRequested = false;
+
     bool b_PauseRequested = false,
          b_CancelRequested = false,
          b_Paused = false,

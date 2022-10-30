@@ -24,6 +24,7 @@ class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
     void usingExtractFilters();
     void usingPassword();
     void informationExtraction();
+    void startAfterInformationExtraction();
     void testInvalidArchivePath();
     void runningExtractorNonSingleThreaded();
     void extractArchiveFromQIODevice();

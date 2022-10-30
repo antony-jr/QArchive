@@ -18,7 +18,7 @@ void QArchiveDiskExtractorTests::initTestCase() {
                     QFileInfo(TestCase4ArchivePath).exists() &&
                     QFileInfo(TestCase5ArchivePath).exists() &&
                     QFileInfo(TestCase6ArchivePath).exists() &&
-		    QFileInfo(TestCase7ArchivePath).exists()
+                    QFileInfo(TestCase7ArchivePath).exists()
                 )) {
             QFAIL("cannot find test case files.");
             return;
@@ -133,6 +133,22 @@ void QArchiveDiskExtractorTests::informationExtraction() {
     e.getInfo();
     QVERIFY(spyInfo.wait() || spyInfo.count());
 }
+
+void QArchiveDiskExtractorTests::startAfterInformationExtraction() {
+    QArchive::DiskExtractor e(TestCase5ArchivePath);
+    QObject::connect(&e, &QArchive::DiskExtractor::error,
+                     this, &QArchiveDiskExtractorTests::defaultErrorHandler);
+
+    QSignalSpy spyInfo(&e, SIGNAL(info(QJsonObject)));
+    QSignalSpy spyStart(&e, SIGNAL(finished()));
+
+    e.getInfo();
+    e.start();
+
+    QVERIFY(spyStart.wait() || spyStart.count());
+    QVERIFY(spyInfo.count() == 1 && spyStart.count() == 1);
+}
+
 
 void QArchiveDiskExtractorTests::testInvalidArchivePath() {
     QArchive::DiskExtractor e("THISDOESNOTEXISTS", TestOutputDir);

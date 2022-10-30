@@ -39,10 +39,10 @@ extern "C" {
 
 using namespace QArchive;
 
-/// MutableMemoryFile class provides a memory files which has both setters and getters 
+/// MutableMemoryFile class provides a memory files which has both setters and getters
 /// unlike MemoryFile which only has getters.
-/// This will force the users to not mess up the integrity of a MemoryFile like 
-/// deleting the internal pointers which will be automatically freed by MemoryFile 
+/// This will force the users to not mess up the integrity of a MemoryFile like
+/// deleting the internal pointers which will be automatically freed by MemoryFile
 /// destructor.
 MutableMemoryFile::MutableMemoryFile() { }
 MutableMemoryFile::~MutableMemoryFile() {
@@ -68,50 +68,50 @@ QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() {
 /// ---
 
 namespace QArchive {
-    class ArchiveFilter {
-    public:
-        ArchiveFilter()
-            : m_match(archive_match_new(), archive_match_free) {
+class ArchiveFilter {
+  public:
+    ArchiveFilter()
+        : m_match(archive_match_new(), archive_match_free) {
+    }
+
+    short addIncludePattern(const QString& pattern) {
+        if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+            return ApplyPatternFailed;
+        return NoError;
+    }
+
+    short addIncludePatterns(const QStringList& includePatterns) {
+        for (const auto& pattern : includePatterns) {
+            auto ret = addIncludePattern(pattern);
+            if (ret != NoError)
+                return ret;
         }
+        return NoError;
+    }
 
-        short addIncludePattern(const QString& pattern) {
-            if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
-                return ApplyPatternFailed;
-            return NoError;
+    short addExcludePattern(const QString& pattern) {
+        if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+            return ApplyPatternFailed;
+        return NoError;
+    }
+
+    short addExcludePatterns(const QStringList& excludePatterns) {
+        for (const auto& pattern : excludePatterns) {
+            auto ret = addExcludePattern(pattern);
+            if (ret != NoError)
+                return ret;
         }
+        return NoError;
+    }
 
-        short addIncludePatterns(const QStringList& includePatterns) {
-            for (const auto& pattern : includePatterns) {
-                auto ret = addIncludePattern(pattern);
-                if (ret != NoError)
-                    return ret;
-            }
-            return NoError;
-        }
+    bool isEntryExcluded(struct archive_entry* entry) {
+        return archive_match_excluded(m_match.data(), entry);
+    }
 
-        short addExcludePattern(const QString& pattern) {
-            if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
-                return ApplyPatternFailed;
-            return NoError;
-        }
+  private:
+    QSharedPointer<struct archive> m_match;
 
-        short addExcludePatterns(const QStringList& excludePatterns) {
-            for (const auto& pattern : excludePatterns) {
-                auto ret = addExcludePattern(pattern);
-                if (ret != NoError)
-                    return ret;
-            }
-            return NoError;
-        }
-
-        bool isEntryExcluded(struct archive_entry* entry) {
-            return archive_match_excluded(m_match.data(), entry);
-        }
-
-    private:
-        QSharedPointer<struct archive> m_match;
-
-    };
+};
 }
 
 static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
@@ -239,8 +239,6 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 // implementation to the DiskExtractor.
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
-// This class only extracts the data to the disk and hence the name DiskExtractor.
-// This class will not be able to extract or work in-memory.
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     : QObject(),
       n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
@@ -395,6 +393,7 @@ void ExtractorPrivate::clear() {
     n_BlockSize = 10240;
     n_PasswordTriedCountGetInfo = n_PasswordTriedCountExtract = 0;
     n_TotalEntries = -1;
+    b_ProcessingArchive = b_StartRequested = false;
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;
 
     n_BytesTotal = 0;
@@ -427,19 +426,37 @@ void ExtractorPrivate::clear() {
 
 // Returns the information of the archive through info signal.
 void ExtractorPrivate::getInfo() {
+    if(b_ProcessingArchive) {
+        return;
+    }
+
+    b_ProcessingArchive = true;
+
     if(!m_Info->isEmpty()) {
+        b_ProcessingArchive = false;
         emit info(*(m_Info.data()));
+        if(b_StartRequested) {
+            b_StartRequested = false;
+            start();
+        }
         return;
     }
     short errorCode = NoError;
 
     // Open the Archive.
     if((errorCode = openArchive()) != NoError) {
+        b_ProcessingArchive = false;
         emit error(errorCode);
+        if(b_StartRequested) {
+            b_StartRequested = false;
+            start();
+        }
         return;
     }
 
     errorCode = processArchiveInformation();
+    b_ProcessingArchive = false;
+
     if(!errorCode) {
         emit info(*(m_Info.data()));
     }
@@ -452,11 +469,21 @@ void ExtractorPrivate::getInfo() {
     else {
         emit error(errorCode);
     }
+
+
+    if(b_StartRequested) {
+        b_StartRequested = false;
+        start();
+    }
+
     return;
 }
 
 void ExtractorPrivate::start() {
-    if(b_Started || b_Paused) {
+    if(b_Started || b_Paused || b_ProcessingArchive) {
+        if(!b_StartRequested) {
+            b_StartRequested = true;
+        }
         return;
     }
 
@@ -711,7 +738,7 @@ short ExtractorPrivate::extract() {
         if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
-	    return ArchiveReadError;
+            return ArchiveReadError;
         }
 
         if(!b_MemoryMode) {
@@ -810,7 +837,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
 
     if((!m_ExtractFilters.isEmpty() &&
             !m_ExtractFilters.contains(QString(archive_entry_pathname(entry))))
-        || (m_archiveFilter->isEntryExcluded(entry))) {
+            || (m_archiveFilter->isEntryExcluded(entry))) {
         n_BytesProcessed += archive_entry_size(entry);
         return NoError;
     }

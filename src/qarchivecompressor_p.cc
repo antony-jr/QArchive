@@ -68,24 +68,24 @@ void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
             iter != end;
             ++iter) {
         if(*iter) {
-		delete *iter;
-	}
+            delete *iter;
+        }
     }
     vec->clear();
 }
 
 static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *vec) {
-for(auto iter = vec->begin(),
+    for(auto iter = vec->begin(),
             end = vec->end();
             iter != end;
             ++iter) {
         if(*iter && (*iter)->valid) {
-		if((*iter)->entry == entry) {
-			return true;
-		}
-	}
-}
-return false;
+            if((*iter)->entry == entry) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // CompressorPrivate is the private class which handles the
@@ -107,7 +107,7 @@ CompressorPrivate::CompressorPrivate(bool memoryMode)
 }
 
 CompressorPrivate::~CompressorPrivate() {
-   clear();
+    clear();
 }
 
 // Set the filename for the archive to written on disk , the filename can
@@ -190,7 +190,7 @@ void CompressorPrivate::addFiles(const QString &file) {
 
     QFileInfo info(file);
     if(contains(info.fileName(), m_StaggedFiles.data())) {
-	    return;
+        return;
     }
 
     auto node = new Node;
@@ -207,10 +207,10 @@ void CompressorPrivate::addFiles(const QStringList &files) {
     for(auto i = 0; i < files.size(); ++i) {
         QFileInfo info(files.at(i));
         if(contains(info.fileName(), m_StaggedFiles.data())) {
-		continue;
-	}
+            continue;
+        }
 
-	auto node = new Node;
+        auto node = new Node;
         node->path = files.at(i);
         node->entry = info.fileName();
         m_StaggedFiles->append(node);
@@ -225,7 +225,7 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
         return;
     }
     if(contains(entryName, m_StaggedFiles.data())) {
-	return;
+        return;
     }
 
     auto node = new Node;
@@ -246,10 +246,10 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
     }
     for(auto i = 0; i < files.size(); ++i) {
         if(contains(entryNames.at(i), m_StaggedFiles.data())) {
-		continue;
-	}
+            continue;
+        }
 
-	auto node = new Node;
+        auto node = new Node;
         node->path = files.at(i);
         node->entry = entryNames.at(i);
         m_StaggedFiles->append(node);
@@ -566,7 +566,7 @@ bool CompressorPrivate::confirmFiles() {
             // recursively.
             if(info.isDir()) {
                 QVector<QString> dirList;
-		QString toReplace = info.filePath();
+                QString toReplace = info.filePath();
                 dirList.append(info.filePath());
 
                 while(!dirList.isEmpty()) {
@@ -578,19 +578,19 @@ bool CompressorPrivate::confirmFiles() {
                             continue;
                         }
                         QString file = list.at(i).filePath();
-			auto fileNode = new Node;
+                        auto fileNode = new Node;
                         fileNode->isInMemory = node->isInMemory;
-			fileNode->valid = node->valid;
-			fileNode->path = file;
-			
-			if(toReplace[toReplace.size() - 1] == '/' || 
-			   toReplace[toReplace.size() - 1] == '\\') {
-				if((node->entry)[(node->entry).size() - 1] != '/' &&
-				   (node->entry)[(node->entry).size() - 1] != '\\') {
-					(node->entry).append('/');
-				}
-			}
-			fileNode->entry = file.replace(toReplace, node->entry);
+                        fileNode->valid = node->valid;
+                        fileNode->path = file;
+
+                        if(toReplace[toReplace.size() - 1] == '/' ||
+                                toReplace[toReplace.size() - 1] == '\\') {
+                            if((node->entry)[(node->entry).size() - 1] != '/' &&
+                                    (node->entry)[(node->entry).size() - 1] != '\\') {
+                                (node->entry).append('/');
+                            }
+                        }
+                        fileNode->entry = file.replace(toReplace, node->entry);
 
                         m_ConfirmedFiles->append(fileNode);
 
@@ -598,28 +598,28 @@ bool CompressorPrivate::confirmFiles() {
                     }
                 }
             } else { // Add it to the confirmed list.
-		auto fileNode = new Node;
-		fileNode->isInMemory = node->isInMemory;
-		fileNode->valid = node->valid;
-		fileNode->path = info.filePath();
-		fileNode->entry = node->entry;
+                auto fileNode = new Node;
+                fileNode->isInMemory = node->isInMemory;
+                fileNode->valid = node->valid;
+                fileNode->path = info.filePath();
+                fileNode->entry = node->entry;
                 m_ConfirmedFiles->append(fileNode);
                 n_BytesTotal += info.size();
             }
         } else { // If QIODevice given
             auto fileNode = new Node;
-	    fileNode->isInMemory = node->isInMemory;
-	    fileNode->valid = node->valid;
-	    fileNode->io = node->io;
-	    fileNode->entry = node->entry;
-	    m_ConfirmedFiles->append(fileNode);
+            fileNode->isInMemory = node->isInMemory;
+            fileNode->valid = node->valid;
+            fileNode->io = node->io;
+            fileNode->entry = node->entry;
+            m_ConfirmedFiles->append(fileNode);
             n_BytesTotal += node->io->size();
         }
     }
 
     /// Important: Check if total bytes is not zero.
     if(n_BytesTotal == 0) {
-	return false;
+        return false;
     }
     return true;
 }
@@ -672,21 +672,21 @@ short CompressorPrivate::compress() {
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_7zip(m_ArchiveWrite.data());
             break;
-	case ZstdFormat:
-	    archive_write_add_filter_zstd(m_ArchiveWrite.data());
-	    /*
-	     * TODO: Investigate more on this.
-	     *
-	     * For some reason, for in-memory compression and extraction
-	     * ISO9660 with ZSTD filter is the only thing that works.
-	     * It seems to be an issue with libarchive itself.
-	    */
-	    if(!b_MemoryMode) {
-	    	archive_write_set_format_gnutar(m_ArchiveWrite.data());
-	    } else {
-	        archive_write_set_format_iso9660(m_ArchiveWrite.data());
-	    }
-	    break;
+        case ZstdFormat:
+            archive_write_add_filter_zstd(m_ArchiveWrite.data());
+            /*
+             * TODO: Investigate more on this.
+             *
+             * For some reason, for in-memory compression and extraction
+             * ISO9660 with ZSTD filter is the only thing that works.
+             * It seems to be an issue with libarchive itself.
+            */
+            if(!b_MemoryMode) {
+                archive_write_set_format_gnutar(m_ArchiveWrite.data());
+            } else {
+                archive_write_set_format_iso9660(m_ArchiveWrite.data());
+            }
+            break;
         case ZipFormat:
         default:
             archive_write_add_filter_none(m_ArchiveWrite.data());
@@ -812,13 +812,13 @@ short CompressorPrivate::compress() {
                              ArchiveEntryDestructor);
 
             // Setup archive entry.
-	    auto datetime = QDateTime::currentDateTime();
+            auto datetime = QDateTime::currentDateTime();
             archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
             archive_entry_set_filetype(entry.data(), AE_IFREG);
             archive_entry_set_size(entry.data(), (node->io)->size());
-	    archive_entry_set_atime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
-	    archive_entry_set_mtime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
-	    archive_entry_set_birthtime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
+            archive_entry_set_atime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
+            archive_entry_set_mtime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
+            archive_entry_set_birthtime(entry.data(), static_cast<time_t>(datetime.toTime_t()), 0);
 
             (node->io)->seek(0);
 
@@ -855,7 +855,7 @@ short CompressorPrivate::compress() {
                       (n_TotalEntries - m_ConfirmedFiles->size()),
                       n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
-	delete node;
+        delete node;
 
         QCoreApplication::processEvents();
         if(b_PauseRequested) {
