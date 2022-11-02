@@ -97,6 +97,10 @@ be sequential</strong>.</p>
 <tr><td><strong>void</strong></td><td><a href="#void-setoutputdirectoryconst-qstring-dir">setOutputDirectory</a>(const QString&amp;)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-addfilterconst-qstring-filter">addFilter</a>(const QString&amp;)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-addfilterconst-qstringlist-filters">addFilter</a>(const QStringList&amp;)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#void-addincludepatternconst-qstring-pattern">addIncludePattern</a>(const QString&amp;)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#void-addincludepatternconst-qstringlist-patterns">addIncludePattern</a>(const QStringList&amp;)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#void-addexcludepatternconst-qstring-pattern">addExcludePattern</a>(const QString&amp;)</td></tr>
+<tr><td><strong>void</strong></td><td><a href="#void-addexcludepatternconst-qstringlist-patterns">addExcludePattern</a>(const QStringList&amp;)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-setpasswordconst-qstring-password">setPassword</a>(const QString&amp;)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-setblocksizeint-size">setBlocksize</a>(int size)</td></tr>
 <tr><td><strong>void</strong></td><td><a href="#void-getinfovoid">getInfo</a>(void)</td></tr>
@@ -254,6 +258,39 @@ filter will be extracted.</strong></p>
 <p align="right"><code>[SLOT]</code></p>
 <p>Adds the given list of files to the filter , when extractor is started , <strong>only the files present in the
 filter will be extracted.</strong></p>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="void-addincludepatternconst-qstring-pattern"></a><a href="#void-addincludepatternconst-qstring-pattern" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void addIncludePattern(const QString &amp;pattern)</h3>
+<p align="right"><code>[SLOT]</code></p>
+<p>The file glob pattern given will only be extracted from the archive and nothing else. For example,
+if <code>*.json</code> is the include pattern, all files ending with <code>.json</code> will be extracted from the
+archive.</p>
+<blockquote>
+<p>Note: Only available from QArchive v2.2.0</p>
+</blockquote>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="void-addincludepatternconst-qstringlist-patterns"></a><a href="#void-addincludepatternconst-qstringlist-patterns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void addIncludePattern(const QStringList &amp;patterns)</h3>
+<p align="right"><code>[SLOT]</code></p>
+<p>This is an overloaded function. The file glob pattern given in the list of patterns will only be extracted
+from the archive.</p>
+<blockquote>
+<p>Note: Only available from QArchive v2.2.0</p>
+</blockquote>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="void-addexcludepatternconst-qstring-pattern"></a><a href="#void-addexcludepatternconst-qstring-pattern" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void addExcludePattern(const QString &amp;pattern)</h3>
+<p align="right"><code>[SLOT]</code></p>
+<p>The file glob pattern given will <strong>NOT</strong> be extracted from the archive. The exclude pattern takes the highest
+priority, (i.e) if a same pattern is present both in exclude and include, only the exclude pattern will be
+considered.</p>
+<blockquote>
+<p>Note: Only available from QArchive v2.2.0</p>
+</blockquote>
+<hr>
+<h3><a class="anchor" aria-hidden="true" id="void-addexcludepatternconst-qstringlist-patterns"></a><a href="#void-addexcludepatternconst-qstringlist-patterns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void addExcludePattern(const QStringList &amp;patterns)</h3>
+<p align="right"><code>[SLOT]</code></p>
+<p>This is an overloaded function. Adds the given list of exclude pattern.</p>
+<blockquote>
+<p>Note: Only available from QArchive v2.2.0</p>
+</blockquote>
 <hr>
 <h3><a class="anchor" aria-hidden="true" id="void-setblocksizeint-size"></a><a href="#void-setblocksizeint-size" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>void setBlocksize(int size)</h3>
 <p align="right"><code>[SLOT]</code></p>
