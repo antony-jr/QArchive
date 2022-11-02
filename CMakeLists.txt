@@ -11,12 +11,29 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 option(QARCHIVE_STATIC "Static Build of QArchive" ON)
 
 # Find the QtCore library and libarchive.
-find_package(LibArchive)
+# In macOS, if libarchive is installed via homebrew,
+# it does not link well with CMake. The only workaround to
+# this is to give the absolute path of the libarchive pkg
+# config (.pc) file to find the actual libarchive installed
+# via brew. If this is not done, cmake always seems to find 
+# the libarchive installed in system by default.
+# 
+# Usage:
+#  cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc
+# ---
+if(APPLE AND LIBARCHIVE_PKG_CONFIG)
+   set(PKG_CONFIG_EXECUTABLE pkg-config --define-prefix "${LIBARCHIVE_PKG_CONFIG}")
+   find_package(PkgConfig REQUIRED)
+   pkg_check_modules(LIBARCHIVE REQUIRED libarchive IMPORTED_TARGET)
+   if(NOT LIBARCHIVE_FOUND)
+      find_package(LibArchive)
+   endif()
+else ()
+   find_package(LibArchive)
+endif()
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 
@@ -95,7 +112,12 @@ list(APPEND toinstall
     ${PROJECT_BINARY_DIR}/config.h
 )	
 
-target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core LibArchive::LibArchive)
+if (APPLE AND LIBARCHIVE_FOUND)
+   target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core PkgConfig::LIBARCHIVE)
+else()
+   target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core LibArchive::LibArchive)
+endif()
+
 target_include_directories(QArchive INTERFACE
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

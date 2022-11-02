@@ -47,14 +47,49 @@ jobs:
           mkdir build
           cd build
           source /opt/qt*/bin/qt*-env.sh || true
-          cmake -DBUILD_TESTS=ON ..
+          cmake ..
           make -j$(nproc)
-          ./tests/QArchiveTests
+          sudo make install
           cd ..
           rm -rf build
+          cd tests
+          mkdir build
+          cd build
+          cmake ..
+          make -j$(nproc)
+          ./QArchiveTests
 
-  TestMac:
-    name: "QArchive Tests (macOS x86_64)"
+  TestMacLegacy:
+    name: "QArchive Tests (macOS x86_64 Legacy)"
+    runs-on: macos-10.15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: lukka/get-cmake@latest
+
+      - name: Install Qt, LibArchive and pkg-config
+        run: brew install qt@5 libarchive
+
+      - name: Run Tests
+        run: |
+          mkdir build
+          cd build
+          export QT_DIR=$(brew --prefix qt@5)
+          export Qt5_DIR=$(brew --prefix qt@5)
+          cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc .. 
+          cmake --build . --config release
+          cat QArchiveConfig.cmake
+          sudo make install
+          cd ..
+          rm -rf build
+          cd tests
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+          ./QArchiveTests
+
+  TestMacLatest:
+    name: "QArchive Tests (macOS x86_64 Latest)"
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,9 +104,14 @@ jobs:
           cd build
           export QT_DIR=$(brew --prefix qt@5)
           export Qt5_DIR=$(brew --prefix qt@5)
-          cmake -DBUILD_TESTS=ON -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include ..
+          cmake  -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include .. 
           cmake --build . --config release
-          ./tests/QArchiveTests
+          sudo make install
           cd ..
           rm -rf build
-   
+          cd tests
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+          ./QArchiveTests

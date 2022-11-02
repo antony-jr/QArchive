@@ -9,6 +9,10 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+if(APPLE)
+   add_definitions(-DBUILD_TESTS)
+endif()
+
 if(NOT BUILD_TESTS)
 	find_package(QArchive)
 endif()
