@@ -46,6 +46,10 @@ The class belongs to the QArchive namespace , so make sure to include it.
 | **void**  | [setOutputDirectory](#void-setoutputdirectoryconst-qstring-dir)(const QString&)                |
 | **void**  | [addFilter](#void-addfilterconst-qstring-filter)(const QString&)				     |
 | **void**  | [addFilter](#void-addfilterconst-qstringlist-filters)(const QStringList&)                      | 
+| **void**  | [addIncludePattern](#void-addincludepatternconst-qstring-pattern)(const QString&)              |
+| **void**  | [addIncludePattern](#void-addincludepatternconst-qstringlist-patterns)(const QStringList&)     |
+| **void**  | [addExcludePattern](#void-addexcludepatternconst-qstring-pattern)(const QString&)              |
+| **void**  | [addExcludePattern](#void-addexcludepatternconst-qstringlist-patterns)(const QStringList&)     |
 | **void**  | [setPassword](#void-setpasswordconst-qstring-password)(const QString&)                         |
 | **void**  | [setBlocksize](#void-setblocksizeint-size)(int size)                                           |
 | **void**  | [getInfo](#void-getinfovoid)(void)                                                             |
@@ -253,6 +257,49 @@ Adds the given list of files to the filter , when extractor is started , **only 
 filter will be extracted.**
 
 ---
+
+### void addIncludePattern(const QString &pattern)
+<p align="right"><code>[SLOT]</code></p>
+
+The file glob pattern given will only be extracted from the archive and nothing else. For example,
+if ```*.json``` is the include pattern, all files ending with ```.json``` will be extracted from the
+archive.
+
+
+> Note: Only available from QArchive v2.2.0
+
+---
+
+### void addIncludePattern(const QStringList &patterns)
+<p align="right"><code>[SLOT]</code></p>
+
+This is an overloaded function. The file glob pattern given in the list of patterns will only be extracted 
+from the archive.
+
+> Note: Only available from QArchive v2.2.0
+
+---
+
+### void addExcludePattern(const QString &pattern)
+<p align="right"><code>[SLOT]</code></p>
+
+The file glob pattern given will **NOT** be extracted from the archive. The exclude pattern takes the highest
+priority, (i.e) if a same pattern is present both in exclude and include, only the exclude pattern will be
+considered.
+
+> Note: Only available from QArchive v2.2.0
+
+---
+
+### void addExcludePattern(const QStringList &patterns)
+<p align="right"><code>[SLOT]</code></p>
+
+This is an overloaded function. Adds the given list of exclude pattern.
+
+> Note: Only available from QArchive v2.2.0
+
+---
+
 
 ### void setBlocksize(int size)
 <p align="right"><code>[SLOT]</code></p>
