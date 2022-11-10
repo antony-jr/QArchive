@@ -59,6 +59,53 @@ jobs:
           make -j$(nproc)
           ./QArchiveTests
 
+  TestLinuxQt6:
+    name: "Qt6 QArchive Tests (GNU+Linux amd64)"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: lukka/get-cmake@latest
+
+      - name: Install Qt
+        run: |
+          sudo add-apt-repository universe -y
+          sudo apt-get update -qq
+          sudo apt-get -y install build-essential libgl1-mesa-dev xvfb qt6-base-dev libssl-dev
+
+      - name: Install LibArchive
+        run: |
+          mkdir build
+          cd build
+          git clone https://github.com/libarchive/libarchive
+          cd libarchive
+          git checkout "v3.5.1"
+          cmake .
+          make -j$(nproc)
+          sudo make install -j$(nproc)
+          cd ..
+          cd ..
+          rm -rf build
+          sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
+          sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
+
+      - name: Run Tests
+        run: |
+          Xvfb :100 -ac &
+          export DISPLAY=:100.0
+          mkdir build
+          cd build
+          cmake ..
+          make -j$(nproc)
+          sudo make install
+          cd ..
+          rm -rf build
+          cd tests
+          mkdir build
+          cd build
+          cmake ..
+          make -j$(nproc)
+          ./QArchiveTests
+
   TestMacLegacy:
     name: "QArchive Tests (macOS x86_64 Legacy)"
     runs-on: macos-10.15
