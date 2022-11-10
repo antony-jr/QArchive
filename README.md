@@ -177,7 +177,18 @@ My utmost **gratitude goes to these people!** :heart:
            </sub><br> 
            <a href="https://github.com/antony-jr/QArchive/commits?author=tastytea">💻</a>  
         </td> 
-  </tr>  
+  </tr>
+  <tr align="center">
+     <td>
+       <img src="https://avatars.githubusercontent.com/u/11352254?v=4" width="100px"><br>
+       <sub>
+         <strong>
+            <a href="https://github.com/lmussier">M. Ludo</a>
+         </strong>
+       </sub><br>
+       <a href="https://github.com/antony-jr/QArchive/commits?author=lmussier">💻</a>
+     </td>
+  </tr> 
 </table>
 
 You can also **become one of them by contributing to this project** , to know more read **[CONTRIBUTING.md](.github/CONTRIBUTING.md)**.
