@@ -8,157 +8,98 @@ on:
     branches:
       - master
 
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
 jobs:
-  TestLinux:
-    name: "QArchive Tests (GNU+Linux amd64)"
-    runs-on: ubuntu-18.04
+  ubuntu:
+    runs-on: ubuntu-${{ matrix.ubuntu_version }}
+    name: Ubuntu-${{ matrix.ubuntu_version }}-Qt-${{ matrix.qt_version }}-shared-${{ matrix.shared }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu_version: [20.04, 22.04]
+        qt_version: [5.12.12, 5.15.2, 6.4.0]
+        shared: [ON, OFF]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: lukka/get-cmake@latest
+    - name: Checkout
+      uses: actions/checkout@v3
+                
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+          version: ${{ matrix.qt_version }}
+          cache: 'true'
+          cache-key-prefix: ${{ runner.os }}-Qt-Cache-${{ matrix.qt_version }}
+          dir: ${{ github.workspace }}/Qt    
 
-      - name: Install Qt
-        run: |
-          sudo add-apt-repository ppa:beineri/opt-qt-5.11.0-bionic -y
-          sudo apt-get update -qq
-          sudo apt-get -y install build-essential libgl1-mesa-dev xvfb qt511base \
-                libssl-dev 
-          source /opt/qt*/bin/qt*-env.sh || true
-
-      - name: Install LibArchive
-        run: |
+    - name: Install LibArchive
+      run: |
           mkdir build
           cd build
           git clone https://github.com/libarchive/libarchive
           cd libarchive
           git checkout "v3.5.1"
-          cmake .
-          make -j$(nproc)
-          sudo make install -j$(nproc)
+          cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" .
+          cmake --build . --config ${{env.BUILD_TYPE}}
+          sudo make install
           cd ..
+          rm -rf libarchive
           cd ..
-          rm -rf build
           sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
           sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
 
-      - name: Run Tests
-        run: |
-          Xvfb :100 -ac &
-          export DISPLAY=:100.0
-          mkdir build
-          cd build
-          source /opt/qt*/bin/qt*-env.sh || true
-          cmake ..
-          make -j$(nproc)
-          sudo make install
-          cd ..
-          rm -rf build
-          cd tests
-          mkdir build
-          cd build
-          cmake ..
-          make -j$(nproc)
-          ./QArchiveTests
+          
 
-  TestLinuxQt6:
-    name: "Qt6 QArchive Tests (GNU+Linux amd64)"
-    runs-on: ubuntu-22.04
+    - name: Configure CMake
+      run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Run tests
+      working-directory: ${{github.workspace}}/build/tests
+      run: "ctest --verbose"
+
+  macos:
+    runs-on: macos-${{ matrix.macos_version }}
+    name: macos-${{ matrix.macos_version }}-Qt-${{ matrix.qt_version }}-shared-${{ matrix.shared }}
+    strategy:
+      fail-fast: false
+      matrix:
+        macos_version: [10.15,12]
+        qt_version: [5.15.2, 6.4.0]
+        shared: [ON, OFF]
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: lukka/get-cmake@latest
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Install Qt
-        run: |
-          sudo add-apt-repository universe -y
-          sudo apt-get update -qq
-          sudo apt-get -y install build-essential libgl1-mesa-dev xvfb qt6-base-dev libssl-dev
+        uses: jurplel/install-qt-action@v3
+        with:
+            version: ${{ matrix.qt_version }}
+            cache: 'true'
+            cache-key-prefix: ${{ runner.os }}-Qt-Cache-${{ matrix.qt_version }}
+            dir: ${{ github.workspace }}/Qt
 
       - name: Install LibArchive
-        run: |
-          mkdir build
-          cd build
-          git clone https://github.com/libarchive/libarchive
-          cd libarchive
-          git checkout "v3.5.1"
-          cmake .
-          make -j$(nproc)
-          sudo make install -j$(nproc)
-          cd ..
-          cd ..
-          rm -rf build
-          sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
-          sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
+        run: brew install libarchive
 
-      - name: Run Tests
-        run: |
-          Xvfb :100 -ac &
-          export DISPLAY=:100.0
-          mkdir build
-          cd build
-          cmake ..
-          make -j$(nproc)
-          sudo make install
-          cd ..
-          rm -rf build
-          cd tests
-          mkdir build
-          cd build
-          cmake ..
-          make -j$(nproc)
-          ./QArchiveTests
+      - name: Configure CMake
+        if: ${{ matrix.macos_version }} == '10'
+        run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
+   
 
-  TestMacLegacy:
-    name: "QArchive Tests (macOS x86_64 Legacy)"
-    runs-on: macos-10.15
-    steps:
-      - uses: actions/checkout@v3
-      - uses: lukka/get-cmake@latest
+      - name: Configure CMake
+        if: ${{ matrix.macos_version }} == '12'
+        run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
+        
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-      - name: Install Qt, LibArchive and pkg-config
-        run: brew install qt@5 libarchive
-
-      - name: Run Tests
-        run: |
-          mkdir build
-          cd build
-          export QT_DIR=$(brew --prefix qt@5)
-          export Qt5_DIR=$(brew --prefix qt@5)
-          cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc .. 
-          cmake --build . --config release
-          cat QArchiveConfig.cmake
-          sudo make install
-          cd ..
-          rm -rf build
-          cd tests
-          mkdir build
-          cd build
-          cmake ..
-          cmake --build .
-          ./QArchiveTests
-
-  TestMacLatest:
-    name: "QArchive Tests (macOS x86_64 Latest)"
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: lukka/get-cmake@latest
-
-      - name: Install Qt and LibArchive
-        run: brew install qt@5 libarchive
-
-      - name: Run Tests
-        run: |
-          mkdir build
-          cd build
-          export QT_DIR=$(brew --prefix qt@5)
-          export Qt5_DIR=$(brew --prefix qt@5)
-          cmake  -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include .. 
-          cmake --build . --config release
-          sudo make install
-          cd ..
-          rm -rf build
-          cd tests
-          mkdir build
-          cd build
-          cmake ..
-          cmake --build .
-          ./QArchiveTests
+      - name: Run tests
+        working-directory: ${{github.workspace}}/build/tests
+        run: "ctest --verbose"
