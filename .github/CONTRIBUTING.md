@@ -34,7 +34,8 @@ If you wish to develop some **code** for the project then you are much **welcome
  * **Update the docs** if you add any new method to a public **class**.
  * **Do not** add **unwanted file(s)** and doing so will make your **pull request invalid**.
  
-After making changes to the source file(s), open a pull request and give a **good title** and **mention** the **issue you opened before**. Thats it! And last but not the least, **Thank You very much for Contributing!** :heart:
+After making changes to the source file(s), open a pull request and give a **good title** and **mention** any **issues related to this pr**(if found any). 
+Thats it! And last but not the least, **Thank You very much for Contributing!** :heart:
 
 ### Reference
 

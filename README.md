@@ -188,6 +188,15 @@ My utmost **gratitude goes to these people!** :heart:
        </sub><br>
        <a href="https://github.com/antony-jr/QArchive/commits?author=lmussier">💻</a>
      </td>
+     <td>
+       <img src="https://avatars.githubusercontent.com/u/2918873?v=4" width="100px"><br>
+       <sub>
+         <strong>
+            <a href="https://github.com/neheb">Rosen Penev</a>
+         </strong>
+       </sub><br>
+       <a href="https://github.com/antony-jr/QArchive/commits?author=neheb">💻</a>
+     </td>
   </tr> 
 </table>
 
