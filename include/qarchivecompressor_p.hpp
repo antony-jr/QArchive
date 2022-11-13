@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QBuffer>
 #include <QSaveFile>
+#include <QVariantList>
 #include <QVector>
 #include <QScopedPointer>
 #include <QSharedPointer>
