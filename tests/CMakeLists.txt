@@ -5,9 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 
 if(APPLE)
    add_definitions(-DBUILD_TESTS)
@@ -21,10 +19,10 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test Concurrent REQUIRED)
 
 # Include Directories.
-include_directories(.)
+
 include_directories(${CMAKE_BINARY_DIR})
 
-add_executable(QArchiveTests main.cc
+add_executable(${PROJECT_NAME} main.cc
 	                     TestRunner.cc
 			     TestRunner.hpp
 			     QArchiveTestCases.hpp
@@ -36,4 +34,24 @@ add_executable(QArchiveTests main.cc
 			     QArchiveDiskExtractorTests.hpp
 			     QArchiveMemoryExtractorTests.cc
 			     QArchiveMemoryExtractorTests.hpp)
-target_link_libraries(QArchiveTests PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Concurrent)
+target_link_libraries(${PROJECT_NAME} PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Concurrent)
+
+enable_testing()
+
+add_test(
+  NAME ${PROJECT_NAME}
+  COMMAND $<TARGET_FILE:QArchiveTests>
+  )
+
+string(TOLOWER "${CMAKE_SYSTEM_NAME}" CMAKE_SYSTEM_NAME_LOWER)
+
+if(CMAKE_SYSTEM_NAME_LOWER STREQUAL "windows")
+    get_filename_component(QT_BIN_DIR ${QT_QMAKE_EXECUTABLE} DIRECTORY)
+    set_tests_properties(
+        ${PROJECT_NAME}
+    PROPERTIES
+        # Make sure DLL is found by adding its directory to PATH
+        ENVIRONMENT "PATH=${QT_BIN_DIR}\;$<TARGET_PROPERTY:QArchive,BINARY_DIR>\;"
+    )
+
+endif()
