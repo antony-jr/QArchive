@@ -576,10 +576,7 @@ bool CompressorPrivate::confirmFiles() {
     }
 
     /// Important: Check if total bytes is not zero.
-    if(n_BytesTotal == 0) {
-        return false;
-    }
-    return true;
+    return n_BytesTotal != 0;
 }
 
 // Does the compression and also resumes it if called twice.
