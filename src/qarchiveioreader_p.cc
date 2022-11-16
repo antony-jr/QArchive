@@ -10,8 +10,6 @@ IOReaderPrivate::IOReaderPrivate(const IOReaderPrivate &copy)
       m_IODevice(copy.m_IODevice) {
 }
 
-IOReaderPrivate::~IOReaderPrivate() = default;
-
 void IOReaderPrivate::operator = (const IOReaderPrivate &copy) {
     n_FilePointerPos = copy.n_FilePointerPos;
     n_BlockSize = copy.n_BlockSize;

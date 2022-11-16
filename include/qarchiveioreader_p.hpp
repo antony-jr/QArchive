@@ -9,7 +9,7 @@ class IOReaderPrivate {
   public:
     IOReaderPrivate();
     IOReaderPrivate(const IOReaderPrivate&);
-    ~IOReaderPrivate();
+    ~IOReaderPrivate() = default;
 
     void setBlockSize(int);
     void setIODevice(QIODevice*);
