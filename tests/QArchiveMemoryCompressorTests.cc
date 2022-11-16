@@ -1,8 +1,7 @@
 #include "QArchiveMemoryCompressorTests.hpp"
 
 QArchiveMemoryCompressorTests::QArchiveMemoryCompressorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) { }
+    : QArchiveTestCases(dir) { }
 
 QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() = default;
 

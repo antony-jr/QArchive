@@ -83,8 +83,7 @@ static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *ve
 // It can compress data in all formats of archive supported by libarchive.
 // However there is a method to set password for archives , Only
 // ZIP Format is currently supported for encrypting archives with a user given.
-CompressorPrivate::CompressorPrivate(bool memoryMode)
-    : QObject() {
+CompressorPrivate::CompressorPrivate(bool memoryMode) {
     b_MemoryMode = memoryMode;
 
     if(!b_MemoryMode) {

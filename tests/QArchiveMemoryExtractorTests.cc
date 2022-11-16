@@ -1,8 +1,7 @@
 #include <QArchiveMemoryExtractorTests.hpp>
 
 QArchiveMemoryExtractorTests::QArchiveMemoryExtractorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) {
+    : QArchiveTestCases(dir) {
 }
 
 QArchiveMemoryExtractorTests::~QArchiveMemoryExtractorTests() = default;

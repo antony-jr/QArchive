@@ -1,8 +1,7 @@
 #include <QArchiveDiskExtractorTests.hpp>
 
 QArchiveDiskExtractorTests::QArchiveDiskExtractorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) {
+    : QArchiveTestCases(dir) {
 }
 
 QArchiveDiskExtractorTests::~QArchiveDiskExtractorTests() = default;

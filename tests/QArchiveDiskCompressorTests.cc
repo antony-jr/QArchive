@@ -1,8 +1,7 @@
 #include <QArchiveDiskCompressorTests.hpp>
 
 QArchiveDiskCompressorTests::QArchiveDiskCompressorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) { }
+    : QArchiveTestCases(dir) { }
 
 QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() = default;
 

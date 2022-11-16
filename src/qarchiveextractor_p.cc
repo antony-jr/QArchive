@@ -240,8 +240,7 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
-    : QObject(),
-      n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
+    : n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
     b_MemoryMode = memoryMode;
 
     m_Info.reset(new QJsonObject);

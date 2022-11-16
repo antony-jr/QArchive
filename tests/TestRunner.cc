@@ -4,8 +4,7 @@
 #include <QtConcurrentRun>
 #include <QTest>
 
-TestRunner::TestRunner()
-    : QObject() {
+TestRunner::TestRunner() {
     m_TempDir.reset(new QTemporaryDir);
     m_Future.reset(new QFuture<void>);
     m_FutureWatcher.reset(new QFutureWatcher<void>);
