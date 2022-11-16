@@ -851,7 +851,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
 
             currentNode.setBuffer(new QBuffer);
 
-            if((currentNode.getBuffer())->open(QIODevice::ReadWrite) == false) {
+            if(!(currentNode.getBuffer())->open(QIODevice::ReadWrite)) {
                 return ArchiveHeaderWriteError;
             }
 
