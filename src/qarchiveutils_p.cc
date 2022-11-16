@@ -28,7 +28,6 @@ void ArchiveReadDestructor(struct archive *ar) {
         archive_read_close(ar);
         archive_read_free(ar);
     }
-    return;
 }
 
 /*
@@ -40,14 +39,12 @@ void ArchiveWriteDestructor(struct archive *aw) {
         archive_write_close(aw);
         archive_write_free(aw);
     }
-    return;
 }
 
 void ArchiveEntryDestructor(struct archive_entry *e) {
     if(e) {
         archive_entry_free(e);
     }
-    return;
 }
 
 /*

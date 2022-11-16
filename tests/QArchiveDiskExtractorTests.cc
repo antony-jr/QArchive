@@ -287,5 +287,4 @@ void QArchiveDiskExtractorTests::defaultErrorHandler(short code) {
     auto scode = QString::number(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
-    return;
 }

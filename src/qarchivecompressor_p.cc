@@ -108,7 +108,6 @@ void CompressorPrivate::setFileName(const QString &fileName) {
         return;
     }
     m_TemporaryFile->setFileName(fileName);
-    return;
 }
 
 // Explicitly set the format of the archive , when the format is explicitly set
@@ -119,7 +118,6 @@ void CompressorPrivate::setArchiveFormat(short format) {
         return;
     }
     m_ArchiveFormat = format;
-    return;
 }
 
 // Only used for ZIP Archives , other formats are ignored.
@@ -132,7 +130,6 @@ void CompressorPrivate::setPassword(const QString &passwd) {
 #else
     (void)passwd;
 #endif
-    return;
 }
 
 void CompressorPrivate::setBlockSize(int size) {
@@ -140,7 +137,6 @@ void CompressorPrivate::setBlockSize(int size) {
         return;
     }
     n_BlockSize = size;
-    return;
 }
 
 void CompressorPrivate::addFiles(const QString &entryName, QIODevice *device) {
@@ -152,7 +148,6 @@ void CompressorPrivate::addFiles(const QString &entryName, QIODevice *device) {
     node->entry = entryName;
     node->io = device;
     m_StaggedFiles->append(node);
-    return;
 }
 
 void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList &devices) {
@@ -170,7 +165,6 @@ void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList 
         node->io = devices.at(i).value<QIODevice*>();
         m_StaggedFiles->append(node);
     }
-    return;
 }
 
 void CompressorPrivate::addFiles(const QString &file) {
@@ -187,7 +181,6 @@ void CompressorPrivate::addFiles(const QString &file) {
     node->path = file;
     node->entry = info.fileName();
     m_StaggedFiles->append(node);
-    return;
 }
 
 void CompressorPrivate::addFiles(const QStringList &files) {
@@ -205,7 +198,6 @@ void CompressorPrivate::addFiles(const QStringList &files) {
         node->entry = info.fileName();
         m_StaggedFiles->append(node);
     }
-    return;
 }
 
 // Adds a single file and uses a custom entry name with
@@ -222,7 +214,6 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     node->path = file;
     node->entry = entryName;
     m_StaggedFiles->append(node);
-    return;
 }
 
 // Adds multiple files and uses a corresponding list of
@@ -244,7 +235,6 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
         node->entry = entryNames.at(i);
         m_StaggedFiles->append(node);
     }
-    return;
 }
 
 void CompressorPrivate::removeFiles(const QString &entry) {
@@ -262,7 +252,6 @@ void CompressorPrivate::removeFiles(const QString &entry) {
         }
         ++index;
     }
-    return;
 }
 
 void CompressorPrivate::removeFiles(const QStringList &entries) {
@@ -282,7 +271,6 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
     for(const int &i : indexes) {
         m_StaggedFiles->remove(i);
     }
-    return;
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, const QString &file) {
@@ -301,7 +289,6 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, 
         }
         ++index;
     }
-    return;
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &files) {
@@ -322,8 +309,6 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNa
     for(const int &i : indexes) {
         m_StaggedFiles->remove(i);
     }
-
-    return;
 }
 
 /* clears internal cache. */
@@ -410,7 +395,6 @@ void CompressorPrivate::start() {
         b_Paused = true;
         emit paused();
     }
-    return;
 }
 
 void CompressorPrivate::resume() {
@@ -442,7 +426,6 @@ void CompressorPrivate::resume() {
     } else {
         b_Started = false;
     }
-    return;
 }
 
 void CompressorPrivate::pause() {
@@ -450,7 +433,6 @@ void CompressorPrivate::pause() {
         return;
     }
     b_PauseRequested = true;
-    return;
 }
 
 // Cancels the current compression process, if the compression process is
@@ -460,7 +442,6 @@ void CompressorPrivate::cancel() {
         return;
     }
     b_CancelRequested = true;
-    return;
 }
 
 // Guesses the archive format from the given archive filename , on success

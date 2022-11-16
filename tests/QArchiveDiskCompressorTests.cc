@@ -18,8 +18,6 @@ void QArchiveDiskCompressorTests::initTestCase() {
     dir.mkpath(TestCase5OutputDir);
     dir.mkpath(TestCase6OutputDir);
     dir.mkpath(TestCase7OutputDir);
-
-    return;
 }
 
 void QArchiveDiskCompressorTests::simpleCompression() {
@@ -217,5 +215,4 @@ void QArchiveDiskCompressorTests::defaultErrorHandler(short code, QString file) 
     auto scode = QString::number(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
-    return;
 }

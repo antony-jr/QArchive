@@ -7,7 +7,6 @@ QArchiveMemoryCompressorTests::QArchiveMemoryCompressorTests(QTemporaryDir *dir)
 QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() = default;
 
 void QArchiveMemoryCompressorTests::initTestCase() {
-    return;
 }
 
 void QArchiveMemoryCompressorTests::simpleCompression() {
@@ -373,12 +372,10 @@ void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, QString file
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
-    return;
 }
 
 void QArchiveMemoryCompressorTests::defaultExtractorErrorHandler(short code) {
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
-    return;
 }
