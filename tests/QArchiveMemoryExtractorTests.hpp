@@ -16,7 +16,7 @@ class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
   public:
     QArchiveMemoryExtractorTests(QTemporaryDir *dir);
-    ~QArchiveMemoryExtractorTests();
+    ~QArchiveMemoryExtractorTests() override;
   private slots:
     void initTestCase();
     void simpleExtraction();

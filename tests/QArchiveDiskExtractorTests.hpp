@@ -16,7 +16,7 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
   public:
     QArchiveDiskExtractorTests(QTemporaryDir *dir);
-    ~QArchiveDiskExtractorTests();
+    ~QArchiveDiskExtractorTests() override;
   private slots:
     void initTestCase();
     void simpleExtraction();

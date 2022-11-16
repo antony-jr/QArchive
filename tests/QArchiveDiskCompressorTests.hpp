@@ -18,7 +18,7 @@ class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
   public:
     QArchiveDiskCompressorTests(QTemporaryDir *dir);
-    ~QArchiveDiskCompressorTests();
+    ~QArchiveDiskCompressorTests() override;
   private slots:
     void initTestCase();
 

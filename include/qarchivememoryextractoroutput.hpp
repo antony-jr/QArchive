@@ -13,7 +13,7 @@ class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
   public:
     MemoryExtractorOutput(QObject *parent = nullptr);
     MemoryExtractorOutput(QVector<MemoryFile>*, QObject *parent = nullptr);
-    ~MemoryExtractorOutput();
+    ~MemoryExtractorOutput() override;
 
     QVector<MemoryFile> &getFiles() const;
 

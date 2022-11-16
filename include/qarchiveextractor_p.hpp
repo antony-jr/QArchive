@@ -38,7 +38,7 @@ class ExtractorPrivate : public QObject {
     Q_OBJECT
   public:
     ExtractorPrivate(bool memoryMode = false);
-    ~ExtractorPrivate();
+    ~ExtractorPrivate() override;
   public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);

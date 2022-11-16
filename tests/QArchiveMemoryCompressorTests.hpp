@@ -19,7 +19,7 @@ class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
     Q_OBJECT
   public:
     QArchiveMemoryCompressorTests(QTemporaryDir*);
-    ~QArchiveMemoryCompressorTests();
+    ~QArchiveMemoryCompressorTests() override;
   private slots:
     void initTestCase();
 

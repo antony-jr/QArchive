@@ -16,7 +16,7 @@ class QARCHIVE_EXPORT MemoryCompressor : public Compressor {
   public:
     MemoryCompressor(QObject *parent = nullptr, bool singleThreaded = true);
     MemoryCompressor(short, QObject *parent = nullptr, bool singleThreaded = true);
-    ~MemoryCompressor();
+    ~MemoryCompressor() override;
   Q_SIGNALS:
     void finished(QBuffer*);
 };
