@@ -31,6 +31,6 @@ class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
     void compressingTarArchiveWithZSTD();
 
   protected slots:
-    void defaultErrorHandler(short code, QString file);
+    void defaultErrorHandler(short code, const QString& file);
 };
 #endif // QARCHIVE_DISK_COMPRESSOR_TESTS_HPP_INCLUDED

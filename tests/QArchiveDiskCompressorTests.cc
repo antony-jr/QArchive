@@ -210,7 +210,7 @@ void QArchiveDiskCompressorTests::compressingTarArchiveWithZSTD() {
     QVERIFY(QFileInfo::exists(TestCase7ArchivePath));
 }
 
-void QArchiveDiskCompressorTests::defaultErrorHandler(short code, QString file) {
+void QArchiveDiskCompressorTests::defaultErrorHandler(short code, const QString& file) {
     auto scode = QString::number(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));

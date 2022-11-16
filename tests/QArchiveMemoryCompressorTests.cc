@@ -367,7 +367,7 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
     archive->deleteLater();
 }
 
-void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, QString file) {
+void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, const QString& file) {
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
