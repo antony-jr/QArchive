@@ -63,26 +63,16 @@ short CompressorPrivate::Node::open() {
 }
 
 void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
-    for(auto iter = vec->begin(),
-            end = vec->end();
-            iter != end;
-            ++iter) {
-        if(*iter) {
-            delete *iter;
-        }
+    for(auto& node : *vec) {
+        delete node;
     }
     vec->clear();
 }
 
 static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *vec) {
-    for(auto iter = vec->begin(),
-            end = vec->end();
-            iter != end;
-            ++iter) {
-        if(*iter && (*iter)->valid) {
-            if((*iter)->entry == entry) {
-                return true;
-            }
+    for(const auto &node : *vec) {
+        if(node && node->valid && node->entry == entry) {
+            return true;
         }
     }
     return false;
@@ -281,22 +271,16 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
     }
     QVector<int> indexes;
     int index = 0;
-    for(auto iter = m_StaggedFiles->begin(),
-            end = m_StaggedFiles->end();
-            iter != end;
-            ++iter) {
-        if(*iter && entries.contains((*iter)->entry)) {
+    for(const auto& file : *m_StaggedFiles) {
+        if(file && entries.contains(file->entry)) {
             indexes.append(index);
             return;
         }
         ++index;
     }
 
-    for(auto iter = indexes.begin(),
-            end = indexes.end();
-            iter != end;
-            ++iter) {
-        m_StaggedFiles->remove(*iter);
+    for(const int &i : indexes) {
+        m_StaggedFiles->remove(i);
     }
     return;
 }
@@ -327,22 +311,16 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNa
     Q_UNUSED(files);
     QVector<int> indexes;
     int index = 0;
-    for(auto iter = m_StaggedFiles->begin(),
-            end = m_StaggedFiles->end();
-            iter != end;
-            ++iter) {
-        if(*iter && entryNames.contains((*iter)->entry)) {
+    for(const auto &file : *m_StaggedFiles) {
+        if(file && entryNames.contains(file->entry)) {
             indexes.append(index);
             return;
         }
         ++index;
     }
 
-    for(auto iter = indexes.begin(),
-            end = indexes.end();
-            iter != end;
-            ++iter) {
-        m_StaggedFiles->remove(*iter);
+    for(const int &i : indexes) {
+        m_StaggedFiles->remove(i);
     }
 
     return;
@@ -572,12 +550,12 @@ bool CompressorPrivate::confirmFiles() {
                 while(!dirList.isEmpty()) {
                     QDir dir(dirList.takeFirst());
                     QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
-                    for (int i = 0; i < list.size(); i++) {
-                        if(list.at(i).isDir()) {
-                            dirList.append(list.at(i).filePath());
+                    for (const auto &i : list) {
+                        if(i.isDir()) {
+                            dirList.append(i.filePath());
                             continue;
                         }
-                        QString file = list.at(i).filePath();
+                        QString file = i.filePath();
                         auto fileNode = new Node;
                         fileNode->isInMemory = node->isInMemory;
                         fileNode->valid = node->valid;
@@ -594,7 +572,7 @@ bool CompressorPrivate::confirmFiles() {
 
                         m_ConfirmedFiles->append(fileNode);
 
-                        n_BytesTotal += QFileInfo(list.at(i).filePath()).size();
+                        n_BytesTotal += QFileInfo(i.filePath()).size();
                     }
                 }
             } else { // Add it to the confirmed list.
