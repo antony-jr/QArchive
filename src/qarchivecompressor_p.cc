@@ -186,14 +186,14 @@ void CompressorPrivate::addFiles(const QStringList &files) {
     if(b_Started || b_Paused) {
         return;
     }
-    for(auto i = 0; i < files.size(); ++i) {
-        QFileInfo info(files.at(i));
+    for(const auto& file : files) {
+        QFileInfo info(file);
         if(contains(info.fileName(), m_StaggedFiles.data())) {
             continue;
         }
 
         auto node = new Node;
-        node->path = files.at(i);
+        node->path = file;
         node->entry = info.fileName();
         m_StaggedFiles->append(node);
     }
@@ -241,11 +241,8 @@ void CompressorPrivate::removeFiles(const QString &entry) {
         return;
     }
     int index = 0;
-    for(auto iter = m_StaggedFiles->begin(),
-            end = m_StaggedFiles->end();
-            iter != end;
-            ++iter) {
-        if(*iter && (*iter)->entry == entry) {
+    for(const auto& file : *m_StaggedFiles) {
+        if(file && file->entry == entry) {
             m_StaggedFiles->remove(index);
             return;
         }
@@ -278,11 +275,8 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, 
     }
     Q_UNUSED(file);
     int index = 0;
-    for(auto iter = m_StaggedFiles->begin(),
-            end = m_StaggedFiles->end();
-            iter != end;
-            ++iter) {
-        if(*iter && (*iter)->entry == entryName) {
+    for(const auto& file : *m_StaggedFiles) {
+        if(file && file->entry == entryName) {
             m_StaggedFiles->remove(index);
             return;
         }
@@ -487,8 +481,7 @@ bool CompressorPrivate::guessArchiveFormat() {
 // Directory's files will be recursively added.
 bool CompressorPrivate::confirmFiles() {
     freeNodes(m_ConfirmedFiles.data());
-    for(auto iter = m_StaggedFiles->begin() ; iter != m_StaggedFiles->end() ; ++iter) {
-        auto node = *iter;
+    for(const auto& node : *m_StaggedFiles) {
         short eCode = NoError;
         if((eCode = node->open()) != NoError) {
             if(!node->isInMemory) {
