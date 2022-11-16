@@ -15,7 +15,7 @@ MemoryFile::~MemoryFile() {
 }
 
 QJsonObject MemoryFile::fileInformation() const {
-    return QJsonObject(m_FileInformation);
+    return {m_FileInformation};
 }
 
 QBuffer *MemoryFile::buffer() const {
