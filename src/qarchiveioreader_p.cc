@@ -2,9 +2,7 @@
 
 using namespace QArchive;
 
-IOReaderPrivate::IOReaderPrivate() {
-    return;
-}
+IOReaderPrivate::IOReaderPrivate() = default;
 
 IOReaderPrivate::IOReaderPrivate(const IOReaderPrivate &copy)
     : n_FilePointerPos(copy.n_FilePointerPos),
@@ -13,10 +11,7 @@ IOReaderPrivate::IOReaderPrivate(const IOReaderPrivate &copy)
     return;
 }
 
-IOReaderPrivate::~IOReaderPrivate() {
-    return;
-}
-
+IOReaderPrivate::~IOReaderPrivate() = default;
 
 void IOReaderPrivate::operator = (const IOReaderPrivate &copy) {
     n_FilePointerPos = copy.n_FilePointerPos;

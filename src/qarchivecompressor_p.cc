@@ -25,7 +25,7 @@ using namespace QArchive;
 
 // Node is a private structure which is used store info about entries to be
 // compressed by the Compressor.
-CompressorPrivate::Node::Node() { }
+CompressorPrivate::Node::Node() = default;
 CompressorPrivate::Node::~Node() {
     if(!valid) {
         return;

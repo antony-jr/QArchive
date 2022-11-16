@@ -15,4 +15,4 @@ MemoryCompressor::MemoryCompressor(short format, QObject *parent, bool singleThr
     return;
 }
 
-MemoryCompressor::~MemoryCompressor() { }
+MemoryCompressor::~MemoryCompressor() = default;

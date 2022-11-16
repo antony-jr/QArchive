@@ -4,7 +4,7 @@ QArchiveMemoryCompressorTests::QArchiveMemoryCompressorTests(QTemporaryDir *dir)
     : QObject(),
       QArchiveTestCases(dir) { }
 
-QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() { }
+QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() = default;
 
 void QArchiveMemoryCompressorTests::initTestCase() {
     return;

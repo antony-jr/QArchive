@@ -5,8 +5,7 @@ QArchiveDiskExtractorTests::QArchiveDiskExtractorTests(QTemporaryDir *dir)
       QArchiveTestCases(dir) {
 }
 
-QArchiveDiskExtractorTests::~QArchiveDiskExtractorTests() {
-}
+QArchiveDiskExtractorTests::~QArchiveDiskExtractorTests() = default;
 
 void QArchiveDiskExtractorTests::initTestCase() {
     QDir cases(TestCasesDir);

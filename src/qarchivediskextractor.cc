@@ -27,4 +27,4 @@ DiskExtractor::DiskExtractor(const QString &archivePath, const QString &outputDi
     setOutputDirectory(outputDirectory);
 }
 
-DiskExtractor::~DiskExtractor() { }
+DiskExtractor::~DiskExtractor() = default;

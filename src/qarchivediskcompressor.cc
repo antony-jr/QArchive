@@ -22,4 +22,4 @@ DiskCompressor::DiskCompressor(const QString &fileName, short format, QObject *p
     return;
 }
 
-DiskCompressor::~DiskCompressor() { }
+DiskCompressor::~DiskCompressor() = default;

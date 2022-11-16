@@ -54,8 +54,7 @@ class QArchiveTestCases {
         Test7OutputFile = QString(TestCase7OutputDir + "/Output.txt");
     }
 
-    ~QArchiveTestCases() {
-    }
+    ~QArchiveTestCases() = default;
 
     QString TestCasesDir,
             TestOutputDir,

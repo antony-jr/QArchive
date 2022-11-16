@@ -4,7 +4,7 @@ QArchiveDiskCompressorTests::QArchiveDiskCompressorTests(QTemporaryDir *dir)
     : QObject(),
       QArchiveTestCases(dir) { }
 
-QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() { }
+QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() = default;
 
 void QArchiveDiskCompressorTests::initTestCase() {
     if(TestCasesDir.isEmpty()) {

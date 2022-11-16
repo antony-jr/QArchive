@@ -18,8 +18,7 @@ TestRunner::TestRunner()
             this, &TestRunner::finished, Qt::DirectConnection);
 }
 
-TestRunner::~TestRunner() {
-}
+TestRunner::~TestRunner() = default;
 
 void TestRunner::start() {
     *(m_Future.data()) = QtConcurrent::run([&]() {
