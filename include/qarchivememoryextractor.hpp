@@ -20,7 +20,7 @@ class QARCHIVE_EXPORT MemoryExtractor : public Extractor {
     MemoryExtractor(QObject *parent = nullptr, bool singleThreaded = true);
     MemoryExtractor(QIODevice*, QObject *parent = nullptr, bool singleThreaded = true);
     MemoryExtractor(const QString&, QObject *parent = nullptr, bool singleThreaded = true);
-    ~MemoryExtractor();
+    ~MemoryExtractor() override;
   Q_SIGNALS:
     void finished(MemoryExtractorOutput*);
 };

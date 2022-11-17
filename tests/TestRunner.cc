@@ -4,8 +4,7 @@
 #include <QtConcurrentRun>
 #include <QTest>
 
-TestRunner::TestRunner()
-    : QObject() {
+TestRunner::TestRunner() {
     m_TempDir.reset(new QTemporaryDir);
     m_Future.reset(new QFuture<void>);
     m_FutureWatcher.reset(new QFutureWatcher<void>);
@@ -18,8 +17,7 @@ TestRunner::TestRunner()
             this, &TestRunner::finished, Qt::DirectConnection);
 }
 
-TestRunner::~TestRunner() {
-}
+TestRunner::~TestRunner() = default;
 
 void TestRunner::start() {
     *(m_Future.data()) = QtConcurrent::run([&]() {

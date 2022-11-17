@@ -16,7 +16,7 @@ class QARCHIVE_EXPORT DiskCompressor : public Compressor {
     DiskCompressor(QObject *parent = nullptr, bool singleThreaded = true);
     DiskCompressor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
     DiskCompressor(const QString&, short, QObject *parent = nullptr, bool singleThreaded = true);
-    ~DiskCompressor();
+    ~DiskCompressor() override;
   Q_SIGNALS:
     void finished();
 };

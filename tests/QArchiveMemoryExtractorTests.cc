@@ -1,12 +1,10 @@
 #include <QArchiveMemoryExtractorTests.hpp>
 
 QArchiveMemoryExtractorTests::QArchiveMemoryExtractorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) {
+    : QArchiveTestCases(dir) {
 }
 
-QArchiveMemoryExtractorTests::~QArchiveMemoryExtractorTests() {
-}
+QArchiveMemoryExtractorTests::~QArchiveMemoryExtractorTests() = default;
 
 void QArchiveMemoryExtractorTests::initTestCase() {
     QDir cases(TestCasesDir);
@@ -354,5 +352,4 @@ void QArchiveMemoryExtractorTests::defaultErrorHandler(short code) {
     auto scode = QString::number(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
-    return;
 }

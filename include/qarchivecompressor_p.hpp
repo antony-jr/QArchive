@@ -18,7 +18,7 @@ class CompressorPrivate : public QObject {
     Q_OBJECT
   public:
     CompressorPrivate(bool memoryMode = false);
-    ~CompressorPrivate();
+    ~CompressorPrivate() override;
   public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);

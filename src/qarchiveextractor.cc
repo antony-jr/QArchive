@@ -49,7 +49,6 @@ Extractor::~Extractor() {
         m_Thread->quit();
         m_Thread->wait();
     }
-    return;
 }
 
 void Extractor::setArchive(QIODevice *archive) {
@@ -57,7 +56,6 @@ void Extractor::setArchive(QIODevice *archive) {
               "setArchive(QIODevice*)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QIODevice*, archive));
-    return;
 }
 
 void Extractor::setArchive(const QString &archivePath) {
@@ -65,7 +63,6 @@ void Extractor::setArchive(const QString &archivePath) {
               "setArchive(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, archivePath));
-    return;
 }
 
 void Extractor::setArchive(const QString &archivePath, const QString &outputDirectory) {
@@ -78,7 +75,6 @@ void Extractor::setBlockSize(int n) {
               "setBlockSize(int)").invoke(m_Extractor.data(),
                                           Qt::QueuedConnection,
                                           Q_ARG(int, n));
-    return;
 }
 
 void Extractor::setCalculateProgress(bool choice) {
@@ -86,7 +82,6 @@ void Extractor::setCalculateProgress(bool choice) {
               "setCalculateProgress(bool)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(bool, choice));
-    return;
 }
 
 void Extractor::setOutputDirectory(const QString &dir) {
@@ -94,7 +89,6 @@ void Extractor::setOutputDirectory(const QString &dir) {
               "setOutputDirectory(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, dir));
-    return;
 }
 
 void Extractor::setPassword(const QString &passwd) {
@@ -102,7 +96,6 @@ void Extractor::setPassword(const QString &passwd) {
               "setPassword(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, passwd));
-    return;
 }
 
 void Extractor::addFilter(const QString &filter) {
@@ -110,7 +103,6 @@ void Extractor::addFilter(const QString &filter) {
               "addFilter(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, filter));
-    return;
 }
 
 void Extractor::addFilter(const QStringList &filters) {
@@ -118,7 +110,6 @@ void Extractor::addFilter(const QStringList &filters) {
               "addFilter(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, filters));
-    return;
 }
 
 void Extractor::addIncludePattern(const QString &pattern) {
@@ -126,7 +117,6 @@ void Extractor::addIncludePattern(const QString &pattern) {
               "addIncludePattern(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, pattern));
-    return;
 }
 
 void Extractor::addIncludePattern(const QStringList &patterns) {
@@ -134,7 +124,6 @@ void Extractor::addIncludePattern(const QStringList &patterns) {
               "addIncludePattern(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, patterns));
-    return;
 }
 
 
@@ -143,7 +132,6 @@ void Extractor::addExcludePattern(const QString & pattern) {
               "addExcludePattern(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, pattern));
-    return;
 }
 
 void Extractor::addExcludePattern(const QStringList & patterns) {
@@ -151,7 +139,6 @@ void Extractor::addExcludePattern(const QStringList & patterns) {
               "addExcludePattern(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, patterns));
-    return;
 }
 
 void Extractor::setBasePath(const QString &path) {
@@ -159,35 +146,28 @@ void Extractor::setBasePath(const QString &path) {
               "setBasePath(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, path));
-    return;
 }
 
 void Extractor::clear() {
     getMethod(m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }
 
 void Extractor::getInfo() {
     getMethod(m_Extractor, "getInfo()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }
 
 void Extractor::start() {
     getMethod(m_Extractor, "start()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }
 
 void Extractor::cancel() {
     getMethod(m_Extractor, "cancel()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }
 
 void Extractor::pause() {
     getMethod(m_Extractor, "pause()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }
 
 void Extractor::resume() {
     getMethod(m_Extractor, "resume()").invoke(m_Extractor.data(), Qt::QueuedConnection);
-    return;
 }

@@ -1,13 +1,11 @@
 #include "QArchiveMemoryCompressorTests.hpp"
 
 QArchiveMemoryCompressorTests::QArchiveMemoryCompressorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) { }
+    : QArchiveTestCases(dir) { }
 
-QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() { }
+QArchiveMemoryCompressorTests::~QArchiveMemoryCompressorTests() = default;
 
 void QArchiveMemoryCompressorTests::initTestCase() {
-    return;
 }
 
 void QArchiveMemoryCompressorTests::simpleCompression() {
@@ -369,16 +367,14 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
     archive->deleteLater();
 }
 
-void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, QString file) {
+void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, const QString& file) {
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
-    return;
 }
 
 void QArchiveMemoryCompressorTests::defaultExtractorErrorHandler(short code) {
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
-    return;
 }

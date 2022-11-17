@@ -1,12 +1,10 @@
 #include <QArchiveDiskExtractorTests.hpp>
 
 QArchiveDiskExtractorTests::QArchiveDiskExtractorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) {
+    : QArchiveTestCases(dir) {
 }
 
-QArchiveDiskExtractorTests::~QArchiveDiskExtractorTests() {
-}
+QArchiveDiskExtractorTests::~QArchiveDiskExtractorTests() = default;
 
 void QArchiveDiskExtractorTests::initTestCase() {
     QDir cases(TestCasesDir);
@@ -288,5 +286,4 @@ void QArchiveDiskExtractorTests::defaultErrorHandler(short code) {
     auto scode = QString::number(code);
     scode.prepend("error:: ");
     QFAIL(QTest::toString(scode));
-    return;
 }

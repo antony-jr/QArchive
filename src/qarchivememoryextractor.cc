@@ -19,4 +19,4 @@ MemoryExtractor::MemoryExtractor(const QString &archivePath, QObject *parent, bo
     setArchive(archivePath);
 }
 
-MemoryExtractor::~MemoryExtractor() { }
+MemoryExtractor::~MemoryExtractor() = default;

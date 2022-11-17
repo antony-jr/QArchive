@@ -44,7 +44,7 @@ using namespace QArchive;
 /// This will force the users to not mess up the integrity of a MemoryFile like
 /// deleting the internal pointers which will be automatically freed by MemoryFile
 /// destructor.
-MutableMemoryFile::MutableMemoryFile() { }
+MutableMemoryFile::MutableMemoryFile() = default;
 MutableMemoryFile::~MutableMemoryFile() {
     m_Buffer.clear();
 }
@@ -240,8 +240,7 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
-    : QObject(),
-      n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
+    : n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
     b_MemoryMode = memoryMode;
 
     m_Info.reset(new QJsonObject);
@@ -263,7 +262,6 @@ void ExtractorPrivate::setArchive(QIODevice *archive) {
     }
     clear();
     m_Archive = archive;
-    return;
 }
 
 // Sets the archive path as the given QString which will be later
@@ -274,7 +272,6 @@ void ExtractorPrivate::setArchive(const QString &archivePath) {
     }
     clear();
     m_ArchivePath = archivePath;
-    return;
 }
 
 // Blocksize to be used when extracting the given archive.
@@ -283,7 +280,6 @@ void ExtractorPrivate::setBlockSize(int n) {
         return;
     }
     n_BlockSize = n;
-    return;
 }
 
 // Sets the directory where the extraction data to be extracted.
@@ -292,14 +288,12 @@ void ExtractorPrivate::setOutputDirectory(const QString &destination) {
         return;
     }
     m_OutputDirectory = destination + "/";
-    return;
 }
 
 // Enables/Disables the progress of the extraction with respect to the
 // given bool.
 void ExtractorPrivate::setCalculateProgress(bool c) {
     b_NoProgress = !c;
-    return;
 }
 
 // Sets the password for the archive when extracting the data.
@@ -314,7 +308,6 @@ void ExtractorPrivate::setPassword(const QString &passwd) {
 #else
     (void)passwd;
 #endif
-    return;
 }
 
 // Adds extract filters , if set , only the files in the filter
@@ -325,7 +318,6 @@ void ExtractorPrivate::addFilter(const QString &filter) {
         return;
     }
     m_ExtractFilters << filter;
-    return;
 }
 
 // Overload of addFilter to accept list of QStrings.
@@ -334,7 +326,6 @@ void ExtractorPrivate::addFilter(const QStringList &filters) {
         return;
     }
     m_ExtractFilters << filters;
-    return;
 }
 
 void ExtractorPrivate::addIncludePattern(const QString &pattern) {
@@ -344,7 +335,6 @@ void ExtractorPrivate::addIncludePattern(const QString &pattern) {
     auto errorCode = m_archiveFilter->addIncludePattern(pattern);
     if (errorCode != NoError)
         emit error(errorCode);
-    return;
 }
 
 void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
@@ -354,7 +344,6 @@ void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
     auto errorCode = m_archiveFilter->addIncludePatterns(patterns);
     if (errorCode != NoError)
         emit error(errorCode);
-    return;
 }
 
 void ExtractorPrivate::addExcludePattern(const QString &pattern) {
@@ -364,7 +353,6 @@ void ExtractorPrivate::addExcludePattern(const QString &pattern) {
     auto errorCode = m_archiveFilter->addExcludePattern(pattern);
     if (errorCode != NoError)
         emit error(errorCode);
-    return;
 }
 
 void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
@@ -374,7 +362,6 @@ void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
     auto errorCode = m_archiveFilter->addExcludePatterns(patterns);
     if (errorCode != NoError)
         emit error(errorCode);
-    return;
 }
 
 void ExtractorPrivate::setBasePath(const QString& path) {
@@ -421,7 +408,6 @@ void ExtractorPrivate::clear() {
     }
     m_CurrentArchiveEntry = nullptr;
     b_QIODeviceOwned = false;
-    return;
 }
 
 // Returns the information of the archive through info signal.
@@ -475,8 +461,6 @@ void ExtractorPrivate::getInfo() {
         b_StartRequested = false;
         start();
     }
-
-    return;
 }
 
 void ExtractorPrivate::start() {
@@ -561,7 +545,6 @@ void ExtractorPrivate::start() {
         b_Started = false;
         emit error(errorCode );
     }
-    return;
 }
 
 // Pauses the extractor.
@@ -569,7 +552,6 @@ void ExtractorPrivate::pause() {
     if(b_Started && !b_Paused) {
         b_PauseRequested = true;
     }
-    return;
 }
 
 // Resumes the extractor.
@@ -612,7 +594,6 @@ void ExtractorPrivate::resume() {
         b_Started = false;
         emit error(ret );
     }
-    return;
 }
 
 // Cancels the extraction.
@@ -620,7 +601,6 @@ void ExtractorPrivate::cancel() {
     if(b_Started && !b_Paused && !b_Finished) {
         b_CancelRequested = true;
     }
-    return;
 }
 
 
@@ -871,7 +851,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
 
             currentNode.setBuffer(new QBuffer);
 
-            if((currentNode.getBuffer())->open(QIODevice::ReadWrite) == false) {
+            if(!(currentNode.getBuffer())->open(QIODevice::ReadWrite)) {
                 return ArchiveHeaderWriteError;
             }
 

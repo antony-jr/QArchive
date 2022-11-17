@@ -1,10 +1,9 @@
 #include <QArchiveDiskCompressorTests.hpp>
 
 QArchiveDiskCompressorTests::QArchiveDiskCompressorTests(QTemporaryDir *dir)
-    : QObject(),
-      QArchiveTestCases(dir) { }
+    : QArchiveTestCases(dir) { }
 
-QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() { }
+QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() = default;
 
 void QArchiveDiskCompressorTests::initTestCase() {
     if(TestCasesDir.isEmpty()) {
@@ -18,8 +17,6 @@ void QArchiveDiskCompressorTests::initTestCase() {
     dir.mkpath(TestCase5OutputDir);
     dir.mkpath(TestCase6OutputDir);
     dir.mkpath(TestCase7OutputDir);
-
-    return;
 }
 
 void QArchiveDiskCompressorTests::simpleCompression() {
@@ -213,9 +210,8 @@ void QArchiveDiskCompressorTests::compressingTarArchiveWithZSTD() {
     QVERIFY(QFileInfo::exists(TestCase7ArchivePath));
 }
 
-void QArchiveDiskCompressorTests::defaultErrorHandler(short code, QString file) {
+void QArchiveDiskCompressorTests::defaultErrorHandler(short code, const QString& file) {
     auto scode = QString::number(code);
     scode.prepend(("error::" + file) + ":: ");
     QFAIL(QTest::toString(scode));
-    return;
 }
