@@ -4,12 +4,7 @@ using namespace QArchive;
 
 IOReaderPrivate::IOReaderPrivate() = default;
 IOReaderPrivate::IOReaderPrivate(const IOReaderPrivate &copy) = default;
-
-void IOReaderPrivate::operator = (const IOReaderPrivate &copy) {
-    n_FilePointerPos = copy.n_FilePointerPos;
-    n_BlockSize = copy.n_BlockSize;
-    m_IODevice = copy.m_IODevice;
-}
+IOReaderPrivate& IOReaderPrivate::operator = (const IOReaderPrivate &copy) = default;
 
 void IOReaderPrivate::setBlockSize(int blockSize) {
     n_BlockSize = (blockSize < 1024) ?
