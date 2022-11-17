@@ -2,10 +2,6 @@
 
 using namespace QArchive;
 
-IOReaderPrivate::IOReaderPrivate() = default;
-IOReaderPrivate::IOReaderPrivate(const IOReaderPrivate &copy) = default;
-IOReaderPrivate& IOReaderPrivate::operator = (const IOReaderPrivate &copy) = default;
-
 void IOReaderPrivate::setBlockSize(int blockSize) {
     n_BlockSize = (blockSize < 1024) ?
                   10204 : blockSize;
