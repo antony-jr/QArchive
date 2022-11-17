@@ -7,11 +7,6 @@
 namespace QArchive {
 class IOReaderPrivate {
   public:
-    IOReaderPrivate() = default;
-    IOReaderPrivate(const IOReaderPrivate&) = default;
-    IOReaderPrivate& operator=(const IOReaderPrivate&) = default;
-    ~IOReaderPrivate() = default;
-
     void setBlockSize(int);
     void setIODevice(QIODevice*);
 
