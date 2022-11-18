@@ -427,10 +427,10 @@ void ExtractorPrivate::getInfo() {
         }
         return;
     }
-    short errorCode = NoError;
 
     // Open the Archive.
-    if((errorCode = openArchive()) != NoError) {
+    short errorCode = openArchive();
+    if(errorCode != NoError) {
         b_ProcessingArchive = false;
         emit error(errorCode);
         if(b_StartRequested) {
@@ -471,10 +471,9 @@ void ExtractorPrivate::start() {
         return;
     }
 
-    short errorCode = NoError;
-
     // Open the Archive.
-    if((errorCode = openArchive()) != NoError) {
+    short errorCode = openArchive();
+    if(errorCode != NoError) {
         emit error(errorCode);
         return;
     }

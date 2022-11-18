@@ -479,8 +479,8 @@ bool CompressorPrivate::guessArchiveFormat() {
 bool CompressorPrivate::confirmFiles() {
     freeNodes(m_ConfirmedFiles.data());
     for(const auto& node : *m_StaggedFiles) {
-        short eCode = NoError;
-        if((eCode = node->open()) != NoError) {
+        short eCode = node->open();
+        if(eCode != NoError) {
             if(!node->isInMemory) {
                 emit error(eCode, node->path);
             } else {
