@@ -148,10 +148,8 @@ static int archive_w_open_cb(struct archive *archive, void *data) {
     if(!p) {
         return ARCHIVE_FATAL;
     }
-    if(!p->isOpen()) {
-        if(!p->open(QIODevice::WriteOnly)) {
-            return ARCHIVE_FATAL;
-        }
+    if(!p->isOpen() && !p->open(QIODevice::WriteOnly)) {
+        return ARCHIVE_FATAL;
     }
     return ARCHIVE_OK;
 }
@@ -209,7 +207,7 @@ int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
  * free it automatically.
 */
 char *concat(const char *dest, const char *src) {
-    char *ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
+    auto ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
     strcpy(ret, dest);
     strcat(ret, src);
     return ret;

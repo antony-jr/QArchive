@@ -6,7 +6,7 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(QScopedPointer<ExtractorPrivate> &object, const char *function) {
+static QMetaMethod getMethod(const QScopedPointer<ExtractorPrivate> &object, const char *function) {
     auto metaObject = object->metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }

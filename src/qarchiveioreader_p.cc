@@ -11,21 +11,21 @@ void IOReaderPrivate::setIODevice(QIODevice *io) {
     m_IODevice = io;
 }
 
-bool IOReaderPrivate::isOpen() {
+bool IOReaderPrivate::isOpen() const {
     if(m_IODevice) {
         return m_IODevice->isOpen();
     }
     return false;
 }
 
-bool IOReaderPrivate::isReadable() {
+bool IOReaderPrivate::isReadable() const {
     if(m_IODevice) {
         return m_IODevice->isReadable();
     }
     return false;
 }
 
-bool IOReaderPrivate::isSequential() {
+bool IOReaderPrivate::isSequential() const {
     if(m_IODevice) {
         return m_IODevice->isSequential();
     }
