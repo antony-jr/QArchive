@@ -32,6 +32,6 @@ class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
     void isExtractorObjectReuseable();
     void testProgress();
   protected slots:
-    void defaultErrorHandler(short code);
+    static void defaultErrorHandler(short code);
 };
 #endif // QARCHIVE_DISK_EXTRACTOR_TESTS_HPP_INCLUDED
