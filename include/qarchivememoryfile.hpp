@@ -10,7 +10,7 @@ namespace QArchive {
 class QARCHIVE_EXPORT MemoryFile {
   public:
     MemoryFile();
-    MemoryFile(const QJsonObject&, const QSharedPointer<QBuffer>&);
+    MemoryFile(QJsonObject, const QSharedPointer<QBuffer>&);
     ~MemoryFile();
 
     QJsonObject fileInformation() const;
