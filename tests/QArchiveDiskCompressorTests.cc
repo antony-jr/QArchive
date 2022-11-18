@@ -1,10 +1,5 @@
 #include <QArchiveDiskCompressorTests.hpp>
 
-QArchiveDiskCompressorTests::QArchiveDiskCompressorTests(QTemporaryDir *dir)
-    : QArchiveTestCases(dir) { }
-
-QArchiveDiskCompressorTests::~QArchiveDiskCompressorTests() = default;
-
 void QArchiveDiskCompressorTests::initTestCase() {
     if(TestCasesDir.isEmpty()) {
         QFAIL("Temporary directory failed to construct.");

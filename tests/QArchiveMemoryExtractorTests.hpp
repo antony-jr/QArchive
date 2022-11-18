@@ -13,10 +13,8 @@
 #include <QTemporaryDir>
 
 class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
+  using QArchiveTestCases::QArchiveTestCases;
     Q_OBJECT
-  public:
-    QArchiveMemoryExtractorTests(QTemporaryDir *dir);
-    ~QArchiveMemoryExtractorTests() override;
   private slots:
     void initTestCase();
     void simpleExtraction();

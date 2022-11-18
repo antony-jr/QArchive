@@ -1,11 +1,5 @@
 #include <QArchiveMemoryExtractorTests.hpp>
 
-QArchiveMemoryExtractorTests::QArchiveMemoryExtractorTests(QTemporaryDir *dir)
-    : QArchiveTestCases(dir) {
-}
-
-QArchiveMemoryExtractorTests::~QArchiveMemoryExtractorTests() = default;
-
 void QArchiveMemoryExtractorTests::initTestCase() {
     QDir cases(TestCasesDir);
     if(cases.exists()) {

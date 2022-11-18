@@ -16,10 +16,8 @@
 #include "QArchiveTestCases.hpp"
 
 class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
+  using QArchiveTestCases::QArchiveTestCases;
     Q_OBJECT
-  public:
-    QArchiveMemoryCompressorTests(QTemporaryDir*);
-    ~QArchiveMemoryCompressorTests() override;
   private slots:
     void initTestCase();
 

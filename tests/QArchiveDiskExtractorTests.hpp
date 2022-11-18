@@ -13,10 +13,8 @@
 #include <QTemporaryDir>
 
 class QArchiveDiskExtractorTests : public QObject,private QArchiveTestCases {
+  using QArchiveTestCases::QArchiveTestCases;
     Q_OBJECT
-  public:
-    QArchiveDiskExtractorTests(QTemporaryDir *dir);
-    ~QArchiveDiskExtractorTests() override;
   private slots:
     void initTestCase();
     void simpleExtraction();
