@@ -65,7 +65,7 @@ struct ClientData_t {
 // the programmer mistakenly gives a QIODevice that has not opened.
 static int archive_open_cb(struct archive *archive, void *data) {
     Q_UNUSED(archive);
-    auto p = (ClientData_t*)data;
+    auto p = static_cast<ClientData_t*>(data);
     if(!p) {
         // We surely need the reader handle to continue
         // any further.
@@ -85,7 +85,7 @@ static int archive_close_cb(struct archive *archive, void *data) {
     // its a private object inside some other class.
     // It will be managed automatically later.
     Q_UNUSED(archive);
-    auto p = (ClientData_t*)data;
+    auto p = static_cast<ClientData_t*>(data);
     if(p->storage) { // free any data that has been allocated.
         free(p->storage);
     }
@@ -99,7 +99,7 @@ static int archive_close_cb(struct archive *archive, void *data) {
 // to read the data from QIODevice.
 static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
     Q_UNUSED(archive);
-    auto p = (ClientData_t*)data;
+    auto p = static_cast<ClientData_t*>(data);
     *buffer = (void*)p->storage;
     return p->io->read(p->storage);
 }
@@ -112,7 +112,7 @@ static la_ssize_t archive_read_cb(struct archive *archive, void *data, const voi
 // Without this function you cannot extract 7zip archives.
 static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {
     Q_UNUSED(archive);
-    auto p = (ClientData_t*)data;
+    auto p = static_cast<ClientData_t*>(data);
     return static_cast<int64_t>(p->io->seek(request, whence));
 }
 
@@ -121,13 +121,13 @@ static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t requ
 int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device) {
     // This client data will be freed on close ,
     // we don't need to worry about this.
-    auto p = (ClientData_t*)calloc(1, sizeof(ClientData_t));
+    auto p = static_cast<ClientData_t*>(calloc(1, sizeof(ClientData_t)));
     p->io = new QArchive::IOReaderPrivate;
     p->io->setIODevice(device);
     p->io->setBlockSize(blocksize);
-    p->storage = (char*)calloc(1, (blocksize < 1024) ?
+    p->storage = static_cast<char*>(calloc(1, (blocksize < 1024) ?
                                sizeof(*(p->storage)) * 10204 :
-                               sizeof(*(p->storage)) * blocksize);
+                               sizeof(*(p->storage)) * blocksize));
 
     archive_read_set_open_callback(archive, archive_open_cb);
     archive_read_set_read_callback(archive, archive_read_cb);
@@ -144,7 +144,7 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
 
 static int archive_w_open_cb(struct archive *archive, void *data) {
     Q_UNUSED(archive);
-    auto p = (QIODevice*)data;
+    auto p = static_cast<QIODevice*>(data);
     if(!p) {
         return ARCHIVE_FATAL;
     }
@@ -156,7 +156,7 @@ static int archive_w_open_cb(struct archive *archive, void *data) {
 
 static int archive_w_close_cb(struct archive *archive, void *data) {
     Q_UNUSED(archive);
-    auto p = (QIODevice*)data;
+    auto p = static_cast<QIODevice*>(data);
     if(!p) {
         return ARCHIVE_FATAL;
     }
@@ -166,8 +166,8 @@ static int archive_w_close_cb(struct archive *archive, void *data) {
 
 static la_ssize_t archive_write_cb(struct archive *archive, void *data, const void *buffer, size_t length) {
     Q_UNUSED(archive);
-    auto p = (QIODevice*)data;
-    return p->write((const char*)buffer, length);
+    auto p = static_cast<QIODevice*>(data);
+    return p->write(static_cast<const char*>(buffer), length);
 }
 
 #if ARCHIVE_VERSION_NUMBER >= 3005000
@@ -207,7 +207,7 @@ int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
  * free it automatically.
 */
 char *concat(const char *dest, const char *src) {
-    auto ret = (char*) calloc(sizeof(char), strlen(dest) + strlen(src) + 1);
+    auto ret = static_cast<char*>(calloc(sizeof(char), strlen(dest) + strlen(src) + 1));
     strcpy(ret, dest);
     strcat(ret, src);
     return ret;

@@ -651,7 +651,7 @@ short ExtractorPrivate::openArchive() {
         }
 
         b_QIODeviceOwned = true;
-        m_Archive = (QIODevice*)file;
+        m_Archive = static_cast<QIODevice*>(file);
     } else {
         /// Open the archive if it's not opened.
         if(!m_Archive->isOpen() && !m_Archive->open(QIODevice::ReadOnly)) {
@@ -883,7 +883,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                     }
                 } else {
                     (currentNode.getBuffer())->seek(offset);
-                    if((currentNode.getBuffer())->write((const char*)buff, size) == -1) {
+                    if((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
                         return ArchiveWriteError;
                     }
                 }
