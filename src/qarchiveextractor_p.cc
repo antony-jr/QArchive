@@ -715,14 +715,14 @@ short ExtractorPrivate::extract() {
         archive_read_support_format_all(m_ArchiveRead.data());
         archive_read_support_filter_all(m_ArchiveRead.data());
 
-        if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {
+        if(archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive)) {
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
             return ArchiveReadError;
         }
 
         if(!b_MemoryMode) {
-            if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {
+            if(archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags)) {
                 m_ArchiveRead.clear();
                 m_ArchiveWrite.clear();
                 return ArchiveWriteError;
@@ -958,7 +958,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
 
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
-    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {
+    if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {
         archive_read_close(inArchive);
         archive_read_free(inArchive);
         return ArchiveReadError;
@@ -1012,7 +1012,7 @@ short ExtractorPrivate::processArchiveInformation() {
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
 
-    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {
+    if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {
         archive_read_close(inArchive);
         archive_read_free(inArchive);
         return ArchiveReadError;
