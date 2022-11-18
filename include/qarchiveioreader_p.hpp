@@ -22,6 +22,6 @@ class IOReaderPrivate {
     int n_BlockSize = 10204; /* Default. */
     QIODevice *m_IODevice = nullptr;
 };
-}
+}  // namespace QArchive
 
 #endif // QARCHIVE_IO_READER_PRIVATE_HPP_INCLUDED

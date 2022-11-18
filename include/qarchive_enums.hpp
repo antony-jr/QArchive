@@ -78,5 +78,5 @@ enum : short {
     XarFormat,
     ZstdFormat
 };
-}
+}  // namespace QArchive
 #endif

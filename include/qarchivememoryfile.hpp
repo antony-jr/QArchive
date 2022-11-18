@@ -19,6 +19,6 @@ class QARCHIVE_EXPORT MemoryFile {
     QJsonObject m_FileInformation;
     QSharedPointer<QBuffer> m_Buffer;
 };
-}
+}  // namespace QArchive
 
 #endif // QARCHIVE_MEMORY_FILE_HPP_INCLUDED

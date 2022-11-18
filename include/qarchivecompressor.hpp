@@ -54,5 +54,5 @@ class QARCHIVE_EXPORT Compressor : public QObject {
     QScopedPointer<CompressorPrivate> m_Compressor;
     QScopedPointer<QThread> m_Thread;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_HPP_INCLUDED

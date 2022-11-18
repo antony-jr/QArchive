@@ -24,6 +24,6 @@ class QARCHIVE_EXPORT MemoryExtractor : public Extractor {
   Q_SIGNALS:
     void finished(MemoryExtractorOutput*);
 };
-}
+}  // namespace QArchive
 
 #endif // QARCHIVE_MEMORY_EXTRACTOR_HPP_INCLUDED

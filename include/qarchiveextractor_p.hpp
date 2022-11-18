@@ -118,5 +118,5 @@ class ExtractorPrivate : public QObject {
     bool b_hasBasePath = false;
     QDir m_basePath;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED

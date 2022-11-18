@@ -112,7 +112,7 @@ class ArchiveFilter {
     QSharedPointer<struct archive> m_match;
 
 };
-}
+}  // namespace QArchive
 
 static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
     QJsonObject CurrentEntry;

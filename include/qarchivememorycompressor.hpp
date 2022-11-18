@@ -20,5 +20,5 @@ class QARCHIVE_EXPORT MemoryCompressor : public Compressor {
   Q_SIGNALS:
     void finished(QBuffer*);
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_MEMORY_COMPRESSOR_HPP_INCLUDED

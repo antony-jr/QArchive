@@ -91,5 +91,5 @@ class CompressorPrivate : public QObject {
     QScopedPointer<QVector<Node*>> m_ConfirmedFiles;
     QScopedPointer<QVector<Node*>> m_StaggedFiles;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

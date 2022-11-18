@@ -20,5 +20,5 @@ class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
   private:
     QScopedPointer<QVector<MemoryFile>> m_Files;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED

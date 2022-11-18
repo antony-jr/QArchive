@@ -59,5 +59,5 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     QScopedPointer<ExtractorPrivate> m_Extractor;
     QScopedPointer<QThread> m_Thread;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_HPP_INCLUDED
