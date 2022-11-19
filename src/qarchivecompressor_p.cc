@@ -61,14 +61,14 @@ short CompressorPrivate::Node::open() {
     return NoError;
 }
 
-void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
+void CompressorPrivate::freeNodes(const QScopedPointer<QVector<Node*>>& vec) {
     for(auto& node : *vec) {
         delete node;
     }
     vec->clear();
 }
 
-static bool contains(const QString &entry, const QVector<CompressorPrivate::Node*> *vec) {
+static bool contains(const QString &entry, const QScopedPointer<QVector<CompressorPrivate::Node*>>& vec) {
     for(const auto &node : *vec) {
         if(node && node->valid && node->entry == entry) {
             return true;
@@ -174,7 +174,7 @@ void CompressorPrivate::addFiles(const QString &file) {
     }
 
     QFileInfo info(file);
-    if(contains(info.fileName(), m_StaggedFiles.data())) {
+    if(contains(info.fileName(), m_StaggedFiles)) {
         return;
     }
 
@@ -190,7 +190,7 @@ void CompressorPrivate::addFiles(const QStringList &files) {
     }
     for(const auto& file : files) {
         QFileInfo info(file);
-        if(contains(info.fileName(), m_StaggedFiles.data())) {
+        if(contains(info.fileName(), m_StaggedFiles)) {
             continue;
         }
 
@@ -207,7 +207,7 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     if(b_Started || b_Paused) {
         return;
     }
-    if(contains(entryName, m_StaggedFiles.data())) {
+    if(contains(entryName, m_StaggedFiles)) {
         return;
     }
 
@@ -227,7 +227,7 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
         return;
     }
     for(auto i = 0; i < files.size(); ++i) {
-        if(contains(entryNames.at(i), m_StaggedFiles.data())) {
+        if(contains(entryNames.at(i), m_StaggedFiles)) {
             continue;
         }
 
@@ -321,8 +321,8 @@ void CompressorPrivate::clear() {
     n_BytesProcessed = 0;
     n_BytesTotal = 0;
 
-    freeNodes(m_ConfirmedFiles.data());
-    freeNodes(m_StaggedFiles.data());
+    freeNodes(m_ConfirmedFiles);
+    freeNodes(m_StaggedFiles);
 
     if(!b_MemoryMode) {
         m_TemporaryFile.reset(new QSaveFile);
@@ -490,7 +490,7 @@ bool CompressorPrivate::guessArchiveFormat() {
 // This populates m_ConfirmedFiles vector with all the files added ,
 // Directory's files will be recursively added.
 bool CompressorPrivate::confirmFiles() {
-    freeNodes(m_ConfirmedFiles.data());
+    freeNodes(m_ConfirmedFiles);
     for(const auto& node : *m_StaggedFiles) {
         short eCode = node->open();
         if(eCode != NoError) {

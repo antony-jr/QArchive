@@ -72,7 +72,7 @@ class CompressorPrivate : public QObject {
     };
 
   private:
-    static void freeNodes(QVector<Node*>*);
+    static void freeNodes(const QScopedPointer<QVector<Node*>>&);
   private:
     bool b_MemoryMode = false;
     bool b_PauseRequested = false,
