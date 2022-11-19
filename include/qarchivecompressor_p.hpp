@@ -11,6 +11,8 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 
+#include <memory>
+
 #include "qarchiveutils_p.hpp"
 
 namespace QArchive {
@@ -87,7 +89,7 @@ class CompressorPrivate : public QObject {
            n_BytesTotal = 0;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QSaveFile> m_TemporaryFile;
-    QScopedPointer<QBuffer> m_Buffer;
+    std::unique_ptr<QBuffer> m_Buffer;
     QScopedPointer<QVector<Node*>> m_ConfirmedFiles;
     QScopedPointer<QVector<Node*>> m_StaggedFiles;
 };

@@ -520,7 +520,7 @@ void ExtractorPrivate::start() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
         }
     }
@@ -569,7 +569,7 @@ void ExtractorPrivate::resume() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
         }
     }

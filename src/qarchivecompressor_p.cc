@@ -371,7 +371,7 @@ void CompressorPrivate::start() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-            emit memoryFinished(m_Buffer.take());
+            emit memoryFinished(m_Buffer.release());
             m_Buffer.reset(new QBuffer);
         } else {
             m_TemporaryFile->commit();
@@ -400,7 +400,7 @@ void CompressorPrivate::resume() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-            emit memoryFinished(m_Buffer.take());
+            emit memoryFinished(m_Buffer.release());
             m_Buffer.reset(new QBuffer);
         } else {
             m_TemporaryFile->commit();
@@ -663,7 +663,7 @@ short CompressorPrivate::compress() {
             }
         } else {
             if(archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
-                                         (QIODevice*)m_Buffer.data()) != ARCHIVE_OK) {
+                                         (QIODevice*)m_Buffer.get()) != ARCHIVE_OK) {
 
                 m_ArchiveWrite.clear();
                 emit error(ArchiveWriteOpenError, QString());

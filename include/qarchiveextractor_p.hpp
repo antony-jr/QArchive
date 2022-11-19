@@ -12,6 +12,8 @@
 #include <QJsonObject>
 #include <QDir>
 
+#include <memory>
+
 #include "qarchivememoryextractoroutput.hpp"
 #include "qarchiveutils_p.hpp"
 
@@ -113,7 +115,7 @@ class ExtractorPrivate : public QObject {
     QSharedPointer<struct archive> m_ArchiveWrite;
     QStringList m_ExtractFilters;
     QScopedPointer<QJsonObject> m_Info;
-    QScopedPointer<QVector<MemoryFile>> m_ExtractedFiles;
+    std::unique_ptr<QVector<MemoryFile>> m_ExtractedFiles;
     QSharedPointer<ArchiveFilter> m_archiveFilter;
     bool b_hasBasePath = false;
     QDir m_basePath;
