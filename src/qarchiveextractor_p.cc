@@ -413,7 +413,7 @@ void ExtractorPrivate::getInfo() {
 
     if(!m_Info->isEmpty()) {
         b_ProcessingArchive = false;
-        emit info(*(m_Info.data()));
+        emit info(*m_Info);
         if(b_StartRequested) {
             b_StartRequested = false;
             start();
@@ -437,7 +437,7 @@ void ExtractorPrivate::getInfo() {
     b_ProcessingArchive = false;
 
     if(!errorCode) {
-        emit info(*(m_Info.data()));
+        emit info(*m_Info);
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
