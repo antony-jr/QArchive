@@ -7,17 +7,12 @@
 namespace QArchive {
 class IOReaderPrivate {
   public:
-    IOReaderPrivate() = default;
-    IOReaderPrivate(const IOReaderPrivate&) = default;
-    IOReaderPrivate& operator=(const IOReaderPrivate&) = default;
-    ~IOReaderPrivate() = default;
-
     void setBlockSize(int);
     void setIODevice(QIODevice*);
 
-    bool isOpen();
-    bool isReadable();
-    bool isSequential();
+    bool isOpen() const;
+    bool isReadable() const;
+    bool isSequential() const;
 
     qint64 read(char*);
     qint64 seek(qint64, /*whence=*/int);
@@ -27,6 +22,6 @@ class IOReaderPrivate {
     int n_BlockSize = 10204; /* Default. */
     QIODevice *m_IODevice = nullptr;
 };
-}
+}  // namespace QArchive
 
 #endif // QARCHIVE_IO_READER_PRIVATE_HPP_INCLUDED

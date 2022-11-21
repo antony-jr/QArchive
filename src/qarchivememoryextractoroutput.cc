@@ -15,5 +15,5 @@ MemoryExtractorOutput::~MemoryExtractorOutput() {
 }
 
 QVector<MemoryFile> &MemoryExtractorOutput::getFiles() const {
-    return *(m_Files.data());
+    return *m_Files;
 }

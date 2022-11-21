@@ -12,6 +12,8 @@
 #include <QJsonObject>
 #include <QDir>
 
+#include <memory>
+
 #include "qarchivememoryextractoroutput.hpp"
 #include "qarchiveutils_p.hpp"
 
@@ -27,8 +29,8 @@ class MutableMemoryFile {
     void setFileInformation(const QJsonObject&);
     void setBuffer(QBuffer*);
 
-    QJsonObject getFileInformation();
-    QSharedPointer<QBuffer> getBuffer();
+    QJsonObject getFileInformation() const;
+    QSharedPointer<QBuffer> getBuffer() const;
   private:
     QJsonObject m_FileInformation;
     QSharedPointer<QBuffer> m_Buffer;
@@ -113,10 +115,10 @@ class ExtractorPrivate : public QObject {
     QSharedPointer<struct archive> m_ArchiveWrite;
     QStringList m_ExtractFilters;
     QScopedPointer<QJsonObject> m_Info;
-    QScopedPointer<QVector<MemoryFile>> m_ExtractedFiles;
+    std::unique_ptr<QVector<MemoryFile>> m_ExtractedFiles;
     QSharedPointer<ArchiveFilter> m_archiveFilter;
     bool b_hasBasePath = false;
     QDir m_basePath;
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED

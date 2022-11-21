@@ -58,11 +58,11 @@ void MutableMemoryFile::setBuffer(QBuffer *buffer) {
     m_Buffer.reset(buffer);
 }
 
-QJsonObject MutableMemoryFile::getFileInformation() {
+QJsonObject MutableMemoryFile::getFileInformation() const {
     return m_FileInformation;
 }
 
-QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() {
+QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() const {
     return m_Buffer;
 }
 /// ---
@@ -104,7 +104,7 @@ class ArchiveFilter {
         return NoError;
     }
 
-    bool isEntryExcluded(struct archive_entry* entry) {
+    bool isEntryExcluded(struct archive_entry* entry) const {
         return archive_match_excluded(m_match.data(), entry);
     }
 
@@ -112,11 +112,11 @@ class ArchiveFilter {
     QSharedPointer<struct archive> m_match;
 
 };
-}
+}  // namespace QArchive
 
 static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
     QJsonObject CurrentEntry;
-    QString CurrentFile = QString(archive_entry_pathname(entry));
+    auto CurrentFile = QString(archive_entry_pathname(entry));
 
     qint64 size = archive_entry_size(entry);
     qint64 roundedSize = size;
@@ -173,7 +173,7 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
     default:
         FileType = "UnknownFile";
         break;
-    };
+    }
 
     QFile fileInfo(CurrentFile);
     // Set the values.
@@ -427,10 +427,10 @@ void ExtractorPrivate::getInfo() {
         }
         return;
     }
-    short errorCode = NoError;
 
     // Open the Archive.
-    if((errorCode = openArchive()) != NoError) {
+    short errorCode = openArchive();
+    if(errorCode != NoError) {
         b_ProcessingArchive = false;
         emit error(errorCode);
         if(b_StartRequested) {
@@ -471,22 +471,20 @@ void ExtractorPrivate::start() {
         return;
     }
 
-    short errorCode = NoError;
-
     // Open the Archive.
-    if((errorCode = openArchive()) != NoError) {
+    short errorCode = openArchive();
+    if(errorCode != NoError) {
         emit error(errorCode);
         return;
     }
 
     // Check and Set Output Directory.
     // If it's not memory mode.
-    if(!b_MemoryMode) {
-        if(!m_OutputDirectory.isEmpty()) {
-            if((errorCode = checkOutputDirectory()) != NoError) {
-                emit error(errorCode );
-                return;
-            }
+    if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
+        errorCode = checkOutputDirectory();
+        if(errorCode != NoError) {
+            emit error(errorCode );
+            return;
         }
     }
 
@@ -522,7 +520,7 @@ void ExtractorPrivate::start() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
         }
     }
@@ -571,7 +569,7 @@ void ExtractorPrivate::resume() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.take()));
+            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
         }
     }
@@ -652,7 +650,7 @@ short ExtractorPrivate::openArchive() {
         }
 
         b_QIODeviceOwned = true;
-        m_Archive = (QIODevice*)file;
+        m_Archive = static_cast<QIODevice*>(file);
     } else {
         /// Open the archive if it's not opened.
         if(!m_Archive->isOpen() && !m_Archive->open(QIODevice::ReadOnly)) {
@@ -715,18 +713,16 @@ short ExtractorPrivate::extract() {
         archive_read_support_format_all(m_ArchiveRead.data());
         archive_read_support_filter_all(m_ArchiveRead.data());
 
-        if((ret = archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive))) {
+        if(archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive)) {
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
             return ArchiveReadError;
         }
 
-        if(!b_MemoryMode) {
-            if((ret = archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags))) {
-                m_ArchiveRead.clear();
-                m_ArchiveWrite.clear();
-                return ArchiveWriteError;
-            }
+        if(!b_MemoryMode && archive_write_disk_set_options(m_ArchiveWrite.data(), n_Flags)) {
+            m_ArchiveRead.clear();
+            m_ArchiveWrite.clear();
+            return ArchiveWriteError;
         }
 
     }
@@ -828,12 +824,10 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
             return NoError;
         archive_entry_copy_pathname_w(entry, relativePath.c_str());
     }
-    if(!b_MemoryMode) {
-        if(!m_OutputDirectory.isEmpty()) {
-            QDir outDir(m_OutputDirectory);
-            const auto& new_entry = outDir.absoluteFilePath(QString::fromStdWString(archive_entry_pathname_w(entry))).toStdWString();
-            archive_entry_copy_pathname_w(entry, new_entry.c_str());
-        }
+    if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
+        QDir outDir(m_OutputDirectory);
+        const auto& new_entry = outDir.absoluteFilePath(QString::fromStdWString(archive_entry_pathname_w(entry))).toStdWString();
+        archive_entry_copy_pathname_w(entry, new_entry.c_str());
     }
 
     MutableMemoryFile currentNode;
@@ -888,7 +882,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                     }
                 } else {
                     (currentNode.getBuffer())->seek(offset);
-                    if((currentNode.getBuffer())->write((const char*)buff, size) == -1) {
+                    if((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
                         return ArchiveWriteError;
                     }
                 }
@@ -958,7 +952,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
 
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
-    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {
+    if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {
         archive_read_close(inArchive);
         archive_read_free(inArchive);
         return ArchiveReadError;
@@ -1012,7 +1006,7 @@ short ExtractorPrivate::processArchiveInformation() {
     archive_read_support_format_all(inArchive);
     archive_read_support_filter_all(inArchive);
 
-    if((ret = archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive))) {
+    if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {
         archive_read_close(inArchive);
         archive_read_free(inArchive);
         return ArchiveReadError;
@@ -1033,7 +1027,7 @@ short ExtractorPrivate::processArchiveInformation() {
             archive_read_free(inArchive);
             return err;
         }
-        QString CurrentFile = QString(archive_entry_pathname(entry));
+        auto CurrentFile = QString(archive_entry_pathname(entry));
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
         m_Info->insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);

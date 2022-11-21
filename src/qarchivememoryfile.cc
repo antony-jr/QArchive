@@ -5,8 +5,8 @@ using namespace QArchive;
 MemoryFile::MemoryFile()
     : m_Buffer(nullptr) { }
 
-MemoryFile::MemoryFile(const QJsonObject &info, const QSharedPointer<QBuffer> &buffer)
-    : m_FileInformation(info),
+MemoryFile::MemoryFile(QJsonObject info, const QSharedPointer<QBuffer> &buffer)
+    : m_FileInformation(std::move(info)),
       m_Buffer(buffer) { }
 
 MemoryFile::~MemoryFile() {

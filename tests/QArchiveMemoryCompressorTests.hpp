@@ -16,10 +16,8 @@
 #include "QArchiveTestCases.hpp"
 
 class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
+  using QArchiveTestCases::QArchiveTestCases;
     Q_OBJECT
-  public:
-    QArchiveMemoryCompressorTests(QTemporaryDir*);
-    ~QArchiveMemoryCompressorTests() override;
   private slots:
     void initTestCase();
 
@@ -32,7 +30,7 @@ class QArchiveMemoryCompressorTests : public QObject,private QArchiveTestCases {
     void compressingTarArchiveWithZSTD();
 
   protected slots:
-    void defaultErrorHandler(short code, const QString& file);
-    void defaultExtractorErrorHandler(short code);
+    static void defaultErrorHandler(short code, const QString& file);
+    static void defaultExtractorErrorHandler(short code);
 };
 #endif // QARCHIVE_MEMORY_COMPRESSOR_TESTS_HPP_INCLUDED

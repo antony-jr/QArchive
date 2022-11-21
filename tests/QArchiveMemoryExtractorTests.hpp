@@ -13,10 +13,8 @@
 #include <QTemporaryDir>
 
 class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
+  using QArchiveTestCases::QArchiveTestCases;
     Q_OBJECT
-  public:
-    QArchiveMemoryExtractorTests(QTemporaryDir *dir);
-    ~QArchiveMemoryExtractorTests() override;
   private slots:
     void initTestCase();
     void simpleExtraction();
@@ -25,7 +23,7 @@ class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
     void usingPassword();
     void informationExtraction();
     void startAfterInformationExtraction();
-    void testInvalidArchivePath();
+    static void testInvalidArchivePath();
     void runningExtractorNonSingleThreaded();
     void extractArchiveFromQIODevice();
     void getInfoFromTarArchiveWithNoFilters();
@@ -34,6 +32,6 @@ class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
     void testProgress();
     void cleanupTestCase();
   protected slots:
-    void defaultErrorHandler(short code);
+    static void defaultErrorHandler(short code);
 };
 #endif // QARCHIVE_MEMORY_EXTRACTOR_TESTS_HPP_INCLUDED

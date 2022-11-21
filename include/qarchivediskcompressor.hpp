@@ -20,5 +20,5 @@ class QARCHIVE_EXPORT DiskCompressor : public Compressor {
   Q_SIGNALS:
     void finished();
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_DISK_COMPRESSOR_HPP_INCLUDED

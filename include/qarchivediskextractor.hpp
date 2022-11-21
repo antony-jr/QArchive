@@ -22,5 +22,5 @@ class QARCHIVE_EXPORT DiskExtractor : public Extractor {
   Q_SIGNALS:
     void finished();
 };
-}
+}  // namespace QArchive
 #endif // QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED

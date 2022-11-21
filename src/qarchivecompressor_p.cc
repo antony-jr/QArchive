@@ -69,7 +69,7 @@ void CompressorPrivate::freeNodes(QVector<Node*> *vec) {
     vec->clear();
 }
 
-static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *vec) {
+static bool contains(const QString &entry, const QVector<CompressorPrivate::Node*> *vec) {
     for(const auto &node : *vec) {
         if(node && node->valid && node->entry == entry) {
             return true;
@@ -83,9 +83,8 @@ static bool contains(const QString &entry, QVector<CompressorPrivate::Node*> *ve
 // It can compress data in all formats of archive supported by libarchive.
 // However there is a method to set password for archives , Only
 // ZIP Format is currently supported for encrypting archives with a user given.
-CompressorPrivate::CompressorPrivate(bool memoryMode) {
-    b_MemoryMode = memoryMode;
-
+CompressorPrivate::CompressorPrivate(bool memoryMode)
+    : b_MemoryMode(memoryMode) {
     if(!b_MemoryMode) {
         m_TemporaryFile.reset(new QSaveFile);
     } else {
@@ -275,8 +274,8 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, 
     }
     Q_UNUSED(file);
     int index = 0;
-    for(const auto& file : *m_StaggedFiles) {
-        if(file && file->entry == entryName) {
+    for(const auto& f : *m_StaggedFiles) {
+        if(f && f->entry == entryName) {
             m_StaggedFiles->remove(index);
             return;
         }
@@ -351,10 +350,8 @@ void CompressorPrivate::start() {
     }
 
     // Guess Archive Format if not given.
-    if(!m_ArchiveFormat) { // if ArchiveFormat == 0 then no format is set.
-        if(!guessArchiveFormat()) {
-            m_ArchiveFormat = ZipFormat; // Default format.
-        }
+    if(!m_ArchiveFormat && !guessArchiveFormat()) { // if ArchiveFormat == 0 then no format is set.
+        m_ArchiveFormat = ZipFormat; // Default format.
     }
 
     /// Confirm files.
@@ -374,7 +371,7 @@ void CompressorPrivate::start() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-            emit memoryFinished(m_Buffer.take());
+            emit memoryFinished(m_Buffer.release());
             m_Buffer.reset(new QBuffer);
         } else {
             m_TemporaryFile->commit();
@@ -403,7 +400,7 @@ void CompressorPrivate::resume() {
         b_Started = false;
         b_Finished = true;
         if(b_MemoryMode) {
-            emit memoryFinished(m_Buffer.take());
+            emit memoryFinished(m_Buffer.release());
             m_Buffer.reset(new QBuffer);
         } else {
             m_TemporaryFile->commit();
@@ -482,8 +479,8 @@ bool CompressorPrivate::guessArchiveFormat() {
 bool CompressorPrivate::confirmFiles() {
     freeNodes(m_ConfirmedFiles.data());
     for(const auto& node : *m_StaggedFiles) {
-        short eCode = NoError;
-        if((eCode = node->open()) != NoError) {
+        short eCode = node->open();
+        if(eCode != NoError) {
             if(!node->isInMemory) {
                 emit error(eCode, node->path);
             } else {
@@ -575,12 +572,10 @@ bool CompressorPrivate::confirmFiles() {
 // Does the compression and also resumes it if called twice.
 short CompressorPrivate::compress() {
     if(m_ArchiveWrite.isNull()) {
-        if(!b_MemoryMode) {
-            /// Open Temporary file for write.
-            if(!m_TemporaryFile->open(QIODevice::WriteOnly)) {
-                emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
-                return ArchiveWriteOpenError;
-            }
+        /// Open Temporary file for write.
+        if(!b_MemoryMode && !m_TemporaryFile->open(QIODevice::WriteOnly)) {
+            emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
+            return ArchiveWriteOpenError;
         }
 
         m_ArchiveWrite = QSharedPointer<struct archive>(
@@ -635,7 +630,6 @@ short CompressorPrivate::compress() {
                 archive_write_set_format_iso9660(m_ArchiveWrite.data());
             }
             break;
-        case ZipFormat:
         default:
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_zip(m_ArchiveWrite.data());
@@ -669,7 +663,7 @@ short CompressorPrivate::compress() {
             }
         } else {
             if(archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
-                                         (QIODevice*)m_Buffer.data()) != ARCHIVE_OK) {
+                                         (QIODevice*)m_Buffer.get()) != ARCHIVE_OK) {
 
                 m_ArchiveWrite.clear();
                 emit error(ArchiveWriteOpenError, QString());
@@ -761,9 +755,9 @@ short CompressorPrivate::compress() {
 
             // Setup archive entry.
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
-            time_t datetime = static_cast<time_t>(QDateTime::currentDateTime().toSecsSinceEpoch());
+            auto datetime = static_cast<time_t>(QDateTime::currentDateTime().toSecsSinceEpoch());
 #else
-            time_t datetime = static_cast<time_t>(QDateTime::currentDateTime().toTime_t());
+            auto datetime = static_cast<time_t>(QDateTime::currentDateTime().toTime_t());
 #endif
 
             archive_entry_set_pathname(entry.data(), (node->entry).toUtf8().constData());
