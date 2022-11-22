@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
-
-
 if(APPLE)
    add_definitions(-DBUILD_TESTS)
 endif()
@@ -16,7 +14,17 @@ if(NOT BUILD_TESTS)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Test REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Test Concurrent REQUIRED)
+if (NOT DEFINED QARCHIVE_QT_VERSION_MAJOR)
+   set(QARCHIVE_QT_VERSION_MAJOR ${QT_VERSION_MAJOR})
+endif()
+
+if (QARCHIVE_QT_VERSION_MAJOR EQUAL 6)
+   set(CMAKE_CXX_STANDARD 17)
+else()
+   set(CMAKE_CXX_STANDARD 11)
+endif()
+
+find_package(Qt${QARCHIVE_QT_VERSION_MAJOR} COMPONENTS Test Concurrent REQUIRED)
 
 # Include Directories.
 
@@ -34,7 +42,9 @@ add_executable(${PROJECT_NAME} main.cc
 			     QArchiveDiskExtractorTests.hpp
 			     QArchiveMemoryExtractorTests.cc
 			     QArchiveMemoryExtractorTests.hpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE QArchive Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Concurrent)
+			  
+target_link_libraries(${PROJECT_NAME} PRIVATE QArchive 
+   Qt${QARCHIVE_QT_VERSION_MAJOR}::Test Qt${QARCHIVE_QT_VERSION_MAJOR}::Concurrent)
 
 enable_testing()
 

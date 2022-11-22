@@ -53,6 +53,12 @@ int main(int argc, char **argv)
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive).
 
+## Qt6 Support
+
+Starting from QArchive **v2.2.3**, Qt6 support exists, if you have only Qt6 installed in the system then
+QArchive's cmake should pick that up, if you have both Qt5 and Qt6, QArchive will pick Qt5, you can pass 
+```-DQARCHIVE_QT_VERSION_MAJOR=6``` to cmake to force to build QArchive with Qt6 libs.
+
 ## Conan
 
 *Thanks to [Eric Riff](https://github.com/ericriff)*.

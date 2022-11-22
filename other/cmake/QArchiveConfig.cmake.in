@@ -2,7 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
-find_dependency(Qt${QT_VERSION_MAJOR} COMPONENTS Core)
+find_dependency(Qt@QARCHIVE_QT_VERSION_MAJOR@ COMPONENTS Core)
 
 if (APPLE)
    set(PKG_CONFIG_EXECUTABLE pkg-config --define-prefix @LIBARCHIVE_PKG_CONFIG@)

@@ -21,6 +21,14 @@ Use this directory structure or something similar. This structure is just a reco
   --CMakeLists.txt
 ```
 
+## Build Options for CMake
+
+**-DBUILD_TESTS = ON**: Builds a test executable which can be run to test the library, defaults to OFF.
+
+**-DQARCHIVE_QT_VERSION_MAJOR = 6/5**: Forces QArchive to use a specific Qt version. Defaults to one installed on the system, if both Qt5 and Qt6 is installed then by default Qt5 is used.
+
+**-DBUILD_SHARED_LIBS = ON**: Build as shared libraries, defaults to static build.
+
 ### MyCoolApplication/libs/CMakeLists.txt
 
 The contents of the CMakeLists should be something like below. To include QArchive repo with **add_subdirectory**.

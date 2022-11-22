@@ -218,8 +218,8 @@ char *concat(const char *dest, const char *src) {
  * to "/home/antonyjr" , i.e Removes the trailing '/' if found.
 */
 QString getDirectoryFileName(const QString &dir) {
-    if(dir[dir.count() - 1] == QStringLiteral("/")) {
-        return dir.mid(0, dir.count() - 1);
+    if(dir[dir.length() - 1] == QStringLiteral("/")) {
+        return dir.mid(0, dir.length() - 1);
     }
     return dir;
 }

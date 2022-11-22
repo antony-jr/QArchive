@@ -3,6 +3,12 @@
 # -------------------------------
 #  CMake Support for QArchive.
 # -------------------------------
+# OPTIONS:
+#    -DBUILD_TESTS=ON -> Build tests for library, defaults to OFF.
+#    -DBUILD_SHARED_LIBS=ON -> Shared libs, defaults to OFF
+#    -DQARCHIVE_QT_VERSION_MAJOR=6 -> Use this major version, defaults to 6
+#				      if found or else 5
+# ---
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.17)
 project(QArchive VERSION 2.2.2)
@@ -11,7 +17,12 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
+# Note to other developers,
+# These are privately maintained options, not for
+# public use. One should not set these manually from
+# cmake build.
 option(QARCHIVE_STATIC "Static Build of QArchive" ON)
+# ---
 
 # Find the QtCore library and libarchive.
 # In macOS, if libarchive is installed via homebrew,
@@ -34,8 +45,22 @@ if(APPLE AND LIBARCHIVE_PKG_CONFIG)
 else ()
    find_package(LibArchive REQUIRED)
 endif()
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
+if (NOT DEFINED QARCHIVE_QT_VERSION_MAJOR)
+   set(QARCHIVE_QT_VERSION_MAJOR ${QT_VERSION_MAJOR})
+endif()
+
+# Qt 6.4.x requires C++ 17 standard, so let's add an exception 
+# for that,  also we should have started testing this.
+# I suppose Ubuntu repo has a old Qt6 version.
+if (QARCHIVE_QT_VERSION_MAJOR EQUAL 6)
+   set(CMAKE_CXX_STANDARD 17)
+else()
+   set(CMAKE_CXX_STANDARD 11)
+endif()
+
+find_package(Qt${QARCHIVE_QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
 
 # cmake macros used
 include(GNUInstallDirs)
@@ -113,9 +138,9 @@ list(APPEND toinstall
 )	
 
 if (APPLE AND LIBARCHIVE_FOUND)
-   target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core PkgConfig::LIBARCHIVE)
+   target_link_libraries(QArchive PUBLIC Qt${QARCHIVE_QT_VERSION_MAJOR}::Core PkgConfig::LIBARCHIVE)
 else()
-   target_link_libraries(QArchive PUBLIC Qt${QT_VERSION_MAJOR}::Core LibArchive::LibArchive)
+   target_link_libraries(QArchive PUBLIC Qt${QARCHIVE_QT_VERSION_MAJOR}::Core LibArchive::LibArchive)
 endif()
 
 target_include_directories(QArchive INTERFACE

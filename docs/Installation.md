@@ -11,7 +11,7 @@ QArchive(needs atleast libarchive v3.3.3 to use passwords).
 ## Dependencies
 
 * [libarchive](https://github.com/libarchive/libarchive)   
-* [Qt5 Framework](https://qt.io)
+* [Qt Framework](https://qt.io)
 
 
 ## Conan
