@@ -6,8 +6,8 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(const QScopedPointer<ExtractorPrivate> &object, const char *function) {
-    auto metaObject = object->metaObject();
+static QMetaMethod getMethod(const ExtractorPrivate &object, const char *function) {
+    auto metaObject = object.metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
 
@@ -52,14 +52,14 @@ Extractor::~Extractor() {
 }
 
 void Extractor::setArchive(QIODevice *archive) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setArchive(QIODevice*)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QIODevice*, archive));
 }
 
 void Extractor::setArchive(const QString &archivePath) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setArchive(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, archivePath));
@@ -71,56 +71,56 @@ void Extractor::setArchive(const QString &archivePath, const QString &outputDire
 }
 
 void Extractor::setBlockSize(int n) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setBlockSize(int)").invoke(m_Extractor.data(),
                                           Qt::QueuedConnection,
                                           Q_ARG(int, n));
 }
 
 void Extractor::setCalculateProgress(bool choice) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setCalculateProgress(bool)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(bool, choice));
 }
 
 void Extractor::setOutputDirectory(const QString &dir) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setOutputDirectory(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, dir));
 }
 
 void Extractor::setPassword(const QString &passwd) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setPassword(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, passwd));
 }
 
 void Extractor::addFilter(const QString &filter) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addFilter(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, filter));
 }
 
 void Extractor::addFilter(const QStringList &filters) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addFilter(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, filters));
 }
 
 void Extractor::addIncludePattern(const QString &pattern) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addIncludePattern(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, pattern));
 }
 
 void Extractor::addIncludePattern(const QStringList &patterns) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addIncludePattern(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, patterns));
@@ -128,46 +128,46 @@ void Extractor::addIncludePattern(const QStringList &patterns) {
 
 
 void Extractor::addExcludePattern(const QString & pattern) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addExcludePattern(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, pattern));
 }
 
 void Extractor::addExcludePattern(const QStringList & patterns) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "addExcludePattern(const QStringList&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QStringList, patterns));
 }
 
 void Extractor::setBasePath(const QString &path) {
-    getMethod(m_Extractor,
+    getMethod(*m_Extractor,
               "setBasePath(const QString&)").invoke(m_Extractor.data(),
                       Qt::QueuedConnection,
                       Q_ARG(QString, path));
 }
 
 void Extractor::clear() {
-    getMethod(m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "clear()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
 
 void Extractor::getInfo() {
-    getMethod(m_Extractor, "getInfo()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "getInfo()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
 
 void Extractor::start() {
-    getMethod(m_Extractor, "start()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "start()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
 
 void Extractor::cancel() {
-    getMethod(m_Extractor, "cancel()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "cancel()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
 
 void Extractor::pause() {
-    getMethod(m_Extractor, "pause()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "pause()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
 
 void Extractor::resume() {
-    getMethod(m_Extractor, "resume()").invoke(m_Extractor.data(), Qt::QueuedConnection);
+    getMethod(*m_Extractor, "resume()").invoke(m_Extractor.data(), Qt::QueuedConnection);
 }
