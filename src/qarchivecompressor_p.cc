@@ -86,8 +86,6 @@ CompressorPrivate::CompressorPrivate(bool memoryMode)
         m_Buffer.reset(new QBuffer);
 #endif
     }
-    m_StaggedFiles.reset(new QVector<Node*>);
-    m_ConfirmedFiles.reset(new QVector<Node*>);
 }
 
 CompressorPrivate::~CompressorPrivate() {
@@ -141,7 +139,7 @@ void CompressorPrivate::addFiles(const QString &entryName, QIODevice *device) {
     auto node = new Node;
     node->entry = entryName;
     node->io = device;
-    m_StaggedFiles->append(node);
+    m_StaggedFiles.append(node);
 }
 
 void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList &devices) {
@@ -157,7 +155,7 @@ void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList 
         auto node = new Node;
         node->entry = entries.at(i);
         node->io = devices.at(i).value<QIODevice*>();
-        m_StaggedFiles->append(node);
+        m_StaggedFiles.append(node);
     }
 }
 
@@ -167,14 +165,14 @@ void CompressorPrivate::addFiles(const QString &file) {
     }
 
     QFileInfo info(file);
-    if(contains(info.fileName(), *m_StaggedFiles)) {
+    if(contains(info.fileName(), m_StaggedFiles)) {
         return;
     }
 
     auto node = new Node;
     node->path = file;
     node->entry = info.fileName();
-    m_StaggedFiles->append(node);
+    m_StaggedFiles.append(node);
 }
 
 void CompressorPrivate::addFiles(const QStringList &files) {
@@ -183,14 +181,14 @@ void CompressorPrivate::addFiles(const QStringList &files) {
     }
     for(const auto& file : files) {
         QFileInfo info(file);
-        if(contains(info.fileName(), *m_StaggedFiles)) {
+        if(contains(info.fileName(), m_StaggedFiles)) {
             continue;
         }
 
         auto node = new Node;
         node->path = file;
         node->entry = info.fileName();
-        m_StaggedFiles->append(node);
+        m_StaggedFiles.append(node);
     }
 }
 
@@ -200,14 +198,14 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     if(b_Started || b_Paused) {
         return;
     }
-    if(contains(entryName, *m_StaggedFiles)) {
+    if(contains(entryName, m_StaggedFiles)) {
         return;
     }
 
     auto node = new Node;
     node->path = file;
     node->entry = entryName;
-    m_StaggedFiles->append(node);
+    m_StaggedFiles.append(node);
 }
 
 // Adds multiple files and uses a corresponding list of
@@ -220,14 +218,14 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
         return;
     }
     for(auto i = 0; i < files.size(); ++i) {
-        if(contains(entryNames.at(i), *m_StaggedFiles)) {
+        if(contains(entryNames.at(i), m_StaggedFiles)) {
             continue;
         }
 
         auto node = new Node;
         node->path = files.at(i);
         node->entry = entryNames.at(i);
-        m_StaggedFiles->append(node);
+        m_StaggedFiles.append(node);
     }
 }
 
@@ -236,9 +234,9 @@ void CompressorPrivate::removeFiles(const QString &entry) {
         return;
     }
     int index = 0;
-    for(const auto& file : *m_StaggedFiles) {
+    for(const auto& file : m_StaggedFiles) {
         if(file && file->entry == entry) {
-            m_StaggedFiles->remove(index);
+            m_StaggedFiles.remove(index);
             return;
         }
         ++index;
@@ -251,7 +249,7 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
     }
     QVector<int> indexes;
     int index = 0;
-    for(const auto& file : *m_StaggedFiles) {
+    for(const auto& file : m_StaggedFiles) {
         if(file && entries.contains(file->entry)) {
             indexes.append(index);
             return;
@@ -260,7 +258,7 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
     }
 
     for(const int &i : indexes) {
-        m_StaggedFiles->remove(i);
+        m_StaggedFiles.remove(i);
     }
 }
 
@@ -269,9 +267,9 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, 
         return;
     }
     int index = 0;
-    for(const auto& f : *m_StaggedFiles) {
+    for(const auto& f : m_StaggedFiles) {
         if(f && f->entry == entryName) {
-            m_StaggedFiles->remove(index);
+            m_StaggedFiles.remove(index);
             return;
         }
         ++index;
@@ -284,7 +282,7 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNa
     }
     QVector<int> indexes;
     int index = 0;
-    for(const auto &file : *m_StaggedFiles) {
+    for(const auto &file : m_StaggedFiles) {
         if(file && entryNames.contains(file->entry)) {
             indexes.append(index);
             return;
@@ -293,7 +291,7 @@ Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNa
     }
 
     for(const int &i : indexes) {
-        m_StaggedFiles->remove(i);
+        m_StaggedFiles.remove(i);
     }
 }
 
@@ -314,8 +312,8 @@ void CompressorPrivate::clear() {
     n_BytesProcessed = 0;
     n_BytesTotal = 0;
 
-    freeNodes(*m_ConfirmedFiles);
-    freeNodes(*m_StaggedFiles);
+    freeNodes(m_ConfirmedFiles);
+    freeNodes(m_StaggedFiles);
 
     if(!b_MemoryMode) {
         m_TemporaryFile.reset(new QSaveFile);
@@ -338,7 +336,7 @@ void CompressorPrivate::start() {
     } else if(!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
         emit error(ArchiveFileAlreadyExists, m_TemporaryFile->fileName());
         return;
-    } else if(m_StaggedFiles->isEmpty()) {
+    } else if(m_StaggedFiles.isEmpty()) {
         if(b_MemoryMode) {
             emit error(NoFilesToCompress, QString());
         } else {
@@ -483,8 +481,8 @@ bool CompressorPrivate::guessArchiveFormat() {
 // This populates m_ConfirmedFiles vector with all the files added ,
 // Directory's files will be recursively added.
 bool CompressorPrivate::confirmFiles() {
-    freeNodes(*m_ConfirmedFiles);
-    for(const auto& node : *m_StaggedFiles) {
+    freeNodes(m_ConfirmedFiles);
+    for(const auto& node : m_StaggedFiles) {
         short eCode = node->open();
         if(eCode != NoError) {
             if(!node->isInMemory) {
@@ -546,7 +544,7 @@ bool CompressorPrivate::confirmFiles() {
                         }
                         fileNode->entry = file.replace(toReplace, node->entry);
 
-                        m_ConfirmedFiles->append(fileNode);
+                        m_ConfirmedFiles.append(fileNode);
 
                         n_BytesTotal += QFileInfo(i.filePath()).size();
                     }
@@ -557,7 +555,7 @@ bool CompressorPrivate::confirmFiles() {
                 fileNode->valid = node->valid;
                 fileNode->path = info.filePath();
                 fileNode->entry = node->entry;
-                m_ConfirmedFiles->append(fileNode);
+                m_ConfirmedFiles.append(fileNode);
                 n_BytesTotal += info.size();
             }
         } else { // If QIODevice given
@@ -566,7 +564,7 @@ bool CompressorPrivate::confirmFiles() {
             fileNode->valid = node->valid;
             fileNode->io = node->io;
             fileNode->entry = node->entry;
-            m_ConfirmedFiles->append(fileNode);
+            m_ConfirmedFiles.append(fileNode);
             n_BytesTotal += node->io->size();
         }
     }
@@ -682,12 +680,12 @@ short CompressorPrivate::compress() {
             }
         }
 
-        n_TotalEntries = m_ConfirmedFiles->size(); // for reporting progress.
+        n_TotalEntries = m_ConfirmedFiles.size(); // for reporting progress.
     }
 
     // Start compressing files.
-    while(!m_ConfirmedFiles->isEmpty()) {
-        auto node = m_ConfirmedFiles->first();
+    while(!m_ConfirmedFiles.isEmpty()) {
+        auto node = m_ConfirmedFiles.first();
         int r;
         std::size_t len;
         char buff[16384];
@@ -734,24 +732,24 @@ short CompressorPrivate::compress() {
                     return ArchiveFatalError;
                 }
                 if (r > ARCHIVE_FAILED) {
-                    QScopedPointer<QFile> file(new QFile(node->path));
-                    if(!file->open(QIODevice::ReadOnly)) {
+                    auto&& file = QFile(node->path);
+                    if(!file.open(QIODevice::ReadOnly)) {
                         emit error(DiskOpenError, node->path);
                         return DiskOpenError;
                     }
-                    len = file->read(buff, sizeof(buff));
+                    len = file.read(buff, sizeof(buff));
                     while (len > 0) {
                         archive_write_data(m_ArchiveWrite.data(), buff, len);
                         n_BytesProcessed += len;
 
                         emit progress(node->entry,
-                                      (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
+                                      (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
                                       n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
                         QCoreApplication::processEvents();
-                        len = file->read(buff, sizeof(buff));
+                        len = file.read(buff, sizeof(buff));
                     }
-                    file->close();
+                    file.close();
                 } else {
                     emit error(ArchiveHeaderWriteError, node->path);
                     return ArchiveHeaderWriteError;
@@ -795,7 +793,7 @@ short CompressorPrivate::compress() {
                     n_BytesProcessed += len;
 
                     emit progress(node->entry,
-                                  (n_TotalEntries - (m_ConfirmedFiles->size() - 1)),
+                                  (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
                                   n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
                     QCoreApplication::processEvents();
@@ -807,10 +805,10 @@ short CompressorPrivate::compress() {
             }
         }
 
-        m_ConfirmedFiles->removeFirst();
+        m_ConfirmedFiles.removeFirst();
 
         emit progress(node->entry,
-                      (n_TotalEntries - m_ConfirmedFiles->size()),
+                      (n_TotalEntries - m_ConfirmedFiles.size()),
                       n_TotalEntries, n_BytesProcessed, n_BytesTotal);
 
         delete node;
@@ -823,7 +821,7 @@ short CompressorPrivate::compress() {
 
         if(b_CancelRequested) {
             b_CancelRequested = false;
-            m_ConfirmedFiles->clear();
+            m_ConfirmedFiles.clear();
             m_ArchiveWrite.clear();
             return OperationCanceled;
         }

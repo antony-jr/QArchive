@@ -90,8 +90,8 @@ class CompressorPrivate : public QObject {
     QSharedPointer<struct archive> m_ArchiveWrite;
     QScopedPointer<QSaveFile> m_TemporaryFile;
     std::unique_ptr<QBuffer> m_Buffer;
-    QScopedPointer<QVector<Node*>> m_ConfirmedFiles;
-    QScopedPointer<QVector<Node*>> m_StaggedFiles;
+    QVector<Node*> m_ConfirmedFiles;
+    QVector<Node*> m_StaggedFiles;
 };
 }  // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

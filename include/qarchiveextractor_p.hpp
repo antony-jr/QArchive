@@ -7,7 +7,6 @@
 #include <QVector>
 #include <QEventLoop>
 #include <QStringList>
-#include <QScopedPointer>
 #include <QSharedPointer>
 #include <QJsonObject>
 #include <QDir>
@@ -114,7 +113,7 @@ class ExtractorPrivate : public QObject {
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
     QStringList m_ExtractFilters;
-    QScopedPointer<QJsonObject> m_Info;
+    QJsonObject m_Info;
     std::unique_ptr<QVector<MemoryFile>> m_ExtractedFiles;
     QSharedPointer<ArchiveFilter> m_archiveFilter;
     bool b_hasBasePath = false;

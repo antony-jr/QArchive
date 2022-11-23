@@ -225,10 +225,9 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
-    : n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
-    b_MemoryMode = memoryMode;
+    : b_MemoryMode(memoryMode)
+    , n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
 
-    m_Info.reset(new QJsonObject);
     m_archiveFilter.reset(new ArchiveFilter);
 
     if(b_MemoryMode) {
@@ -381,7 +380,7 @@ void ExtractorPrivate::clear() {
     m_OutputDirectory.clear();
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
-    m_Info.reset(new QJsonObject);
+    m_Info = {};
     m_ExtractFilters.clear();
     m_archiveFilter.reset(new ArchiveFilter);
 
@@ -411,9 +410,9 @@ void ExtractorPrivate::getInfo() {
 
     b_ProcessingArchive = true;
 
-    if(!m_Info->isEmpty()) {
+    if(!m_Info.isEmpty()) {
         b_ProcessingArchive = false;
-        emit info(*m_Info);
+        emit info(m_Info);
         if(b_StartRequested) {
             b_StartRequested = false;
             start();
@@ -437,7 +436,7 @@ void ExtractorPrivate::getInfo() {
     b_ProcessingArchive = false;
 
     if(!errorCode) {
-        emit info(*m_Info);
+        emit info(m_Info);
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
@@ -1030,7 +1029,7 @@ short ExtractorPrivate::processArchiveInformation() {
         }
         auto CurrentFile = QString(archive_entry_pathname(entry));
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
-        m_Info->insert(CurrentFile, CurrentEntry);
+        m_Info.insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
         // Clear the entry since it is re-used by the libarchive internally that may lead to the stale data be taken.
         archive_entry_clear(entry);
@@ -1038,7 +1037,7 @@ short ExtractorPrivate::processArchiveInformation() {
     }
 
     // set total number of entries.
-    n_TotalEntries = m_Info->size();
+    n_TotalEntries = m_Info.size();
 
     // free memory.
     archive_read_close(inArchive);
