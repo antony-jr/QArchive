@@ -28,8 +28,8 @@ class MutableMemoryFile {
     void setFileInformation(const QJsonObject&);
     void setBuffer(QBuffer*);
 
-    QJsonObject getFileInformation() const;
-    QSharedPointer<QBuffer> getBuffer() const;
+    [[gnu::warn_unused_result]] QJsonObject getFileInformation() const;
+    [[gnu::warn_unused_result]] QSharedPointer<QBuffer> getBuffer() const;
   private:
     QJsonObject m_FileInformation;
     QSharedPointer<QBuffer> m_Buffer;
