@@ -512,7 +512,7 @@ void ExtractorPrivate::start() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+            emit memoryFinished(new MemoryExtractorOutput(std::move(m_ExtractedFiles)));
 #ifdef __cpp_lib_make_unique
             m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
 #else
@@ -565,7 +565,7 @@ void ExtractorPrivate::resume() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+            emit memoryFinished(new MemoryExtractorOutput(std::move(m_ExtractedFiles)));
 #ifdef __cpp_lib_make_unique
             m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
 #else
