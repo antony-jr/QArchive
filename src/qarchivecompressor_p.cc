@@ -62,9 +62,7 @@ short CompressorPrivate::Node::open() {
 }
 
 void CompressorPrivate::freeNodes(QVector<Node*>& vec) {
-    for(auto& node : vec) {
-        delete node;
-    }
+    qDeleteAll(vec);
     vec.clear();
 }
 
