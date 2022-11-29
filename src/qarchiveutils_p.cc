@@ -63,8 +63,7 @@ struct ClientData_t {
 // This callback will be called on archive open.
 // This callback is simply used to avoid segmentation fault when
 // the programmer mistakenly gives a QIODevice that has not opened.
-static int archive_open_cb(struct archive *archive, void *data) {
-    Q_UNUSED(archive);
+static int archive_open_cb(struct archive *, void *data) {
     auto p = static_cast<ClientData_t*>(data);
     if(!p) {
         // We surely need the reader handle to continue
@@ -80,11 +79,10 @@ static int archive_open_cb(struct archive *archive, void *data) {
     return ARCHIVE_OK;
 }
 
-static int archive_close_cb(struct archive *archive, void *data) {
+static int archive_close_cb(struct archive *, void *data) {
     // Should not do anything to archive pointer since
     // its a private object inside some other class.
     // It will be managed automatically later.
-    Q_UNUSED(archive);
     auto p = static_cast<ClientData_t*>(data);
     if(p->storage) { // free any data that has been allocated.
         free(p->storage);
@@ -97,8 +95,7 @@ static int archive_close_cb(struct archive *archive, void *data) {
 // This read callback is called whenever libarchive needs
 // more data to crunch , this is very important since we have
 // to read the data from QIODevice.
-static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
-    Q_UNUSED(archive);
+static la_ssize_t archive_read_cb(struct archive *, void *data, const void **buffer) {
     auto p = static_cast<ClientData_t*>(data);
     *buffer = static_cast<void*>(p->storage);
     return p->io->read(p->storage);
@@ -110,8 +107,7 @@ static la_ssize_t archive_read_cb(struct archive *archive, void *data, const voi
 // given in fseek and lseek.
 //
 // Without this function you cannot extract 7zip archives.
-static int64_t archive_seek_cb(struct archive *archive, void *data, int64_t request, int whence) {
-    Q_UNUSED(archive);
+static int64_t archive_seek_cb(struct archive *, void *data, int64_t request, int whence) {
     auto p = static_cast<ClientData_t*>(data);
     return static_cast<int64_t>(p->io->seek(request, whence));
 }
@@ -142,8 +138,7 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
  * Custom libarchive callbacks to handle QIODevice as the archive
  * output. */
 
-static int archive_w_open_cb(struct archive *archive, void *data) {
-    Q_UNUSED(archive);
+static int archive_w_open_cb(struct archive *, void *data) {
     auto p = static_cast<QIODevice*>(data);
     if(!p) {
         return ARCHIVE_FATAL;
@@ -154,8 +149,7 @@ static int archive_w_open_cb(struct archive *archive, void *data) {
     return ARCHIVE_OK;
 }
 
-static int archive_w_close_cb(struct archive *archive, void *data) {
-    Q_UNUSED(archive);
+static int archive_w_close_cb(struct archive *, void *data) {
     auto p = static_cast<QIODevice*>(data);
     if(!p) {
         return ARCHIVE_FATAL;
@@ -164,8 +158,7 @@ static int archive_w_close_cb(struct archive *archive, void *data) {
     return ARCHIVE_OK;
 }
 
-static la_ssize_t archive_write_cb(struct archive *archive, void *data, const void *buffer, size_t length) {
-    Q_UNUSED(archive);
+static la_ssize_t archive_write_cb(struct archive *, void *data, const void *buffer, size_t length) {
     auto p = static_cast<QIODevice*>(data);
     return p->write(static_cast<const char*>(buffer), length);
 }
