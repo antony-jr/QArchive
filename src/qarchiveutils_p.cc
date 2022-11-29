@@ -163,16 +163,6 @@ static la_ssize_t archive_write_cb(struct archive *, void *data, const void *buf
     return p->write(static_cast<const char*>(buffer), length);
 }
 
-#if ARCHIVE_VERSION_NUMBER >= 3005000
-/// Should not delete the client data because it's our QIODevice
-/// buffer.
-int archive_w_free_cb(struct archive *archive, void *data) {
-    Q_UNUSED(archive);
-    Q_UNUSED(data);
-    return ARCHIVE_OK;
-}
-#endif
-
 // This is a custom functions which sets up the callbacks and other
 // stuff for a libarchive struct to use QIODevice to write.
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
@@ -183,12 +173,14 @@ int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
                               archive_write_cb,
                               archive_w_close_cb);
 #else
+/// Should not delete the client data because it's our QIODevice
+/// buffer.
     return archive_write_open2(archive,
                                static_cast<void*>(device),
                                archive_w_open_cb,
                                archive_write_cb,
                                archive_w_close_cb,
-                               archive_w_free_cb);
+                               [](struct archive*, void*){ return ARCHIVE_OK; });
 #endif
 }
 /* ---- */

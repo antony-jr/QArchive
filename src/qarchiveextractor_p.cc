@@ -35,7 +35,6 @@ MutableMemoryFile::~MutableMemoryFile() {
     m_Buffer.clear();
 }
 
-
 void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
     m_FileInformation = info;
 }
