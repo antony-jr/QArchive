@@ -100,7 +100,7 @@ static int archive_close_cb(struct archive *archive, void *data) {
 static la_ssize_t archive_read_cb(struct archive *archive, void *data, const void **buffer) {
     Q_UNUSED(archive);
     auto p = static_cast<ClientData_t*>(data);
-    *buffer = (void*)p->storage;
+    *buffer = static_cast<void*>(p->storage);
     return p->io->read(p->storage);
 }
 
@@ -133,7 +133,7 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
     archive_read_set_read_callback(archive, archive_read_cb);
     archive_read_set_seek_callback(archive, archive_seek_cb);
     archive_read_set_close_callback(archive, archive_close_cb);
-    archive_read_set_callback_data(archive, (void*)p);
+    archive_read_set_callback_data(archive, static_cast<void*>(p));
     return archive_read_open1(archive);
 }
 /* ---- */
@@ -185,13 +185,13 @@ int archive_w_free_cb(struct archive *archive, void *data) {
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
 #if ARCHIVE_VERSION_NUMBER < 3005000
     return archive_write_open(archive,
-                              (void*)device,
+                              static_cast<void*>(device),
                               archive_w_open_cb,
                               archive_write_cb,
                               archive_w_close_cb);
 #else
     return archive_write_open2(archive,
-                               (void*)device,
+                               static_cast<void*>(device),
                                archive_w_open_cb,
                                archive_write_cb,
                                archive_w_close_cb,
