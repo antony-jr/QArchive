@@ -615,6 +615,7 @@ short CompressorPrivate::compress() {
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_7zip(m_ArchiveWrite.data());
             break;
+#if (ARCHIVE_VERSION_NUMBER >= 3003003)
         case ZstdFormat:
             archive_write_add_filter_zstd(m_ArchiveWrite.data());
             /*
@@ -630,6 +631,7 @@ short CompressorPrivate::compress() {
                 archive_write_set_format_iso9660(m_ArchiveWrite.data());
             }
             break;
+#endif
         default:
             archive_write_add_filter_none(m_ArchiveWrite.data());
             archive_write_set_format_zip(m_ArchiveWrite.data());
