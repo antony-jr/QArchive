@@ -118,7 +118,7 @@ class ExtractorPrivate : public QObject {
     QStringList m_ExtractFilters;
     QJsonObject m_Info;
     std::unique_ptr<QVector<MemoryFile>> m_ExtractedFiles;
-    QSharedPointer<ArchiveFilter> m_archiveFilter;
+    std::unique_ptr<ArchiveFilter> m_archiveFilter;
     bool b_hasBasePath = false;
     QDir m_basePath;
 };

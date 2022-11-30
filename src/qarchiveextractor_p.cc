@@ -227,8 +227,11 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     : b_MemoryMode(memoryMode)
     , n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
-
+#ifdef __cpp_lib_make_unique
+    m_archiveFilter = std::make_unique<ArchiveFilter>();
+#else
     m_archiveFilter.reset(new ArchiveFilter);
+#endif
 
     if(b_MemoryMode) {
 #ifdef __cpp_lib_make_unique
@@ -382,7 +385,11 @@ void ExtractorPrivate::clear() {
     m_ArchiveWrite.clear();
     m_Info = {};
     m_ExtractFilters.clear();
+#ifdef __cpp_lib_make_unique
+    m_archiveFilter = std::make_unique<ArchiveFilter>();
+#else
     m_archiveFilter.reset(new ArchiveFilter);
+#endif
 
     if(b_MemoryMode) {
 #ifdef __cpp_lib_make_unique
