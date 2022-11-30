@@ -16,20 +16,6 @@ extern "C" {
 #include <sys/stat.h>
 }
 
-#if defined(__APPLE__)
-#define st_atim st_atimespec.tv_sec
-#define st_ctim st_ctimespec.tv_sec
-#define st_mtim st_mtimespec.tv_sec
-#elif defined(_WIN32) && !defined(__CYGWIN__)
-#define st_atim st_atime
-#define st_ctim st_ctime
-#define st_mtim st_mtime
-#else
-#define st_atim st_atim.tv_sec
-#define st_ctim st_ctim.tv_sec
-#define st_mtim st_mtim.tv_sec
-#endif
-
 // Helpful macros to check if an archive error is caused due to
 // faulty passwords.
 // Expects a pointer to a struct archive , returns 1 if password
