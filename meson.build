@@ -42,26 +42,21 @@ src = files(
 )
 
 headers = files(
-  'include/qarchive_enums.hpp',
-  'include/qarchive_global.hpp',
   'include/qarchivecompressor.hpp',
   'include/qarchivecompressor_p.hpp',
   'include/qarchivediskcompressor.hpp',
   'include/qarchivediskextractor.hpp',
   'include/qarchiveextractor.hpp',
   'include/qarchiveextractor_p.hpp',
-  'include/qarchiveioreader_p.hpp',
   'include/qarchivememorycompressor.hpp',
   'include/qarchivememoryextractor.hpp',
   'include/qarchivememoryextractoroutput.hpp',
-  'include/qarchivememoryfile.hpp',
-  'include/qarchiveutils_p.hpp',
 )
 
 maininc = include_directories('include')
 
 moc_files = qt.preprocess(
-  moc_sources: src,
+  moc_sources: [],
   moc_headers: headers,
   include_directories: maininc,
   dependencies: qt_dep,
@@ -133,14 +128,13 @@ if get_option('tests')
     'tests/QArchiveDiskExtractorTests.hpp',
     'tests/QArchiveMemoryCompressorTests.hpp',
     'tests/QArchiveMemoryExtractorTests.hpp',
-    'tests/QArchiveTestCases.hpp',
     'tests/TestRunner.hpp',
   )
 
   test_include_dirs = include_directories('include', 'tests')
 
   test_moc_files = qt.preprocess(
-    moc_sources: test_src,
+    moc_sources: [],
     moc_headers: test_headers,
     include_directories: test_include_dirs,
     dependencies: qt_dep,
