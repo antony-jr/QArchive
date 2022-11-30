@@ -616,6 +616,7 @@ short CompressorPrivate::compress() {
             archive_write_set_format_7zip(m_ArchiveWrite.data());
             break;
         case ZstdFormat:
+#if ARCHIVE_VERSION_NUMBER >= 3003003
             archive_write_add_filter_zstd(m_ArchiveWrite.data());
             /*
              * TODO: Investigate more on this.
@@ -629,6 +630,10 @@ short CompressorPrivate::compress() {
             } else {
                 archive_write_set_format_iso9660(m_ArchiveWrite.data());
             }
+#else // Explicitly fall-back to zip if libarchive doesn't support zstd.
+            archive_write_add_filter_none(m_ArchiveWrite.data());
+            archive_write_set_format_zip(m_ArchiveWrite.data());
+#endif
             break;
         default:
             archive_write_add_filter_none(m_ArchiveWrite.data());
