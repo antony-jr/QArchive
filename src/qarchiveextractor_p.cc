@@ -247,7 +247,11 @@ ExtractorPrivate::ExtractorPrivate(bool memoryMode)
     m_archiveFilter.reset(new ArchiveFilter);
 
     if(b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
     }
 }
 
@@ -397,7 +401,11 @@ void ExtractorPrivate::clear() {
     m_archiveFilter.reset(new ArchiveFilter);
 
     if(b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
     }
 
     if(b_QIODeviceOwned) {
@@ -521,7 +529,11 @@ void ExtractorPrivate::start() {
             emit diskFinished();
         } else {
             emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+#ifdef __cpp_lib_make_unique
+            m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
         }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -570,7 +582,11 @@ void ExtractorPrivate::resume() {
             emit diskFinished();
         } else {
             emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+#ifdef __cpp_lib_make_unique
+            m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
         }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003

@@ -1,11 +1,10 @@
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QDebug>
+#include <QDir>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QVector>
-#include <QDir>
-#include <QDebug>
-#include <QElapsedTimer>
-
 
 #include "qarchive_enums.hpp"
 #include "qarchivecompressor_p.hpp"
@@ -88,7 +87,11 @@ CompressorPrivate::CompressorPrivate(bool memoryMode)
     if(!b_MemoryMode) {
         m_TemporaryFile.reset(new QSaveFile);
     } else {
+#ifdef __cpp_lib_make_unique
+        m_Buffer = std::make_unique<QBuffer>();
+#else
         m_Buffer.reset(new QBuffer);
+#endif
     }
     m_StaggedFiles.reset(new QVector<Node*>);
     m_ConfirmedFiles.reset(new QVector<Node*>);
@@ -326,7 +329,11 @@ void CompressorPrivate::clear() {
     if(!b_MemoryMode) {
         m_TemporaryFile.reset(new QSaveFile);
     } else {
+#ifdef __cpp_lib_make_unique
+        m_Buffer = std::make_unique<QBuffer>();
+#else
         m_Buffer.reset(new QBuffer);
+#endif
     }
 }
 
@@ -372,7 +379,11 @@ void CompressorPrivate::start() {
         b_Finished = true;
         if(b_MemoryMode) {
             emit memoryFinished(m_Buffer.release());
+#ifdef __cpp_lib_make_unique
+            m_Buffer = std::make_unique<QBuffer>();
+#else
             m_Buffer.reset(new QBuffer);
+#endif
         } else {
             m_TemporaryFile->commit();
             emit diskFinished();
@@ -401,7 +412,11 @@ void CompressorPrivate::resume() {
         b_Finished = true;
         if(b_MemoryMode) {
             emit memoryFinished(m_Buffer.release());
+#ifdef __cpp_lib_make_unique
+            m_Buffer = std::make_unique<QBuffer>();
+#else
             m_Buffer.reset(new QBuffer);
+#endif
         } else {
             m_TemporaryFile->commit();
             emit diskFinished();
