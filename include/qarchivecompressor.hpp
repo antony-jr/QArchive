@@ -5,8 +5,9 @@
 #include <QString>
 #include <QVariant>
 #include <QStringList>
-#include <QScopedPointer>
 #include <QThread>
+
+#include <memory>
 
 #include "qarchive_global.hpp"
 
@@ -51,8 +52,8 @@ class QARCHIVE_EXPORT Compressor : public QObject {
     void diskFinished();
 
   private:
-    QScopedPointer<CompressorPrivate> m_Compressor;
-    QScopedPointer<QThread> m_Thread;
+    std::unique_ptr<CompressorPrivate> m_Compressor;
+    std::unique_ptr<QThread> m_Thread;
 };
 }  // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_HPP_INCLUDED

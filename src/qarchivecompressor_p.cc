@@ -78,7 +78,11 @@ static bool contains(const QString &entry, const QVector<CompressorPrivate::Node
 CompressorPrivate::CompressorPrivate(bool memoryMode)
     : b_MemoryMode(memoryMode) {
     if(!b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_TemporaryFile = std::make_unique<QSaveFile>();
+#else
         m_TemporaryFile.reset(new QSaveFile);
+#endif
     } else {
 #ifdef __cpp_lib_make_unique
         m_Buffer = std::make_unique<QBuffer>();
@@ -316,7 +320,11 @@ void CompressorPrivate::clear() {
     freeNodes(m_StaggedFiles);
 
     if(!b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_TemporaryFile = std::make_unique<QSaveFile>();
+#else
         m_TemporaryFile.reset(new QSaveFile);
+#endif
     } else {
 #ifdef __cpp_lib_make_unique
         m_Buffer = std::make_unique<QBuffer>();

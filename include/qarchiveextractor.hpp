@@ -1,12 +1,13 @@
 #ifndef QARCHIVE_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_EXTRACTOR_HPP_INCLUDED
-#include <QScopedPointer>
 #include <QIODevice>
 #include <QBuffer>
 #include <QString>
 #include <QObject>
 #include <QThread>
 #include <QJsonObject>
+
+#include <memory>
 
 #include "qarchivememoryextractoroutput.hpp"
 #include "qarchive_global.hpp"
@@ -56,8 +57,8 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     void info(QJsonObject);
 
   private:
-    QScopedPointer<ExtractorPrivate> m_Extractor;
-    QScopedPointer<QThread> m_Thread;
+    std::unique_ptr<ExtractorPrivate> m_Extractor;
+    std::unique_ptr<QThread> m_Thread;
 };
 }  // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_HPP_INCLUDED
