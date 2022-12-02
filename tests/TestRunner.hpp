@@ -22,9 +22,9 @@ class TestRunner : public QObject {
   Q_SIGNALS:
     void finished();
   private:
-    std::unique_ptr<QTemporaryDir> m_TempDir;
-    std::unique_ptr<QFuture<void>> m_Future;
-    std::unique_ptr<QFutureWatcher<void>> m_FutureWatcher;
+    QTemporaryDir m_TempDir;
+    QFuture<void> m_Future;
+    QFutureWatcher<void> m_FutureWatcher;
     std::unique_ptr<QArchiveDiskCompressorTests> m_CompressorTests;
     std::unique_ptr<QArchiveMemoryCompressorTests> m_MemoryCompressorTests;
     std::unique_ptr<QArchiveDiskExtractorTests> m_ExtractorTests;
