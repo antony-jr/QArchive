@@ -19,6 +19,8 @@ class QARCHIVE_EXPORT Extractor : public QObject {
   public:
     Extractor(bool memoryMode = false, QObject *parent = nullptr, bool singleThreaded = true);
     ~Extractor() override;
+    Extractor(const Extractor&) = delete;
+    Extractor& operator=(const Extractor&) = delete;
   public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);

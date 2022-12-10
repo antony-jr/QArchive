@@ -43,6 +43,8 @@ class ExtractorPrivate : public QObject {
   public:
     ExtractorPrivate(bool memoryMode = false);
     ~ExtractorPrivate() override;
+    ExtractorPrivate(const ExtractorPrivate&) = delete;
+    ExtractorPrivate& operator=(const ExtractorPrivate&) = delete;
   public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
