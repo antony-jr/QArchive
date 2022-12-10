@@ -32,7 +32,7 @@ using namespace QArchive;
 /// destructor.
 MutableMemoryFile::MutableMemoryFile() = default;
 MutableMemoryFile::~MutableMemoryFile() {
-    m_Buffer.clear();
+    m_Buffer = {};
 }
 
 void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
@@ -47,7 +47,7 @@ QJsonObject MutableMemoryFile::getFileInformation() const {
     return m_FileInformation;
 }
 
-QSharedPointer<QBuffer> MutableMemoryFile::getBuffer() const {
+std::shared_ptr<QBuffer> MutableMemoryFile::getBuffer() const {
     return m_Buffer;
 }
 /// ---

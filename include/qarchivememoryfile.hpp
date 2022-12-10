@@ -1,6 +1,5 @@
 #ifndef QARCHIVE_MEMORY_FILE_HPP_INCLUDED
 #define QARCHIVE_MEMORY_FILE_HPP_INCLUDED
-#include <QSharedPointer>
 #include <QBuffer>
 #include <QJsonObject>
 
@@ -10,7 +9,7 @@ namespace QArchive {
 class QARCHIVE_EXPORT MemoryFile {
   public:
     MemoryFile();
-    MemoryFile(QJsonObject, const QSharedPointer<QBuffer>&);
+    MemoryFile(QJsonObject, std::shared_ptr<QBuffer>);
     ~MemoryFile();
 
     MemoryFile(const MemoryFile&) = default;
@@ -20,7 +19,7 @@ class QARCHIVE_EXPORT MemoryFile {
     [[gnu::warn_unused_result]] QBuffer *buffer() const;
   private:
     QJsonObject m_FileInformation;
-    QSharedPointer<QBuffer> m_Buffer;
+    std::shared_ptr<QBuffer> m_Buffer;
 };
 }  // namespace QArchive
 

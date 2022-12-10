@@ -1,6 +1,5 @@
 #ifndef QARCHIVE_MEMORY_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_MEMORY_EXTRACTOR_HPP_INCLUDED
-#include <QSharedPointer>
 #include <QBuffer>
 #include <QIODevice>
 #include <QString>
