@@ -3,6 +3,8 @@
 #include <QBuffer>
 #include <QJsonObject>
 
+#include <memory>
+
 #include "qarchive_global.hpp"
 
 namespace QArchive {
@@ -13,7 +15,7 @@ class QARCHIVE_EXPORT MemoryFile {
     ~MemoryFile() = default;
 
     [[gnu::warn_unused_result]] QJsonObject fileInformation() const;
-    [[gnu::warn_unused_result]] QBuffer *buffer() const;
+    [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> buffer() const;
   private:
     QJsonObject m_FileInformation;
     std::shared_ptr<QBuffer> m_Buffer;

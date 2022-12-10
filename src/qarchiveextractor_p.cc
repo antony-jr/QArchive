@@ -35,7 +35,7 @@ void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
 }
 
 void MutableMemoryFile::setBuffer(QBuffer *buffer) {
-    m_Buffer.reset(buffer);
+    m_Buffer = std::make_shared<QBuffer>(buffer);
 }
 
 QJsonObject MutableMemoryFile::getFileInformation() const {

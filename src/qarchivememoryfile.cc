@@ -7,9 +7,9 @@ MemoryFile::MemoryFile(QJsonObject info, std::shared_ptr<QBuffer> buffer)
       m_Buffer(std::move(buffer)) { }
 
 QJsonObject MemoryFile::fileInformation() const {
-    return {m_FileInformation};
+    return m_FileInformation;
 }
 
-QBuffer *MemoryFile::buffer() const {
-    return m_Buffer.get();
+std::shared_ptr<QBuffer> MemoryFile::buffer() const {
+    return m_Buffer;
 }
