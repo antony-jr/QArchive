@@ -17,7 +17,6 @@ class QARCHIVE_EXPORT DiskExtractor : public Extractor {
     DiskExtractor(QIODevice*, QObject *parent = nullptr, bool singleThreaded = true);
     DiskExtractor(const QString&, QObject *parent = nullptr, bool singleThreaded = true);
     DiskExtractor(const QString&, const QString&, QObject *parent = nullptr, bool singleThreaded = true);
-    ~DiskExtractor() override;
   Q_SIGNALS:
     void finished();
 };

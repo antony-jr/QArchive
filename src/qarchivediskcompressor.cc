@@ -18,5 +18,3 @@ DiskCompressor::DiskCompressor(const QString &fileName, short format, QObject *p
     setFileName(fileName);
     setArchiveFormat(format);
 }
-
-DiskCompressor::~DiskCompressor() = default;

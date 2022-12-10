@@ -12,5 +12,3 @@ MemoryCompressor::MemoryCompressor(short format, QObject *parent, bool singleThr
     : MemoryCompressor(parent, singleThreaded) {
     setArchiveFormat(format);
 }
-
-MemoryCompressor::~MemoryCompressor() = default;
