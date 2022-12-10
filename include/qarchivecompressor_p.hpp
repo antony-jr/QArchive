@@ -59,9 +59,6 @@ class CompressorPrivate : public QObject {
 
   public:
     struct Node {
-        Node();
-        ~Node();
-
         short open();
 
         QString path,entry;
