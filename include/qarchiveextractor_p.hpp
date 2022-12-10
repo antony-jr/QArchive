@@ -22,12 +22,6 @@ class ArchiveFilter;
 
 class MutableMemoryFile {
   public:
-    MutableMemoryFile();
-    ~MutableMemoryFile();
-
-    MutableMemoryFile(const MutableMemoryFile&) = default;
-    MutableMemoryFile& operator=(const MutableMemoryFile&) = default;
-
     void setFileInformation(const QJsonObject&);
     void setBuffer(QBuffer*);
 
