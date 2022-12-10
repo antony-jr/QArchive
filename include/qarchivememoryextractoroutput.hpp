@@ -2,23 +2,23 @@
 #define QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED
 #include <QObject>
 #include <QVector>
-#include <QScopedPointer>
+
+#include <memory>
 
 #include "qarchivememoryfile.hpp"
 #include "qarchive_global.hpp"
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
+  using QObject::QObject;
     Q_OBJECT
   public:
-    MemoryExtractorOutput(QObject *parent = nullptr);
-    MemoryExtractorOutput(QVector<MemoryFile>*, QObject *parent = nullptr);
-    ~MemoryExtractorOutput() override;
+    MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>, QObject *parent = nullptr);
 
-    QVector<MemoryFile> &getFiles() const;
+    [[gnu::warn_unused_result]] const QVector<MemoryFile> &getFiles() const;
 
   private:
-    QScopedPointer<QVector<MemoryFile>> m_Files;
+    std::unique_ptr<QVector<MemoryFile>> m_Files;
 };
 }  // namespace QArchive
 #endif // QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED

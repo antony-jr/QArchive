@@ -1,6 +1,5 @@
 #ifndef QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
-#include <QScopedPointer>
 #include <QIODevice>
 #include <QString>
 #include <QObject>

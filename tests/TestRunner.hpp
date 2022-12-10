@@ -4,7 +4,6 @@
 #include <QTemporaryDir>
 #include <QFuture>
 #include <QFutureWatcher>
-#include <QScopedPointer>
 
 #include "QArchiveDiskExtractorTests.hpp"
 #include "QArchiveDiskCompressorTests.hpp"
@@ -23,12 +22,12 @@ class TestRunner : public QObject {
   Q_SIGNALS:
     void finished();
   private:
-    QScopedPointer<QTemporaryDir> m_TempDir;
-    QScopedPointer<QFuture<void>> m_Future;
-    QScopedPointer<QFutureWatcher<void>> m_FutureWatcher;
-    QScopedPointer<QArchiveDiskCompressorTests> m_CompressorTests;
-    QScopedPointer<QArchiveMemoryCompressorTests> m_MemoryCompressorTests;
-    QScopedPointer<QArchiveDiskExtractorTests> m_ExtractorTests;
-    QScopedPointer<QArchiveMemoryExtractorTests> m_MemoryExtractorTests;
+    QTemporaryDir m_TempDir;
+    QFuture<void> m_Future;
+    QFutureWatcher<void> m_FutureWatcher;
+    std::unique_ptr<QArchiveDiskCompressorTests> m_CompressorTests;
+    std::unique_ptr<QArchiveMemoryCompressorTests> m_MemoryCompressorTests;
+    std::unique_ptr<QArchiveDiskExtractorTests> m_ExtractorTests;
+    std::unique_ptr<QArchiveMemoryExtractorTests> m_MemoryExtractorTests;
 };
 #endif

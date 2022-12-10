@@ -8,7 +8,6 @@
 #include <QSaveFile>
 #include <QVariantList>
 #include <QVector>
-#include <QScopedPointer>
 #include <QSharedPointer>
 
 #include <memory>
@@ -72,7 +71,7 @@ class CompressorPrivate : public QObject {
     };
 
   private:
-    static void freeNodes(QVector<Node*>*);
+    static void freeNodes(QVector<Node*>&);
   private:
     bool b_MemoryMode = false;
     bool b_PauseRequested = false,
@@ -88,10 +87,10 @@ class CompressorPrivate : public QObject {
     qint64 n_BytesProcessed = 0,
            n_BytesTotal = 0;
     QSharedPointer<struct archive> m_ArchiveWrite;
-    QScopedPointer<QSaveFile> m_TemporaryFile;
+    std::unique_ptr<QSaveFile> m_TemporaryFile;
     std::unique_ptr<QBuffer> m_Buffer;
-    QScopedPointer<QVector<Node*>> m_ConfirmedFiles;
-    QScopedPointer<QVector<Node*>> m_StaggedFiles;
+    QVector<Node*> m_ConfirmedFiles;
+    QVector<Node*> m_StaggedFiles;
 };
 }  // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

@@ -256,7 +256,7 @@ void QArchiveMemoryExtractorTests::getInfoFromTarArchiveWithNoFilters() {
 }
 
 void QArchiveMemoryExtractorTests::extractTarArchiveWithNoFilters() {
-    QArchive::MemoryExtractor e(TestCase6ArchivePath);;
+    QArchive::MemoryExtractor e(TestCase6ArchivePath);
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
 

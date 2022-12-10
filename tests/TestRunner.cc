@@ -5,40 +5,37 @@
 #include <QTest>
 
 TestRunner::TestRunner() {
-    m_TempDir.reset(new QTemporaryDir);
-    m_Future.reset(new QFuture<void>);
-    m_FutureWatcher.reset(new QFutureWatcher<void>);
-    m_CompressorTests.reset(new QArchiveDiskCompressorTests(m_TempDir.data()));
-    m_ExtractorTests.reset(new QArchiveDiskExtractorTests(m_TempDir.data()));
-    m_MemoryExtractorTests.reset(new QArchiveMemoryExtractorTests(m_TempDir.data()));
-    m_MemoryCompressorTests.reset(new QArchiveMemoryCompressorTests(m_TempDir.data()));
+    m_CompressorTests.reset(new QArchiveDiskCompressorTests(&m_TempDir));
+    m_ExtractorTests.reset(new QArchiveDiskExtractorTests(&m_TempDir));
+    m_MemoryExtractorTests.reset(new QArchiveMemoryExtractorTests(&m_TempDir));
+    m_MemoryCompressorTests.reset(new QArchiveMemoryCompressorTests(&m_TempDir));
 
-    connect(m_FutureWatcher.data(), &QFutureWatcher<void>::finished,
+    connect(&m_FutureWatcher, &QFutureWatcher<void>::finished,
             this, &TestRunner::finished, Qt::DirectConnection);
 }
 
 TestRunner::~TestRunner() = default;
 
 void TestRunner::start() {
-    *(m_Future.data()) = QtConcurrent::run([&]() {
+    m_Future = QtConcurrent::run([this] {
         runTests();
         return;
     });
-    m_FutureWatcher->setFuture(*(m_Future.data()));
+    m_FutureWatcher.setFuture(m_Future);
 
 }
 
 void TestRunner::runTests() {
     // Run the compressor tests which should generate the
     // desired archives to test it with the extractor.
-    QTest::qExec(m_CompressorTests.data());
+    QTest::qExec(m_CompressorTests.get());
 
     // Run disk extractor tests.
-    QTest::qExec(m_ExtractorTests.data());
+    QTest::qExec(m_ExtractorTests.get());
 
     // Run memory extractor tests
-    QTest::qExec(m_MemoryExtractorTests.data());
+    QTest::qExec(m_MemoryExtractorTests.get());
 
     // Run memory compressor tests
-    QTest::qExec(m_MemoryCompressorTests.data());
+    QTest::qExec(m_MemoryCompressorTests.get());
 }

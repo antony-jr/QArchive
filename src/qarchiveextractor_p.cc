@@ -16,20 +16,6 @@ extern "C" {
 #include <sys/stat.h>
 }
 
-#if defined(__APPLE__)
-#define st_atim st_atimespec.tv_sec
-#define st_ctim st_ctimespec.tv_sec
-#define st_mtim st_mtimespec.tv_sec
-#elif defined(_WIN32) && !defined(__CYGWIN__)
-#define st_atim st_atime
-#define st_ctim st_ctime
-#define st_mtim st_mtime
-#else
-#define st_atim st_atim.tv_sec
-#define st_ctim st_ctim.tv_sec
-#define st_mtim st_mtim.tv_sec
-#endif
-
 // Helpful macros to check if an archive error is caused due to
 // faulty passwords.
 // Expects a pointer to a struct archive , returns 1 if password
@@ -48,7 +34,6 @@ MutableMemoryFile::MutableMemoryFile() = default;
 MutableMemoryFile::~MutableMemoryFile() {
     m_Buffer.clear();
 }
-
 
 void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
     m_FileInformation = info;
@@ -240,14 +225,20 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 // This class is responsible for extraction and information retrival of the data
 // inside an archive.
 ExtractorPrivate::ExtractorPrivate(bool memoryMode)
-    : n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
-    b_MemoryMode = memoryMode;
-
-    m_Info.reset(new QJsonObject);
+    : b_MemoryMode(memoryMode)
+    , n_Flags(ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_SECURE_NODOTDOT) {
+#ifdef __cpp_lib_make_unique
+    m_archiveFilter = std::make_unique<ArchiveFilter>();
+#else
     m_archiveFilter.reset(new ArchiveFilter);
+#endif
 
     if(b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
     }
 }
 
@@ -392,12 +383,20 @@ void ExtractorPrivate::clear() {
     m_OutputDirectory.clear();
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
-    m_Info.reset(new QJsonObject);
+    m_Info = {};
     m_ExtractFilters.clear();
+#ifdef __cpp_lib_make_unique
+    m_archiveFilter = std::make_unique<ArchiveFilter>();
+#else
     m_archiveFilter.reset(new ArchiveFilter);
+#endif
 
     if(b_MemoryMode) {
+#ifdef __cpp_lib_make_unique
+        m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
         m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
     }
 
     if(b_QIODeviceOwned) {
@@ -418,9 +417,9 @@ void ExtractorPrivate::getInfo() {
 
     b_ProcessingArchive = true;
 
-    if(!m_Info->isEmpty()) {
+    if(!m_Info.isEmpty()) {
         b_ProcessingArchive = false;
-        emit info(*(m_Info.data()));
+        emit info(m_Info);
         if(b_StartRequested) {
             b_StartRequested = false;
             start();
@@ -444,7 +443,7 @@ void ExtractorPrivate::getInfo() {
     b_ProcessingArchive = false;
 
     if(!errorCode) {
-        emit info(*(m_Info.data()));
+        emit info(m_Info);
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
     else if(errorCode == ArchivePasswordIncorrect || errorCode == ArchivePasswordNeeded) {
@@ -520,8 +519,12 @@ void ExtractorPrivate::start() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+            emit memoryFinished(new MemoryExtractorOutput(std::move(m_ExtractedFiles)));
+#ifdef __cpp_lib_make_unique
+            m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
         }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -569,8 +572,12 @@ void ExtractorPrivate::resume() {
         if(!b_MemoryMode) {
             emit diskFinished();
         } else {
-            emit memoryFinished(new MemoryExtractorOutput(m_ExtractedFiles.release()));
+            emit memoryFinished(new MemoryExtractorOutput(std::move(m_ExtractedFiles)));
+#ifdef __cpp_lib_make_unique
+            m_ExtractedFiles = std::make_unique<QVector<MemoryFile>>();
+#else
             m_ExtractedFiles.reset(new QVector<MemoryFile>);
+#endif
         }
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
@@ -1029,7 +1036,7 @@ short ExtractorPrivate::processArchiveInformation() {
         }
         auto CurrentFile = QString(archive_entry_pathname(entry));
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
-        m_Info->insert(CurrentFile, CurrentEntry);
+        m_Info.insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
         // Clear the entry since it is re-used by the libarchive internally that may lead to the stale data be taken.
         archive_entry_clear(entry);
@@ -1037,7 +1044,7 @@ short ExtractorPrivate::processArchiveInformation() {
     }
 
     // set total number of entries.
-    n_TotalEntries = m_Info->size();
+    n_TotalEntries = m_Info.size();
 
     // free memory.
     archive_read_close(inArchive);

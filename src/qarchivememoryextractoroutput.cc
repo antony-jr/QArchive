@@ -2,18 +2,11 @@
 
 using namespace QArchive;
 
-MemoryExtractorOutput::MemoryExtractorOutput(QObject *parent)
-    : QObject(parent) { }
-
-MemoryExtractorOutput::MemoryExtractorOutput(QVector<MemoryFile> *files, QObject *parent)
+MemoryExtractorOutput::MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>> files, QObject *parent)
     : MemoryExtractorOutput(parent) {
-    m_Files.reset(files);
+    m_Files = std::move(files);
 }
 
-MemoryExtractorOutput::~MemoryExtractorOutput() {
-    m_Files.reset(nullptr);
-}
-
-QVector<MemoryFile> &MemoryExtractorOutput::getFiles() const {
+const QVector<MemoryFile> &MemoryExtractorOutput::getFiles() const {
     return *m_Files;
 }

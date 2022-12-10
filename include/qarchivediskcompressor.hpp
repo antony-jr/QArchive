@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
-#include <QScopedPointer>
 #include <QThread>
 
 #include "qarchive_global.hpp"
