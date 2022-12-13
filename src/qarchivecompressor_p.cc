@@ -251,25 +251,11 @@ void CompressorPrivate::removeFiles(const QStringList &entries) {
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, const QString &) {
-    if(b_Started || b_Paused)
-        return;
-
-    auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && f->entry == entryName; });
-    if (it != m_StaggedFiles.end())
-        m_StaggedFiles.remove(std::distance(m_StaggedFiles.begin(), it));
+    removeFiles(entryName);
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &) {
-    if(b_Started || b_Paused)
-        return;
-
-    QVector<int> indexes;
-    auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && entryNames.contains(f->entry); });
-    if (it != m_StaggedFiles.end())
-        indexes.append(std::distance(m_StaggedFiles.begin(), it));
-
-    for (const int &i : indexes)
-        m_StaggedFiles.remove(i);
+    removeFiles(entryNames);
 }
 
 /* clears internal cache. */
