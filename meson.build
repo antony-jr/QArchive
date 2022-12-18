@@ -75,18 +75,6 @@ qarchive_lib = library(
 pconf = import('pkgconfig')
 pconf.generate(qarchive_lib, description: 'A Qt wrapper for libarchive.')
 
-if meson.version().version_compare('>=0.50.0')
-  cconfig = configuration_data()
-  cconfig.set('LIBARCHIVE_PKG_CONFIG', libarchive_dep.get_pkgconfig_variable('prefix'))
-  cconfig.set('LibArchive_INCLUDE_DIR', libarchive_dep.get_pkgconfig_variable('includedir'))
-  cmakeconf = import('cmake')
-  cmakeconf.configure_package_config_file(
-    name: 'QArchive',
-    input: 'other/cmake/QArchiveConfig.cmake.in',
-    configuration: cconfig,
-  )
-endif
-
 install_headers(
   'include/qarchive_enums.hpp',
   'include/qarchive_global.hpp',
