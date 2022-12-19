@@ -24,7 +24,7 @@ The class belongs to the QArchive namespace, so make sure to include it.
 |--------------------------------------|------------------------------------------------------------|
 | **QJsonObject const**                | [fileInformation()](#qjsonobject-fileinformation-const)    |
 | **QBuffer \* const**                 | [buffer()](#qbuffer-buffer-const)                          |
-| **std::shared_ptr\<QBuffer\> const** | [sharedBuffer()](#stdshared_ptrqbuffer-sharedBuffer-const) |
+| **std::shared_ptr\<QBuffer\> const** | [sharedBuffer()](#stdshared_ptrqbuffer-sharedbuffer-const) |
 
 
 ## Member Functions Documentation
