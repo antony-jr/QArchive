@@ -18,5 +18,3 @@ MemoryExtractor::MemoryExtractor(const QString &archivePath, QObject *parent, bo
     : MemoryExtractor(parent, singleThreaded) {
     setArchive(archivePath);
 }
-
-MemoryExtractor::~MemoryExtractor() = default;

@@ -14,7 +14,6 @@ class TestRunner : public QObject {
     Q_OBJECT
   public:
     TestRunner();
-    ~TestRunner() override;
   public Q_SLOTS:
     void start();
   private Q_SLOTS:

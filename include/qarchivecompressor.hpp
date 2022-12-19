@@ -19,6 +19,8 @@ class QARCHIVE_EXPORT Compressor : public QObject {
   public:
     Compressor(bool memoryMode = false, QObject *parent = nullptr, bool singleThreaded = true);
     ~Compressor() override;
+    Compressor(const Compressor&) = delete;
+    Compressor& operator=(const Compressor&) = delete;
   public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
