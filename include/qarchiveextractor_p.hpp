@@ -22,20 +22,14 @@ class ArchiveFilter;
 
 class MutableMemoryFile {
   public:
-    MutableMemoryFile();
-    ~MutableMemoryFile();
-
-    MutableMemoryFile(const MutableMemoryFile&) = default;
-    MutableMemoryFile& operator=(const MutableMemoryFile&) = default;
-
     void setFileInformation(const QJsonObject&);
     void setBuffer(QBuffer*);
 
     [[gnu::warn_unused_result]] QJsonObject getFileInformation() const;
-    [[gnu::warn_unused_result]] QSharedPointer<QBuffer> getBuffer() const;
+    [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> getBuffer() const;
   private:
     QJsonObject m_FileInformation;
-    QSharedPointer<QBuffer> m_Buffer;
+    std::shared_ptr<QBuffer> m_Buffer;
 };
 
 class ExtractorPrivate : public QObject {
