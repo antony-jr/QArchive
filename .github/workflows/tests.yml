@@ -26,14 +26,14 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-                
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
           version: ${{ matrix.qt_version }}
           cache: 'true'
           cache-key-prefix: ${{ runner.os }}-Qt-Cache-${{ matrix.qt_version }}
-          dir: ${{ github.workspace }}/Qt    
+          dir: ${{ github.workspace }}/Qt
 
     - name: Install LibArchive
       run: |
@@ -51,7 +51,7 @@ jobs:
           sudo cp -fp /usr/local/lib/pkgconfig/libarchive.pc /usr/lib/pkgconfig/libarchive.pc
           sudo cp -fp /usr/local/lib/libarchive.* /usr/lib/
 
-          
+
 
     - name: Configure CMake
       run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
@@ -64,40 +64,27 @@ jobs:
       run: "ctest --verbose"
 
   macos:
-    # This will not run until the upstream brew formula is fixed.
-    # Blocked until https://github.com/libarchive/libarchive/issues/1766 is closed.
-    if: false
     runs-on: macos-${{ matrix.macos_version }}
-    name: macos-${{ matrix.macos_version }}-Qt-${{ matrix.qt_version }}-shared-${{ matrix.shared }}
+    name: macos-${{ matrix.macos_version }}-Qt6-${{ matrix.qt6 }}-${{ matrix.shared }}
     strategy:
       fail-fast: false
       matrix:
         macos_version: [11, 12]
-        qt_version: [5.15.2, 6.4.0]
-        shared: [ON, OFF]
+        qt6: ['enabled', 'disabled']
+        shared: ['shared', 'static']
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-            version: ${{ matrix.qt_version }}
-            cache: 'true'
-            cache-key-prefix: ${{ runner.os }}-Qt-Cache-${{ matrix.qt_version }}
-            dir: ${{ github.workspace }}/Qt
+      - name: Install Dependencies
+        run: brew install meson ninja qt6 qt5
 
-      - name: Install LibArchive
-        run: brew install libarchive
-
-      - name: Configure CMake
-        run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
-   
+      - name: Configure Meson
+        run: meson setup "${{github.workspace}}/build" -Ddefault_library=${{matrix.shared}} -Dqt6=${{matrix.qt6}} -Dpkg_config_path=/usr/local/opt/qt@5/lib/pkgconfig
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: meson compile -C "${{github.workspace}}/build" --verbose
 
       - name: Run tests
-        working-directory: ${{github.workspace}}/build/tests
-        run: "ctest --verbose"
+        run: meson test -C "${{github.workspace}}/build" --verbose
