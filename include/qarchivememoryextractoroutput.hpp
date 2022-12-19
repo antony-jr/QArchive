@@ -10,7 +10,7 @@
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
-  using QObject::QObject;
+    using QObject::QObject;
     Q_OBJECT
   public:
     MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>, QObject *parent = nullptr);

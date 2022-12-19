@@ -60,7 +60,9 @@ void CompressorPrivate::freeNodes(QVector<Node*>& vec) {
 }
 
 static bool contains(const QString &entry, const QVector<CompressorPrivate::Node*>& vec) {
-    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node *n){ return n && n->valid && n->entry == entry; });
+    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node *n) {
+        return n && n->valid && n->entry == entry;
+    });
 }
 
 // CompressorPrivate is the private class which handles the

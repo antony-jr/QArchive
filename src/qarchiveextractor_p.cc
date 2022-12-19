@@ -867,7 +867,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         for (;;) {
             ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
             if (ret == ARCHIVE_EOF) {
-	       break;
+                break;
             } else if (ret != ARCHIVE_OK) {
                 short err = ArchiveCorrupted;
                 if(PASSWORD_NEEDED(m_ArchiveRead.data())) {

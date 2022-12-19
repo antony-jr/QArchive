@@ -122,8 +122,8 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
     p->io->setIODevice(device);
     p->io->setBlockSize(blocksize);
     p->storage = static_cast<char*>(calloc(1, (blocksize < 1024) ?
-                               sizeof(*(p->storage)) * 10204 :
-                               sizeof(*(p->storage)) * blocksize));
+                                           sizeof(*(p->storage)) * 10204 :
+                                           sizeof(*(p->storage)) * blocksize));
 
     archive_read_set_open_callback(archive, archive_open_cb);
     archive_read_set_read_callback(archive, archive_read_cb);
@@ -180,7 +180,9 @@ int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
                                archive_w_open_cb,
                                archive_write_cb,
                                archive_w_close_cb,
-                               [](struct archive*, void*){ return ARCHIVE_OK; });
+    [](struct archive*, void*) {
+        return ARCHIVE_OK;
+    });
 #endif
 }
 /* ---- */

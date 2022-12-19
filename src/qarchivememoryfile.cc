@@ -11,12 +11,12 @@ QJsonObject MemoryFile::fileInformation() const {
 }
 
 // We can't break api that easily, maybe no one is using
-// this but still it's not wise to break api without chaning 
+// this but still it's not wise to break api without chaning
 // the major version which I think is a overkill so
 // let's keep this for a while then remove this on the next
 // major version favouring the std version.
 Q_DECL_DEPRECATED QBuffer *MemoryFile::buffer() const {
-   return m_Buffer.get();
+    return m_Buffer.get();
 }
 
 std::shared_ptr<QBuffer> MemoryFile::sharedBuffer() const {
