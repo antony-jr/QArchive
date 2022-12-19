@@ -89,7 +89,7 @@ jobs:
         run: brew install libarchive
 
       - name: Configure CMake
-        run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
+        run: cmake -DCMAKE_BUILD_TYPE="${{env.BUILD_TYPE}}" -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include -DBUILD_SHARED_LIBS=${{ matrix.shared }} -DBUILD_TESTS=ON -B "${{github.workspace}}/build"
    
 
       - name: Build
