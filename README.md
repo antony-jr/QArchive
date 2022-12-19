@@ -53,6 +53,11 @@ int main(int argc, char **argv)
 
 Learn more about **QArchive** at the official [documentation](https://antony-jr.github.io/QArchive).
 
+The documentation does not document any new changes that happen at the master branch and will only have
+information about the released version of the library. If you encounter API breaks in master branch, this
+is intentional, please use the release version. **This situation will change soon in the future, so sorry
+for the inconvenience.**
+
 ## Qt6 Support
 
 Starting from QArchive **v2.2.3**, Qt6 support exists, if you have only Qt6 installed in the system then

@@ -52,6 +52,10 @@ class QArchiveTestCases {
         TestCase7ArchivePath = QString(TestCasesDir + "Test7.tar.zstd");
         TestCase7OutputDir = QString(TestOutputDir + "Test7");
         Test7OutputFile = QString(TestCase7OutputDir + "/Output.txt");
+        
+	TestCase8ArchivePath = QString(TestCasesDir + "Test8.zip");
+	TestCase8OutputDir = QString(TestOutputDir + "Test8");
+	Test8OutputFile = QString(TestCase8OutputDir + "/Test8SpecialEmptyFile.txt");	
     }
 
     ~QArchiveTestCases() = default;
@@ -80,6 +84,9 @@ class QArchiveTestCases {
             TestCase7ArchivePath,
             TestCase7OutputDir,
             Test7OutputFile,
+	    TestCase8ArchivePath,
+	    TestCase8OutputDir,
+	    Test8OutputFile,
             TemporaryFilePath;
     const QString Test1OutputContents = QString("TEST1SUCCESS!");
     const QString Test2OutputContents = QString("TEST2SUCCESS!");

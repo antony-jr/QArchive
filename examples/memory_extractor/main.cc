@@ -57,7 +57,7 @@ int main(int ac, char **av) {
 		 iter != end;
 		 ++iter) {
 		QJsonObject fileInfo = (*iter).fileInformation();
-		QBuffer *buffer = (*iter).buffer(); 
+		auto buffer = (*iter).sharedBuffer(); 
 		qDebug() << "FileName:: " << fileInfo.value("FileName").toString();
 		qDebug() << "Buf Size:: " << buffer->size();
 	}

@@ -12,6 +12,7 @@ void QArchiveDiskCompressorTests::initTestCase() {
     dir.mkpath(TestCase5OutputDir);
     dir.mkpath(TestCase6OutputDir);
     dir.mkpath(TestCase7OutputDir);
+    dir.mkpath(TestCase8OutputDir);
 }
 
 void QArchiveDiskCompressorTests::simpleCompression() {
@@ -203,6 +204,29 @@ void QArchiveDiskCompressorTests::compressingTarArchiveWithZSTD() {
 
     /* The archive should also exists. */
     QVERIFY(QFileInfo::exists(TestCase7ArchivePath));
+}
+
+void QArchiveDiskCompressorTests::compressEmptyFiles() {
+   QArchive::DiskCompressor e(TestCase8ArchivePath);
+
+   // Write a Empty File
+   QFile TestOutput(TemporaryFilePath);
+   QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
+   TestOutput.write(QByteArray());
+   TestOutput.close();
+
+   e.addFiles(QFileInfo(Test8OutputFile).fileName(), TemporaryFilePath);
+
+   QObject::connect(&e, &QArchive::DiskCompressor::error,
+                     this, &QArchiveDiskCompressorTests::defaultErrorHandler);
+   QSignalSpy spyInfo(&e, SIGNAL(finished()));
+   e.start();
+   
+   /*  Must emit exactly one signal. */
+   QVERIFY(spyInfo.wait() || spyInfo.count());
+
+   /* The archive should also exists. */
+   QVERIFY(QFileInfo::exists(TestCase8ArchivePath));
 }
 
 void QArchiveDiskCompressorTests::defaultErrorHandler(short code, const QString& file) {

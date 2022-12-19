@@ -20,10 +20,11 @@ The class belongs to the QArchive namespace, so make sure to include it.
 
 ### Public Functions
 
-|                        |                                                        |
-|------------------------|--------------------------------------------------------|
-| **QJsonObject const**  | [fileInformation()](#qjsonobject-fileinformation-const)|
-| **QBuffer \* const**   | [buffer()](#qbuffer-buffer-const) 			  |
+|                                      |                                                            |
+|--------------------------------------|------------------------------------------------------------|
+| **QJsonObject const**                | [fileInformation()](#qjsonobject-fileinformation-const)    |
+| **QBuffer \* const**                 | [buffer()](#qbuffer-buffer-const)                          |
+| **std::shared_ptr\<QBuffer\> const** | [sharedBuffer()](#stdshared_ptrqbuffer-sharedBuffer-const) |
 
 
 ## Member Functions Documentation
@@ -49,6 +50,13 @@ Returns file information as QJsonObject. The QJsonObject has the below format w.
 
 ### QBuffer \*buffer() const
 
+<p align="right"><b style="color: red;">(OBSOLETE)</b></b></p>
+
 Returns a QBuffer pointer. This QBuffer is closed by default. You can read or write by opening this buffer. **Do not try to free this pointer. This pointer will be freed automatically when this class is destructed.**
 
+### std::shared_ptr\<QBuffer\> sharedBuffer() const
 
+Returns a std::shared_ptr QBuffer. This QBuffer is closed by default. You can read or write by opening this buffer.
+
+> Only available in the master branch, this is recommended since, you can do whatever with the shared pointer. Even if you free it,
+> the pointer will take care of itself.

@@ -44,7 +44,10 @@ int main(int ac, char **av) {
 
     QObject::connect(&Compressor, &DiskCompressor::progress, [&](QString file,
     int proc, int total, qint64 br, qint64 bt) {
-        qInfo() << "Progress::" << file << ":: Done ( " << proc << " / " << total << ") " << (br * 100/bt)  << "%.";
+	if (bt == 0) {
+	   bt = 1;
+	}
+	qInfo() << "Progress::" << file << ":: Done ( " << proc << " / " << total << ") " << (br * 100/bt)  << "%.";
         return;
     });
 

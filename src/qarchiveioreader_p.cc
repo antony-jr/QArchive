@@ -2,6 +2,18 @@
 
 using namespace QArchive;
 
+IOReaderPrivate::~IOReaderPrivate() {
+   if(isOpen() && 
+	 isReadable() && 
+	 !isSequential()) {
+     // IMPORTANT: We need to make sure the IO Device
+     // is at default when we close it finally.
+     // Otherwise, this will cause silent errors when 
+     // we attempt use the same QIODevice.
+     m_IODevice->seek(0); 
+   }
+}
+
 void IOReaderPrivate::setBlockSize(int blockSize) {
     n_BlockSize = (blockSize < 1024) ?
                   10204 : blockSize;
@@ -33,43 +45,33 @@ bool IOReaderPrivate::isSequential() const {
 }
 
 qint64 IOReaderPrivate::read(char *buffer) {
-    qint64 read = 0;
-    auto prev = m_IODevice->pos();
-    if(!m_IODevice->seek(n_FilePointerPos)) {
-        m_IODevice->seek(prev);
-        return -1;
-    }
-    read = m_IODevice->read(buffer, n_BlockSize);
-    n_FilePointerPos = m_IODevice->pos();
-    m_IODevice->seek(prev);
-    return read;
+   return m_IODevice ? m_IODevice->read(buffer, n_BlockSize) : -1;
 }
 
 qint64 IOReaderPrivate::seek(qint64 offset, int whence) {
+    if(!m_IODevice)
+       return -1;
+
+    auto value = offset;
+    
+    // Whence can be
+    // SEEK_SET - Simply sets the seek
+    // SEEK_CUR - Seeks past n from the current pointed location
+    // SEEK_END - Seeks past n from the end of the file.
+    // 
+    // No need to care about SEEK_SET, it's set by default,
+    // look out for two other options.
+
     switch(whence) {
-    case SEEK_SET:
-        n_FilePointerPos = offset;
-        break;
     case SEEK_CUR:
-        n_FilePointerPos += offset;
+        value += m_IODevice->pos();	
         break;
     case SEEK_END:
-        n_FilePointerPos = m_IODevice->size() + offset;
+        value += m_IODevice->size();
         break;
     default:
         break;
     }
 
-    /*
-     * We have to get the actual seeked position from the IODevice
-     * then set it to its previous position. */
-    auto prev = m_IODevice->pos();
-    if(!m_IODevice->seek(n_FilePointerPos)) {
-        m_IODevice->seek(prev);
-        return -1;
-    }
-    n_FilePointerPos = m_IODevice->pos();
-    m_IODevice->seek(prev);
-    return n_FilePointerPos;
-
+    return m_IODevice->seek(value) ? value : -1;
 }

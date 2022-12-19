@@ -570,8 +570,15 @@ bool CompressorPrivate::confirmFiles() {
         }
     }
 
-    /// Important: Check if total bytes is not zero.
-    return n_BytesTotal != 0;
+    // TODO: If we need the ability to compress empty files,
+    // then n_BytesTotal should be valid even if it is zero,
+    // know why it is important to keep it a non-zero value,
+    // other than the fact that if bytes total is zero, anyone
+    // who depends on the progress signal to provide non-zero
+    // value will segfault.
+    // Let's now check if we atleast have some files to actually
+    // compress.
+    return m_ConfirmedFiles.size() != 0;
 }
 
 // Does the compression and also resumes it if called twice.

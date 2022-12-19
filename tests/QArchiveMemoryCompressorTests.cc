@@ -362,6 +362,53 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
     archive->deleteLater();
 }
 
+void QArchiveMemoryCompressorTests::compressEmptyFiles() {
+    QArchive::MemoryCompressor compressor(QArchive::ZipFormat);
+
+    // Get a Empty QBuffer
+    QBuffer buffer;
+    compressor.addFiles(/*entry name=*/QFileInfo(Test8OutputFile).fileName(), (QIODevice*)&buffer);
+
+    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
+                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
+    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+    compressor.start();
+
+    /*  Must emit exactly one signal. */
+    QVERIFY(spyInfo.wait() || spyInfo.count());
+
+    QList<QVariant> output = spyInfo.takeFirst();
+    QVERIFY(output.count() == 1);
+    auto archive = output.at(0).value<QBuffer*>();
+
+    QArchive::MemoryExtractor extractor((QIODevice*)archive);
+    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
+                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+
+    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+    extractor.start();
+
+    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+
+    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+
+    QVERIFY(extractorOutput.count() == 1);
+    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+
+    QVERIFY(data->getFiles().count() >= 1);
+    
+    QJsonObject fileInfo = data->getFiles().at(0).fileInformation();
+    QCOMPARE(fileInfo.value("FileName").toString(), QFileInfo(Test8OutputFile).fileName());
+
+    auto outputBuffer = data->getFiles().at(0).buffer();
+    outputBuffer->open(QIODevice::ReadOnly);
+    QCOMPARE(QString(outputBuffer->readAll()), QString());
+    outputBuffer->close();
+
+    data->deleteLater();
+    archive->deleteLater();
+}
+
 void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, const QString& file) {
     auto scode = QArchive::errorCodeToString(code);
     scode.prepend(("error::" + file) + ":: ");

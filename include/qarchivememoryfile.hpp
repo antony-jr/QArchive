@@ -15,7 +15,8 @@ class QARCHIVE_EXPORT MemoryFile {
     ~MemoryFile() = default;
 
     [[gnu::warn_unused_result]] QJsonObject fileInformation() const;
-    [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> buffer() const;
+    QBuffer *buffer() const;  
+    [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> sharedBuffer() const;
   private:
     QJsonObject m_FileInformation;
     std::shared_ptr<QBuffer> m_Buffer;

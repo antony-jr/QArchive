@@ -7,6 +7,8 @@
 namespace QArchive {
 class IOReaderPrivate {
   public:
+    ~IOReaderPrivate();
+
     void setBlockSize(int);
     void setIODevice(QIODevice*);
 
@@ -18,7 +20,6 @@ class IOReaderPrivate {
     qint64 seek(qint64, /*whence=*/int);
     qint64 skip(qint64);
   private:
-    qint64 n_FilePointerPos = 0;
     int n_BlockSize = 10204; /* Default. */
     QIODevice *m_IODevice = nullptr;
 };

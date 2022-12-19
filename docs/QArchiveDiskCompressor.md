@@ -366,6 +366,8 @@ the **second** is the number of files **that are compressed** , the **third** is
 stagged for compression, the **fourth** is the number of bytes processed and the **last one** is the total number of bytes
 required for this compression.
 
+> The total bytes might be zero if you are compressing empty files, so please mind that.
+
 
 ---
 
