@@ -681,9 +681,8 @@ short CompressorPrivate::compress() {
                 return ArchiveWriteOpenError;
             }
         } else {
-            if(archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
-                                         static_cast<QIODevice*>(m_Buffer.get())) != ARCHIVE_OK) {
-
+            if (archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
+                                          m_Buffer.get()) != ARCHIVE_OK) {
                 m_ArchiveWrite.clear();
                 emit error(ArchiveWriteOpenError, QString());
                 return ArchiveWriteOpenError;

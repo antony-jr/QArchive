@@ -652,7 +652,7 @@ short ExtractorPrivate::openArchive() {
         }
 
         b_QIODeviceOwned = true;
-        m_Archive = static_cast<QIODevice*>(file);
+        m_Archive = file;
     } else {
         /// Open the archive if it's not opened.
         if(!m_Archive->isOpen() && !m_Archive->open(QIODevice::ReadOnly)) {

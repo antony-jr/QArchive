@@ -97,7 +97,7 @@ static int archive_close_cb(struct archive *, void *data) {
 // to read the data from QIODevice.
 static la_ssize_t archive_read_cb(struct archive *, void *data, const void **buffer) {
     auto p = static_cast<ClientData_t*>(data);
-    *buffer = static_cast<void*>(p->storage);
+    *buffer = p->storage;
     return p->io->read(p->storage);
 }
 
@@ -129,7 +129,7 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
     archive_read_set_read_callback(archive, archive_read_cb);
     archive_read_set_seek_callback(archive, archive_seek_cb);
     archive_read_set_close_callback(archive, archive_close_cb);
-    archive_read_set_callback_data(archive, static_cast<void*>(p));
+    archive_read_set_callback_data(archive, p);
     return archive_read_open1(archive);
 }
 /* ---- */
@@ -167,22 +167,15 @@ static la_ssize_t archive_write_cb(struct archive *, void *data, const void *buf
 // stuff for a libarchive struct to use QIODevice to write.
 int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device) {
 #if ARCHIVE_VERSION_NUMBER < 3005000
-    return archive_write_open(archive,
-                              static_cast<void*>(device),
-                              archive_w_open_cb,
-                              archive_write_cb,
-                              archive_w_close_cb);
+    return archive_write_open(archive, device, archive_w_open_cb,
+                              archive_write_cb, archive_w_close_cb);
 #else
 /// Should not delete the client data because it's our QIODevice
 /// buffer.
-    return archive_write_open2(archive,
-                               static_cast<void*>(device),
-                               archive_w_open_cb,
-                               archive_write_cb,
-                               archive_w_close_cb,
-    [](struct archive*, void*) {
-        return ARCHIVE_OK;
-    });
+    return archive_write_open2(
+        archive, device, archive_w_open_cb, archive_write_cb,
+        archive_w_close_cb,
+        [](struct archive *, void *) { return ARCHIVE_OK; });
 #endif
 }
 /* ---- */
