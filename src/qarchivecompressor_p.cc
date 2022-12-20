@@ -229,69 +229,27 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
 }
 
 void CompressorPrivate::removeFiles(const QString &entry) {
-    if(b_Started || b_Paused) {
+    if(b_Started || b_Paused)
         return;
-    }
-    int index = 0;
-    for(const auto& file : m_StaggedFiles) {
-        if(file && file->entry == entry) {
-            m_StaggedFiles.remove(index);
-            return;
-        }
-        ++index;
-    }
+
+    auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && f->entry == entry; });
+    if (it != m_StaggedFiles.end())
+        m_StaggedFiles.remove(std::distance(m_StaggedFiles.begin(), it));
 }
 
 void CompressorPrivate::removeFiles(const QStringList &entries) {
-    if(b_Started || b_Paused) {
+    if(b_Started || b_Paused)
         return;
-    }
-    QVector<int> indexes;
-    int index = 0;
-    for(const auto& file : m_StaggedFiles) {
-        if(file && entries.contains(file->entry)) {
-            indexes.append(index);
-            return;
-        }
-        ++index;
-    }
 
-    for(const int &i : indexes) {
-        m_StaggedFiles.remove(i);
-    }
+    std::for_each(entries.begin(), entries.end(), [this](const QString& e){ removeFiles(e); });
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QString &entryName, const QString &) {
-    if(b_Started || b_Paused) {
-        return;
-    }
-    int index = 0;
-    for(const auto& f : m_StaggedFiles) {
-        if(f && f->entry == entryName) {
-            m_StaggedFiles.remove(index);
-            return;
-        }
-        ++index;
-    }
+    removeFiles(entryName);
 }
 
 Q_DECL_DEPRECATED void CompressorPrivate::removeFiles(const QStringList &entryNames, const QStringList &) {
-    if(b_Started || b_Paused) {
-        return;
-    }
-    QVector<int> indexes;
-    int index = 0;
-    for(const auto &file : m_StaggedFiles) {
-        if(file && entryNames.contains(file->entry)) {
-            indexes.append(index);
-            return;
-        }
-        ++index;
-    }
-
-    for(const int &i : indexes) {
-        m_StaggedFiles.remove(i);
-    }
+    removeFiles(entryNames);
 }
 
 /* clears internal cache. */
