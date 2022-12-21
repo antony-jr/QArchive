@@ -54,9 +54,11 @@ Returns file information as QJsonObject. The QJsonObject has the below format w.
 
 Returns a QBuffer pointer. This QBuffer is closed by default. You can read or write by opening this buffer. **Do not try to free this pointer. This pointer will be freed automatically when this class is destructed.**
 
+> This is obsolete since v2.2.4 in favor of sharedBuffer()
+
 ### std::shared_ptr\<QBuffer\> sharedBuffer() const
 
 Returns a std::shared_ptr QBuffer. This QBuffer is closed by default. You can read or write by opening this buffer.
 
-> Only available in the master branch, this is recommended since, you can do whatever with the shared pointer. Even if you free it,
-> the pointer will take care of itself.
+> Only available in v2.2.4 or later, this is recommended since, you can do whatever with the shared pointer. 
+> Even if you free it, he pointer will take care of itself.
