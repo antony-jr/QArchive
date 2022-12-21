@@ -106,7 +106,6 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
         roundedSize = 0;
     } else if(roundedSize < 1024) {
         sizeUnits = "Bytes";
-        roundedSize = roundedSize;
     } else if(roundedSize >= 1024 && roundedSize < 1048576) {
         sizeUnits = "KiB";
         roundedSize /= 1024;
