@@ -411,30 +411,20 @@ bool CompressorPrivate::guessArchiveFormat() {
     }
 
     auto ext = QFileInfo(m_TemporaryFile->fileName()).suffix().toLower();
-    if(ext == "bz") {
-        m_ArchiveFormat = BZipFormat;
-    } else if(ext == "bz2") {
-        m_ArchiveFormat = BZip2Format;
-    } else if(ext == "gz") {
-        m_ArchiveFormat = GZipFormat;
-    } else if(ext == "xz") {
-        m_ArchiveFormat = XzFormat;
-    } else if(ext == "tar") {
-        m_ArchiveFormat = TarFormat;
-    } else if(ext == "xar") {
-        m_ArchiveFormat = XarFormat;
-    } else if(ext == "zip") {
-        m_ArchiveFormat = ZipFormat;
-    } else if(ext == "7z") {
-        m_ArchiveFormat = SevenZipFormat;
-    } else if(ext == "zstd") {
-        m_ArchiveFormat = ZstdFormat;
-    } else {
-        m_ArchiveFormat = 0;
-        return false;
-    }
+    m_ArchiveFormat = [ext] {
+      if (ext == "bz") return BZipFormat;
+      if (ext == "bz2") return BZip2Format;
+      if (ext == "gz") return GZipFormat;
+      if (ext == "xz") return XzFormat;
+      if (ext == "tar") return TarFormat;
+      if (ext == "xar") return XarFormat;
+      if (ext == "zip") return ZipFormat;
+      if (ext == "7z") return SevenZipFormat;
+      if (ext == "zstd") return ZstdFormat;
+      return formats(0);
+    }();
 
-    return true;
+    return m_ArchiveFormat != 0;
 }
 
 // Confirms all the files that are stagged for compression , Returns true

@@ -18,7 +18,7 @@ namespace QArchive {
 class CompressorPrivate : public QObject {
     Q_OBJECT
   public:
-    CompressorPrivate(bool memoryMode = false);
+    explicit CompressorPrivate(bool memoryMode = false);
     ~CompressorPrivate() override;
     CompressorPrivate(const CompressorPrivate&) = delete;
     CompressorPrivate& operator=(const CompressorPrivate&) = delete;

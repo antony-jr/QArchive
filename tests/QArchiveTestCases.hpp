@@ -88,6 +88,7 @@ class QArchiveTestCases {
 	    TestCase8OutputDir,
 	    Test8OutputFile,
             TemporaryFilePath;
+  protected:
     const QString Test1OutputContents = "TEST1SUCCESS!";
     const QString Test2OutputContents = "TEST2SUCCESS!";
     const QString Test3Output1Contents = "TEST3SUCCESS1!";

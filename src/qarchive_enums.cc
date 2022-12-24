@@ -4,95 +4,65 @@
 using namespace QArchive;
 
 QString QArchive::errorCodeToString(short errorCode) {
-    QString errorString;
     switch(errorCode) {
     case NoError:
-        errorString = QString("QArchive::NoError");
-        break;
+        return "QArchive::NoError";
     case NotEnoughMemory:
-        errorString = QString("QArchive::NotEnoughMemory");
-        break;
+        return "QArchive::NotEnoughMemory";
     case NoPermissionToWrite:
-        errorString = QString("QArchive::NoPermissionToWrite");
-        break;
+        return "QArchive::NoPermissionToWrite";
     case ArchiveNotGiven:
-        errorString = QString("QArchive::ArchiveNotGiven");
-        break;
+        return "QArchive::ArchiveNotGiven";
     case ArchiveDoesNotExists:
-        errorString = QString("QArchive::ArchiveDoesNotExists");
-        break;
+        return "QArchive::ArchiveDoesNotExists";
     case ArchiveReadError:
-        errorString = QString("QArchive::ArchiveReadError");
-        break;
+        return "QArchive::ArchiveReadError";
     case ArchiveWriteError:
-        errorString = QString("QArchive::ArchiveWriteError");
-        break;
+        return "QArchive::ArchiveWriteError";
     case ArchiveHeaderWriteError:
-        errorString = QString("QArchive::ArchiveHeaderWriteError");
-        break;
+        return "QArchive::ArchiveHeaderWriteError";
     case ArchiveCorrupted:
-        errorString = QString("QArchive::ArchiveCorrupted");
-        break;
+        return "QArchive::ArchiveCorrupted";
     case ArchiveIsNotReadable:
-        errorString = QString("QArchive::ArchiveIsNotReadable");
-        break;
+        return "QArchive::ArchiveIsNotReadable";
     case ArchiveIsNotOpened:
-        errorString = QString("QArchive::ArchiveIsNotOpened");
-        break;
+        return "QArchive::ArchiveIsNotOpened";
     case ArchivePasswordNeeded:
-        errorString = QString("QArchive::ArchivePasswordNeeded");
-        break;
+        return "QArchive::ArchivePasswordNeeded";
     case ArchivePasswordIncorrect:
-        errorString = QString("QArchive::ArchivePasswordIncorrect");
-        break;
+        return "QArchive::ArchivePasswordIncorrect";
     case CannotOpenArchive:
-        errorString = QString("QArchive::CannotOpenArchive");
-        break;
+        return "QArchive::CannotOpenArchive";
     case NoPermissionToReadArchive:
-        errorString = QString("QArchive::NoPermissionToReadArchive");
-        break;
+        return "QArchive::NoPermissionToReadArchive";
     case InvalidOutputDirectory:
-        errorString = QString("QArchive::InvalidOutputDirectory");
-        break;
+        return "QArchive::InvalidOutputDirectory";
     case InvalidArchiveFile:
-        errorString = QString("QArchive::InvalidArchiveFile");
-        break;
+        return "QArchive::InvalidArchiveFile";
     case ArchiveFileNameNotGiven:
-        errorString = QString("QArchive::ArchiveFileNameNotGiven");
-        break;
+        return "QArchive::ArchiveFileNameNotGiven";
     case ArchiveFileAlreadyExists:
-        errorString = QString("QArchive::ArchiveFileAlreadyExists");
-        break;
+        return "QArchive::ArchiveFileAlreadyExists";
     case ArchiveWriteOpenError:
-        errorString = QString("QArchive::ArchiveWriteOpenError");
-        break;
+        return "QArchive::ArchiveWriteOpenError";
     case ArchiveFatalError:
-        errorString = QString("QArchive::ArchiveFatalError");
-        break;
+        return "QArchive::ArchiveFatalError";
     case FileDoesNotExist:
-        errorString = QString("QArchive::FileDoesNotExist");
-        break;
+        return "QArchive::FileDoesNotExist";
     case DiskReadError:
-        errorString = QString("QArchive::DiskReadError");
-        break;
+        return "QArchive::DiskReadError";
     case DiskOpenError:
-        errorString = QString("QArchive::DiskOpenError");
-        break;
+        return "QArchive::DiskOpenError";
     case NoPermissionToReadFile:
-        errorString = QString("QArchive::NoPermissionToReadFile");
-        break;
+        return "QArchive::NoPermissionToReadFile";
     case NoFilesToCompress:
-        errorString = QString("QArchive::NoFilesToCompress");
-        break;
+        return "QArchive::NoFilesToCompress";
     case CannotOpenFile:
-        errorString = QString("QArchive::CannotOpenFile");
-        break;
+        return "QArchive::CannotOpenFile";
     case IODeviceSequential:
-        errorString = QString("QArchive::IODeviceSequential");
-        break;
+        return "QArchive::IODeviceSequential";
     default:
-        errorString = QString("QArchive::UnknownError");
-        break;
+        return "QArchive::UnknownError";
     }
-    return errorString;
+    return "";
 }

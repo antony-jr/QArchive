@@ -67,7 +67,7 @@ enum : short {
  * These codes are used to represent Archive formats in form
  * of a short integer.
 */
-enum : short {
+enum formats : short {
     TarFormat = 200,
     ZipFormat,
     SevenZipFormat,

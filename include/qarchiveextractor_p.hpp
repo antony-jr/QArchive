@@ -35,7 +35,7 @@ class MutableMemoryFile {
 class ExtractorPrivate : public QObject {
     Q_OBJECT
   public:
-    ExtractorPrivate(bool memoryMode = false);
+    explicit ExtractorPrivate(bool memoryMode = false);
     ~ExtractorPrivate() override;
     ExtractorPrivate(const ExtractorPrivate&) = delete;
     ExtractorPrivate& operator=(const ExtractorPrivate&) = delete;
