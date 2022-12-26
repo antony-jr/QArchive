@@ -1,7 +1,7 @@
-#include <qarchiveutils_p.hpp>
-#include <qarchiveioreader_p.hpp>
-#include <QString>
 #include <QIODevice>
+#include <QString>
+#include <qarchiveioreader_p.hpp>
+#include <qarchiveutils_p.hpp>
 
 extern "C" {
 #include <archive.h>
@@ -10,8 +10,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 }
 
 // Support older libarchive versions where la_ssize_t is not defined yet

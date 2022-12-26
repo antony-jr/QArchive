@@ -1,14 +1,14 @@
 #ifndef TEST_RUNNER_HPP_INCLUDED
 #define TEST_RUNNER_HPP_INCLUDED
-#include <QObject>
-#include <QTemporaryDir>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QObject>
+#include <QTemporaryDir>
 
-#include "QArchiveDiskExtractorTests.hpp"
 #include "QArchiveDiskCompressorTests.hpp"
-#include "QArchiveMemoryExtractorTests.hpp"
+#include "QArchiveDiskExtractorTests.hpp"
 #include "QArchiveMemoryCompressorTests.hpp"
+#include "QArchiveMemoryExtractorTests.hpp"
 
 class TestRunner : public QObject {
     Q_OBJECT

@@ -2,8 +2,8 @@
 #include <QDateTime>
 #include <QFileInfo>
 
-#include "qarchiveextractor_p.hpp"
 #include "qarchive_enums.hpp"
+#include "qarchiveextractor_p.hpp"
 
 extern "C" {
 #include <archive.h>
@@ -12,8 +12,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 }
 
 // Helpful macros to check if an archive error is caused due to

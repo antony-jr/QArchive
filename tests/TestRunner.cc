@@ -1,8 +1,8 @@
-#include <TestRunner.hpp>
-#include <QMetaObject>
 #include <QMetaMethod>
-#include <QtConcurrentRun>
+#include <QMetaObject>
 #include <QTest>
+#include <QtConcurrentRun>
+#include <TestRunner.hpp>
 
 TestRunner::TestRunner() {
     m_CompressorTests.reset(new QArchiveDiskCompressorTests(&m_TempDir));
