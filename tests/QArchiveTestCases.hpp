@@ -7,12 +7,13 @@
  * Abstract class to hold the test case information.
 */
 class QArchiveTestCases {
-  public:
+public:
     /*
       * Test Input file paths and other
       * static informations required for the unit test.
      */
-    QArchiveTestCases(QTemporaryDir *dir) {
+    explicit QArchiveTestCases(QTemporaryDir* dir)
+    {
         if (!dir || dir->path().isEmpty()) {
             return;
         }
@@ -57,35 +58,36 @@ class QArchiveTestCases {
 
     ~QArchiveTestCases() = default;
 
-    QString TestCasesDir,
-            TestOutputDir,
-            TestCase1ArchivePath,
-            TestCase1OutputDir,
-            Test1OutputFile,
-            TestCase2ArchivePath,
-            TestCase2OutputDir,
-            Test2OutputFile,
-            TestCase3ArchivePath,
-            TestCase3OutputDir,
-            Test3OutputFile1,
-            Test3OutputFile2,
-            TestCase4ArchivePath,
-            TestCase4OutputDir,
-            Test4OutputFile,
-            TestCase5ArchivePath,
-            TestCase5OutputDir,
-            Test5OutputFile,
-            TestCase6ArchivePath,
-            TestCase6OutputDir,
-            Test6OutputFile,
-            TestCase7ArchivePath,
-            TestCase7OutputDir,
-            Test7OutputFile,
-	    TestCase8ArchivePath,
-	    TestCase8OutputDir,
-	    Test8OutputFile,
-            TemporaryFilePath;
-  protected:
+    QString TestCasesDir;
+    QString TestOutputDir;
+    QString TestCase1ArchivePath;
+    QString TestCase1OutputDir;
+    QString Test1OutputFile;
+    QString TestCase2ArchivePath;
+    QString TestCase2OutputDir;
+    QString Test2OutputFile;
+    QString TestCase3ArchivePath;
+    QString TestCase3OutputDir;
+    QString Test3OutputFile1;
+    QString Test3OutputFile2;
+    QString TestCase4ArchivePath;
+    QString TestCase4OutputDir;
+    QString Test4OutputFile;
+    QString TestCase5ArchivePath;
+    QString TestCase5OutputDir;
+    QString Test5OutputFile;
+    QString TestCase6ArchivePath;
+    QString TestCase6OutputDir;
+    QString Test6OutputFile;
+    QString TestCase7ArchivePath;
+    QString TestCase7OutputDir;
+    QString Test7OutputFile;
+    QString TestCase8ArchivePath;
+    QString TestCase8OutputDir;
+    QString Test8OutputFile;
+    QString TemporaryFilePath;
+
+protected:
     const QString Test1OutputContents = "TEST1SUCCESS!";
     const QString Test2OutputContents = "TEST2SUCCESS!";
     const QString Test3Output1Contents = "TEST3SUCCESS1!";

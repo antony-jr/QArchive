@@ -18,7 +18,7 @@ class QARCHIVE_EXPORT Compressor : public QObject {
     Q_OBJECT
 public:
     Q_DISABLE_COPY(Compressor)
-    Compressor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
+    explicit Compressor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
     ~Compressor() override;
 public Q_SLOTS:
     void setFileName(const QString&);

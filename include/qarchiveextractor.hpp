@@ -18,7 +18,7 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     Q_OBJECT
 public:
     Q_DISABLE_COPY(Extractor)
-    Extractor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
+    explicit Extractor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
     ~Extractor() override;
 public Q_SLOTS:
     void setArchive(QIODevice*);
