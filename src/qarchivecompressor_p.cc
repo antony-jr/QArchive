@@ -291,13 +291,16 @@ void CompressorPrivate::clear() {
 void CompressorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
-    } else if(!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
+    }
+    if (!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
         emit error(ArchiveFileNameNotGiven, QString());
         return;
-    } else if(!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
+    }
+    if (!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
         emit error(ArchiveFileAlreadyExists, m_TemporaryFile->fileName());
         return;
-    } else if(m_StaggedFiles.isEmpty()) {
+    }
+    if (m_StaggedFiles.isEmpty()) {
         if(b_MemoryMode) {
             emit error(NoFilesToCompress, QString());
         } else {

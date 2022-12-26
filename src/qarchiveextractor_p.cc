@@ -606,7 +606,8 @@ void ExtractorPrivate::cancel() {
 short ExtractorPrivate::openArchive() {
     if(m_ArchivePath.isEmpty() && !m_Archive) {
         return ArchiveNotGiven;
-    } else if(b_ArchiveOpened) {
+    }
+    if (b_ArchiveOpened) {
         return NoError;
     }
     // Check and Open the given archive.
@@ -620,7 +621,8 @@ short ExtractorPrivate::openArchive() {
         // Check if the file exists.
         if(!info.exists()) {
             return ArchiveDoesNotExists;
-        } else if(!info.isFile()) { // Check if its really a file.
+        }
+        if (!info.isFile()) { // Check if its really a file.
             return InvalidArchiveFile;
         }
 
@@ -732,7 +734,8 @@ short ExtractorPrivate::extract() {
             err = writeData(m_CurrentArchiveEntry);
             if(err == OperationPaused) {
                 return err;
-            } else if(err) { // NoError = 0
+            }
+            if (err) { // NoError = 0
                 m_ArchiveRead.clear();
                 m_ArchiveWrite.clear();
                 return err;
@@ -776,7 +779,8 @@ short ExtractorPrivate::extract() {
         err = writeData(entry);
         if(err == OperationPaused) {
             return err;
-        } else if(err) { // NoError = 0
+        }
+        if (err) { // NoError = 0
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
             return err;
@@ -867,7 +871,8 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
             ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
             if (ret == ARCHIVE_EOF) {
                 break;
-            } else if (ret != ARCHIVE_OK) {
+            }
+            if (ret != ARCHIVE_OK) {
                 short err = ArchiveCorrupted;
                 if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
                     err = ArchivePasswordNeeded;
@@ -875,18 +880,18 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                     err = ArchivePasswordIncorrect;
                 }
                 return err;
-            } else {
-                if(!b_MemoryMode) {
-                    ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
-                    if (ret != ARCHIVE_OK) {
-                        return ArchiveWriteError;
-                    }
-                } else {
-                    (currentNode.getBuffer())->seek(offset);
-                    if((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
-                        return ArchiveWriteError;
-                    }
+            }
+            if (!b_MemoryMode) {
+                ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
+                if (ret != ARCHIVE_OK) {
+                    return ArchiveWriteError;
                 }
+            } else {
+                (currentNode.getBuffer())->seek(offset);
+                if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
+                    return ArchiveWriteError;
+                }
+            }
                 n_BytesProcessed += size;
                 if(n_BytesTotal > 0 && n_TotalEntries > 0) {
                     emit progress(QString(archive_entry_pathname(entry)),
@@ -894,8 +899,6 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                                   n_TotalEntries,
                                   n_BytesProcessed, n_BytesTotal);
                 }
-
-            }
 
             // Allow the execution of the event loop
             QCoreApplication::processEvents();
@@ -905,11 +908,11 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                 b_PauseRequested = false;
                 m_CurrentArchiveEntry = entry;
                 return OperationPaused;
-            } else if(b_CancelRequested) {
+            }
+            if (b_CancelRequested) {
                 b_CancelRequested = false;
                 return OperationCanceled;
             }
-
         }
     } else {
         return ArchiveHeaderWriteError;

@@ -13,13 +13,9 @@ class QArchiveTestCases {
       * static informations required for the unit test.
      */
     QArchiveTestCases(QTemporaryDir *dir) {
-        if(!dir) {
+        if (!dir || dir->path().isEmpty())
             return;
-        } else {
-            if((dir->path()).isEmpty()) {
-                return;
-            }
-        }
+
         TemporaryFilePath = dir->path() + "/TemporaryFile.txt";
         TestCasesDir = dir->path() + "/";
         TestOutputDir = dir->path() + "/";
