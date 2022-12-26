@@ -55,31 +55,35 @@ class ArchiveFilter {
     }
 
     short addIncludePattern(const QString& pattern) {
-        if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+        if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK) {
             return ApplyPatternFailed;
+        }
         return NoError;
     }
 
     short addIncludePatterns(const QStringList& includePatterns) {
         for (const auto& pattern : includePatterns) {
             auto ret = addIncludePattern(pattern);
-            if (ret != NoError)
+            if (ret != NoError) {
                 return ret;
+            }
         }
         return NoError;
     }
 
     short addExcludePattern(const QString& pattern) {
-        if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+        if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK) {
             return ApplyPatternFailed;
+        }
         return NoError;
     }
 
     short addExcludePatterns(const QStringList& excludePatterns) {
         for (const auto& pattern : excludePatterns) {
             auto ret = addExcludePattern(pattern);
-            if (ret != NoError)
+            if (ret != NoError) {
                 return ret;
+            }
         }
         return NoError;
     }
@@ -318,8 +322,9 @@ void ExtractorPrivate::addIncludePattern(const QString &pattern) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePattern(pattern);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
@@ -327,8 +332,9 @@ void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePatterns(patterns);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addExcludePattern(const QString &pattern) {
@@ -336,8 +342,9 @@ void ExtractorPrivate::addExcludePattern(const QString &pattern) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePattern(pattern);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
@@ -345,8 +352,9 @@ void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePatterns(patterns);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::setBasePath(const QString& path) {
@@ -825,8 +833,9 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
 
     if(b_hasBasePath) {
         const auto& relativePath = m_basePath.relativeFilePath(QString::fromLatin1("/") + archive_entry_pathname(entry)).toStdWString();
-        if (relativePath == L".") // Root directory
+        if (relativePath == L".") { // Root directory
             return NoError;
+        }
         archive_entry_copy_pathname_w(entry, relativePath.c_str());
     }
     if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {

@@ -229,17 +229,20 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
 }
 
 void CompressorPrivate::removeFiles(const QString &entry) {
-    if(b_Started || b_Paused)
+    if (b_Started || b_Paused) {
         return;
+    }
 
     auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && f->entry == entry; });
-    if (it != m_StaggedFiles.end())
+    if (it != m_StaggedFiles.end()) {
         m_StaggedFiles.erase(it);
+    }
 }
 
 void CompressorPrivate::removeFiles(const QStringList &entries) {
-    if(b_Started || b_Paused)
+    if (b_Started || b_Paused) {
         return;
+    }
 
     std::for_each(entries.begin(), entries.end(), [this](const QString& e){ removeFiles(e); });
 }
@@ -415,16 +418,34 @@ bool CompressorPrivate::guessArchiveFormat() {
 
     auto ext = QFileInfo(m_TemporaryFile->fileName()).suffix().toLower();
     m_ArchiveFormat = [ext] {
-      if (ext == "bz") return BZipFormat;
-      if (ext == "bz2") return BZip2Format;
-      if (ext == "gz") return GZipFormat;
-      if (ext == "xz") return XzFormat;
-      if (ext == "tar") return TarFormat;
-      if (ext == "xar") return XarFormat;
-      if (ext == "zip") return ZipFormat;
-      if (ext == "7z") return SevenZipFormat;
-      if (ext == "zstd") return ZstdFormat;
-      return formats(0);
+        if (ext == "bz") {
+            return BZipFormat;
+        }
+        if (ext == "bz2") {
+            return BZip2Format;
+        }
+        if (ext == "gz") {
+            return GZipFormat;
+        }
+        if (ext == "xz") {
+            return XzFormat;
+        }
+        if (ext == "tar") {
+            return TarFormat;
+        }
+        if (ext == "xar") {
+            return XarFormat;
+        }
+        if (ext == "zip") {
+            return ZipFormat;
+        }
+        if (ext == "7z") {
+            return SevenZipFormat;
+        }
+        if (ext == "zstd") {
+            return ZstdFormat;
+        }
+        return formats(0);
     }();
 
     return m_ArchiveFormat != 0;
