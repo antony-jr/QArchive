@@ -1,15 +1,15 @@
 #ifndef QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
 #define QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
-#include <QIODevice>
 #include <QBuffer>
-#include <QObject>
-#include <QString>
-#include <QVector>
-#include <QEventLoop>
-#include <QStringList>
-#include <QSharedPointer>
-#include <QJsonObject>
 #include <QDir>
+#include <QEventLoop>
+#include <QIODevice>
+#include <QJsonObject>
+#include <QObject>
+#include <QSharedPointer>
+#include <QString>
+#include <QStringList>
+#include <QVector>
 
 #include <memory>
 
@@ -21,25 +21,25 @@ namespace QArchive {
 class ArchiveFilter;
 
 class MutableMemoryFile {
-  public:
+public:
     void setFileInformation(const QJsonObject&);
     void setBuffer(QBuffer*);
 
     [[gnu::warn_unused_result]] QJsonObject getFileInformation() const;
     [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> getBuffer() const;
-  private:
+
+private:
     QJsonObject m_FileInformation;
     std::shared_ptr<QBuffer> m_Buffer;
 };
 
 class ExtractorPrivate : public QObject {
     Q_OBJECT
-  public:
+public:
+    Q_DISABLE_COPY(ExtractorPrivate)
     explicit ExtractorPrivate(bool memoryMode = false);
     ~ExtractorPrivate() override;
-    ExtractorPrivate(const ExtractorPrivate&) = delete;
-    ExtractorPrivate& operator=(const ExtractorPrivate&) = delete;
-  public Q_SLOTS:
+public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setBlockSize(int);
@@ -62,14 +62,14 @@ class ExtractorPrivate : public QObject {
     void pause();
     void resume();
 
-  private Q_SLOTS:
+private Q_SLOTS:
     short openArchive();
     short checkOutputDirectory();
     short getTotalEntriesCount();
     short processArchiveInformation();
     short writeData(struct archive_entry*);
     short extract();
-  Q_SIGNALS:
+Q_SIGNALS:
     void started();
     void canceled();
     void paused();
@@ -81,33 +81,34 @@ class ExtractorPrivate : public QObject {
     void progress(QString, int, int, qint64, qint64);
     void getInfoRequirePassword(int);
     void extractionRequirePassword(int);
-  private:
-    bool b_MemoryMode = false,
-         b_ProcessingArchive = false,
-         b_StartRequested = false;
 
-    bool b_PauseRequested = false,
-         b_CancelRequested = false,
-         b_Paused = false,
-         b_Started = false,
-         b_Finished = false,
-         b_NoProgress = true,
-         b_ArchiveOpened = false,
-         b_QIODeviceOwned = false; // If set, free m_Archive on clear()
-    int n_PasswordTriedCountGetInfo = 0,
-        n_PasswordTriedCountExtract = 0,
-        n_ProcessedEntries = 0,
-        n_TotalEntries = -1,
-        n_BlockSize = 10240,
-        n_Flags = 0;
-    qint64 n_BytesProcessed = 0,
-           n_BytesTotal = 0;
+private:
+    bool b_MemoryMode = false;
+    bool b_ProcessingArchive = false;
+    bool b_StartRequested = false;
 
-    QString m_OutputDirectory,
-            m_Password,
-            m_ArchivePath;
-    QIODevice *m_Archive = nullptr;
-    archive_entry *m_CurrentArchiveEntry = nullptr;
+    bool b_PauseRequested = false;
+    bool b_CancelRequested = false;
+    bool b_Paused = false;
+    bool b_Started = false;
+    bool b_Finished = false;
+    bool b_NoProgress = true;
+    bool b_ArchiveOpened = false;
+    bool b_QIODeviceOwned = false; // If set, free m_Archive on clear()
+    int n_PasswordTriedCountGetInfo = 0;
+    int n_PasswordTriedCountExtract = 0;
+    int n_ProcessedEntries = 0;
+    int n_TotalEntries = -1;
+    int n_BlockSize = 10240;
+    int n_Flags = 0;
+    qint64 n_BytesProcessed = 0;
+    qint64 n_BytesTotal = 0;
+
+    QString m_OutputDirectory;
+    QString m_Password;
+    QString m_ArchivePath;
+    QIODevice* m_Archive = nullptr;
+    archive_entry* m_CurrentArchiveEntry = nullptr;
     MutableMemoryFile m_CurrentMemoryFile;
     QSharedPointer<struct archive> m_ArchiveRead;
     QSharedPointer<struct archive> m_ArchiveWrite;
@@ -118,5 +119,5 @@ class ExtractorPrivate : public QObject {
     bool b_hasBasePath = false;
     QDir m_basePath;
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_PRIVATE_HPP_INCLUDED
