@@ -56,9 +56,9 @@ void QArchiveMemoryCompressorTests::usingPauseResume() {
     QBuffer inputBuffer(&array);
     compressor.addFiles(QFileInfo(Test2OutputFile).fileName(), &inputBuffer);
 
-    bool startedEmitted = false,
-         pausedEmitted = false,
-         resumedEmitted = false;
+    bool startedEmitted = false;
+    bool pausedEmitted = false;
+    bool resumedEmitted = false;
     QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
                      this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
     QObject::connect(&compressor, &QArchive::MemoryCompressor::started, [&]() {

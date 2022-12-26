@@ -55,9 +55,9 @@ void QArchiveDiskCompressorTests::usingPauseResume() {
 
     e.addFiles(QFileInfo(Test2OutputFile).fileName(), TemporaryFilePath);
 
-    bool startedEmitted = false,
-         pausedEmitted = false,
-         resumedEmitted = false;
+    bool startedEmitted = false;
+    bool pausedEmitted = false;
+    bool resumedEmitted = false;
     QObject::connect(&e, &QArchive::DiskCompressor::error,
                      this, &QArchiveDiskCompressorTests::defaultErrorHandler);
     QObject::connect(&e, &QArchive::DiskCompressor::started, [&]() {

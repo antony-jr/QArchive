@@ -45,9 +45,9 @@ void QArchiveMemoryExtractorTests::simpleExtraction() {
 
 void QArchiveMemoryExtractorTests::usingPauseResume() {
     QArchive::MemoryExtractor e(TestCase2ArchivePath);
-    bool startedEmitted = false,
-         pausedEmitted = false,
-         resumedEmitted = false;
+    bool startedEmitted = false;
+    bool pausedEmitted = false;
+    bool resumedEmitted = false;
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
     QObject::connect(&e, &QArchive::MemoryExtractor::started, [&]() {
