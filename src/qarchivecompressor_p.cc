@@ -531,7 +531,7 @@ bool CompressorPrivate::confirmFiles() {
     // value will segfault.
     // Let's now check if we atleast have some files to actually
     // compress.
-    return m_ConfirmedFiles.size() != 0;
+    return !m_ConfirmedFiles.empty();
 }
 
 // Does the compression and also resumes it if called twice.
