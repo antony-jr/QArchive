@@ -152,7 +152,7 @@ void QArchiveDiskExtractorTests::testInvalidArchivePath() {
 
 void QArchiveDiskExtractorTests::runningExtractorNonSingleThreaded() {
     QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir,
-                              /*parent=*/nullptr, /*singleThread=*/false);
+        /*parent=*/nullptr, /*singleThreaded=*/false);
     QObject::connect(&e, &QArchive::DiskExtractor::error,
                      this, &QArchiveDiskExtractorTests::defaultErrorHandler);
     QSignalSpy spyInfo(&e, SIGNAL(finished()));

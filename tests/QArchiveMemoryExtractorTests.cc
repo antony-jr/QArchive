@@ -193,7 +193,7 @@ void QArchiveMemoryExtractorTests::testInvalidArchivePath() {
 
 void QArchiveMemoryExtractorTests::runningExtractorNonSingleThreaded() {
     QArchive::MemoryExtractor e(TestCase1ArchivePath,
-                                /*parent=*/nullptr, /*singleThread=*/false);
+        /*parent=*/nullptr, /*singleThreaded=*/false);
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
     QSignalSpy spyInfo(&e, &QArchive::MemoryExtractor::finished);
