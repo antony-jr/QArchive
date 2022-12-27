@@ -53,6 +53,8 @@ class ExtractorPrivate : public QObject {
     void addExcludePattern(const QString&);
     void addExcludePattern(const QStringList&);
     void setBasePath(const QString&);
+    void setRawMode(bool);
+    void setRawOutputFilename(const QString&);
     void clear();
 
     void getInfo();
@@ -69,6 +71,7 @@ class ExtractorPrivate : public QObject {
     short processArchiveInformation();
     short writeData(struct archive_entry*);
     short extract();
+    void toggleArchiveFormat(struct archive*);
   Q_SIGNALS:
     void started();
     void canceled();
@@ -83,6 +86,7 @@ class ExtractorPrivate : public QObject {
     void extractionRequirePassword(int);
   private:
     bool b_MemoryMode = false,
+         b_RawMode = false,
          b_ProcessingArchive = false,
          b_StartRequested = false;
 
@@ -105,7 +109,8 @@ class ExtractorPrivate : public QObject {
 
     QString m_OutputDirectory,
             m_Password,
-            m_ArchivePath;
+            m_ArchivePath,
+            m_RawOutputFilename;
     QIODevice *m_Archive = nullptr;
     archive_entry *m_CurrentArchiveEntry = nullptr;
     MutableMemoryFile m_CurrentMemoryFile;
