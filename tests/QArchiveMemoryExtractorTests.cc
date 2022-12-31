@@ -76,11 +76,11 @@ void QArchiveMemoryExtractorTests::usingPauseResume() {
 
     /* Verify output and contents. */
     QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() >= 1);
+    QVERIFY(!output.empty());
 
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto buffer = data->getFiles().at(0).buffer();
 
     buffer->open(QIODevice::ReadOnly);
@@ -111,7 +111,7 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 
     /// Test3OUtputFile1 should not exists
-    QVERIFY(data->getFiles().count() == 1);
+    QVERIFY(data->getFiles().empty());
     QVERIFY(
         data->getFiles()
         .at(0)

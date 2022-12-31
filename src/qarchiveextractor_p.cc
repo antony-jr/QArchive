@@ -933,11 +933,9 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
             return ArchiveHeaderWriteError;
         }
     } else {
-        (currentNode.getBuffer())->close();
-        m_ExtractedFiles->append(
-            MemoryFile(
-                currentNode.getFileInformation(),
-                currentNode.getBuffer()));
+        currentNode.getBuffer()->close();
+        auto mfile = MemoryFile(currentNode.getFileInformation(), currentNode.getBuffer());
+        m_ExtractedFiles->push_back(std::move(mfile));
         m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;

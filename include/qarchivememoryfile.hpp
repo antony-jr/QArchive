@@ -9,18 +9,19 @@
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryFile {
-  public:
+public:
     MemoryFile(QJsonObject, std::shared_ptr<QBuffer>);
     MemoryFile() = default;
     ~MemoryFile() = default;
 
     [[gnu::warn_unused_result]] QJsonObject fileInformation() const;
-    QBuffer *buffer() const;
+    QBuffer* buffer() const;
     [[gnu::warn_unused_result]] std::shared_ptr<QBuffer> sharedBuffer() const;
-  private:
+
+private:
     QJsonObject m_FileInformation;
     std::shared_ptr<QBuffer> m_Buffer;
 };
-}  // namespace QArchive
+} // namespace QArchive
 
 #endif // QARCHIVE_MEMORY_FILE_HPP_INCLUDED

@@ -37,7 +37,7 @@ void QArchiveMemoryCompressorTests::simpleCompression() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -105,7 +105,7 @@ void QArchiveMemoryCompressorTests::usingPauseResume() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -159,7 +159,7 @@ void QArchiveMemoryCompressorTests::compressingMultipleFiles() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 2);
+    QVERIFY(data->getFiles().size() >= 2);
     auto outputBuffer1 = data->getFiles().at(0).buffer();
     auto outputBuffer2 = data->getFiles().at(1).buffer();
 
@@ -214,7 +214,7 @@ void QArchiveMemoryCompressorTests::encryptingZipArchive() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -260,7 +260,7 @@ void QArchiveMemoryCompressorTests::runningCompressorNonSingleThreaded() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -305,7 +305,7 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithoutFilters() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -350,7 +350,7 @@ void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto outputBuffer = data->getFiles().at(0).buffer();
 
     outputBuffer->open(QIODevice::ReadOnly);
@@ -394,7 +394,7 @@ void QArchiveMemoryCompressorTests::compressEmptyFiles() {
     QVERIFY(extractorOutput.count() == 1);
     auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
 
     QJsonObject fileInfo = data->getFiles().at(0).fileInformation();
     QCOMPARE(fileInfo.value("FileName").toString(), QFileInfo(Test8OutputFile).fileName());
