@@ -54,11 +54,7 @@ void ArchiveEntryDestructor(struct archive_entry *e) {
 // Private data structure which holds a QIODevice along with its buffer size
 // to read at a time.
 // This structure will be used as the client data for the archive callbacks.
-struct ClientData_t {
-    char *storage = nullptr;
-    QArchive::IOReaderPrivate *io = nullptr;
-};
-
+using ClientData_t = std::pair<char*, QArchive::IOReaderPrivate*>;
 
 // This callback will be called on archive open.
 // This callback is simply used to avoid segmentation fault when
@@ -70,10 +66,7 @@ static int archive_open_cb(struct archive *, void *data) {
         // any further.
         return ARCHIVE_FATAL;
     }
-    if(!p->io->isOpen() ||
-            !p->io->isReadable() ||
-            !(p->storage) ||
-            p->io->isSequential()) {
+    if (!p->second->isOpen() || !p->second->isReadable() || !(p->first) || p->second->isSequential()) {
         return ARCHIVE_FATAL;
     }
     return ARCHIVE_OK;
@@ -84,10 +77,10 @@ static int archive_close_cb(struct archive *, void *data) {
     // its a private object inside some other class.
     // It will be managed automatically later.
     auto p = static_cast<ClientData_t*>(data);
-    if(p->storage) { // free any data that has been allocated.
-        free(p->storage);
+    if (p->first) { // free any data that has been allocated.
+        free(p->first);
     }
-    delete (p->io); //  Delete IOReaderPrivate.
+    delete (p->second); //  Delete IOReaderPrivate.
     free(p); // free the client data allocated on creation.
     return ARCHIVE_OK;
 }
@@ -97,8 +90,8 @@ static int archive_close_cb(struct archive *, void *data) {
 // to read the data from QIODevice.
 static la_ssize_t archive_read_cb(struct archive *, void *data, const void **buffer) {
     auto p = static_cast<ClientData_t*>(data);
-    *buffer = p->storage;
-    return p->io->read(p->storage);
+    *buffer = p->first;
+    return p->second->read(p->first);
 }
 
 // This is the most important callback function required for libarchive to work with
@@ -109,7 +102,7 @@ static la_ssize_t archive_read_cb(struct archive *, void *data, const void **buf
 // Without this function you cannot extract 7zip archives.
 static int64_t archive_seek_cb(struct archive *, void *data, int64_t request, int whence) {
     auto p = static_cast<ClientData_t*>(data);
-    return static_cast<int64_t>(p->io->seek(request, whence));
+    return static_cast<int64_t>(p->second->seek(request, whence));
 }
 
 // This is a custom functions which sets up the callbacks and other
@@ -118,12 +111,10 @@ int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *
     // This client data will be freed on close ,
     // we don't need to worry about this.
     auto p = static_cast<ClientData_t*>(calloc(1, sizeof(ClientData_t)));
-    p->io = new QArchive::IOReaderPrivate;
-    p->io->setIODevice(device);
-    p->io->setBlockSize(blocksize);
-    p->storage = static_cast<char*>(calloc(1, (blocksize < 1024) ?
-                                           sizeof(*(p->storage)) * 10204 :
-                                           sizeof(*(p->storage)) * blocksize));
+    p->second = new QArchive::IOReaderPrivate;
+    p->second->setIODevice(device);
+    p->second->setBlockSize(blocksize);
+    p->first = static_cast<char*>(calloc(1, (blocksize < 1024) ? sizeof(*(p->first)) * 10204 : sizeof(*(p->first)) * blocksize));
 
     archive_read_set_open_callback(archive, archive_open_cb);
     archive_read_set_read_callback(archive, archive_read_cb);
