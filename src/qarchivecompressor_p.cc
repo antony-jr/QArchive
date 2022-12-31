@@ -234,7 +234,7 @@ void CompressorPrivate::removeFiles(const QString &entry) {
 
     auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && f->entry == entry; });
     if (it != m_StaggedFiles.end())
-        m_StaggedFiles.remove(std::distance(m_StaggedFiles.begin(), it));
+        m_StaggedFiles.erase(it);
 }
 
 void CompressorPrivate::removeFiles(const QStringList &entries) {
