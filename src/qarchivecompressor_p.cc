@@ -676,8 +676,8 @@ short CompressorPrivate::compress() {
             // Note:
             // Down below implementation is nearly good but
             // not very robust and thus needs a good implementation.
-            auto disk = QSharedPointer<struct archive>(
-                            archive_read_disk_new(), ArchiveReadDestructor);
+            QSharedPointer<struct archive> disk(
+                archive_read_disk_new(), ArchiveReadDestructor);
             archive_read_disk_set_standard_lookup(disk.data());
 
             r = archive_read_disk_open(disk.data(),
@@ -689,8 +689,8 @@ short CompressorPrivate::compress() {
             }
 
             for (;;) {
-                auto entry = QSharedPointer<struct archive_entry>(
-                                 archive_entry_new(), ArchiveEntryDestructor);
+                QSharedPointer<struct archive_entry> entry(
+                    archive_entry_new(), ArchiveEntryDestructor);
                 r = archive_read_next_header2(disk.data(), entry.data());
 
                 if (r == ARCHIVE_EOF) {
@@ -711,7 +711,7 @@ short CompressorPrivate::compress() {
                     return ArchiveFatalError;
                 }
                 if (r > ARCHIVE_FAILED) {
-                    auto&& file = QFile(node->path);
+                    QFile file(node->path);
                     if(!file.open(QIODevice::ReadOnly)) {
                         emit error(DiskOpenError, node->path);
                         return DiskOpenError;
@@ -737,9 +737,9 @@ short CompressorPrivate::compress() {
                 QCoreApplication::processEvents();
             }
         } else {
-            auto entry = QSharedPointer<struct archive_entry>(
-                             archive_entry_new(),
-                             ArchiveEntryDestructor);
+            QSharedPointer<struct archive_entry> entry(
+                archive_entry_new(),
+                ArchiveEntryDestructor);
 
             // Setup archive entry.
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))

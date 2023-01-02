@@ -100,7 +100,7 @@ class ArchiveFilter {
 
 static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
     QJsonObject CurrentEntry;
-    auto CurrentFile = QString(archive_entry_pathname(entry));
+    QString CurrentFile(archive_entry_pathname(entry));
 
     qint64 size = archive_entry_size(entry);
     qint64 roundedSize = size;
@@ -934,7 +934,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         }
     } else {
         currentNode.getBuffer()->close();
-        auto mfile = MemoryFile(currentNode.getFileInformation(), currentNode.getBuffer());
+        MemoryFile mfile(currentNode.getFileInformation(), currentNode.getBuffer());
         m_ExtractedFiles->push_back(std::move(mfile));
         m_CurrentMemoryFile = MutableMemoryFile();
     }
@@ -1038,7 +1038,7 @@ short ExtractorPrivate::processArchiveInformation() {
             archive_read_free(inArchive);
             return err;
         }
-        auto CurrentFile = QString(archive_entry_pathname(entry));
+        QString CurrentFile(archive_entry_pathname(entry));
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
         m_Info.insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);
