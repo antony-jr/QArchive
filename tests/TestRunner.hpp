@@ -12,21 +12,22 @@
 
 class TestRunner : public QObject {
     Q_OBJECT
-  public:
+public:
     TestRunner();
-  public Q_SLOTS:
+public Q_SLOTS:
     void start();
-  private Q_SLOTS:
+private Q_SLOTS:
     void runTests();
-  Q_SIGNALS:
+Q_SIGNALS:
     void finished();
-  private:
+
+private:
     QTemporaryDir m_TempDir;
     QFuture<void> m_Future;
     QFutureWatcher<void> m_FutureWatcher;
-    std::unique_ptr<QArchiveDiskCompressorTests> m_CompressorTests;
-    std::unique_ptr<QArchiveMemoryCompressorTests> m_MemoryCompressorTests;
-    std::unique_ptr<QArchiveDiskExtractorTests> m_ExtractorTests;
-    std::unique_ptr<QArchiveMemoryExtractorTests> m_MemoryExtractorTests;
+    QArchiveDiskCompressorTests m_CompressorTests;
+    QArchiveMemoryCompressorTests m_MemoryCompressorTests;
+    QArchiveDiskExtractorTests m_ExtractorTests;
+    QArchiveMemoryExtractorTests m_MemoryExtractorTests;
 };
 #endif
