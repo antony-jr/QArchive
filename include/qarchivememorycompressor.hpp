@@ -1,7 +1,7 @@
 #ifndef QARCHIVE_MEMORY_COMPRESSOR_HPP_INCLUDED
 #define QARCHIVE_MEMORY_COMPRESSOR_HPP_INCLUDED
-#include <QObject>
 #include <QBuffer>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QThread>
@@ -12,11 +12,11 @@
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryCompressor : public Compressor {
     Q_OBJECT
-  public:
-    MemoryCompressor(QObject *parent = nullptr, bool singleThreaded = true);
-    MemoryCompressor(short, QObject *parent = nullptr, bool singleThreaded = true);
-  Q_SIGNALS:
+public:
+    explicit MemoryCompressor(QObject* parent = nullptr, bool singleThreaded = true);
+    explicit MemoryCompressor(short, QObject* parent = nullptr, bool singleThreaded = true);
+Q_SIGNALS:
     void finished(QBuffer*);
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_MEMORY_COMPRESSOR_HPP_INCLUDED

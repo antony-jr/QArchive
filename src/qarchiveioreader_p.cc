@@ -49,8 +49,9 @@ qint64 IOReaderPrivate::read(char *buffer) {
 }
 
 qint64 IOReaderPrivate::seek(qint64 offset, int whence) {
-    if(!m_IODevice)
+    if (!m_IODevice) {
         return -1;
+    }
 
     auto value = offset;
 

@@ -5,13 +5,13 @@
 #else
 # include <QArchive/QArchive>
 #endif
-#include <QTest>
-#include <QFileInfo>
-#include <QTimer>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonObject>
 #include <QSignalSpy>
 #include <QTemporaryDir>
+#include <QTest>
+#include <QTimer>
 
 #include "QArchiveTestCases.hpp"
 

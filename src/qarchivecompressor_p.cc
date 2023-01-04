@@ -16,8 +16,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 }
 
 using namespace QArchive;
@@ -138,7 +138,7 @@ void CompressorPrivate::addFiles(const QString &entryName, QIODevice *device) {
     auto node = new Node;
     node->entry = entryName;
     node->io = device;
-    m_StaggedFiles.append(node);
+    m_StaggedFiles.push_back(node);
 }
 
 void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList &devices) {
@@ -154,7 +154,7 @@ void CompressorPrivate::addFiles(const QStringList &entries, const QVariantList 
         auto node = new Node;
         node->entry = entries.at(i);
         node->io = devices.at(i).value<QIODevice*>();
-        m_StaggedFiles.append(node);
+        m_StaggedFiles.push_back(node);
     }
 }
 
@@ -171,7 +171,7 @@ void CompressorPrivate::addFiles(const QString &file) {
     auto node = new Node;
     node->path = file;
     node->entry = info.fileName();
-    m_StaggedFiles.append(node);
+    m_StaggedFiles.push_back(node);
 }
 
 void CompressorPrivate::addFiles(const QStringList &files) {
@@ -187,7 +187,7 @@ void CompressorPrivate::addFiles(const QStringList &files) {
         auto node = new Node;
         node->path = file;
         node->entry = info.fileName();
-        m_StaggedFiles.append(node);
+        m_StaggedFiles.push_back(node);
     }
 }
 
@@ -204,7 +204,7 @@ void CompressorPrivate::addFiles(const QString &entryName, const QString &file) 
     auto node = new Node;
     node->path = file;
     node->entry = entryName;
-    m_StaggedFiles.append(node);
+    m_StaggedFiles.push_back(node);
 }
 
 // Adds multiple files and uses a corresponding list of
@@ -224,22 +224,25 @@ void CompressorPrivate::addFiles(const QStringList &entryNames, const QStringLis
         auto node = new Node;
         node->path = files.at(i);
         node->entry = entryNames.at(i);
-        m_StaggedFiles.append(node);
+        m_StaggedFiles.push_back(node);
     }
 }
 
 void CompressorPrivate::removeFiles(const QString &entry) {
-    if(b_Started || b_Paused)
+    if (b_Started || b_Paused) {
         return;
+    }
 
     auto it = std::find_if(m_StaggedFiles.begin(), m_StaggedFiles.end(), [&](const Node* f){ return f && f->entry == entry; });
-    if (it != m_StaggedFiles.end())
+    if (it != m_StaggedFiles.end()) {
         m_StaggedFiles.erase(it);
+    }
 }
 
 void CompressorPrivate::removeFiles(const QStringList &entries) {
-    if(b_Started || b_Paused)
+    if (b_Started || b_Paused) {
         return;
+    }
 
     std::for_each(entries.begin(), entries.end(), [this](const QString& e){ removeFiles(e); });
 }
@@ -291,13 +294,16 @@ void CompressorPrivate::clear() {
 void CompressorPrivate::start() {
     if(b_Started || b_Paused) {
         return;
-    } else if(!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
+    }
+    if (!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
         emit error(ArchiveFileNameNotGiven, QString());
         return;
-    } else if(!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
+    }
+    if (!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
         emit error(ArchiveFileAlreadyExists, m_TemporaryFile->fileName());
         return;
-    } else if(m_StaggedFiles.isEmpty()) {
+    }
+    if (m_StaggedFiles.empty()) {
         if(b_MemoryMode) {
             emit error(NoFilesToCompress, QString());
         } else {
@@ -412,16 +418,34 @@ bool CompressorPrivate::guessArchiveFormat() {
 
     auto ext = QFileInfo(m_TemporaryFile->fileName()).suffix().toLower();
     m_ArchiveFormat = [ext] {
-      if (ext == "bz") return BZipFormat;
-      if (ext == "bz2") return BZip2Format;
-      if (ext == "gz") return GZipFormat;
-      if (ext == "xz") return XzFormat;
-      if (ext == "tar") return TarFormat;
-      if (ext == "xar") return XarFormat;
-      if (ext == "zip") return ZipFormat;
-      if (ext == "7z") return SevenZipFormat;
-      if (ext == "zstd") return ZstdFormat;
-      return formats(0);
+        if (ext == "bz") {
+            return BZipFormat;
+        }
+        if (ext == "bz2") {
+            return BZip2Format;
+        }
+        if (ext == "gz") {
+            return GZipFormat;
+        }
+        if (ext == "xz") {
+            return XzFormat;
+        }
+        if (ext == "tar") {
+            return TarFormat;
+        }
+        if (ext == "xar") {
+            return XarFormat;
+        }
+        if (ext == "zip") {
+            return ZipFormat;
+        }
+        if (ext == "7z") {
+            return SevenZipFormat;
+        }
+        if (ext == "zstd") {
+            return ZstdFormat;
+        }
+        return formats(0);
     }();
 
     return m_ArchiveFormat != 0;
@@ -470,14 +494,14 @@ bool CompressorPrivate::confirmFiles() {
             if(info.isDir()) {
                 QVector<QString> dirList;
                 QString toReplace = info.filePath();
-                dirList.append(info.filePath());
+                dirList.push_back(info.filePath());
 
                 while(!dirList.isEmpty()) {
                     QDir dir(dirList.takeFirst());
                     QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
                     for (const auto &i : list) {
                         if(i.isDir()) {
-                            dirList.append(i.filePath());
+                            dirList.push_back(i.filePath());
                             continue;
                         }
                         QString file = i.filePath();
@@ -486,16 +510,14 @@ bool CompressorPrivate::confirmFiles() {
                         fileNode->valid = node->valid;
                         fileNode->path = file;
 
-                        if(toReplace[toReplace.size() - 1] == '/' ||
-                                toReplace[toReplace.size() - 1] == '\\') {
-                            if((node->entry)[(node->entry).size() - 1] != '/' &&
-                                    (node->entry)[(node->entry).size() - 1] != '\\') {
-                                (node->entry).append('/');
+                        if (toReplace.back() == '/' || toReplace.back() == '\\') {
+                            if (node->entry.back() != '/' && node->entry.back() != '\\') {
+                                node->entry.append('/');
                             }
                         }
                         fileNode->entry = file.replace(toReplace, node->entry);
 
-                        m_ConfirmedFiles.append(fileNode);
+                        m_ConfirmedFiles.push_back(fileNode);
 
                         n_BytesTotal += QFileInfo(i.filePath()).size();
                     }
@@ -506,7 +528,7 @@ bool CompressorPrivate::confirmFiles() {
                 fileNode->valid = node->valid;
                 fileNode->path = info.filePath();
                 fileNode->entry = node->entry;
-                m_ConfirmedFiles.append(fileNode);
+                m_ConfirmedFiles.push_back(fileNode);
                 n_BytesTotal += info.size();
             }
         } else { // If QIODevice given
@@ -515,7 +537,7 @@ bool CompressorPrivate::confirmFiles() {
             fileNode->valid = node->valid;
             fileNode->io = node->io;
             fileNode->entry = node->entry;
-            m_ConfirmedFiles.append(fileNode);
+            m_ConfirmedFiles.push_back(fileNode);
             n_BytesTotal += node->io->size();
         }
     }
@@ -528,7 +550,7 @@ bool CompressorPrivate::confirmFiles() {
     // value will segfault.
     // Let's now check if we atleast have some files to actually
     // compress.
-    return m_ConfirmedFiles.size() != 0;
+    return !m_ConfirmedFiles.empty();
 }
 
 // Does the compression and also resumes it if called twice.
@@ -641,8 +663,8 @@ short CompressorPrivate::compress() {
     }
 
     // Start compressing files.
-    while(!m_ConfirmedFiles.isEmpty()) {
-        auto node = m_ConfirmedFiles.first();
+    while (!m_ConfirmedFiles.empty()) {
+        auto node = m_ConfirmedFiles.front();
         int r;
         std::size_t len;
         char buff[16384];
@@ -654,8 +676,8 @@ short CompressorPrivate::compress() {
             // Note:
             // Down below implementation is nearly good but
             // not very robust and thus needs a good implementation.
-            auto disk = QSharedPointer<struct archive>(
-                            archive_read_disk_new(), ArchiveReadDestructor);
+            QSharedPointer<struct archive> disk(
+                archive_read_disk_new(), ArchiveReadDestructor);
             archive_read_disk_set_standard_lookup(disk.data());
 
             r = archive_read_disk_open(disk.data(),
@@ -667,8 +689,8 @@ short CompressorPrivate::compress() {
             }
 
             for (;;) {
-                auto entry = QSharedPointer<struct archive_entry>(
-                                 archive_entry_new(), ArchiveEntryDestructor);
+                QSharedPointer<struct archive_entry> entry(
+                    archive_entry_new(), ArchiveEntryDestructor);
                 r = archive_read_next_header2(disk.data(), entry.data());
 
                 if (r == ARCHIVE_EOF) {
@@ -689,7 +711,7 @@ short CompressorPrivate::compress() {
                     return ArchiveFatalError;
                 }
                 if (r > ARCHIVE_FAILED) {
-                    auto&& file = QFile(node->path);
+                    QFile file(node->path);
                     if(!file.open(QIODevice::ReadOnly)) {
                         emit error(DiskOpenError, node->path);
                         return DiskOpenError;
@@ -715,9 +737,9 @@ short CompressorPrivate::compress() {
                 QCoreApplication::processEvents();
             }
         } else {
-            auto entry = QSharedPointer<struct archive_entry>(
-                             archive_entry_new(),
-                             ArchiveEntryDestructor);
+            QSharedPointer<struct archive_entry> entry(
+                archive_entry_new(),
+                ArchiveEntryDestructor);
 
             // Setup archive entry.
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
