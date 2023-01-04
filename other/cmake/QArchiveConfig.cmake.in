@@ -5,7 +5,7 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 find_dependency(Qt@QARCHIVE_QT_VERSION_MAJOR@ COMPONENTS Core)
 
 if (APPLE)
-   set(PKG_CONFIG_EXECUTABLE pkg-config --define-prefix @LIBARCHIVE_PKG_CONFIG@)
+   set(ENV{PKG_CONFIG_PATH} @LIBARCHIVE_PKG_CONFIG@)
    find_package(PkgConfig QUIET)
    if(PKG_CONFIG_FOUND)
       pkg_check_modules(LIBARCHIVE QUIET libarchive IMPORTED_TARGET)

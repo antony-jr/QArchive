@@ -33,10 +33,10 @@ option(QARCHIVE_STATIC "Static Build of QArchive" ON)
 # the libarchive installed in system by default.
 # 
 # Usage:
-#  cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc
+#  cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/
 # ---
 if(APPLE AND LIBARCHIVE_PKG_CONFIG)
-   set(PKG_CONFIG_EXECUTABLE pkg-config --define-prefix "${LIBARCHIVE_PKG_CONFIG}")
+   set(ENV{PKG_CONFIG_PATH} "${LIBARCHIVE_PKG_CONFIG}")
    find_package(PkgConfig REQUIRED)
    pkg_check_modules(LIBARCHIVE REQUIRED libarchive IMPORTED_TARGET)
    if(NOT LIBARCHIVE_FOUND)
