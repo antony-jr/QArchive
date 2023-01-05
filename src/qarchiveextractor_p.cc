@@ -823,8 +823,8 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         return ArchiveNotGiven;
     }
 
-    if ((!m_ExtractFilters.empty() && !m_ExtractFilters.contains(QString(archive_entry_pathname(entry))))
-        || (m_archiveFilter->isEntryExcluded(entry))) {
+    if (!(m_ExtractFilters.empty() || m_ExtractFilters.contains(archive_entry_pathname(entry)))
+        || m_archiveFilter->isEntryExcluded(entry)) {
         n_BytesProcessed += archive_entry_size(entry);
         return NoError;
     }
