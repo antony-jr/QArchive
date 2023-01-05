@@ -1,7 +1,7 @@
 #include <QArchiveDiskCompressorTests.hpp>
 
 void QArchiveDiskCompressorTests::initTestCase() {
-    if(TestCasesDir.isEmpty()) {
+    if (TestCasesDir.isEmpty()) {
         QFAIL("Temporary directory failed to construct.");
     }
     QDir dir;
@@ -221,7 +221,7 @@ void QArchiveDiskCompressorTests::compressEmptyFiles() {
                      this, &QArchiveDiskCompressorTests::defaultErrorHandler);
    QSignalSpy spyInfo(&e, SIGNAL(finished()));
    e.start();
-   
+
    /*  Must emit exactly one signal. */
    QVERIFY(spyInfo.wait() || spyInfo.count());
 

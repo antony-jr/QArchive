@@ -29,11 +29,11 @@ short CompressorPrivate::Node::open() {
         return NoError;
     }
 
-    if(path.isEmpty() && (io == nullptr && entry.isEmpty())) {
+    if (path.isEmpty() && (!io && entry.isEmpty())) {
         return FileDoesNotExist;
     }
 
-    if(path.isEmpty() && io) {
+    if (path.isEmpty() && io) {
         isInMemory = true;
         if(!io->isOpen() &&
                 !io->open(QIODevice::ReadOnly)) {
@@ -47,7 +47,6 @@ short CompressorPrivate::Node::open() {
         if(io->isSequential()) {
             return IODeviceSequential;
         }
-
     }
 
     valid = true;
@@ -412,7 +411,7 @@ bool CompressorPrivate::guessArchiveFormat() {
         return false;
     }
 
-    if(m_TemporaryFile->fileName().isEmpty()) {
+    if (m_TemporaryFile->fileName().isEmpty()) {
         return false;
     }
 
@@ -496,7 +495,7 @@ bool CompressorPrivate::confirmFiles() {
                 QString toReplace = info.filePath();
                 dirList.push_back(info.filePath());
 
-                while(!dirList.isEmpty()) {
+                while (!dirList.empty()) {
                     QDir dir(dirList.takeFirst());
                     QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
                     for (const auto &i : list) {
@@ -512,7 +511,7 @@ bool CompressorPrivate::confirmFiles() {
 
                         if (toReplace.back() == '/' || toReplace.back() == '\\') {
                             if (node->entry.back() != '/' && node->entry.back() != '\\') {
-                                node->entry.append('/');
+                                node->entry.push_back('/');
                             }
                         }
                         fileNode->entry = file.replace(toReplace, node->entry);
@@ -632,7 +631,7 @@ short CompressorPrivate::compress() {
         // ability to use passwords and thus until the user uses Zip format , the
         // password even if given is ignored.
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-        if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
+        if (!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
             archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());
             archive_write_set_options(m_ArchiveWrite.data(), "zip:encryption=traditional");
         }
@@ -783,7 +782,7 @@ short CompressorPrivate::compress() {
             }
         }
 
-        m_ConfirmedFiles.removeFirst();
+        m_ConfirmedFiles.pop_front();
 
         emit progress(node->entry,
                       (n_TotalEntries - m_ConfirmedFiles.size()),
