@@ -692,14 +692,14 @@ short ExtractorPrivate::checkOutputDirectory() {
 }
 
 short ExtractorPrivate::extract() {
-    if(m_Archive == nullptr) {
+    if (!m_Archive) {
         return ArchiveNotGiven;
     }
     int ret = 0;
     short err = NoError;
     archive_entry *entry = nullptr;
 
-    if(m_ArchiveRead.isNull() && (b_MemoryMode || m_ArchiveWrite.isNull())) {
+    if (!m_ArchiveRead && (b_MemoryMode || !m_ArchiveWrite)) {
         n_ProcessedEntries = 0;
         n_BytesProcessed = 0;
 
@@ -735,7 +735,6 @@ short ExtractorPrivate::extract() {
             m_ArchiveWrite.clear();
             return ArchiveWriteError;
         }
-
     }
     for (;;) {
         if(m_CurrentArchiveEntry) {
@@ -820,7 +819,7 @@ short ExtractorPrivate::extract() {
 }
 
 short ExtractorPrivate::writeData(struct archive_entry *entry) {
-    if(m_ArchiveRead.isNull() || (!b_MemoryMode && m_ArchiveWrite.isNull()) || m_Archive == nullptr) {
+    if (!m_ArchiveRead || (!b_MemoryMode && !m_ArchiveWrite) || !m_Archive) {
         return ArchiveNotGiven;
     }
 
@@ -1007,7 +1006,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
 }
 
 short ExtractorPrivate::processArchiveInformation() {
-    if(m_Archive == nullptr) {
+    if (!m_Archive) {
         return ArchiveNotGiven;
     }
 

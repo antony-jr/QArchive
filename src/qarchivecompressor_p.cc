@@ -554,7 +554,7 @@ bool CompressorPrivate::confirmFiles() {
 
 // Does the compression and also resumes it if called twice.
 short CompressorPrivate::compress() {
-    if(m_ArchiveWrite.isNull()) {
+    if (!m_ArchiveWrite) {
         /// Open Temporary file for write.
         if(!b_MemoryMode && !m_TemporaryFile->open(QIODevice::WriteOnly)) {
             emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
@@ -563,7 +563,7 @@ short CompressorPrivate::compress() {
 
         m_ArchiveWrite = QSharedPointer<struct archive>(
                              archive_write_new(), ArchiveWriteDestructor);
-        if(m_ArchiveWrite.isNull()) {
+        if (!m_ArchiveWrite) {
             if(b_MemoryMode) {
                 emit error(NotEnoughMemory, QString());
             } else {
