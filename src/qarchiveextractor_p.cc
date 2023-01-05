@@ -743,17 +743,16 @@ short ExtractorPrivate::extract() {
 
             // Report final progress signal after extracting the file fully.
             if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
-                              n_ProcessedEntries,
-                              n_TotalEntries,
-                              n_BytesProcessed, n_BytesTotal);
+                emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
+                    n_ProcessedEntries,
+                    n_TotalEntries,
+                    n_BytesProcessed, n_BytesTotal);
             } else {
-                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
-                              1,
-                              1,
-                              1,
-                              1);
-
+                emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
+                    1,
+                    1,
+                    1,
+                    1);
             }
 
             archive_entry_clear(m_CurrentArchiveEntry);
@@ -788,17 +787,16 @@ short ExtractorPrivate::extract() {
 
         // Report final progress signal after extracting the file fully.
         if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-            emit progress(QString(archive_entry_pathname(entry)),
-                          n_ProcessedEntries,
-                          n_TotalEntries,
-                          n_BytesProcessed, n_BytesTotal);
+            emit progress(archive_entry_pathname(entry),
+                n_ProcessedEntries,
+                n_TotalEntries,
+                n_BytesProcessed, n_BytesTotal);
         } else {
-            emit progress(QString(archive_entry_pathname(entry)),
-                          1,
-                          1,
-                          1,
-                          1);
-
+            emit progress(archive_entry_pathname(entry),
+                1,
+                1,
+                1,
+                1);
         }
         archive_entry_clear(entry);
         QCoreApplication::processEvents(); // call event loop for the signal to take effect.
@@ -901,7 +899,7 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         }
         n_BytesProcessed += size;
         if (n_BytesTotal > 0 && n_TotalEntries > 0) {
-            emit progress(QString(archive_entry_pathname(entry)),
+            emit progress(archive_entry_pathname(entry),
                 n_ProcessedEntries,
                 n_TotalEntries,
                 n_BytesProcessed, n_BytesTotal);
