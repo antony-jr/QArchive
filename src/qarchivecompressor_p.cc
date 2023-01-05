@@ -765,22 +765,21 @@ short CompressorPrivate::compress() {
                 return ArchiveFatalError;
             }
 
-            if (r > ARCHIVE_FAILED) {
-                len = (node->io)->read(buff, sizeof(buff));
-                while (len > 0) {
-                    archive_write_data(m_ArchiveWrite.data(), buff, len);
-                    n_BytesProcessed += len;
-
-                    emit progress(node->entry,
-                                  (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
-                                  n_TotalEntries, n_BytesProcessed, n_BytesTotal);
-
-                    QCoreApplication::processEvents();
-                    len = (node->io)->read(buff, sizeof(buff));
-                }
-            } else {
+            if (r <= ARCHIVE_FAILED) {
                 emit error(ArchiveHeaderWriteError, node->entry);
                 return ArchiveHeaderWriteError;
+            }
+            len = (node->io)->read(buff, sizeof(buff));
+            while (len > 0) {
+                archive_write_data(m_ArchiveWrite.data(), buff, len);
+                n_BytesProcessed += len;
+
+                emit progress(node->entry,
+                    (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
+                    n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+
+                QCoreApplication::processEvents();
+                len = (node->io)->read(buff, sizeof(buff));
             }
         }
 

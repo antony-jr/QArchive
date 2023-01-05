@@ -872,63 +872,64 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
     } else {
         currentNode = m_CurrentMemoryFile;
     }
-    if (ret == ARCHIVE_OK) {
-        const void *buff;
-        size_t size;
+    if (ret != ARCHIVE_OK) {
+        return ArchiveHeaderWriteError;
+    }
+    const void* buff;
+    size_t size;
 #if ARCHIVE_VERSION_NUMBER >= 3000000
-        int64_t offset;
+    int64_t offset;
 #else
-        off_t offset;
+    off_t offset;
 #endif
-        for (;;) {
-            ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
-            if (ret == ARCHIVE_EOF) {
-                break;
+    for (;;) {
+        ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
+        if (ret == ARCHIVE_EOF) {
+            break;
+        }
+
+        if (ret != ARCHIVE_OK) {
+            short err = ArchiveCorrupted;
+            if (PASSWORD_NEEDED(m_ArchiveRead.data())) {
+                err = ArchivePasswordNeeded;
+            } else if (PASSWORD_INCORRECT(m_ArchiveRead.data())) {
+                err = ArchivePasswordIncorrect;
             }
+            return err;
+        }
+
+        if (!b_MemoryMode) {
+            ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
             if (ret != ARCHIVE_OK) {
-                short err = ArchiveCorrupted;
-                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
-                    err = ArchivePasswordNeeded;
-                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {
-                    err = ArchivePasswordIncorrect;
-                }
-                return err;
+                return ArchiveWriteError;
             }
-            if (!b_MemoryMode) {
-                ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
-                if (ret != ARCHIVE_OK) {
-                    return ArchiveWriteError;
-                }
-            } else {
-                (currentNode.getBuffer())->seek(offset);
-                if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
-                    return ArchiveWriteError;
-                }
-            }
-                n_BytesProcessed += size;
-                if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-                    emit progress(QString(archive_entry_pathname(entry)),
-                                  n_ProcessedEntries,
-                                  n_TotalEntries,
-                                  n_BytesProcessed, n_BytesTotal);
-                }
-
-            // Allow the execution of the event loop
-            QCoreApplication::processEvents();
-
-            // Check for pause and cancel requests.
-            if(b_PauseRequested) {
-                b_PauseRequested = false;
-                m_CurrentArchiveEntry = entry;
-                return OperationPaused;
-            }
-            if (b_CancelRequested) {
-                b_CancelRequested = false;
-                return OperationCanceled;
+        } else {
+            (currentNode.getBuffer())->seek(offset);
+            if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
+                return ArchiveWriteError;
             }
         }
-    } else {
-        return ArchiveHeaderWriteError;
+        n_BytesProcessed += size;
+        if (n_BytesTotal > 0 && n_TotalEntries > 0) {
+            emit progress(QString(archive_entry_pathname(entry)),
+                n_ProcessedEntries,
+                n_TotalEntries,
+                n_BytesProcessed, n_BytesTotal);
+        }
+
+        // Allow the execution of the event loop
+        QCoreApplication::processEvents();
+
+        // Check for pause and cancel requests.
+        if (b_PauseRequested) {
+            b_PauseRequested = false;
+            m_CurrentArchiveEntry = entry;
+            return OperationPaused;
+        }
+        if (b_CancelRequested) {
+            b_CancelRequested = false;
+            return OperationCanceled;
+        }
     }
 
     if(!b_MemoryMode) {
