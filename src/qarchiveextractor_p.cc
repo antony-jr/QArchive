@@ -934,8 +934,12 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         }
     } else {
         currentNode.getBuffer()->close();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         MemoryFile mfile(currentNode.getFileInformation(), currentNode.getBuffer());
         m_ExtractedFiles->push_back(std::move(mfile));
+#else
+        m_ExtractedFiles->emplace_back(currentNode.getFileInformation(), currentNode.getBuffer());
+#endif
         m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;
