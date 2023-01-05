@@ -845,7 +845,11 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
     }
 
     MutableMemoryFile currentNode;
-    int ret = ARCHIVE_OK;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+    qsizetype ret = ARCHIVE_OK;
+#else
+    qptrdiff ret = ARCHIVE_OK;
+#endif
     if(m_CurrentArchiveEntry != entry) {
         if(!b_MemoryMode) {
             ret = archive_write_header(m_ArchiveWrite.data(), entry);
