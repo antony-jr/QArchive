@@ -1,14 +1,14 @@
 #ifndef QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED
 #define QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED
+#include <QBuffer>
+#include <QFile>
 #include <QObject>
+#include <QSaveFile>
+#include <QSharedPointer>
 #include <QString>
 #include <QStringList>
-#include <QFile>
-#include <QBuffer>
-#include <QSaveFile>
 #include <QVariantList>
 #include <QVector>
-#include <QSharedPointer>
 
 #include <memory>
 
@@ -17,12 +17,11 @@
 namespace QArchive {
 class CompressorPrivate : public QObject {
     Q_OBJECT
-  public:
+public:
+    Q_DISABLE_COPY(CompressorPrivate)
     explicit CompressorPrivate(bool memoryMode = false);
     ~CompressorPrivate() override;
-    CompressorPrivate(const CompressorPrivate&) = delete;
-    CompressorPrivate& operator=(const CompressorPrivate&) = delete;
-  public Q_SLOTS:
+public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
     void setPassword(const QString&);
@@ -44,12 +43,12 @@ class CompressorPrivate : public QObject {
     void pause();
     void resume();
 
-  private Q_SLOTS:
+private Q_SLOTS:
     bool guessArchiveFormat();
     bool confirmFiles();
     short compress();
 
-  Q_SIGNALS:
+Q_SIGNALS:
     void progress(QString, int, int, qint64, qint64);
     void error(short, QString);
     void started();
@@ -59,19 +58,20 @@ class CompressorPrivate : public QObject {
     void memoryFinished(QBuffer*);
     void diskFinished();
 
-  public:
+public:
     struct Node {
         short open();
 
-        QString path,entry;
-        QIODevice *io = nullptr;
+        QString path, entry;
+        QIODevice* io = nullptr;
         bool valid = false;
         bool isInMemory = false;
     };
 
-  private:
+private:
     static void freeNodes(QVector<Node*>&);
-  private:
+
+private:
     bool b_MemoryMode = false;
     bool b_PauseRequested = false,
          b_CancelRequested = false,
@@ -91,5 +91,5 @@ class CompressorPrivate : public QObject {
     QVector<Node*> m_ConfirmedFiles;
     QVector<Node*> m_StaggedFiles;
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

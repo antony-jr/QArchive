@@ -1,27 +1,26 @@
 #ifndef QARCHIVE_EXTRACTOR_HPP_INCLUDED
 #define QARCHIVE_EXTRACTOR_HPP_INCLUDED
-#include <QIODevice>
 #include <QBuffer>
-#include <QString>
-#include <QObject>
-#include <QThread>
+#include <QIODevice>
 #include <QJsonObject>
+#include <QObject>
+#include <QString>
+#include <QThread>
 
 #include <memory>
 
-#include "qarchivememoryextractoroutput.hpp"
 #include "qarchive_global.hpp"
+#include "qarchivememoryextractoroutput.hpp"
 
 namespace QArchive {
 class ExtractorPrivate;
 class QARCHIVE_EXPORT Extractor : public QObject {
     Q_OBJECT
-  public:
-    Extractor(bool memoryMode = false, QObject *parent = nullptr, bool singleThreaded = true);
+public:
+    Q_DISABLE_COPY(Extractor)
+    explicit Extractor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
     ~Extractor() override;
-    Extractor(const Extractor&) = delete;
-    Extractor& operator=(const Extractor&) = delete;
-  public Q_SLOTS:
+public Q_SLOTS:
     void setArchive(QIODevice*);
     void setArchive(const QString&);
     void setArchive(const QString&, const QString&);
@@ -47,7 +46,7 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     void pause();
     void resume();
 
-  Q_SIGNALS:
+Q_SIGNALS:
     void started();
     void canceled();
     void paused();
@@ -60,9 +59,9 @@ class QARCHIVE_EXPORT Extractor : public QObject {
     void extractionRequirePassword(int);
     void info(QJsonObject);
 
-  private:
+private:
     std::unique_ptr<ExtractorPrivate> m_Extractor;
     std::unique_ptr<QThread> m_Thread;
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_EXTRACTOR_HPP_INCLUDED

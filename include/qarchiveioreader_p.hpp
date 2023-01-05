@@ -6,8 +6,11 @@
 
 namespace QArchive {
 class IOReaderPrivate {
-  public:
+public:
+    IOReaderPrivate() = default;
     ~IOReaderPrivate();
+
+    Q_DISABLE_COPY(IOReaderPrivate)
 
     void setBlockSize(int);
     void setIODevice(QIODevice*);
@@ -19,10 +22,11 @@ class IOReaderPrivate {
     qint64 read(char*);
     qint64 seek(qint64, /*whence=*/int);
     qint64 skip(qint64);
-  private:
+
+private:
     int n_BlockSize = 10204; /* Default. */
-    QIODevice *m_IODevice = nullptr;
+    QIODevice* m_IODevice = nullptr;
 };
-}  // namespace QArchive
+} // namespace QArchive
 
 #endif // QARCHIVE_IO_READER_PRIVATE_HPP_INCLUDED

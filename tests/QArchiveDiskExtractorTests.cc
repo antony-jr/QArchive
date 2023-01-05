@@ -39,9 +39,9 @@ void QArchiveDiskExtractorTests::simpleExtraction() {
 
 void QArchiveDiskExtractorTests::usingPauseResume() {
     QArchive::DiskExtractor e(TestCase2ArchivePath, TestCase2OutputDir);
-    bool startedEmitted = false,
-         pausedEmitted = false,
-         resumedEmitted = false;
+    bool startedEmitted = false;
+    bool pausedEmitted = false;
+    bool resumedEmitted = false;
     QObject::connect(&e, &QArchive::DiskExtractor::error,
                      this, &QArchiveDiskExtractorTests::defaultErrorHandler);
     QObject::connect(&e, &QArchive::DiskExtractor::started, [&]() {
@@ -152,7 +152,7 @@ void QArchiveDiskExtractorTests::testInvalidArchivePath() {
 
 void QArchiveDiskExtractorTests::runningExtractorNonSingleThreaded() {
     QArchive::DiskExtractor e(TestCase1ArchivePath, TestCase1OutputDir,
-                              /*parent=*/nullptr, /*singleThread=*/false);
+        /*parent=*/nullptr, /*singleThreaded=*/false);
     QObject::connect(&e, &QArchive::DiskExtractor::error,
                      this, &QArchiveDiskExtractorTests::defaultErrorHandler);
     QSignalSpy spyInfo(&e, SIGNAL(finished()));

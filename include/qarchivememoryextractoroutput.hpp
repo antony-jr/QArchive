@@ -5,20 +5,20 @@
 
 #include <memory>
 
-#include "qarchivememoryfile.hpp"
 #include "qarchive_global.hpp"
+#include "qarchivememoryfile.hpp"
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
     using QObject::QObject;
     Q_OBJECT
-  public:
-    MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>, QObject *parent = nullptr);
+public:
+    explicit MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>, QObject* parent = nullptr);
 
-    [[gnu::warn_unused_result]] const QVector<MemoryFile> &getFiles() const;
+    [[gnu::warn_unused_result]] const QVector<MemoryFile>& getFiles() const;
 
-  private:
+private:
     std::unique_ptr<QVector<MemoryFile>> m_Files;
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED

@@ -11,12 +11,12 @@
 namespace QArchive {
 class QARCHIVE_EXPORT DiskCompressor : public Compressor {
     Q_OBJECT
-  public:
-    DiskCompressor(QObject *parent = nullptr, bool singleThreaded = true);
-    DiskCompressor(const QString&, QObject *parent = nullptr,  bool singleThreaded = true);
-    DiskCompressor(const QString&, short, QObject *parent = nullptr, bool singleThreaded = true);
-  Q_SIGNALS:
+public:
+    explicit DiskCompressor(QObject* parent = nullptr, bool singleThreaded = true);
+    explicit DiskCompressor(const QString&, QObject* parent = nullptr, bool singleThreaded = true);
+    DiskCompressor(const QString&, short, QObject* parent = nullptr, bool singleThreaded = true);
+Q_SIGNALS:
     void finished();
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_DISK_COMPRESSOR_HPP_INCLUDED

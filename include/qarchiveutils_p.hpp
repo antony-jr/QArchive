@@ -2,11 +2,11 @@
 #define QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
 
 #ifndef OperationCanceled
-#define OperationCanceled -1
+#define OperationCanceled (-1)
 #endif
 
 #ifndef OperationPaused
-#define OperationPaused -2
+#define OperationPaused (-2)
 #endif
 
 struct archive;

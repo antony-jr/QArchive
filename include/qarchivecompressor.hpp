@@ -1,11 +1,11 @@
 #ifndef QARCHIVE_COMPRESSOR_HPP_INCLUDED
 #define QARCHIVE_COMPRESSOR_HPP_INCLUDED
-#include <QObject>
 #include <QBuffer>
+#include <QObject>
 #include <QString>
-#include <QVariant>
 #include <QStringList>
 #include <QThread>
+#include <QVariant>
 
 #include <memory>
 
@@ -16,12 +16,11 @@ namespace QArchive {
 class CompressorPrivate;
 class QARCHIVE_EXPORT Compressor : public QObject {
     Q_OBJECT
-  public:
-    Compressor(bool memoryMode = false, QObject *parent = nullptr, bool singleThreaded = true);
+public:
+    Q_DISABLE_COPY(Compressor)
+    explicit Compressor(bool memoryMode = false, QObject* parent = nullptr, bool singleThreaded = true);
     ~Compressor() override;
-    Compressor(const Compressor&) = delete;
-    Compressor& operator=(const Compressor&) = delete;
-  public Q_SLOTS:
+public Q_SLOTS:
     void setFileName(const QString&);
     void setArchiveFormat(short);
     void setPassword(const QString&);
@@ -43,7 +42,7 @@ class QARCHIVE_EXPORT Compressor : public QObject {
     void pause();
     void resume();
 
-  Q_SIGNALS:
+Q_SIGNALS:
     void progress(QString, int, int, qint64, qint64);
     void error(short, QString);
     void started();
@@ -53,9 +52,9 @@ class QARCHIVE_EXPORT Compressor : public QObject {
     void memoryFinished(QBuffer*);
     void diskFinished();
 
-  private:
+private:
     std::unique_ptr<CompressorPrivate> m_Compressor;
     std::unique_ptr<QThread> m_Thread;
 };
-}  // namespace QArchive
+} // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_HPP_INCLUDED

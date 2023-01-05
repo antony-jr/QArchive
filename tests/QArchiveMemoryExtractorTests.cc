@@ -45,9 +45,9 @@ void QArchiveMemoryExtractorTests::simpleExtraction() {
 
 void QArchiveMemoryExtractorTests::usingPauseResume() {
     QArchive::MemoryExtractor e(TestCase2ArchivePath);
-    bool startedEmitted = false,
-         pausedEmitted = false,
-         resumedEmitted = false;
+    bool startedEmitted = false;
+    bool pausedEmitted = false;
+    bool resumedEmitted = false;
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
     QObject::connect(&e, &QArchive::MemoryExtractor::started, [&]() {
@@ -76,11 +76,11 @@ void QArchiveMemoryExtractorTests::usingPauseResume() {
 
     /* Verify output and contents. */
     QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() >= 1);
+    QVERIFY(!output.empty());
 
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().count() >= 1);
+    QVERIFY(!data->getFiles().empty());
     auto buffer = data->getFiles().at(0).buffer();
 
     buffer->open(QIODevice::ReadOnly);
@@ -111,7 +111,7 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
     auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 
     /// Test3OUtputFile1 should not exists
-    QVERIFY(data->getFiles().count() == 1);
+    QVERIFY(data->getFiles().empty());
     QVERIFY(
         data->getFiles()
         .at(0)
@@ -193,7 +193,7 @@ void QArchiveMemoryExtractorTests::testInvalidArchivePath() {
 
 void QArchiveMemoryExtractorTests::runningExtractorNonSingleThreaded() {
     QArchive::MemoryExtractor e(TestCase1ArchivePath,
-                                /*parent=*/nullptr, /*singleThread=*/false);
+        /*parent=*/nullptr, /*singleThreaded=*/false);
     QObject::connect(&e, &QArchive::MemoryExtractor::error,
                      this, &QArchiveMemoryExtractorTests::defaultErrorHandler);
     QSignalSpy spyInfo(&e, &QArchive::MemoryExtractor::finished);

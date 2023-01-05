@@ -2,8 +2,8 @@
 #include <QDateTime>
 #include <QFileInfo>
 
-#include "qarchiveextractor_p.hpp"
 #include "qarchive_enums.hpp"
+#include "qarchiveextractor_p.hpp"
 
 extern "C" {
 #include <archive.h>
@@ -12,8 +12,8 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 }
 
 // Helpful macros to check if an archive error is caused due to
@@ -55,31 +55,35 @@ class ArchiveFilter {
     }
 
     short addIncludePattern(const QString& pattern) {
-        if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+        if (archive_match_include_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK) {
             return ApplyPatternFailed;
+        }
         return NoError;
     }
 
     short addIncludePatterns(const QStringList& includePatterns) {
         for (const auto& pattern : includePatterns) {
             auto ret = addIncludePattern(pattern);
-            if (ret != NoError)
+            if (ret != NoError) {
                 return ret;
+            }
         }
         return NoError;
     }
 
     short addExcludePattern(const QString& pattern) {
-        if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK)
+        if (archive_match_exclude_pattern_w(m_match.data(), pattern.toStdWString().c_str()) != ARCHIVE_OK) {
             return ApplyPatternFailed;
+        }
         return NoError;
     }
 
     short addExcludePatterns(const QStringList& excludePatterns) {
         for (const auto& pattern : excludePatterns) {
             auto ret = addExcludePattern(pattern);
-            if (ret != NoError)
+            if (ret != NoError) {
                 return ret;
+            }
         }
         return NoError;
     }
@@ -96,7 +100,7 @@ class ArchiveFilter {
 
 static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
     QJsonObject CurrentEntry;
-    auto CurrentFile = QString(archive_entry_pathname(entry));
+    QString CurrentFile(archive_entry_pathname(entry));
 
     qint64 size = archive_entry_size(entry);
     qint64 roundedSize = size;
@@ -318,8 +322,9 @@ void ExtractorPrivate::addIncludePattern(const QString &pattern) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePattern(pattern);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
@@ -327,8 +332,9 @@ void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePatterns(patterns);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addExcludePattern(const QString &pattern) {
@@ -336,8 +342,9 @@ void ExtractorPrivate::addExcludePattern(const QString &pattern) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePattern(pattern);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
@@ -345,8 +352,9 @@ void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePatterns(patterns);
-    if (errorCode != NoError)
+    if (errorCode != NoError) {
         emit error(errorCode);
+    }
 }
 
 void ExtractorPrivate::setBasePath(const QString& path) {
@@ -624,7 +632,8 @@ void ExtractorPrivate::cancel() {
 short ExtractorPrivate::openArchive() {
     if(m_ArchivePath.isEmpty() && !m_Archive) {
         return ArchiveNotGiven;
-    } else if(b_ArchiveOpened) {
+    }
+    if (b_ArchiveOpened) {
         return NoError;
     }
     // Check and Open the given archive.
@@ -638,7 +647,8 @@ short ExtractorPrivate::openArchive() {
         // Check if the file exists.
         if(!info.exists()) {
             return ArchiveDoesNotExists;
-        } else if(!info.isFile()) { // Check if its really a file.
+        }
+        if (!info.isFile()) { // Check if its really a file.
             return InvalidArchiveFile;
         }
 
@@ -750,7 +760,8 @@ short ExtractorPrivate::extract() {
             err = writeData(m_CurrentArchiveEntry);
             if(err == OperationPaused) {
                 return err;
-            } else if(err) { // NoError = 0
+            }
+            if (err) { // NoError = 0
                 m_ArchiveRead.clear();
                 m_ArchiveWrite.clear();
                 return err;
@@ -794,7 +805,8 @@ short ExtractorPrivate::extract() {
         err = writeData(entry);
         if(err == OperationPaused) {
             return err;
-        } else if(err) { // NoError = 0
+        }
+        if (err) { // NoError = 0
             m_ArchiveRead.clear();
             m_ArchiveWrite.clear();
             return err;
@@ -853,8 +865,9 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
     }
     if(b_hasBasePath) {
         const auto& relativePath = m_basePath.relativeFilePath(QString::fromLatin1("/") + archive_entry_pathname(entry)).toStdWString();
-        if (relativePath == L".") // Root directory
+        if (relativePath == L".") { // Root directory
             return NoError;
+        }
         archive_entry_copy_pathname_w(entry, relativePath.c_str());
     }
     if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
@@ -899,7 +912,8 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
             ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
             if (ret == ARCHIVE_EOF) {
                 break;
-            } else if (ret != ARCHIVE_OK) {
+            }
+            if (ret != ARCHIVE_OK) {
                 short err = ArchiveCorrupted;
                 if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
                     err = ArchivePasswordNeeded;
@@ -907,18 +921,18 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                     err = ArchivePasswordIncorrect;
                 }
                 return err;
-            } else {
-                if(!b_MemoryMode) {
-                    ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
-                    if (ret != ARCHIVE_OK) {
-                        return ArchiveWriteError;
-                    }
-                } else {
-                    (currentNode.getBuffer())->seek(offset);
-                    if((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
-                        return ArchiveWriteError;
-                    }
+            }
+            if (!b_MemoryMode) {
+                ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
+                if (ret != ARCHIVE_OK) {
+                    return ArchiveWriteError;
                 }
+            } else {
+                (currentNode.getBuffer())->seek(offset);
+                if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
+                    return ArchiveWriteError;
+                }
+            }
                 n_BytesProcessed += size;
                 if(n_BytesTotal > 0 && n_TotalEntries > 0) {
                     emit progress(QString(archive_entry_pathname(entry)),
@@ -926,8 +940,6 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                                   n_TotalEntries,
                                   n_BytesProcessed, n_BytesTotal);
                 }
-
-            }
 
             // Allow the execution of the event loop
             QCoreApplication::processEvents();
@@ -937,11 +949,11 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
                 b_PauseRequested = false;
                 m_CurrentArchiveEntry = entry;
                 return OperationPaused;
-            } else if(b_CancelRequested) {
+            }
+            if (b_CancelRequested) {
                 b_CancelRequested = false;
                 return OperationCanceled;
             }
-
         }
     } else {
         return ArchiveHeaderWriteError;
@@ -953,11 +965,9 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
             return ArchiveHeaderWriteError;
         }
     } else {
-        (currentNode.getBuffer())->close();
-        m_ExtractedFiles->append(
-            MemoryFile(
-                currentNode.getFileInformation(),
-                currentNode.getBuffer()));
+        currentNode.getBuffer()->close();
+        MemoryFile mfile(currentNode.getFileInformation(), currentNode.getBuffer());
+        m_ExtractedFiles->push_back(std::move(mfile));
         m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;
@@ -1060,7 +1070,7 @@ short ExtractorPrivate::processArchiveInformation() {
             archive_read_free(inArchive);
             return err;
         }
-        auto CurrentFile = QString(archive_entry_pathname(entry));
+        QString CurrentFile(archive_entry_pathname(entry));
         QJsonObject CurrentEntry = getArchiveEntryInformation(entry, m_archiveFilter->isEntryExcluded(entry));
         m_Info.insert(CurrentFile, CurrentEntry);
         n_BytesTotal += archive_entry_size(entry);

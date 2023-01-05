@@ -1,39 +1,40 @@
-#include <TestRunner.hpp>
-#include <QMetaObject>
 #include <QMetaMethod>
-#include <QtConcurrentRun>
+#include <QMetaObject>
 #include <QTest>
+#include <QtConcurrentRun>
+#include <TestRunner.hpp>
 
-TestRunner::TestRunner() {
-    m_CompressorTests.reset(new QArchiveDiskCompressorTests(&m_TempDir));
-    m_ExtractorTests.reset(new QArchiveDiskExtractorTests(&m_TempDir));
-    m_MemoryExtractorTests.reset(new QArchiveMemoryExtractorTests(&m_TempDir));
-    m_MemoryCompressorTests.reset(new QArchiveMemoryCompressorTests(&m_TempDir));
-
+TestRunner::TestRunner()
+    : m_CompressorTests(&m_TempDir)
+    , m_MemoryCompressorTests(&m_TempDir)
+    , m_ExtractorTests(&m_TempDir)
+    , m_MemoryExtractorTests(&m_TempDir)
+{
     connect(&m_FutureWatcher, &QFutureWatcher<void>::finished,
-            this, &TestRunner::finished, Qt::DirectConnection);
+        this, &TestRunner::finished, Qt::DirectConnection);
 }
 
-void TestRunner::start() {
+void TestRunner::start()
+{
     m_Future = QtConcurrent::run([this] {
         runTests();
         return;
     });
     m_FutureWatcher.setFuture(m_Future);
-
 }
 
-void TestRunner::runTests() {
+void TestRunner::runTests()
+{
     // Run the compressor tests which should generate the
     // desired archives to test it with the extractor.
-    QTest::qExec(m_CompressorTests.get());
+    QTest::qExec(&m_CompressorTests);
 
     // Run disk extractor tests.
-    QTest::qExec(m_ExtractorTests.get());
+    QTest::qExec(&m_ExtractorTests);
 
     // Run memory extractor tests
-    QTest::qExec(m_MemoryExtractorTests.get());
+    QTest::qExec(&m_MemoryExtractorTests);
 
     // Run memory compressor tests
-    QTest::qExec(m_MemoryCompressorTests.get());
+    QTest::qExec(&m_MemoryCompressorTests);
 }

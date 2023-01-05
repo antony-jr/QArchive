@@ -5,12 +5,12 @@
 #else
 # include <QArchive/QArchive>
 #endif
-#include <QTest>
-#include <QTimer>
+#include <QArchiveTestCases.hpp>
 #include <QJsonObject>
 #include <QSignalSpy>
-#include <QArchiveTestCases.hpp>
 #include <QTemporaryDir>
+#include <QTest>
+#include <QTimer>
 
 class QArchiveMemoryExtractorTests : public QObject,private QArchiveTestCases {
   using QArchiveTestCases::QArchiveTestCases;

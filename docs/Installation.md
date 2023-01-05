@@ -62,7 +62,7 @@ In latest macOS, libarchive is present in the system but not the headers so we w
 using the headers from homebrew but this is not the case with macOS **10.15** (aka. Catalina)
 which provides an old version of libarchive which is not recommended.
 
-**For macOS 10.15 (Legacy):**
+**For macOS:**
 
 ```
  brew install qt@5 libarchive pkg-config
@@ -72,22 +72,7 @@ which provides an old version of libarchive which is not recommended.
  cd build
  export QT_DIR=$(brew --prefix qt@5)
  export Qt5_DIR=$(brew --prefix qt@5)
- cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/libarchive.pc ..
- make -j$(nproc)
- sudo make install
-```
-
-**For macOS later than 10.15 (or latest):**
-
-```
- brew install qt@5 libarchive
- git clone https://github.com/antony-jr/QArchive
- cd QArchive
- mkdir build
- cd build
- export QT_DIR=$(brew --prefix qt@5)
- export Qt5_DIR=$(brew --prefix qt@5)
- cmake  -DLibArchive_INCLUDE_DIR=$(brew --prefix libarchive)/include .. 
+ cmake -DLIBARCHIVE_PKG_CONFIG=$(brew --prefix libarchive)/lib/pkgconfig/ ..
  make -j$(nproc)
  sudo make install
 ```

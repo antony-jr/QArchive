@@ -5,14 +5,14 @@
 #else
 # include <QArchive/QArchive>
 #endif
-#include <QTest>
-#include <QFileInfo>
-#include <QTimer>
+#include <QArchiveTestCases.hpp>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonObject>
 #include <QSignalSpy>
 #include <QTemporaryDir>
-#include <QArchiveTestCases.hpp>
+#include <QTest>
+#include <QTimer>
 
 class QArchiveDiskCompressorTests : public QObject,private QArchiveTestCases {
   using QArchiveTestCases::QArchiveTestCases;
