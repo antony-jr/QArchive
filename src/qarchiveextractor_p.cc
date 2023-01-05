@@ -819,7 +819,7 @@ short ExtractorPrivate::extract() {
 }
 
 short ExtractorPrivate::writeData(struct archive_entry *entry) {
-    if (!m_ArchiveRead || (!b_MemoryMode && !m_ArchiveWrite) || !m_Archive) {
+    if (!m_ArchiveRead || !(b_MemoryMode || m_ArchiveWrite) || !m_Archive) {
         return ArchiveNotGiven;
     }
 
