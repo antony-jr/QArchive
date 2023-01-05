@@ -30,8 +30,9 @@ using namespace QArchive;
 /// This will force the users to not mess up the integrity of a MemoryFile like
 /// deleting the internal pointers which will be automatically freed by MemoryFile
 /// destructor.
-void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
-    m_FileInformation = info;
+void MutableMemoryFile::setFileInformation(QJsonObject info)
+{
+    m_FileInformation = std::move(info);
 }
 
 void MutableMemoryFile::setBuffer(QBuffer *buffer) {
