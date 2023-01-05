@@ -130,34 +130,26 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
     auto lastModT = archive_entry_mtime(entry);
     auto lastStatusModT = archive_entry_ctime(entry);
 
-    auto ft = archive_entry_filetype(entry);
-    QString FileType;
-    switch(ft) {
-    case AE_IFREG: // Regular file
-        FileType = "RegularFile";
-        break;
-    case AE_IFLNK: // Link
-        FileType = "SymbolicLink";
-        break;
-    case AE_IFSOCK: // Socket
-        FileType = "Socket";
-        break;
-    case AE_IFCHR: // Character Device
-        FileType = "CharacterDevice";
-        break;
-    case AE_IFBLK: // Block Device
-        FileType = "BlockDevice";
-        break;
-    case AE_IFDIR: // Directory.
-        FileType = "Directory";
-        break;
-    case AE_IFIFO: // Named PIPE. (fifo)
-        FileType = "NamedPipe";
-        break;
-    default:
-        FileType = "UnknownFile";
-        break;
-    }
+    QString FileType = [entry] {
+        auto ft = archive_entry_filetype(entry);
+        switch (ft) {
+        case AE_IFREG: // Regular file
+            return "RegularFile";
+        case AE_IFLNK: // Link
+            return "SymbolicLink";
+        case AE_IFSOCK: // Socket
+            return "Socket";
+        case AE_IFCHR: // Character Device
+            return "CharacterDevice";
+        case AE_IFBLK: // Block Device
+            return "BlockDevice";
+        case AE_IFDIR: // Directory.
+            return "Directory";
+        case AE_IFIFO: // Named PIPE. (fifo)
+            return "NamedPipe";
+        }
+        return "UnknownFile";
+    }();
 
     QFile fileInfo(CurrentFile);
     // Set the values.
