@@ -295,7 +295,7 @@ void CompressorPrivate::start() {
         return;
     }
     if (!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
-        emit error(ArchiveFileNameNotGiven, QString());
+        emit error(ArchiveFileNameNotGiven, {});
         return;
     }
     if (!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
@@ -303,11 +303,7 @@ void CompressorPrivate::start() {
         return;
     }
     if (m_StaggedFiles.empty()) {
-        if(b_MemoryMode) {
-            emit error(NoFilesToCompress, QString());
-        } else {
-            emit error(NoFilesToCompress, m_TemporaryFile->fileName());
-        }
+        emit error(NoFilesToCompress, !b_MemoryMode ? m_TemporaryFile->fileName() : "");
         return;
     }
 
@@ -459,11 +455,7 @@ bool CompressorPrivate::confirmFiles() {
     for(const auto& node : m_StaggedFiles) {
         short eCode = node->open();
         if(eCode != NoError) {
-            if(!node->isInMemory) {
-                emit error(eCode, node->path);
-            } else {
-                emit error(eCode, QString());
-            }
+            emit error(eCode, !node->isInMemory ? node->path : "");
             return false;
         }
 
@@ -564,11 +556,7 @@ short CompressorPrivate::compress() {
         m_ArchiveWrite = QSharedPointer<struct archive>(
                              archive_write_new(), ArchiveWriteDestructor);
         if (!m_ArchiveWrite) {
-            if(b_MemoryMode) {
-                emit error(NotEnoughMemory, QString());
-            } else {
-                emit error(NotEnoughMemory, m_TemporaryFile->fileName());
-            }
+            emit error(NotEnoughMemory, !b_MemoryMode ? m_TemporaryFile->fileName() : "");
             return NotEnoughMemory;
         }
 
@@ -653,7 +641,7 @@ short CompressorPrivate::compress() {
             if (archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
                                           m_Buffer.get()) != ARCHIVE_OK) {
                 m_ArchiveWrite.clear();
-                emit error(ArchiveWriteOpenError, QString());
+                emit error(ArchiveWriteOpenError, {});
                 return ArchiveWriteOpenError;
             }
         }
