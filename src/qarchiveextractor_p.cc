@@ -99,7 +99,9 @@ class ArchiveFilter {
 };
 }  // namespace QArchive
 
-static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
+namespace {
+QJsonObject getArchiveEntryInformation(archive_entry* entry, bool bExcluded)
+{
     QJsonObject CurrentEntry;
     QString CurrentFile(archive_entry_pathname(entry));
 
@@ -210,6 +212,7 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 
     return CurrentEntry;
 }
+} // namespace
 
 // ExtractorPrivate constructor constructs the object which is the private class
 // implementation to the DiskExtractor.

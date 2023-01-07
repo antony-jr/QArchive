@@ -22,6 +22,15 @@ extern "C" {
 
 using namespace QArchive;
 
+namespace {
+bool contains(const QString& entry, const QVector<CompressorPrivate::Node*>& vec)
+{
+    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node* n) {
+        return n && n->valid && n->entry == entry;
+    });
+}
+} // namespace
+
 // Node is a private structure which is used store info about entries to be
 // compressed by the Compressor.
 short CompressorPrivate::Node::open() {
@@ -56,12 +65,6 @@ short CompressorPrivate::Node::open() {
 void CompressorPrivate::freeNodes(QVector<Node*>& vec) {
     qDeleteAll(vec);
     vec.clear();
-}
-
-static bool contains(const QString &entry, const QVector<CompressorPrivate::Node*>& vec) {
-    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node *n) {
-        return n && n->valid && n->entry == entry;
-    });
 }
 
 // CompressorPrivate is the private class which handles the
