@@ -8,8 +8,8 @@
 #include <QString>
 #include <QStringList>
 #include <QVariantList>
-#include <QVector>
 
+#include <deque>
 #include <memory>
 
 #include "qarchiveutils_p.hpp"
@@ -69,27 +69,24 @@ public:
     };
 
 private:
-    static void freeNodes(QVector<Node*>&);
-
-private:
     bool b_MemoryMode = false;
-    bool b_PauseRequested = false,
-         b_CancelRequested = false,
-         b_Paused = false,
-         b_Started = false,
-         b_Finished = false;
+    bool b_PauseRequested = false;
+    bool b_CancelRequested = false;
+    bool b_Paused = false;
+    bool b_Started = false;
+    bool b_Finished = false;
 
     QString m_Password; /* Only used for ZIP. */
     short m_ArchiveFormat = 0; /* Defaults to ZIP. */
-    int n_BlockSize = 10240,
-        n_TotalEntries = 0;
-    qint64 n_BytesProcessed = 0,
-           n_BytesTotal = 0;
+    int n_BlockSize = 10240;
+    int n_TotalEntries = 0;
+    qint64 n_BytesProcessed = 0;
+    qint64 n_BytesTotal = 0;
     QSharedPointer<struct archive> m_ArchiveWrite;
     std::unique_ptr<QSaveFile> m_TemporaryFile;
     std::unique_ptr<QBuffer> m_Buffer;
-    QVector<Node*> m_ConfirmedFiles;
-    QVector<Node*> m_StaggedFiles;
+    std::deque<Node*> m_ConfirmedFiles;
+    std::deque<Node*> m_StaggedFiles;
 };
 } // namespace QArchive
 #endif // QARCHIVE_COMPRESSOR_PRIVATE_HPP_INCLUDED

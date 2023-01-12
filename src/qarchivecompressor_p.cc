@@ -4,7 +4,8 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
-#include <QVector>
+
+#include <deque>
 
 #include "qarchive_enums.hpp"
 #include "qarchivecompressor_p.hpp"
@@ -23,9 +24,9 @@ extern "C" {
 using namespace QArchive;
 
 namespace {
-bool contains(const QString& entry, const QVector<CompressorPrivate::Node*>& vec)
+bool contains(const QString& entry, const std::deque<CompressorPrivate::Node*>& vec)
 {
-    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node* n) {
+    return std::any_of(vec.begin(), vec.end(), [&](const CompressorPrivate::Node* n) {
         return n && n->valid && n->entry == entry;
     });
 }
@@ -60,11 +61,6 @@ short CompressorPrivate::Node::open() {
 
     valid = true;
     return NoError;
-}
-
-void CompressorPrivate::freeNodes(QVector<Node*>& vec) {
-    qDeleteAll(vec);
-    vec.clear();
 }
 
 // CompressorPrivate is the private class which handles the
@@ -274,8 +270,10 @@ void CompressorPrivate::clear() {
     n_BytesProcessed = 0;
     n_BytesTotal = 0;
 
-    freeNodes(m_ConfirmedFiles);
-    freeNodes(m_StaggedFiles);
+    qDeleteAll(m_ConfirmedFiles);
+    m_ConfirmedFiles.clear();
+    qDeleteAll(m_StaggedFiles);
+    m_StaggedFiles.clear();
 
     if(!b_MemoryMode) {
 #ifdef __cpp_lib_make_unique
@@ -454,7 +452,8 @@ bool CompressorPrivate::guessArchiveFormat() {
 // This populates m_ConfirmedFiles vector with all the files added ,
 // Directory's files will be recursively added.
 bool CompressorPrivate::confirmFiles() {
-    freeNodes(m_ConfirmedFiles);
+    qDeleteAll(m_ConfirmedFiles);
+    m_ConfirmedFiles.clear();
     for(const auto& node : m_StaggedFiles) {
         short eCode = node->open();
         if(eCode != NoError) {
@@ -486,12 +485,13 @@ bool CompressorPrivate::confirmFiles() {
             // if directory then add files in directory
             // recursively.
             if(info.isDir()) {
-                QVector<QString> dirList;
+                std::deque<QString> dirList;
                 QString toReplace = info.filePath();
                 dirList.push_back(info.filePath());
 
                 while (!dirList.empty()) {
-                    QDir dir(dirList.takeFirst());
+                    QDir dir(dirList.front());
+                    dirList.pop_front();
                     QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
                     for (const auto &i : list) {
                         if(i.isDir()) {
