@@ -53,6 +53,8 @@ public Q_SLOTS:
     void addExcludePattern(const QString&);
     void addExcludePattern(const QStringList&);
     void setBasePath(const QString&);
+    void setRawMode(bool);
+    void setRawOutputFilename(const QString&);
     void clear();
 
     void getInfo();
@@ -69,6 +71,8 @@ private Q_SLOTS:
     short processArchiveInformation();
     short writeData(struct archive_entry*);
     short extract();
+    void toggleArchiveFormat(struct archive*);
+
 Q_SIGNALS:
     void started();
     void canceled();
@@ -84,6 +88,7 @@ Q_SIGNALS:
 
 private:
     bool b_MemoryMode = false;
+    bool b_RawMode = false;
     bool b_ProcessingArchive = false;
     bool b_StartRequested = false;
 
@@ -107,6 +112,7 @@ private:
     QString m_OutputDirectory;
     QString m_Password;
     QString m_ArchivePath;
+    QString m_RawOutputFilename;
     QIODevice* m_Archive = nullptr;
     archive_entry* m_CurrentArchiveEntry = nullptr;
     MutableMemoryFile m_CurrentMemoryFile;

@@ -50,6 +50,8 @@ The class belongs to the QArchive namespace , so make sure to include it.
 | **void**  | [addIncludePattern](#void-addincludepatternconst-qstringlist-patterns)(const QStringList&)     |
 | **void**  | [addExcludePattern](#void-addexcludepatternconst-qstring-pattern)(const QString&)              |
 | **void**  | [addExcludePattern](#void-addexcludepatternconst-qstringlist-patterns)(const QStringList&)     |
+| **void**  | [setRawMode](#void-setrawmode-bool-enabled)(bool)     |
+| **void**  | [setRawOutputFilename](#void-setrawoutputfilenameconst-qstring-name)(const QString&)     |
 | **void**  | [setPassword](#void-setpasswordconst-qstring-password)(const QString&)                         |
 | **void**  | [setBlocksize](#void-setblocksizeint-size)(int size)                                           |
 | **void**  | [getInfo](#void-getinfovoid)(void)                                                             |
@@ -297,6 +299,22 @@ considered.
 This is an overloaded function. Adds the given list of exclude pattern.
 
 > Note: Only available from QArchive v2.2.0
+
+---
+
+### void setRawMode(bool enabled)
+<p align="right"><code>[SLOT]</code></p>
+
+When enabled, the extraction is performed in 
+[raw mode](https://github.com/libarchive/libarchive/wiki/FormatRaw).
+
+---
+
+### void setRawOutputFilename(const QString &name)
+<p align="right"><code>[SLOT]</code></p>
+
+Sets raw mode to enabled. By default, the file extracted in raw mode is named `data`,
+as archive metadata is not available. This can be changed by providing the name here.
 
 ---
 

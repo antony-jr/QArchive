@@ -365,6 +365,23 @@ void ExtractorPrivate::setBasePath(const QString& path) {
     b_hasBasePath = !path.isEmpty();
 }
 
+void ExtractorPrivate::setRawMode(bool enabled)
+{
+    if (b_Started || b_Paused) {
+        return;
+    }
+    b_RawMode = enabled;
+}
+
+void ExtractorPrivate::setRawOutputFilename(const QString& name)
+{
+    if (b_Started || b_Paused || b_MemoryMode) {
+        return;
+    }
+    m_RawOutputFilename = name;
+    b_RawMode = !name.isEmpty();
+}
+
 // Clears all internal data and sets it back to default.
 void ExtractorPrivate::clear() {
     if(b_Started) {
@@ -373,7 +390,7 @@ void ExtractorPrivate::clear() {
     n_BlockSize = 10240;
     n_PasswordTriedCountGetInfo = n_PasswordTriedCountExtract = 0;
     n_TotalEntries = -1;
-    b_ProcessingArchive = b_StartRequested = false;
+    b_RawMode = b_ProcessingArchive = b_StartRequested = false;
     b_PauseRequested = b_CancelRequested = b_Paused = b_Started = b_Finished = b_ArchiveOpened = false;
 
     n_BytesTotal = 0;
@@ -383,6 +400,7 @@ void ExtractorPrivate::clear() {
     m_Password.clear();
 #endif
     m_OutputDirectory.clear();
+    m_RawOutputFilename.clear();
     m_ArchiveRead.clear();
     m_ArchiveWrite.clear();
     m_Info = {};
@@ -721,7 +739,7 @@ short ExtractorPrivate::extract() {
             archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toUtf8().constData());
         }
 #endif
-        archive_read_support_format_all(m_ArchiveRead.data());
+        toggleArchiveFormat(m_ArchiveRead.data());
         archive_read_support_filter_all(m_ArchiveRead.data());
 
         if(archiveReadOpenQIODevice(m_ArchiveRead.data(), n_BlockSize, m_Archive)) {
@@ -819,6 +837,16 @@ short ExtractorPrivate::extract() {
     return NoError;
 }
 
+void ExtractorPrivate::toggleArchiveFormat(struct archive* inArchive)
+{
+    if (b_RawMode) {
+        archive_read_support_format_raw(inArchive);
+        archive_read_support_format_empty(inArchive);
+    } else {
+        archive_read_support_format_all(inArchive);
+    }
+}
+
 short ExtractorPrivate::writeData(struct archive_entry *entry) {
     if(m_ArchiveRead.isNull() || (!b_MemoryMode && m_ArchiveWrite.isNull()) || m_Archive == nullptr) {
         return ArchiveNotGiven;
@@ -831,6 +859,10 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         return NoError;
     }
 
+    if (!b_MemoryMode && b_RawMode && !m_RawOutputFilename.isEmpty()) {
+        const auto& path = (QFileInfo(archive_entry_pathname(entry)).path() + QString::fromLatin1("/") + m_RawOutputFilename).toStdWString();
+        archive_entry_copy_pathname_w(entry, path.c_str());
+    }
     if(b_hasBasePath) {
         const auto& relativePath = m_basePath.relativeFilePath(QString::fromLatin1("/") + archive_entry_pathname(entry)).toStdWString();
         if (relativePath == L".") { // Root directory
@@ -961,7 +993,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
     }
 #endif
 
-    archive_read_support_format_all(inArchive);
+    toggleArchiveFormat(inArchive);
     archive_read_support_filter_all(inArchive);
     if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {
         archive_read_close(inArchive);
@@ -1014,7 +1046,7 @@ short ExtractorPrivate::processArchiveInformation() {
         archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());
     }
 #endif
-    archive_read_support_format_all(inArchive);
+    toggleArchiveFormat(inArchive);
     archive_read_support_filter_all(inArchive);
 
     if(archiveReadOpenQIODevice(inArchive, n_BlockSize, m_Archive)) {

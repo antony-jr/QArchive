@@ -156,6 +156,20 @@ void Extractor::setBasePath(const QString &path) {
                       Q_ARG(QString, path));
 }
 
+void Extractor::setRawMode(bool enabled) {
+    getMethod(*m_Extractor,
+        "setRawMode(bool)").invoke(m_Extractor.get(),
+            Qt::QueuedConnection,
+            Q_ARG(bool, enabled));
+}
+
+void Extractor::setRawOutputFilename(const QString& path) {
+    getMethod(*m_Extractor,
+        "setRawOutputFilename(const QString&)").invoke(m_Extractor.get(),
+            Qt::QueuedConnection,
+            Q_ARG(QString, path));
+}
+
 void Extractor::clear() {
     getMethod(*m_Extractor, "clear()").invoke(m_Extractor.get(), Qt::QueuedConnection);
 }

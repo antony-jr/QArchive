@@ -35,6 +35,8 @@ public Q_SLOTS:
     void addExcludePattern(const QString&);
     void addExcludePattern(const QStringList&);
     void setBasePath(const QString&);
+    void setRawMode(bool);
+    void setRawOutputFilename(const QString&);
     void clear();
 
     void getInfo();
