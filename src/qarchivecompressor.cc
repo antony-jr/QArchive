@@ -6,10 +6,13 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(const CompressorPrivate &object, const char *function) {
+namespace {
+QMetaMethod getMethod(const CompressorPrivate& object, const char* function)
+{
     auto metaObject = object.metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
+} // namspace
 
 Compressor::Compressor(bool memoryMode, QObject *parent, bool singleThreaded)
     : QObject(parent) {

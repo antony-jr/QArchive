@@ -30,8 +30,9 @@ using namespace QArchive;
 /// This will force the users to not mess up the integrity of a MemoryFile like
 /// deleting the internal pointers which will be automatically freed by MemoryFile
 /// destructor.
-void MutableMemoryFile::setFileInformation(const QJsonObject &info) {
-    m_FileInformation = info;
+void MutableMemoryFile::setFileInformation(QJsonObject info)
+{
+    m_FileInformation = std::move(info);
 }
 
 void MutableMemoryFile::setBuffer(QBuffer *buffer) {
@@ -98,7 +99,9 @@ class ArchiveFilter {
 };
 }  // namespace QArchive
 
-static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExcluded) {
+namespace {
+QJsonObject getArchiveEntryInformation(archive_entry* entry, bool bExcluded)
+{
     QJsonObject CurrentEntry;
     QString CurrentFile(archive_entry_pathname(entry));
 
@@ -129,34 +132,26 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
     auto lastModT = archive_entry_mtime(entry);
     auto lastStatusModT = archive_entry_ctime(entry);
 
-    auto ft = archive_entry_filetype(entry);
-    QString FileType;
-    switch(ft) {
-    case AE_IFREG: // Regular file
-        FileType = "RegularFile";
-        break;
-    case AE_IFLNK: // Link
-        FileType = "SymbolicLink";
-        break;
-    case AE_IFSOCK: // Socket
-        FileType = "Socket";
-        break;
-    case AE_IFCHR: // Character Device
-        FileType = "CharacterDevice";
-        break;
-    case AE_IFBLK: // Block Device
-        FileType = "BlockDevice";
-        break;
-    case AE_IFDIR: // Directory.
-        FileType = "Directory";
-        break;
-    case AE_IFIFO: // Named PIPE. (fifo)
-        FileType = "NamedPipe";
-        break;
-    default:
-        FileType = "UnknownFile";
-        break;
-    }
+    QString FileType = [entry] {
+        auto ft = archive_entry_filetype(entry);
+        switch (ft) {
+        case AE_IFREG: // Regular file
+            return "RegularFile";
+        case AE_IFLNK: // Link
+            return "SymbolicLink";
+        case AE_IFSOCK: // Socket
+            return "Socket";
+        case AE_IFCHR: // Character Device
+            return "CharacterDevice";
+        case AE_IFBLK: // Block Device
+            return "BlockDevice";
+        case AE_IFDIR: // Directory.
+            return "Directory";
+        case AE_IFIFO: // Named PIPE. (fifo)
+            return "NamedPipe";
+        }
+        return "UnknownFile";
+    }();
 
     QFile fileInfo(CurrentFile);
     // Set the values.
@@ -217,6 +212,7 @@ static QJsonObject getArchiveEntryInformation(archive_entry *entry, bool bExclud
 
     return CurrentEntry;
 }
+} // namespace
 
 // ExtractorPrivate constructor constructs the object which is the private class
 // implementation to the DiskExtractor.
@@ -256,7 +252,7 @@ void ExtractorPrivate::setArchive(QIODevice *archive) {
 // Sets the archive path as the given QString which will be later
 // opened to be used as the Archive file.
 void ExtractorPrivate::setArchive(const QString &archivePath) {
-    if(b_Started || b_Paused || archivePath.isEmpty()) {
+    if (b_Started || b_Paused || archivePath.isEmpty()) {
         return;
     }
     clear();
@@ -273,7 +269,7 @@ void ExtractorPrivate::setBlockSize(int n) {
 
 // Sets the directory where the extraction data to be extracted.
 void ExtractorPrivate::setOutputDirectory(const QString &destination) {
-    if(b_MemoryMode || b_Started || b_Paused || destination.isEmpty()) {
+    if (b_MemoryMode || b_Started || b_Paused || destination.isEmpty()) {
         return;
     }
     m_OutputDirectory = destination + "/";
@@ -290,7 +286,7 @@ void ExtractorPrivate::setCalculateProgress(bool c) {
 // since the user may set password anytime.
 void ExtractorPrivate::setPassword(const QString &passwd) {
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-    if(passwd.isEmpty()) {
+    if (passwd.isEmpty()) {
         return;
     }
     m_Password = passwd;
@@ -303,7 +299,7 @@ void ExtractorPrivate::setPassword(const QString &passwd) {
 // will be extracted , the filter has to correspond to the exact
 // path given in the archive.
 void ExtractorPrivate::addFilter(const QString &filter) {
-    if(b_Started || b_Paused || filter.isEmpty()) {
+    if (b_Started || b_Paused || filter.isEmpty()) {
         return;
     }
     m_ExtractFilters << filter;
@@ -311,14 +307,14 @@ void ExtractorPrivate::addFilter(const QString &filter) {
 
 // Overload of addFilter to accept list of QStrings.
 void ExtractorPrivate::addFilter(const QStringList &filters) {
-    if(b_Started || b_Paused || filters.isEmpty()) {
+    if (b_Started || b_Paused || filters.isEmpty()) {
         return;
     }
     m_ExtractFilters << filters;
 }
 
 void ExtractorPrivate::addIncludePattern(const QString &pattern) {
-    if(b_Started || b_Paused || pattern.isEmpty()) {
+    if (b_Started || b_Paused || pattern.isEmpty()) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePattern(pattern);
@@ -328,7 +324,7 @@ void ExtractorPrivate::addIncludePattern(const QString &pattern) {
 }
 
 void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
-    if(b_Started || b_Paused || patterns.isEmpty()) {
+    if (b_Started || b_Paused || patterns.isEmpty()) {
         return;
     }
     auto errorCode = m_archiveFilter->addIncludePatterns(patterns);
@@ -338,7 +334,7 @@ void ExtractorPrivate::addIncludePattern(const QStringList &patterns) {
 }
 
 void ExtractorPrivate::addExcludePattern(const QString &pattern) {
-    if(b_Started || b_Paused || pattern.isEmpty()) {
+    if (b_Started || b_Paused || pattern.isEmpty()) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePattern(pattern);
@@ -348,7 +344,7 @@ void ExtractorPrivate::addExcludePattern(const QString &pattern) {
 }
 
 void ExtractorPrivate::addExcludePattern(const QStringList &patterns) {
-    if(b_Started || b_Paused || patterns.isEmpty()) {
+    if (b_Started || b_Paused || patterns.isEmpty()) {
         return;
     }
     auto errorCode = m_archiveFilter->addExcludePatterns(patterns);
@@ -437,7 +433,7 @@ void ExtractorPrivate::getInfo() {
 
     b_ProcessingArchive = true;
 
-    if(!m_Info.isEmpty()) {
+    if (!m_Info.empty()) {
         b_ProcessingArchive = false;
         emit info(m_Info);
         if(b_StartRequested) {
@@ -499,7 +495,7 @@ void ExtractorPrivate::start() {
 
     // Check and Set Output Directory.
     // If it's not memory mode.
-    if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
+    if (!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
         errorCode = checkOutputDirectory();
         if(errorCode != NoError) {
             emit error(errorCode );
@@ -630,7 +626,7 @@ void ExtractorPrivate::cancel() {
 
 
 short ExtractorPrivate::openArchive() {
-    if(m_ArchivePath.isEmpty() && !m_Archive) {
+    if (m_ArchivePath.isEmpty() && !m_Archive) {
         return ArchiveNotGiven;
     }
     if (b_ArchiveOpened) {
@@ -641,8 +637,7 @@ short ExtractorPrivate::openArchive() {
     // Note:
     // At this point of code either m_ArchivePath or m_Archive has to be
     // set or else the function should have exited with an error signal.
-    if(!m_ArchivePath.isEmpty()) {
-
+    if (!m_ArchivePath.isEmpty()) {
         QFileInfo info(m_ArchivePath);
         // Check if the file exists.
         if(!info.exists()) {
@@ -710,14 +705,14 @@ short ExtractorPrivate::checkOutputDirectory() {
 }
 
 short ExtractorPrivate::extract() {
-    if(m_Archive == nullptr) {
+    if (!m_Archive) {
         return ArchiveNotGiven;
     }
     int ret = 0;
     short err = NoError;
     archive_entry *entry = nullptr;
 
-    if(m_ArchiveRead.isNull() && (b_MemoryMode || m_ArchiveWrite.isNull())) {
+    if (!m_ArchiveRead && (b_MemoryMode || !m_ArchiveWrite)) {
         n_ProcessedEntries = 0;
         n_BytesProcessed = 0;
 
@@ -735,7 +730,7 @@ short ExtractorPrivate::extract() {
         }
 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-        if(!m_Password.isEmpty()) {
+        if (!m_Password.isEmpty()) {
             archive_read_add_passphrase(m_ArchiveRead.data(), m_Password.toUtf8().constData());
         }
 #endif
@@ -753,7 +748,6 @@ short ExtractorPrivate::extract() {
             m_ArchiveWrite.clear();
             return ArchiveWriteError;
         }
-
     }
     for (;;) {
         if(m_CurrentArchiveEntry) {
@@ -770,17 +764,16 @@ short ExtractorPrivate::extract() {
 
             // Report final progress signal after extracting the file fully.
             if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
-                              n_ProcessedEntries,
-                              n_TotalEntries,
-                              n_BytesProcessed, n_BytesTotal);
+                emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
+                    n_ProcessedEntries,
+                    n_TotalEntries,
+                    n_BytesProcessed, n_BytesTotal);
             } else {
-                emit progress(QString(archive_entry_pathname(m_CurrentArchiveEntry)),
-                              1,
-                              1,
-                              1,
-                              1);
-
+                emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
+                    1,
+                    1,
+                    1,
+                    1);
             }
 
             archive_entry_clear(m_CurrentArchiveEntry);
@@ -815,17 +808,16 @@ short ExtractorPrivate::extract() {
 
         // Report final progress signal after extracting the file fully.
         if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-            emit progress(QString(archive_entry_pathname(entry)),
-                          n_ProcessedEntries,
-                          n_TotalEntries,
-                          n_BytesProcessed, n_BytesTotal);
+            emit progress(archive_entry_pathname(entry),
+                n_ProcessedEntries,
+                n_TotalEntries,
+                n_BytesProcessed, n_BytesTotal);
         } else {
-            emit progress(QString(archive_entry_pathname(entry)),
-                          1,
-                          1,
-                          1,
-                          1);
-
+            emit progress(archive_entry_pathname(entry),
+                1,
+                1,
+                1,
+                1);
         }
         archive_entry_clear(entry);
         QCoreApplication::processEvents(); // call event loop for the signal to take effect.
@@ -848,13 +840,12 @@ void ExtractorPrivate::toggleArchiveFormat(struct archive* inArchive)
 }
 
 short ExtractorPrivate::writeData(struct archive_entry *entry) {
-    if(m_ArchiveRead.isNull() || (!b_MemoryMode && m_ArchiveWrite.isNull()) || m_Archive == nullptr) {
+    if (!m_ArchiveRead || !(b_MemoryMode || m_ArchiveWrite) || !m_Archive) {
         return ArchiveNotGiven;
     }
 
-    if((!m_ExtractFilters.isEmpty() &&
-            !m_ExtractFilters.contains(QString(archive_entry_pathname(entry))))
-            || (m_archiveFilter->isEntryExcluded(entry))) {
+    if (!(m_ExtractFilters.empty() || m_ExtractFilters.contains(archive_entry_pathname(entry)))
+        || m_archiveFilter->isEntryExcluded(entry)) {
         n_BytesProcessed += archive_entry_size(entry);
         return NoError;
     }
@@ -870,14 +861,18 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         }
         archive_entry_copy_pathname_w(entry, relativePath.c_str());
     }
-    if(!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
+    if (!b_MemoryMode && !m_OutputDirectory.isEmpty()) {
         QDir outDir(m_OutputDirectory);
         const auto& new_entry = outDir.absoluteFilePath(QString::fromStdWString(archive_entry_pathname_w(entry))).toStdWString();
         archive_entry_copy_pathname_w(entry, new_entry.c_str());
     }
 
     MutableMemoryFile currentNode;
-    int ret = ARCHIVE_OK;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+    qsizetype ret = ARCHIVE_OK;
+#else
+    qptrdiff ret = ARCHIVE_OK;
+#endif
     if(m_CurrentArchiveEntry != entry) {
         if(!b_MemoryMode) {
             ret = archive_write_header(m_ArchiveWrite.data(), entry);
@@ -900,63 +895,64 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
     } else {
         currentNode = m_CurrentMemoryFile;
     }
-    if (ret == ARCHIVE_OK) {
-        const void *buff;
-        size_t size;
+    if (ret != ARCHIVE_OK) {
+        return ArchiveHeaderWriteError;
+    }
+    const void* buff;
+    size_t size;
 #if ARCHIVE_VERSION_NUMBER >= 3000000
-        int64_t offset;
+    int64_t offset;
 #else
-        off_t offset;
+    off_t offset;
 #endif
-        for (;;) {
-            ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
-            if (ret == ARCHIVE_EOF) {
-                break;
+    for (;;) {
+        ret = archive_read_data_block(m_ArchiveRead.data(), &buff, &size, &offset);
+        if (ret == ARCHIVE_EOF) {
+            break;
+        }
+
+        if (ret != ARCHIVE_OK) {
+            short err = ArchiveCorrupted;
+            if (PASSWORD_NEEDED(m_ArchiveRead.data())) {
+                err = ArchivePasswordNeeded;
+            } else if (PASSWORD_INCORRECT(m_ArchiveRead.data())) {
+                err = ArchivePasswordIncorrect;
             }
+            return err;
+        }
+
+        if (!b_MemoryMode) {
+            ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
             if (ret != ARCHIVE_OK) {
-                short err = ArchiveCorrupted;
-                if(PASSWORD_NEEDED(m_ArchiveRead.data())) {
-                    err = ArchivePasswordNeeded;
-                } else if(PASSWORD_INCORRECT(m_ArchiveRead.data())) {
-                    err = ArchivePasswordIncorrect;
-                }
-                return err;
+                return ArchiveWriteError;
             }
-            if (!b_MemoryMode) {
-                ret = archive_write_data_block(m_ArchiveWrite.data(), buff, size, offset);
-                if (ret != ARCHIVE_OK) {
-                    return ArchiveWriteError;
-                }
-            } else {
-                (currentNode.getBuffer())->seek(offset);
-                if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
-                    return ArchiveWriteError;
-                }
-            }
-                n_BytesProcessed += size;
-                if(n_BytesTotal > 0 && n_TotalEntries > 0) {
-                    emit progress(QString(archive_entry_pathname(entry)),
-                                  n_ProcessedEntries,
-                                  n_TotalEntries,
-                                  n_BytesProcessed, n_BytesTotal);
-                }
-
-            // Allow the execution of the event loop
-            QCoreApplication::processEvents();
-
-            // Check for pause and cancel requests.
-            if(b_PauseRequested) {
-                b_PauseRequested = false;
-                m_CurrentArchiveEntry = entry;
-                return OperationPaused;
-            }
-            if (b_CancelRequested) {
-                b_CancelRequested = false;
-                return OperationCanceled;
+        } else {
+            (currentNode.getBuffer())->seek(offset);
+            if ((currentNode.getBuffer())->write(static_cast<const char*>(buff), size) == -1) {
+                return ArchiveWriteError;
             }
         }
-    } else {
-        return ArchiveHeaderWriteError;
+        n_BytesProcessed += size;
+        if (n_BytesTotal > 0 && n_TotalEntries > 0) {
+            emit progress(archive_entry_pathname(entry),
+                n_ProcessedEntries,
+                n_TotalEntries,
+                n_BytesProcessed, n_BytesTotal);
+        }
+
+        // Allow the execution of the event loop
+        QCoreApplication::processEvents();
+
+        // Check for pause and cancel requests.
+        if (b_PauseRequested) {
+            b_PauseRequested = false;
+            m_CurrentArchiveEntry = entry;
+            return OperationPaused;
+        }
+        if (b_CancelRequested) {
+            b_CancelRequested = false;
+            return OperationCanceled;
+        }
     }
 
     if(!b_MemoryMode) {
@@ -966,8 +962,12 @@ short ExtractorPrivate::writeData(struct archive_entry *entry) {
         }
     } else {
         currentNode.getBuffer()->close();
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         MemoryFile mfile(currentNode.getFileInformation(), currentNode.getBuffer());
         m_ExtractedFiles->push_back(std::move(mfile));
+#else
+        m_ExtractedFiles->emplace_back(currentNode.getFileInformation(), currentNode.getBuffer());
+#endif
         m_CurrentMemoryFile = MutableMemoryFile();
     }
     return NoError;
@@ -988,7 +988,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
     }
 
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-    if(!m_Password.isEmpty()) {
+    if (!m_Password.isEmpty()) {
         archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());
     }
 #endif
@@ -1031,7 +1031,7 @@ short ExtractorPrivate::getTotalEntriesCount() {
 }
 
 short ExtractorPrivate::processArchiveInformation() {
-    if(m_Archive == nullptr) {
+    if (!m_Archive) {
         return ArchiveNotGiven;
     }
 
@@ -1042,7 +1042,7 @@ short ExtractorPrivate::processArchiveInformation() {
         return NotEnoughMemory;
     }
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-    if(!m_Password.isEmpty()) {
+    if (!m_Password.isEmpty()) {
         archive_read_add_passphrase(inArchive, m_Password.toUtf8().constData());
     }
 #endif

@@ -64,5 +64,5 @@ QString QArchive::errorCodeToString(short errorCode) {
     default:
         return "QArchive::UnknownError";
     }
-    return "";
+    return {};
 }

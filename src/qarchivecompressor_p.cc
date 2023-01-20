@@ -4,7 +4,8 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
-#include <QVector>
+
+#include <deque>
 
 #include "qarchive_enums.hpp"
 #include "qarchivecompressor_p.hpp"
@@ -22,6 +23,15 @@ extern "C" {
 
 using namespace QArchive;
 
+namespace {
+bool contains(const QString& entry, const std::deque<CompressorPrivate::Node*>& vec)
+{
+    return std::any_of(vec.begin(), vec.end(), [&](const CompressorPrivate::Node* n) {
+        return n && n->valid && n->entry == entry;
+    });
+}
+} // namespace
+
 // Node is a private structure which is used store info about entries to be
 // compressed by the Compressor.
 short CompressorPrivate::Node::open() {
@@ -29,11 +39,11 @@ short CompressorPrivate::Node::open() {
         return NoError;
     }
 
-    if(path.isEmpty() && (io == nullptr && entry.isEmpty())) {
+    if (path.isEmpty() && (!io && entry.isEmpty())) {
         return FileDoesNotExist;
     }
 
-    if(path.isEmpty() && io) {
+    if (path.isEmpty() && io) {
         isInMemory = true;
         if(!io->isOpen() &&
                 !io->open(QIODevice::ReadOnly)) {
@@ -47,22 +57,10 @@ short CompressorPrivate::Node::open() {
         if(io->isSequential()) {
             return IODeviceSequential;
         }
-
     }
 
     valid = true;
     return NoError;
-}
-
-void CompressorPrivate::freeNodes(QVector<Node*>& vec) {
-    qDeleteAll(vec);
-    vec.clear();
-}
-
-static bool contains(const QString &entry, const QVector<CompressorPrivate::Node*>& vec) {
-    return std::any_of(vec.begin(), vec.end(), [&](CompressorPrivate::Node *n) {
-        return n && n->valid && n->entry == entry;
-    });
 }
 
 // CompressorPrivate is the private class which handles the
@@ -272,8 +270,10 @@ void CompressorPrivate::clear() {
     n_BytesProcessed = 0;
     n_BytesTotal = 0;
 
-    freeNodes(m_ConfirmedFiles);
-    freeNodes(m_StaggedFiles);
+    qDeleteAll(m_ConfirmedFiles);
+    m_ConfirmedFiles.clear();
+    qDeleteAll(m_StaggedFiles);
+    m_StaggedFiles.clear();
 
     if(!b_MemoryMode) {
 #ifdef __cpp_lib_make_unique
@@ -296,7 +296,7 @@ void CompressorPrivate::start() {
         return;
     }
     if (!b_MemoryMode && m_TemporaryFile->fileName().isEmpty()) {
-        emit error(ArchiveFileNameNotGiven, QString());
+        emit error(ArchiveFileNameNotGiven, {});
         return;
     }
     if (!b_MemoryMode && QFileInfo::exists(m_TemporaryFile->fileName())) {
@@ -304,11 +304,7 @@ void CompressorPrivate::start() {
         return;
     }
     if (m_StaggedFiles.empty()) {
-        if(b_MemoryMode) {
-            emit error(NoFilesToCompress, QString());
-        } else {
-            emit error(NoFilesToCompress, m_TemporaryFile->fileName());
-        }
+        emit error(NoFilesToCompress, !b_MemoryMode ? m_TemporaryFile->fileName() : "");
         return;
     }
 
@@ -412,7 +408,7 @@ bool CompressorPrivate::guessArchiveFormat() {
         return false;
     }
 
-    if(m_TemporaryFile->fileName().isEmpty()) {
+    if (m_TemporaryFile->fileName().isEmpty()) {
         return false;
     }
 
@@ -456,15 +452,12 @@ bool CompressorPrivate::guessArchiveFormat() {
 // This populates m_ConfirmedFiles vector with all the files added ,
 // Directory's files will be recursively added.
 bool CompressorPrivate::confirmFiles() {
-    freeNodes(m_ConfirmedFiles);
+    qDeleteAll(m_ConfirmedFiles);
+    m_ConfirmedFiles.clear();
     for(const auto& node : m_StaggedFiles) {
         short eCode = node->open();
         if(eCode != NoError) {
-            if(!node->isInMemory) {
-                emit error(eCode, node->path);
-            } else {
-                emit error(eCode, QString());
-            }
+            emit error(eCode, !node->isInMemory ? node->path : "");
             return false;
         }
 
@@ -492,12 +485,13 @@ bool CompressorPrivate::confirmFiles() {
             // if directory then add files in directory
             // recursively.
             if(info.isDir()) {
-                QVector<QString> dirList;
+                std::deque<QString> dirList;
                 QString toReplace = info.filePath();
                 dirList.push_back(info.filePath());
 
-                while(!dirList.isEmpty()) {
-                    QDir dir(dirList.takeFirst());
+                while (!dirList.empty()) {
+                    QDir dir(dirList.front());
+                    dirList.pop_front();
                     QFileInfoList list = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden);
                     for (const auto &i : list) {
                         if(i.isDir()) {
@@ -512,7 +506,7 @@ bool CompressorPrivate::confirmFiles() {
 
                         if (toReplace.back() == '/' || toReplace.back() == '\\') {
                             if (node->entry.back() != '/' && node->entry.back() != '\\') {
-                                node->entry.append('/');
+                                node->entry.push_back('/');
                             }
                         }
                         fileNode->entry = file.replace(toReplace, node->entry);
@@ -555,7 +549,7 @@ bool CompressorPrivate::confirmFiles() {
 
 // Does the compression and also resumes it if called twice.
 short CompressorPrivate::compress() {
-    if(m_ArchiveWrite.isNull()) {
+    if (!m_ArchiveWrite) {
         /// Open Temporary file for write.
         if(!b_MemoryMode && !m_TemporaryFile->open(QIODevice::WriteOnly)) {
             emit error(ArchiveWriteOpenError, m_TemporaryFile->fileName());
@@ -564,12 +558,8 @@ short CompressorPrivate::compress() {
 
         m_ArchiveWrite = QSharedPointer<struct archive>(
                              archive_write_new(), ArchiveWriteDestructor);
-        if(m_ArchiveWrite.isNull()) {
-            if(b_MemoryMode) {
-                emit error(NotEnoughMemory, QString());
-            } else {
-                emit error(NotEnoughMemory, m_TemporaryFile->fileName());
-            }
+        if (!m_ArchiveWrite) {
+            emit error(NotEnoughMemory, !b_MemoryMode ? m_TemporaryFile->fileName() : "");
             return NotEnoughMemory;
         }
 
@@ -632,7 +622,7 @@ short CompressorPrivate::compress() {
         // ability to use passwords and thus until the user uses Zip format , the
         // password even if given is ignored.
 #if ARCHIVE_VERSION_NUMBER >= 3003003
-        if(!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
+        if (!m_Password.isEmpty() && m_ArchiveFormat == ZipFormat) {
             archive_write_set_passphrase(m_ArchiveWrite.data(), m_Password.toUtf8().constData());
             archive_write_set_options(m_ArchiveWrite.data(), "zip:encryption=traditional");
         }
@@ -654,7 +644,7 @@ short CompressorPrivate::compress() {
             if (archiveWriteOpenQIODevice(m_ArchiveWrite.data(),
                                           m_Buffer.get()) != ARCHIVE_OK) {
                 m_ArchiveWrite.clear();
-                emit error(ArchiveWriteOpenError, QString());
+                emit error(ArchiveWriteOpenError, {});
                 return ArchiveWriteOpenError;
             }
         }
@@ -765,26 +755,25 @@ short CompressorPrivate::compress() {
                 return ArchiveFatalError;
             }
 
-            if (r > ARCHIVE_FAILED) {
-                len = (node->io)->read(buff, sizeof(buff));
-                while (len > 0) {
-                    archive_write_data(m_ArchiveWrite.data(), buff, len);
-                    n_BytesProcessed += len;
-
-                    emit progress(node->entry,
-                                  (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
-                                  n_TotalEntries, n_BytesProcessed, n_BytesTotal);
-
-                    QCoreApplication::processEvents();
-                    len = (node->io)->read(buff, sizeof(buff));
-                }
-            } else {
+            if (r <= ARCHIVE_FAILED) {
                 emit error(ArchiveHeaderWriteError, node->entry);
                 return ArchiveHeaderWriteError;
             }
+            len = (node->io)->read(buff, sizeof(buff));
+            while (len > 0) {
+                archive_write_data(m_ArchiveWrite.data(), buff, len);
+                n_BytesProcessed += len;
+
+                emit progress(node->entry,
+                    (n_TotalEntries - (m_ConfirmedFiles.size() - 1)),
+                    n_TotalEntries, n_BytesProcessed, n_BytesTotal);
+
+                QCoreApplication::processEvents();
+                len = (node->io)->read(buff, sizeof(buff));
+            }
         }
 
-        m_ConfirmedFiles.removeFirst();
+        m_ConfirmedFiles.pop_front();
 
         emit progress(node->entry,
                       (n_TotalEntries - m_ConfirmedFiles.size()),

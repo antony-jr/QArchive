@@ -6,10 +6,13 @@
 
 using namespace QArchive;
 
-static QMetaMethod getMethod(const ExtractorPrivate &object, const char *function) {
+namespace {
+QMetaMethod getMethod(const ExtractorPrivate& object, const char* function)
+{
     auto metaObject = object.metaObject();
     return metaObject->method(metaObject->indexOfMethod(QMetaObject::normalizedSignature(function)));
 }
+} // namespace
 
 Extractor::Extractor(bool memoryMode, QObject *parent, bool singleThreaded)
     : QObject(parent) {

@@ -22,7 +22,7 @@ class ArchiveFilter;
 
 class MutableMemoryFile {
 public:
-    void setFileInformation(const QJsonObject&);
+    void setFileInformation(QJsonObject);
     void setBuffer(QBuffer*);
 
     [[gnu::warn_unused_result]] QJsonObject getFileInformation() const;
