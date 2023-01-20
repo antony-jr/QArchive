@@ -217,6 +217,15 @@ My utmost **gratitude goes to these people!** :heart:
        </sub><br>
        <a href="https://github.com/antony-jr/QArchive/commits?author=Jihadist">💻</a>
      </td>
+     <td>
+       <img src="https://avatars.githubusercontent.com/u/52410353?v=4" width="100px"><br>
+       <sub>
+         <strong>
+            <a href="https://github.com/elizabethfeden">Elizabeth</a>
+         </strong>
+       </sub><br>
+       <a href="https://github.com/antony-jr/QArchive/commits?author=elizabethfeden">💻</a>
+     </td>
   </tr> 
 </table>
 
