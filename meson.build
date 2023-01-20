@@ -1,7 +1,7 @@
 project(
   'QArchive',
   'cpp',
-  version: '2.2.4',
+  version: '2.2.5',
   license: 'BSD-3-Clause',
   default_options: ['cpp_std=c++17'],
   meson_version: '>=0.49.0',
