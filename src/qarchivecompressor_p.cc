@@ -504,8 +504,11 @@ bool CompressorPrivate::confirmFiles() {
                         fileNode->valid = node->valid;
                         fileNode->path = file;
 
-                        if (toReplace.back() == '/' || toReplace.back() == '\\') {
-                            if (node->entry.back() != '/' && node->entry.back() != '\\') {
+			auto len = toReplace.length();
+
+                        if (toReplace[len - 1] == '/' || toReplace[len - 1] == '\\') {
+                            len = node->entry.length();
+			    if (node->entry[len - 1] != '/' && node->entry[len - 1] != '\\') {
                                 node->entry.push_back('/');
                             }
                         }
