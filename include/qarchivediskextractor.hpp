@@ -11,14 +11,17 @@
 
 namespace QArchive {
 class QARCHIVE_EXPORT DiskExtractor : public Extractor {
-    Q_OBJECT
-public:
-    explicit DiskExtractor(QObject* parent = nullptr, bool singleThreaded = true);
-    explicit DiskExtractor(QIODevice*, QObject* parent = nullptr, bool singleThreaded = true);
-    explicit DiskExtractor(const QString&, QObject* parent = nullptr, bool singleThreaded = true);
-    DiskExtractor(const QString&, const QString&, QObject* parent = nullptr, bool singleThreaded = true);
-Q_SIGNALS:
-    void finished();
+  Q_OBJECT
+ public:
+  explicit DiskExtractor(QObject* parent = nullptr, bool singleThreaded = true);
+  explicit DiskExtractor(QIODevice*, QObject* parent = nullptr,
+                         bool singleThreaded = true);
+  explicit DiskExtractor(const QString&, QObject* parent = nullptr,
+                         bool singleThreaded = true);
+  DiskExtractor(const QString&, const QString&, QObject* parent = nullptr,
+                bool singleThreaded = true);
+ Q_SIGNALS:
+  void finished();
 };
-} // namespace QArchive
-#endif // QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED
+}  // namespace QArchive
+#endif  // QARCHIVE_DISK_EXTRACTOR_HPP_INCLUDED

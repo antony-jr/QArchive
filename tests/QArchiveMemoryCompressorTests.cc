@@ -1,421 +1,432 @@
 #include "QArchiveMemoryCompressorTests.hpp"
 
-void QArchiveMemoryCompressorTests::initTestCase() {
-}
+void QArchiveMemoryCompressorTests::initTestCase() {}
 
 void QArchiveMemoryCompressorTests::simpleCompression() {
-    QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
+  QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
 
-    /* Write the file to compress and add it. */
-    auto array = Test1OutputContents.toLocal8Bit();
-    QBuffer buffer(&array);
-    compressor.addFiles(QFileInfo(Test1OutputFile).fileName(), &buffer);
+  /* Write the file to compress and add it. */
+  auto array = Test1OutputContents.toLocal8Bit();
+  QBuffer buffer(&array);
+  compressor.addFiles(QFileInfo(Test1OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test1OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test1OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::usingPauseResume() {
-    QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
+  QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
 
-    auto array = Test2OutputContents.toLocal8Bit();
+  auto array = Test2OutputContents.toLocal8Bit();
 
-    QBuffer inputBuffer(&array);
-    compressor.addFiles(QFileInfo(Test2OutputFile).fileName(), &inputBuffer);
+  QBuffer inputBuffer(&array);
+  compressor.addFiles(QFileInfo(Test2OutputFile).fileName(), &inputBuffer);
 
-    bool startedEmitted = false;
-    bool pausedEmitted = false;
-    bool resumedEmitted = false;
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::started, [&]() {
-        startedEmitted = true;
-        compressor.pause();
-        return;
-    });
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::paused, [&]() {
-        pausedEmitted = true;
-        QTimer::singleShot(1000, &compressor, SLOT(resume()));
-        return;
-    });
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::resumed, [&]() {
-        resumedEmitted = true;
-        return;
-    });
+  bool startedEmitted = false;
+  bool pausedEmitted = false;
+  bool resumedEmitted = false;
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::started, [&]() {
+    startedEmitted = true;
+    compressor.pause();
+    return;
+  });
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::paused, [&]() {
+    pausedEmitted = true;
+    QTimer::singleShot(1000, &compressor, SLOT(resume()));
+    return;
+  });
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::resumed, [&]() {
+    resumedEmitted = true;
+    return;
+  });
 
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QVERIFY(startedEmitted);
-    QVERIFY(pausedEmitted);
-    QVERIFY(resumedEmitted);
+  QVERIFY(startedEmitted);
+  QVERIFY(pausedEmitted);
+  QVERIFY(resumedEmitted);
 
-    /// Verify Data
+  /// Verify Data
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test2OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test2OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::compressingMultipleFiles() {
-    QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
+  QArchive::MemoryCompressor compressor(QArchive::SevenZipFormat);
 
-    /* Write the file to compress and add it. */
-    auto array1 = Test3Output1Contents.toLocal8Bit();
-    auto array2 = Test3Output2Contents.toLocal8Bit();
+  /* Write the file to compress and add it. */
+  auto array1 = Test3Output1Contents.toLocal8Bit();
+  auto array2 = Test3Output2Contents.toLocal8Bit();
 
-    QBuffer buffer1(&array1);
-    QBuffer buffer2(&array2);
+  QBuffer buffer1(&array1);
+  QBuffer buffer2(&array2);
 
-    compressor.addFiles(QStringList() << QFileInfo(Test3OutputFile1).fileName()
-                                      << QFileInfo(Test3OutputFile2).fileName(),
-                        QVariantList() << QVariant::fromValue(&buffer1)
-                                       << QVariant::fromValue(&buffer2));
+  compressor.addFiles(QStringList() << QFileInfo(Test3OutputFile1).fileName()
+                                    << QFileInfo(Test3OutputFile2).fileName(),
+                      QVariantList() << QVariant::fromValue(&buffer1)
+                                     << QVariant::fromValue(&buffer2));
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy progressSpyInfo(&compressor, SIGNAL(progress(QString, int, int, qint64, qint64)));
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy progressSpyInfo(
+      &compressor, SIGNAL(progress(QString, int, int, qint64, qint64)));
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
-    QCOMPARE(progressSpyInfo.count(), 4);
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
+  QCOMPARE(progressSpyInfo.count(), 4);
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(data->getFiles().size() >= 2);
-    auto outputBuffer1 = data->getFiles().at(0).buffer();
-    auto outputBuffer2 = data->getFiles().at(1).buffer();
+  QVERIFY(data->getFiles().size() >= 2);
+  auto outputBuffer1 = data->getFiles().at(0).buffer();
+  auto outputBuffer2 = data->getFiles().at(1).buffer();
 
-    outputBuffer1->open(QIODevice::ReadOnly);
-    outputBuffer2->open(QIODevice::ReadOnly);
+  outputBuffer1->open(QIODevice::ReadOnly);
+  outputBuffer2->open(QIODevice::ReadOnly);
 
-    QCOMPARE(QString(outputBuffer1->readAll()), Test3Output1Contents);
-    QCOMPARE(QString(outputBuffer2->readAll()), Test3Output2Contents);
+  QCOMPARE(QString(outputBuffer1->readAll()), Test3Output1Contents);
+  QCOMPARE(QString(outputBuffer2->readAll()), Test3Output2Contents);
 
-    outputBuffer1->close();
-    outputBuffer2->close();
+  outputBuffer1->close();
+  outputBuffer2->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::encryptingZipArchive() {
-    QArchive::MemoryCompressor compressor(QArchive::ZipFormat);
+  QArchive::MemoryCompressor compressor(QArchive::ZipFormat);
 
-    /* Write the file to compress and add it. */
-    auto array = Test4OutputContents.toLocal8Bit();
-    QBuffer buffer(&array);
-    compressor.addFiles(QFileInfo(Test4OutputFile).fileName(), &buffer);
+  /* Write the file to compress and add it. */
+  auto array = Test4OutputContents.toLocal8Bit();
+  QBuffer buffer(&array);
+  compressor.addFiles(QFileInfo(Test4OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
 
-    compressor.setPassword(Test4Password);
-    compressor.start();
+  compressor.setPassword(Test4Password);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
 
-    extractor.setPassword(Test4Password);
-    extractor.start();
+  extractor.setPassword(Test4Password);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test4OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test4OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::runningCompressorNonSingleThreaded() {
-    QArchive::MemoryCompressor compressor(QArchive::GZipFormat, /*parent=*/nullptr,
-                                          /*single threaded=*/false);
+  QArchive::MemoryCompressor compressor(QArchive::GZipFormat,
+                                        /*parent=*/nullptr,
+                                        /*single threaded=*/false);
 
-    /* Write the file to compress and add it. */
-    auto array = Test5OutputContents.toLocal8Bit();
-    QBuffer buffer(&array);
-    compressor.addFiles(QFileInfo(Test5OutputFile).fileName(), &buffer);
+  /* Write the file to compress and add it. */
+  auto array = Test5OutputContents.toLocal8Bit();
+  QBuffer buffer(&array);
+  compressor.addFiles(QFileInfo(Test5OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test5OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test5OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::compressingTarArchiveWithoutFilters() {
-    QArchive::MemoryCompressor compressor(QArchive::TarFormat);
+  QArchive::MemoryCompressor compressor(QArchive::TarFormat);
 
-    /* Write the file to compress and add it. */
-    auto array = Test6OutputContents.toLocal8Bit();
-    QBuffer buffer(&array);
-    compressor.addFiles(QFileInfo(Test6OutputFile).fileName(), &buffer);
+  /* Write the file to compress and add it. */
+  auto array = Test6OutputContents.toLocal8Bit();
+  QBuffer buffer(&array);
+  compressor.addFiles(QFileInfo(Test6OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test6OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test6OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::compressingTarArchiveWithZSTD() {
-    QArchive::MemoryCompressor compressor(QArchive::ZstdFormat);
+  QArchive::MemoryCompressor compressor(QArchive::ZstdFormat);
 
-    /* Write the file to compress and add it. */
-    auto array = Test7OutputContents.toLocal8Bit();
-    QBuffer buffer(&array);
-    compressor.addFiles(QFileInfo(Test7OutputFile).fileName(), &buffer);
+  /* Write the file to compress and add it. */
+  auto array = Test7OutputContents.toLocal8Bit();
+  QBuffer buffer(&array);
+  compressor.addFiles(QFileInfo(Test7OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
-    auto outputBuffer = data->getFiles().at(0).buffer();
+  QVERIFY(!data->getFiles().empty());
+  auto outputBuffer = data->getFiles().at(0).buffer();
 
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), Test7OutputContents);
-    outputBuffer->close();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), Test7OutputContents);
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
 void QArchiveMemoryCompressorTests::compressEmptyFiles() {
-    QArchive::MemoryCompressor compressor(QArchive::ZipFormat);
+  QArchive::MemoryCompressor compressor(QArchive::ZipFormat);
 
-    // Get a Empty QBuffer
-    QBuffer buffer;
-    compressor.addFiles(QFileInfo(Test8OutputFile).fileName(), &buffer);
+  // Get a Empty QBuffer
+  QBuffer buffer;
+  compressor.addFiles(QFileInfo(Test8OutputFile).fileName(), &buffer);
 
-    QObject::connect(&compressor, &QArchive::MemoryCompressor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultErrorHandler);
-    QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
-    compressor.start();
+  QObject::connect(&compressor, &QArchive::MemoryCompressor::error, this,
+                   &QArchiveMemoryCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&compressor, &QArchive::MemoryCompressor::finished);
+  compressor.start();
 
-    /*  Must emit exactly one signal. */
-    QVERIFY(spyInfo.wait() || spyInfo.count());
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
 
-    QList<QVariant> output = spyInfo.takeFirst();
-    QVERIFY(output.count() == 1);
-    auto archive = output.at(0).value<QBuffer*>();
+  QList<QVariant> output = spyInfo.takeFirst();
+  QVERIFY(output.count() == 1);
+  auto archive = output.at(0).value<QBuffer*>();
 
-    QArchive::MemoryExtractor extractor(archive);
-    QObject::connect(&extractor, &QArchive::MemoryExtractor::error,
-                     this, &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
+  QArchive::MemoryExtractor extractor(archive);
+  QObject::connect(
+      &extractor, &QArchive::MemoryExtractor::error, this,
+      &QArchiveMemoryCompressorTests::defaultExtractorErrorHandler);
 
-    QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
-    extractor.start();
+  QSignalSpy spyExtractor(&extractor, &QArchive::MemoryExtractor::finished);
+  extractor.start();
 
-    QVERIFY(spyExtractor.wait() || spyExtractor.count());
+  QVERIFY(spyExtractor.wait() || spyExtractor.count());
 
-    QList<QVariant> extractorOutput = spyExtractor.takeFirst();
+  QList<QVariant> extractorOutput = spyExtractor.takeFirst();
 
-    QVERIFY(extractorOutput.count() == 1);
-    auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
+  QVERIFY(extractorOutput.count() == 1);
+  auto data = extractorOutput.at(0).value<QArchive::MemoryExtractorOutput*>();
 
-    QVERIFY(!data->getFiles().empty());
+  QVERIFY(!data->getFiles().empty());
 
-    QJsonObject fileInfo = data->getFiles().at(0).fileInformation();
-    QCOMPARE(fileInfo.value("FileName").toString(), QFileInfo(Test8OutputFile).fileName());
+  QJsonObject fileInfo = data->getFiles().at(0).fileInformation();
+  QCOMPARE(fileInfo.value("FileName").toString(),
+           QFileInfo(Test8OutputFile).fileName());
 
-    auto outputBuffer = data->getFiles().at(0).buffer();
-    outputBuffer->open(QIODevice::ReadOnly);
-    QCOMPARE(QString(outputBuffer->readAll()), QString());
-    outputBuffer->close();
+  auto outputBuffer = data->getFiles().at(0).buffer();
+  outputBuffer->open(QIODevice::ReadOnly);
+  QCOMPARE(QString(outputBuffer->readAll()), QString());
+  outputBuffer->close();
 
-    data->deleteLater();
-    archive->deleteLater();
+  data->deleteLater();
+  archive->deleteLater();
 }
 
-void QArchiveMemoryCompressorTests::defaultErrorHandler(short code, const QString& file) {
-    auto scode = QArchive::errorCodeToString(code);
-    scode.prepend(("error::" + file) + ":: ");
-    QFAIL(QTest::toString(scode));
+void QArchiveMemoryCompressorTests::defaultErrorHandler(short code,
+                                                        const QString& file) {
+  auto scode = QArchive::errorCodeToString(code);
+  scode.prepend(("error::" + file) + ":: ");
+  QFAIL(QTest::toString(scode));
 }
 
 void QArchiveMemoryCompressorTests::defaultExtractorErrorHandler(short code) {
-    auto scode = QArchive::errorCodeToString(code);
-    scode.prepend("error:: ");
-    QFAIL(QTest::toString(scode));
+  auto scode = QArchive::errorCodeToString(code);
+  scode.prepend("error:: ");
+  QFAIL(QTest::toString(scode));
 }

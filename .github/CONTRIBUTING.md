@@ -25,7 +25,13 @@ If you wish to develop some **code** for the project then you are much **welcome
     $ astyle --style=google src/*cc include/*hpp
     $ rm src/*orig include/*orig # remove old files.
    ```
-   
+ * You **can** use ```clang-format``` command to format automatically.
+
+   ```
+    $ cd QArchive
+    $ clang-format -i src/*.cc include/*.hpp
+   ```
+  
  * You **must** follow **google's** conventions for c++ file extensions , (i.e) for **source file(s)** you must use **.cc**
    extension and for **header file(s)** you must use **.hpp**.
  * Use comments only to write why we need a **class** or a **function** and not **what**.

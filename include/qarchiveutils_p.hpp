@@ -20,12 +20,13 @@ void ArchiveWriteDestructor(archive*);
 void ArchiveEntryDestructor(archive_entry*);
 
 /* Open Archive from QIODevice. (non-sequential) */
-int archiveReadOpenQIODevice(struct archive *archive, int blocksize, QIODevice *device);
+int archiveReadOpenQIODevice(struct archive* archive, int blocksize,
+                             QIODevice* device);
 
 /* Write Archive to QIODevice. */
-int archiveWriteOpenQIODevice(struct archive *archive, QIODevice *device);
+int archiveWriteOpenQIODevice(struct archive* archive, QIODevice* device);
 
 /* Basic string manupilators.  */
-char *concat(const char*, const char*);
+char* concat(const char*, const char*);
 QString getDirectoryFileName(const QString&);
-#endif // QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED
+#endif  // QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED

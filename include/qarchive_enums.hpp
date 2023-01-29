@@ -15,11 +15,7 @@ QARCHIVE_EXPORT QString errorCodeToString(short);
  * used across all QArchive Objects, Thus these are
  * given an global error code values.
 */
-enum : short {
-    NoError = 0,
-    NotEnoughMemory,
-    NoPermissionToWrite
-};
+enum : short { NoError = 0, NotEnoughMemory, NoPermissionToWrite };
 
 /*
  * Extractor error codes, these error codes are
@@ -28,38 +24,38 @@ enum : short {
  * Archives.
 */
 enum : short {
-    ArchiveNotGiven = 3,
-    ArchiveDoesNotExists,
-    ArchiveReadError,
-    ArchiveWriteError,
-    ArchiveHeaderWriteError,
-    ArchiveCorrupted,
-    ArchiveIsNotReadable,
-    ArchiveIsNotOpened,
-    ArchivePasswordNeeded,
-    ArchivePasswordIncorrect,
-    CannotOpenArchive,
-    NoPermissionToReadArchive,
-    InvalidOutputDirectory,
-    InvalidArchiveFile,
-    ApplyPatternFailed,
+  ArchiveNotGiven = 3,
+  ArchiveDoesNotExists,
+  ArchiveReadError,
+  ArchiveWriteError,
+  ArchiveHeaderWriteError,
+  ArchiveCorrupted,
+  ArchiveIsNotReadable,
+  ArchiveIsNotOpened,
+  ArchivePasswordNeeded,
+  ArchivePasswordIncorrect,
+  CannotOpenArchive,
+  NoPermissionToReadArchive,
+  InvalidOutputDirectory,
+  InvalidArchiveFile,
+  ApplyPatternFailed,
 };
 
 /*
  * Compressor error codes.
 */
 enum : short {
-    ArchiveFileNameNotGiven = 100,
-    ArchiveFileAlreadyExists,
-    ArchiveWriteOpenError,
-    ArchiveFatalError,
-    FileDoesNotExist,
-    DiskReadError,
-    DiskOpenError,
-    NoPermissionToReadFile,
-    NoFilesToCompress,
-    CannotOpenFile,
-    IODeviceSequential
+  ArchiveFileNameNotGiven = 100,
+  ArchiveFileAlreadyExists,
+  ArchiveWriteOpenError,
+  ArchiveFatalError,
+  FileDoesNotExist,
+  DiskReadError,
+  DiskOpenError,
+  NoPermissionToReadFile,
+  NoFilesToCompress,
+  CannotOpenFile,
+  IODeviceSequential
 };
 
 /*
@@ -68,15 +64,15 @@ enum : short {
  * of a short integer.
 */
 enum formats : short {
-    TarFormat = 200,
-    ZipFormat,
-    SevenZipFormat,
-    BZipFormat,
-    BZip2Format,
-    GZipFormat,
-    XzFormat,
-    XarFormat,
-    ZstdFormat
+  TarFormat = 200,
+  ZipFormat,
+  SevenZipFormat,
+  BZipFormat,
+  BZip2Format,
+  GZipFormat,
+  XzFormat,
+  XarFormat,
+  ZstdFormat
 };
 }  // namespace QArchive
 #endif

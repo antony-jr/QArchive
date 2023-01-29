@@ -2,13 +2,14 @@
 
 using namespace QArchive;
 
-MemoryCompressor::MemoryCompressor(QObject *parent, bool singleThreaded)
+MemoryCompressor::MemoryCompressor(QObject* parent, bool singleThreaded)
     : Compressor(true, parent, singleThreaded) {
-    connect(this, &MemoryCompressor::memoryFinished,
-            this, &MemoryCompressor::finished, Qt::DirectConnection);
+  connect(this, &MemoryCompressor::memoryFinished, this,
+          &MemoryCompressor::finished, Qt::DirectConnection);
 }
 
-MemoryCompressor::MemoryCompressor(short format, QObject *parent, bool singleThreaded)
+MemoryCompressor::MemoryCompressor(short format, QObject* parent,
+                                   bool singleThreaded)
     : MemoryCompressor(parent, singleThreaded) {
-    setArchiveFormat(format);
+  setArchiveFormat(format);
 }

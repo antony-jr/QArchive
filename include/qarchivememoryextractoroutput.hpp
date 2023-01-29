@@ -10,15 +10,16 @@
 
 namespace QArchive {
 class QARCHIVE_EXPORT MemoryExtractorOutput : public QObject {
-    using QObject::QObject;
-    Q_OBJECT
-public:
-    explicit MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>, QObject* parent = nullptr);
+  using QObject::QObject;
+  Q_OBJECT
+ public:
+  explicit MemoryExtractorOutput(std::unique_ptr<QVector<MemoryFile>>,
+                                 QObject* parent = nullptr);
 
-    [[gnu::warn_unused_result]] const QVector<MemoryFile>& getFiles() const;
+  [[gnu::warn_unused_result]] const QVector<MemoryFile>& getFiles() const;
 
-private:
-    std::unique_ptr<QVector<MemoryFile>> m_Files;
+ private:
+  std::unique_ptr<QVector<MemoryFile>> m_Files;
 };
-} // namespace QArchive
-#endif // QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED
+}  // namespace QArchive
+#endif  // QARCHIVE_MEMORY_EXTRACTOR_OUTPUT_HPP_INCLUDED
