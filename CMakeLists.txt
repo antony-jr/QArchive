@@ -1,5 +1,6 @@
 # BSD-3 Clause.
-# Copyright (C) 2018 Antony Jr.
+# Copyright (c) 2017-present, QArchive Contributors and Antony J.R
+#
 # -------------------------------
 #  CMake Support for QArchive.
 # -------------------------------
