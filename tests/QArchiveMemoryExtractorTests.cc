@@ -109,7 +109,7 @@ void QArchiveMemoryExtractorTests::usingExtractFilters() {
   auto data = output.at(0).value<QArchive::MemoryExtractorOutput*>();
 
   /// Test3OUtputFile1 should not exists
-  QVERIFY(data->getFiles().empty());
+  QVERIFY(!data->getFiles().empty());
   QVERIFY(
       data->getFiles().at(0).fileInformation().value("FileName").toString() !=
       QFileInfo(Test3OutputFile1).fileName());

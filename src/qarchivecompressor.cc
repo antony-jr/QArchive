@@ -79,7 +79,7 @@ void Compressor::setBlockSize(int size) {
 void Compressor::addFiles(const QString& entry, QIODevice* io) {
   getMethod(*m_Compressor, "addFiles(const QString&, QIODevice*)")
       .invoke(m_Compressor.get(), Qt::QueuedConnection, Q_ARG(QString, entry),
-              Q_ARG(QObject*, io));
+              Q_ARG(QIODevice*, io));
 }
 
 void Compressor::addFiles(const QStringList& entries,
