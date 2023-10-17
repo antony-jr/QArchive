@@ -7,7 +7,6 @@ project(
   meson_version: '>=0.49.0',
 )
 
-libarchive_dep = dependency('libarchive')
 qt_dep = dependency('qt6', modules: ['Core'], required: get_option('qt6'))
 if qt_dep.found() and meson.version().version_compare('>=0.57.0')
   qt = import('qt6')
@@ -17,6 +16,7 @@ else
   qt_dep = dependency('qt5', modules: ['Core'])
   qt = import('qt5')
 endif
+libarchive_dep = dependency('libarchive')
 
 conf = configure_file(
   format: 'cmake@',
