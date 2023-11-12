@@ -53,6 +53,10 @@ class QArchiveTestCases {
     TestCase8ArchivePath = TestCasesDir + "Test8.zip";
     TestCase8OutputDir = TestOutputDir + "Test8";
     Test8OutputFile = TestCase8OutputDir + "/Test8SpecialEmptyFile.txt";
+
+    TestCase9ArchivePath = TestCasesDir + "Test9.zip";
+    TestCase9OutputDir = TestOutputDir + "Test9";
+    Test9OutputFile = TestCase9OutputDir + "/新建文件.txt";
   }
 
   ~QArchiveTestCases() = default;
@@ -84,6 +88,9 @@ class QArchiveTestCases {
   QString TestCase8ArchivePath;
   QString TestCase8OutputDir;
   QString Test8OutputFile;
+  QString TestCase9ArchivePath;
+  QString TestCase9OutputDir;
+  QString Test9OutputFile;
   QString TemporaryFilePath;
 
  protected:
@@ -97,6 +104,7 @@ class QArchiveTestCases {
   const QString Test5OutputContents = "TEST5SUCCESS!";
   const QString Test6OutputContents = "TEST6SUCCESS!";
   const QString Test7OutputContents = "TEST7SUCCESS!";
+  const QString Test9OutputContents = "测试9成功!";
 };
 
 #endif  // QARCHIVE_TEST_CASES_HPP_INCLUDED

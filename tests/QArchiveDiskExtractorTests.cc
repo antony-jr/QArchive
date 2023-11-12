@@ -9,12 +9,13 @@ void QArchiveDiskExtractorTests::initTestCase() {
           QFileInfo(TestCase4ArchivePath).exists() &&
           QFileInfo(TestCase5ArchivePath).exists() &&
           QFileInfo(TestCase6ArchivePath).exists() &&
-          QFileInfo(TestCase7ArchivePath).exists())) {
+          QFileInfo(TestCase7ArchivePath).exists() &&
+          QFileInfo(TestCase8ArchivePath).exists() &&
+          QFileInfo(TestCase9ArchivePath).exists())) {
       QFAIL("cannot find test case files.");
       return;
     }
   } else {
-
     QFAIL("cannnot find test cases.");
   }
 }
@@ -225,6 +226,22 @@ void QArchiveDiskExtractorTests::extractTarArchiveWithZSTD() {
   TestOutput.setFileName(Test7OutputFile);
   QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
   QVERIFY(Test7OutputContents == QString(TestOutput.readAll()));
+  TestOutput.close();
+}
+
+void QArchiveDiskExtractorTests::extractSpecialCharacterFiles() {
+  QArchive::DiskExtractor e(TestCase9ArchivePath, TestCase9OutputDir);
+  QObject::connect(&e, &QArchive::DiskExtractor::error, this,
+                   &QArchiveDiskExtractorTests::defaultErrorHandler);
+
+  QFile TestOutput;
+  QSignalSpy spyInfo(&e, SIGNAL(finished()));
+  e.start();
+
+  QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
+  TestOutput.setFileName(Test9OutputFile);
+  QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+  QVERIFY(Test9OutputContents == QString(TestOutput.readAll()));
   TestOutput.close();
 }
 
