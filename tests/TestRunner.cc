@@ -9,8 +9,8 @@ TestRunner::TestRunner()
       m_MemoryCompressorTests(&m_TempDir),
       m_ExtractorTests(&m_TempDir),
       m_MemoryExtractorTests(&m_TempDir) {
-  connect(&m_FutureWatcher, &QFutureWatcher<void>::finished, this,
-          &TestRunner::finished, Qt::DirectConnection);
+  connect(&m_FutureWatcher, &QFutureWatcher<void>::finished,
+          [&]() { emit finished(n_ReturnCode); });
 }
 
 void TestRunner::start() {
@@ -24,14 +24,8 @@ void TestRunner::start() {
 void TestRunner::runTests() {
   // Run the compressor tests which should generate the
   // desired archives to test it with the extractor.
-  QTest::qExec(&m_CompressorTests);
-
-  // Run disk extractor tests.
-  QTest::qExec(&m_ExtractorTests);
-
-  // Run memory extractor tests
-  QTest::qExec(&m_MemoryExtractorTests);
-
-  // Run memory compressor tests
-  QTest::qExec(&m_MemoryCompressorTests);
+  n_ReturnCode = QTest::qExec(&m_CompressorTests) |
+                 QTest::qExec(&m_ExtractorTests) |
+                 QTest::qExec(&m_MemoryExtractorTests) |
+                 QTest::qExec(&m_MemoryCompressorTests);
 }

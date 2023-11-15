@@ -19,9 +19,10 @@ class TestRunner : public QObject {
  private Q_SLOTS:
   void runTests();
  Q_SIGNALS:
-  void finished();
+  void finished(int);
 
  private:
+  int n_ReturnCode{};
   QTemporaryDir m_TempDir;
   QFuture<void> m_Future;
   QFutureWatcher<void> m_FutureWatcher;
