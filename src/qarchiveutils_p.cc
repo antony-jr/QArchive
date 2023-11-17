@@ -206,3 +206,13 @@ QString getDirectoryFileName(const QString& dir) {
   }
   return dir;
 }
+
+bool isUTF8(const char* src) {
+  auto s = QString::fromUtf8(src);
+  auto latin1 = QString::fromLatin1(src);
+
+  // Latin1 converts utf8 chars to ?
+  // so we can easily check if the string has
+  // utf8 characters
+  return s != latin1;
+}

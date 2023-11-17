@@ -14,6 +14,7 @@ void QArchiveDiskCompressorTests::initTestCase() {
   dir.mkpath(TestCase7OutputDir);
   dir.mkpath(TestCase8OutputDir);
   dir.mkpath(TestCase9OutputDir);
+  dir.mkpath(TestCase10OutputDir);
 }
 
 void QArchiveDiskCompressorTests::simpleCompression() {
@@ -254,6 +255,29 @@ void QArchiveDiskCompressorTests::compressingSpecialCharacterFiles() {
 
   /* The archive should also exists. */
   QVERIFY(QFileInfo::exists(TestCase9ArchivePath));
+}
+
+void QArchiveDiskCompressorTests::compressMultiLevelSpecialCharacterFiles() {
+  QArchive::DiskCompressor e(TestCase10ArchivePath);
+
+  /* Write the file to compress and add it. */
+  QFile TestOutput(TemporaryFilePath);
+  QVERIFY((TestOutput.open(QIODevice::WriteOnly)) == true);
+  TestOutput.write(Test10OutputContents.toUtf8());
+  TestOutput.close();
+
+  e.addFiles(/*entry name(optional)=*/Test10EntryName, TemporaryFilePath);
+
+  QObject::connect(&e, &QArchive::DiskCompressor::error, this,
+                   &QArchiveDiskCompressorTests::defaultErrorHandler);
+  QSignalSpy spyInfo(&e, SIGNAL(finished()));
+  e.start();
+
+  /*  Must emit exactly one signal. */
+  QVERIFY(spyInfo.wait() || spyInfo.count());
+
+  /* The archive should also exists. */
+  QVERIFY(QFileInfo::exists(TestCase10ArchivePath));
 }
 
 void QArchiveDiskCompressorTests::defaultErrorHandler(short code,

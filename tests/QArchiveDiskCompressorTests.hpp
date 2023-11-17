@@ -29,6 +29,7 @@ class QArchiveDiskCompressorTests : public QObject, private QArchiveTestCases {
   void compressingTarArchiveWithZSTD();
   void compressEmptyFiles();
   void compressingSpecialCharacterFiles();
+  void compressMultiLevelSpecialCharacterFiles();
 
  protected slots:
   static void defaultErrorHandler(short code, const QString& file);

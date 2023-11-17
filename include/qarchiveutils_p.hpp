@@ -29,4 +29,5 @@ int archiveWriteOpenQIODevice(struct archive* archive, QIODevice* device);
 /* Basic string manupilators.  */
 char* concat(const char*, const char*);
 QString getDirectoryFileName(const QString&);
+bool isUTF8(const char*);
 #endif  // QARCHIVE_UTILS_PRIVATE_HPP_INCLUDED

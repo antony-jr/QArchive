@@ -245,6 +245,25 @@ void QArchiveDiskExtractorTests::extractSpecialCharacterFiles() {
   TestOutput.close();
 }
 
+void QArchiveDiskExtractorTests::extractMultiLevelSpecialCharacterFiles() {
+  QArchive::DiskExtractor e(TestCase10ArchivePath, TestCase10OutputDir);
+  QObject::connect(&e, &QArchive::DiskExtractor::error, this,
+                   &QArchiveDiskExtractorTests::defaultErrorHandler);
+
+  QFile TestOutput;
+  QSignalSpy spyInfo(&e, SIGNAL(finished()));
+  e.start();
+
+  QVERIFY(spyInfo.wait() || spyInfo.count() == 1);
+
+  TestOutput.setFileName(Test10OutputFile);
+
+  QVERIFY(TestOutput.exists() == true);
+  QVERIFY((TestOutput.open(QIODevice::ReadOnly)) == true);
+  QVERIFY(Test10OutputContents == QString::fromUtf8(TestOutput.readAll()));
+  TestOutput.close();
+}
+
 void QArchiveDiskExtractorTests::isExtractorObjectReuseable() {
   QArchive::DiskExtractor e(TestCase5ArchivePath, TestCase5OutputDir);
   QObject::connect(&e, &QArchive::DiskExtractor::error, this,

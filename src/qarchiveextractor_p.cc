@@ -177,7 +177,7 @@ QJsonObject getArchiveEntryInformation(archive_entry* entry, bool bExcluded) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
                        QDateTime::fromSecsSinceEpoch(lastAccessT)
 #else
-                        QDateTime::fromTime_t(lastAccessT)
+                       QDateTime::fromTime_t(lastAccessT)
 #endif
                            )
                        .toString(Qt::ISODate)));
@@ -759,32 +759,33 @@ short ExtractorPrivate::extract() {
       return ArchiveWriteError;
     }
   }
-  for (;;) {
-    if (m_CurrentArchiveEntry) {
-      err = writeData(m_CurrentArchiveEntry);
-      if (err == OperationPaused) {
-        return err;
-      }
-      if (err) {  // NoError = 0
-        m_ArchiveRead.clear();
-        m_ArchiveWrite.clear();
-        return err;
-      }
-      ++n_ProcessedEntries;
 
-      // Report final progress signal after extracting the file fully.
-      if (n_BytesTotal > 0 && n_TotalEntries > 0) {
-        emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
-                      n_ProcessedEntries, n_TotalEntries, n_BytesProcessed,
-                      n_BytesTotal);
-      } else {
-        emit progress(archive_entry_pathname(m_CurrentArchiveEntry), 1, 1, 1,
-                      1);
-      }
-
-      archive_entry_clear(m_CurrentArchiveEntry);
-      m_CurrentArchiveEntry = nullptr;
+  if (m_CurrentArchiveEntry) {
+    err = writeData(m_CurrentArchiveEntry);
+    if (err == OperationPaused) {
+      return err;
     }
+    if (err) {  // NoError = 0
+      m_ArchiveRead.clear();
+      m_ArchiveWrite.clear();
+      return err;
+    }
+    ++n_ProcessedEntries;
+
+    // Report final progress signal after extracting the file fully.
+    if (n_BytesTotal > 0 && n_TotalEntries > 0) {
+      emit progress(archive_entry_pathname(m_CurrentArchiveEntry),
+                    n_ProcessedEntries, n_TotalEntries, n_BytesProcessed,
+                    n_BytesTotal);
+    } else {
+      emit progress(archive_entry_pathname(m_CurrentArchiveEntry), 1, 1, 1, 1);
+    }
+
+    archive_entry_clear(m_CurrentArchiveEntry);
+    m_CurrentArchiveEntry = nullptr;
+  }
+
+  for (;;) {
     ret = archive_read_next_header(m_ArchiveRead.data(), &entry);
     if (ret == ARCHIVE_EOF) {
       break;
@@ -853,14 +854,14 @@ short ExtractorPrivate::writeData(struct archive_entry* entry) {
 
   if (!b_MemoryMode && b_RawMode && !m_RawOutputFilename.isEmpty()) {
     const auto& path = (QFileInfo(archive_entry_pathname(entry)).path() +
-                        QString::fromLatin1("/") + m_RawOutputFilename)
+                        QString::fromUtf8("/") + m_RawOutputFilename)
                            .toStdWString();
     archive_entry_copy_pathname_w(entry, path.c_str());
   }
   if (b_hasBasePath) {
     const auto& relativePath =
         m_basePath
-            .relativeFilePath(QString::fromLatin1("/") +
+            .relativeFilePath(QString::fromUtf8("/") +
                               archive_entry_pathname(entry))
             .toStdWString();
     if (relativePath == L".") {  // Root directory
@@ -885,6 +886,23 @@ short ExtractorPrivate::writeData(struct archive_entry* entry) {
 #endif
   if (m_CurrentArchiveEntry != entry) {
     if (!b_MemoryMode) {
+      // UTF-8 in archive entry messes up when extracting under Windows
+      // when UTF-8 is not set, to fix this we first get the archive
+      // entry pathname in raw bytes then convert it to wide characters
+      // and set it has the new pathname which should make libarchive
+      // handle it better.
+
+      // Get current pathname
+      auto ptname_cstr = archive_entry_pathname(entry);
+
+      // Check if UTF-8
+      if (isUTF8(ptname_cstr)) {
+        auto ptname = QString::fromUtf8(ptname_cstr);
+
+        auto wstr = ptname.toStdWString();
+        archive_entry_copy_pathname_w(entry, wstr.c_str());
+      }
+
       ret = archive_write_header(m_ArchiveWrite.data(), entry);
     } else {
       currentNode.setFileInformation(getArchiveEntryInformation(entry, false));

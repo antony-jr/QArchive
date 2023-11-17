@@ -1,6 +1,9 @@
 name: Tests
 
 on:
+  push:
+    branches:
+      - "*"
   pull_request:
     branches:
       - master
@@ -66,7 +69,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        macos_version: [11, 12]
+        macos_version: [12]
         qt6: ['enabled', 'disabled']
         shared: ['shared', 'static']
 

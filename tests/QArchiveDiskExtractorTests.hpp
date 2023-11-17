@@ -30,6 +30,7 @@ class QArchiveDiskExtractorTests : public QObject, private QArchiveTestCases {
   void extractTarArchiveWithNoFilters();
   void extractTarArchiveWithZSTD();
   void extractSpecialCharacterFiles();
+  void extractMultiLevelSpecialCharacterFiles();
   void isExtractorObjectReuseable();
   void testProgress();
  protected slots:
