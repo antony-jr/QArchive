@@ -17,7 +17,7 @@ sed -i "s/  version: .*/  version: '$QARCHIVE_VERSION',/" meson.build
 cat > /tmp/qarchive.commit.template.txt << EOF
 [Release v$QARCHIVE_VERSION] QArchive v$QARCHIVE_VERSION release
 
-#Changelog
+# Changelog
 
    * Change 1
    * Change 2

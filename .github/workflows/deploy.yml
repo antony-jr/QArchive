@@ -30,13 +30,10 @@ jobs:
           rm -rf qarc
           cat /tmp/tags.txt
           result=$(python3 scripts/check.py "$(git log -1 --pretty=%B)" "/tmp/tags.txt")
-          #TODO: revert this after testing
-          #echo "deploy=$result" >> $GITHUB_OUTPUT
-          echo "deploy=v2.2.9" >> $GITHUB_OUTPUT
+          echo "deploy=$result" >> $GITHUB_OUTPUT
 
       - id: make_rel
-        #TODO: change == to != after testing
-        if: steps.git.outputs.deploy == 'false'
+        if: steps.git.outputs.deploy != 'false'
         name: Make Relase
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
