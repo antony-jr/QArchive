@@ -59,7 +59,7 @@ jobs:
       - name: Trigger
         env:
           GITHUB_TOKEN: $${{ secrets.QTMODULES_TOKEN }} 
-        run: gh api repos/antony-jr/qtmodules/dispatches --raw-field event_type=qarchive
+        run: gh --repo antony-jr/qtmodules workflow run gh-pages
 
   windows-msvc:
     runs-on: windows-2019
