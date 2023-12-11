@@ -48,7 +48,8 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     name: Notify Qt Modules Repository
-    needs: [windows-msvc]
+    needs: [check, windows-msvc]
+    if: needs.check.outputs.deploy != 'false'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,9 +61,9 @@ jobs:
         run: gh --repo antony-jr/qtmodules workflow run gh-pages
 
   windows-msvc:
+    if: "!contains(github.event.head_commit.message, '[skip builds]')"
     runs-on: windows-2019
     needs: check
-    if: needs.check.outputs.deploy != 'false'
     name: windows-msvc-v${{ matrix.toolset }}-${{ matrix.arch }}-qt-${{ matrix.qt_version }}-${{ matrix.build_type }}
     strategy:
       fail-fast: false
@@ -118,7 +119,19 @@ jobs:
         cd ${{ github.workspace }}/output/
         7z a ${{ github.workspace }}/upload/windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip QArchive
 
+    - name: Upload Builds to Continuous
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ${{ github.workspace }}/upload/windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip
+        tag: continuous
+        overwrite: true
+        prerelease: true
+        release_name: "Continuous Builds"
+        body: "Prebuilt QArchive from latest commit on master."
+
     - id: upload_rel
+      if: needs.check.outputs.deploy != 'false' 
       name: Upload Asset
       working-directory: ${{ github.workspace }}/upload
       env:
