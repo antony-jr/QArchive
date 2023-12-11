@@ -35,7 +35,8 @@ jobs:
           echo "deploy=v2.2.9" >> $GITHUB_OUTPUT
 
       - id: make_rel
-        if: steps.git.outputs.deploy != 'false'
+        #TODO: change == to != after testing
+        if: steps.git.outputs.deploy == 'false'
         name: Make Relase
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
