@@ -58,7 +58,8 @@ jobs:
 
       - name: Trigger
         env:
-          GITHUB_TOKEN: $${{ secrets.QTMODULES_TOKEN }} 
+          GH_TOKEN: ${{ secrets.QTMODULES_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.QTMODULES_TOKEN }}
         run: gh --repo antony-jr/qtmodules workflow run gh-pages
 
   windows-msvc:
