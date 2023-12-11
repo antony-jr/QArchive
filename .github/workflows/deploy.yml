@@ -30,7 +30,9 @@ jobs:
           rm -rf qarc
           cat /tmp/tags.txt
           result=$(python3 scripts/check.py "$(git log -1 --pretty=%B)" "/tmp/tags.txt")
-          echo "deploy=$result" >> $GITHUB_OUTPUT
+          #TODO: revert this after testing
+          #echo "deploy=$result" >> $GITHUB_OUTPUT
+          echo "deploy=v2.2.9" >> $GITHUB_OUTPUT
 
       - id: make_rel
         if: steps.git.outputs.deploy != 'false'

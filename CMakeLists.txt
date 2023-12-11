@@ -63,8 +63,8 @@ else ()
    find_package(LibArchive REQUIRED)
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 if (NOT DEFINED QARCHIVE_QT_VERSION_MAJOR)
+   find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
    set(QARCHIVE_QT_VERSION_MAJOR ${QT_VERSION_MAJOR})
 endif()
 
