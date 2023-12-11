@@ -15,9 +15,9 @@ sed -i 's/QArchive VERSION .*/QArchive VERSION '$QARCHIVE_VERSION'\)/' CMakeList
 sed -i "s/  version: .*/  version: '$QARCHIVE_VERSION',/" meson.build
 
 cat > /tmp/qarchive.commit.template.txt << EOF
-[Release $QARCHIVE_VERSION] QArchive v$QARCHIVE_VERSION release
+[Release v$QARCHIVE_VERSION] QArchive v$QARCHIVE_VERSION release
 
-#Changelog
+# Changelog
 
    * Change 1
    * Change 2
@@ -30,7 +30,9 @@ git status
 
 read -p "Do you want to commit? press any key to continue..."
 
+git config --local core.commentchar ";"
 git commit -S -t /tmp/qarchive.commit.template.txt
+git config --local core.commentchar "#"
 
 rm -rf /tmp/qarchive.commit.template.txt
 

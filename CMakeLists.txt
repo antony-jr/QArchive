@@ -12,7 +12,7 @@
 # ---
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.17)
-project(QArchive VERSION 2.2.7)
+project(QArchive VERSION 2.2.9)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -63,8 +63,8 @@ else ()
    find_package(LibArchive REQUIRED)
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
 if (NOT DEFINED QARCHIVE_QT_VERSION_MAJOR)
+   find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
    set(QARCHIVE_QT_VERSION_MAJOR ${QT_VERSION_MAJOR})
 endif()
 

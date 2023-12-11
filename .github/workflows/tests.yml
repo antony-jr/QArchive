@@ -27,12 +27,9 @@ jobs:
       - id: git
         name: Check Commit Message
         run: |
-          git clone https://github.com/antony-jr/QArchive qarc
-          cd qarc
-          git tag > /tmp/tags.txt
-          cd ..
-          rm -rf qarc
-          cat /tmp/tags.txt
+          # Don't need tags to check if the commit message has
+          # the special commit.
+          echo "" > /tmp/tags.txt
           result=$(python3 scripts/check.py "$(git log -1 --pretty=%B)" "/tmp/tags.txt")
           echo "deploy=$result" >> $GITHUB_OUTPUT
 
