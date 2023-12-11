@@ -75,11 +75,6 @@ jobs:
         toolset: [14.0, 14.2]
 
     steps:
-    - name: Test
-      env:
-        check: "Testing"
-      run: echo "${{ env.check }}"
-
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -132,4 +127,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ needs.check.outputs.deploy }}
       run: |
-        gh release upload "${{ env.TAG }}" --repo "${{ env.GITHUB_REPOSITORY }}" windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip
+        gh release upload "${{ env.TAG }}" --repo "${{ github.repository }}" windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip
