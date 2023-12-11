@@ -25,6 +25,22 @@ set(CMAKE_AUTOMOC ON)
 option(QARCHIVE_STATIC "Static Build of QArchive" ON)
 # ---
 
+# This is used to generate pre-build binaries.
+option(QARCHIVE_CONAN_BUILD "Use conan to build QArchive" OFF)
+if (QARCHIVE_CONAN_BUILD)
+   set(CMAKE_CXX_STANDARD 14) # Conan wants C++14, I have no idea why.
+
+   list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+   list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+   include(conan.cmake)
+
+   conan_cmake_autodetect(settings)
+   conan_cmake_install(PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR}/conanfile.py
+                    BUILD missing
+                    REMOTE conancenter
+                    SETTINGS ${settings})
+endif()
+
 # Find the QtCore library and libarchive.
 # In macOS, if libarchive is installed via homebrew,
 # it does not link well with CMake. The only workaround to

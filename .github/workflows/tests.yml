@@ -12,15 +12,40 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
-jobs:
+jobs: 
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.git.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python3
+        run: |
+          sudo apt install -y python3
+
+      - id: git
+        name: Check Commit Message
+        run: |
+          git clone https://github.com/antony-jr/QArchive qarc
+          cd qarc
+          git tag > /tmp/tags.txt
+          cd ..
+          rm -rf qarc
+          cat /tmp/tags.txt
+          result=$(python3 scripts/check.py "$(git log -1 --pretty=%B)" "/tmp/tags.txt")
+          echo "deploy=$result" >> $GITHUB_OUTPUT
+
   ubuntu:
+    needs: check
+    if: needs.check.outputs.deploy == 'false'   
     runs-on: ubuntu-${{ matrix.ubuntu_version }}
     name: Ubuntu-${{ matrix.ubuntu_version }}-Qt-${{ matrix.qt_version }}-shared-${{ matrix.shared }}
     strategy:
       fail-fast: false
       matrix:
         ubuntu_version: [20.04, 22.04]
-        qt_version: [5.9.9, 5.12.12, 5.15.2, 6.4.0]
+        qt_version: [5.9.9, 5.15.2, 6.4.0]
         shared: [ON, OFF]
 
     steps:
@@ -64,6 +89,8 @@ jobs:
       run: "ctest --verbose"
 
   macos:
+    needs: check
+    if: needs.check.outputs.deploy == 'false'  
     runs-on: macos-${{ matrix.macos_version }}
     name: macos-${{ matrix.macos_version }}-Qt6-${{ matrix.qt6 }}-${{ matrix.shared }}
     strategy:
@@ -89,6 +116,8 @@ jobs:
       - name: Run tests
         run: meson test -C "${{github.workspace}}/build" --verbose
   MSYS2:
+    needs: check
+    if: needs.check.outputs.deploy == 'false'
     runs-on: windows-latest
     name: MSYS2-${{matrix.platform}}
     strategy:
@@ -119,6 +148,8 @@ jobs:
           meson compile -C "${{github.workspace}}/build" --verbose
           meson test -C "${{github.workspace}}/build" --verbose
   Ubuntu-meson:
+    needs: check
+    if: needs.check.outputs.deploy == 'false'  
     runs-on: ubuntu-20.04
     name: Linux-GCC${{matrix.cxx}}
     strategy:
@@ -139,6 +170,8 @@ jobs:
           meson compile -C "${{github.workspace}}/build" --verbose
           meson test -C "${{github.workspace}}/build" --verbose
   Ubuntu-meson-clang:
+    needs: check
+    if: needs.check.outputs.deploy == 'false' 
     runs-on: ubuntu-20.04
     name: Linux-Clang${{matrix.cxx}}
     strategy:

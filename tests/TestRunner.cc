@@ -23,9 +23,9 @@ void TestRunner::start() {
 
 void TestRunner::runTests() {
   // Run the compressor tests which should generate the
-  // desired archives to test it with the extractor.
-  n_ReturnCode = QTest::qExec(&m_CompressorTests) |
-                 QTest::qExec(&m_ExtractorTests) |
-                 QTest::qExec(&m_MemoryExtractorTests) |
-                 QTest::qExec(&m_MemoryCompressorTests);
+  // desired archives to test it with the extractor. 
+  n_ReturnCode |= QTest::qExec(&m_CompressorTests);
+  n_ReturnCode |= QTest::qExec(&m_ExtractorTests);
+  n_ReturnCode |= QTest::qExec(&m_MemoryExtractorTests);
+  n_ReturnCode |= QTest::qExec(&m_MemoryCompressorTests);
 }

@@ -1,0 +1,129 @@
+name: Deploy Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.git.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python3
+        run: |
+          sudo apt install -y python3
+
+      - id: git
+        name: Check Commit Message
+        run: |
+          git clone https://github.com/antony-jr/QArchive qarc
+          cd qarc
+          git tag > /tmp/tags.txt
+          cd ..
+          rm -rf qarc
+          cat /tmp/tags.txt
+          result=$(python3 scripts/check.py "$(git log -1 --pretty=%B)" "/tmp/tags.txt")
+          echo "deploy=$result" >> $GITHUB_OUTPUT
+
+      - id: make_rel
+        if: steps.git.outputs.deploy != 'false'
+        name: Make Relase
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.git.outputs.deploy}}
+        run: |
+          git show -s --format="%b" | head -n -2 > body.md
+          gh release create "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              --title="$tag" \
+              --notes-file body.md
+
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify Qt Modules Repository
+    needs: [windows-msvc]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trigger
+        env:
+          GITHUB_TOKEN: $${{ secrets.QTMODULES_TOKEN }} 
+        run: gh api repos/antony-jr/qtmodules/dispatches --raw-field event_type=qarchive
+
+  windows-msvc:
+    runs-on: windows-2019
+    needs: check
+    if: needs.check.outputs.deploy != 'false'
+    name: windows-msvc-v${{ matrix.toolset }}-${{ matrix.arch }}-qt-${{ matrix.qt_version }}-${{ matrix.build_type }}
+    strategy:
+      fail-fast: false
+      matrix:
+        qt_version: [5.15.2]
+        arch: [x64, x86]
+        build_type: [Release, Debug]
+        toolset: [14.0, 14.2]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: CMake
+      uses: lukka/get-cmake@latest
+
+    - name: MSVC
+      uses: TheMrMilchmann/setup-msvc-dev@v2
+      with:
+        arch: ${{ matrix.arch }}
+        toolset: ${{ matrix.toolset }}
+
+    - name: Install Conan
+      id: conan
+      uses: turtlebrowser/get-conan@main
+      with:
+        version: 1.62.0
+
+    - name: Make Output Directory
+      run: |
+        mkdir -p ${{github.workspace}}/output/QArchive
+        mkdir -p ${{github.workspace}}/upload
+
+    - name: Build
+      run: |
+        set QT_VERSION=${{ matrix.qt_version }}
+        python3 scripts/write_conan.py
+        
+        mkdir build
+        cd build
+        cmake -DQARCHIVE_QT_VERSION_MAJOR=5 -DQARCHIVE_CONAN_BUILD=ON -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ..
+        cmake --build . --config ${{ matrix.build_type }}
+        cmake --install . --prefix=${{ github.workspace }}/output/QArchive --config ${{ matrix.build_type }}
+
+        cd ..
+
+    - name: Check Contents
+      working-directory: ${{github.workspace}}
+      run: ls -R ${{ github.workspace }}/output
+
+    - name: Zip Files
+      run: |
+        cd ${{ github.workspace }}/output/
+        7z a ${{ github.workspace }}/upload/windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip QArchive
+
+    - id: upload_rel
+      name: Upload Asset
+      working-directory: ${{ github.workspace }}/upload
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ needs.check.outputs.deploy }}
+      run: |
+        gh release upload "$tag" \
+              --repo="$GITHUB_REPOSITORY" \
+              windows-msvc-v${{ matrix.toolset }}-qt-${{ matrix.qt_version }}-${{ matrix.arch }}-${{ matrix.build_type }}.zip
