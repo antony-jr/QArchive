@@ -18,11 +18,19 @@ else
 endif
 libarchive_dep = dependency('libarchive')
 
+vers = meson.project_version().split('.')
+cdata = configuration_data()
+cdata.set('PROJECT_VERSION', meson.project_version())
+cdata.set('PROJECT_VERSION_MAJOR', vers[0])
+cdata.set('PROJECT_VERSION_MINOR', vers[1])
+cdata.set('PROJECT_VERSION_PATCH', vers[2])
+cdata.set('QARCHIVE_STATIC', get_option('default_library') == 'static')
+
 conf = configure_file(
   format: 'cmake@',
   input: 'other/cmake/config.h.in',
   output: 'config.h',
-  configuration: configuration_data({'QARCHIVE_STATIC': get_option('default_library') == 'static'}),
+  configuration: cdata,
 )
 
 src = files(
